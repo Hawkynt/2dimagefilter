@@ -7,12 +7,23 @@
  * inform me about updates, changes new features and modification. 
  * Distribution and selling is allowed. Would be nice if you give some 
  * payback.
+ * 
+ * Mapping usually is implemented as
+ *
+ * 2x:
+ * C0 C1 C2     00  01
+ * C3 C4 C5 =>
+ * C6 C7 C8     10  11
+ * 
+ * 3x:
+ * C0 C1 C2    00 01 02
+ * C3 C4 C5 => 10 11 12
+ * C6 C7 C8    20 21 22
+      
  */
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using nImager.Filters;
 using System.Threading.Tasks;
 
@@ -57,6 +68,7 @@ namespace nImager {
       */
       new sFilter("Eagle 2x",2,2,libEagle.voidEagle2x),
       new sFilter("Eagle 3x",3,3,libEagle.voidEagle3x),
+      new sFilter("Eagle 3xB",3,3,libEagle.voidEagle3xB),
       new sFilter("Super Eagle",2,2,libKreed.voidSuperEagle),
       new sFilter("SaI 2x",2,2,libKreed.voidSaI2X),
       new sFilter("Super SaI",2,2,libKreed.voidSuperSaI),
@@ -65,6 +77,7 @@ namespace nImager {
       new sFilter("Scale 2x",2,2,libMAME.voidScale2x),
       new sFilter("Scale 3x",3,3,libMAME.voidScale3x),
       new sFilter("EPXB",2,2,libSNES9x.voidEPXB),
+      new sFilter("EPXC",2,2,libSNES9x.voidEPXC),
       new sFilter("EPX3",3,3,libSNES9x.voidEPX3),
       //new sFilter("EPXC 2x",2,2,libMAME.voidEPXC),
       new sFilter("HQ 2x",2,2,libHQ.voidComplex_nQwXh,new libHQ.delHQFilter(libHQ._arrHQ2x)),
@@ -128,10 +141,29 @@ namespace nImager {
     // NOTE: Bitmap objects does not support parallel read-outs blame Microsoft
     public cImage(System.Drawing.Bitmap objBitmap)
       : this(objBitmap != null ? (ulong)objBitmap.Width : 0, objBitmap != null ? (ulong)objBitmap.Height : 0) {
-      
+
+      System.Drawing.Imaging.BitmapData objBitmapData = objBitmap.LockBits(
+        new System.Drawing.Rectangle(0, 0, (int)this._qwordWidth, (int)this._qwordHeight),
+        System.Drawing.Imaging.ImageLockMode.ReadOnly,
+        System.Drawing.Imaging.PixelFormat.Format24bppRgb
+        );
+      int intFillX = objBitmapData.Stride - objBitmapData.Width * 3;
+      unsafe {
+        byte* ptrOffset = (byte*)objBitmapData.Scan0.ToPointer();
+        for (ulong qwordY = 0; qwordY < this._qwordHeight; qwordY++) {
+          for (ulong qwordX = 0; qwordX < this._qwordWidth; qwordX++) {
+            this[qwordX, qwordY] = new sPixel(*(ptrOffset+2), *(ptrOffset + 1), *(ptrOffset + 0));
+            ptrOffset += 3;
+          }
+          ptrOffset += intFillX;
+        }
+      }
+      objBitmap.UnlockBits(objBitmapData);
+      /*
       for (int intY = 0; intY < objBitmap.Height; intY++)
         for (int intX = 0; intX < objBitmap.Width; intX++)
           this[(ulong)intX, (ulong)intY] = new sPixel(objBitmap.GetPixel(intX, intY));
+      */
     }
     public cImage(ulong qwordWidth, ulong qwordHeight) {
       this._qwordWidth = qwordWidth;
@@ -163,9 +195,12 @@ namespace nImager {
       ulong dwordNewHeight = (ulong)(this._qwordHeight * stFilter.ScaleY);
       objRet = new cImage(dwordNewWidth, dwordNewHeight);
       Parallel.For(0, (long)this._qwordHeight, qwordSrcY => {
-        Parallel.For(0, (long)this._qwordWidth, qwordSrcX => {
+        /*Parallel.For(0, (long)this._qwordWidth, qwordSrcX => {
           stFilter.FilterFunction(this, (ulong)qwordSrcX, (ulong)qwordSrcY, objRet, (ulong)qwordSrcX * stFilter.ScaleX, (ulong)qwordSrcY * stFilter.ScaleY, stFilter.ScaleX, stFilter.ScaleY, stFilter.Parameter);
-        });
+        });*/
+        for(ulong qwordSrcX =0; qwordSrcX < this._qwordWidth; qwordSrcX++) {
+          stFilter.FilterFunction(this, (ulong)qwordSrcX, (ulong)qwordSrcY, objRet, (ulong)qwordSrcX * stFilter.ScaleX, (ulong)qwordSrcY * stFilter.ScaleY, stFilter.ScaleX, stFilter.ScaleY, stFilter.Parameter);
+        };
       });
       return (objRet);
     }
@@ -185,9 +220,30 @@ namespace nImager {
     public System.Drawing.Bitmap ToBitmap() {
       System.Drawing.Bitmap objRet = new System.Drawing.Bitmap((int)this.Width, (int)this.Height);
       // NOTE: fucking bitmap does not allow parallel writes
+      System.Drawing.Imaging.BitmapData objBitmapData = objRet.LockBits(
+        new System.Drawing.Rectangle(0, 0, objRet.Width, objRet.Height),
+        System.Drawing.Imaging.ImageLockMode.WriteOnly,
+        System.Drawing.Imaging.PixelFormat.Format24bppRgb
+      );
+      int intFillX = objBitmapData.Stride - objBitmapData.Width * 3;
+      unsafe {
+        byte* ptrOffset = (byte*)objBitmapData.Scan0.ToPointer();
+        for (ulong qwordY = 0; qwordY < this._qwordHeight; qwordY++) {
+          for (ulong qwordX = 0; qwordX < this._qwordWidth; qwordX++) {
+            *(ptrOffset+0) = this[qwordX, qwordY].B;
+            *(ptrOffset+1) = this[qwordX, qwordY].G;
+            *(ptrOffset+2) = this[qwordX, qwordY].R;
+            ptrOffset += 3;
+          }
+          ptrOffset += intFillX;
+        }
+      }
+      objRet.UnlockBits(objBitmapData);
+      /*
       for (ulong qwordY = 0; qwordY < this._qwordHeight; qwordY++)
         for (ulong qwordX = 0; qwordX < this._qwordWidth; qwordX++)
           objRet.SetPixel((int)qwordX, (int)qwordY, this[qwordX, qwordY].Color);
+      */
       return (objRet);
     }
     public void Fill(byte byteR, byte byteG, byte byteB) {

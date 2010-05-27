@@ -324,14 +324,16 @@ namespace nImager {
     }
     public static sPixel Interpolate(sPixel stA, sPixel stB, sPixel stC) {
       return (new sPixel(
+
+        (byte)(((stA.R + stB.R + stC.R) * 86 ) >> 8 ),
+        (byte)(((stA.G + stB.G + stC.G) * 86 ) >> 8 ),
+        (byte)(((stA.B + stB.B + stC.B) * 86 ) >> 8 )
+
         /*
         (byte)((stA.R + stB.R + stC.R) / 3),
         (byte)((stA.G + stB.G + stC.G) / 3),
         (byte)((stA.B + stB.B + stC.B) / 3)
         */
-        (byte)(((stA.R + stB.R + stC.R) * 86) >> 8),
-        (byte)(((stA.G + stB.G + stC.G) * 86) >> 8),
-        (byte)(((stA.B + stB.B + stC.B) * 86) >> 8)
       ));
     }
     public static sPixel Interpolate(sPixel stA, sPixel stB, sPixel stC,sPixel stD) {

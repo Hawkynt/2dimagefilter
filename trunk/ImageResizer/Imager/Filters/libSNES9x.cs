@@ -2,8 +2,6 @@
 
 namespace nImager.Filters {
   static class libSNES9x {
-    // TODO: implement EPXC
-    
     // SNES9x's EPXB modified by Hawkynt to support thresholds
     public static void voidEPXB(cImage objSrc, ulong qwordSrcX, ulong qwordSrcY, cImage objTgt, ulong qwordTgtX, ulong qwordTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
       sPixel stC0 = objSrc[qwordSrcX - 1, qwordSrcY - 1];
@@ -191,6 +189,126 @@ namespace nImager.Filters {
       objTgt[qwordTgtX + 0, qwordTgtY + 2] = stE20;
       objTgt[qwordTgtX + 1, qwordTgtY + 2] = stE21;
       objTgt[qwordTgtX + 2, qwordTgtY + 2] = stE22;
+    }
+    
+    // SNES9x's EPXC modified by Hawkynt to support thresholds
+    public static void voidEPXC(cImage objSrc, ulong qwordSrcX, ulong qwordSrcY, cImage objTgt, ulong qwordTgtX, ulong qwordTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
+      sPixel stC0 = objSrc[qwordSrcX - 1, qwordSrcY - 1];
+      sPixel stC1 = objSrc[qwordSrcX, qwordSrcY - 1];
+      sPixel stC2 = objSrc[qwordSrcX + 1, qwordSrcY - 1];
+      sPixel stC3 = objSrc[qwordSrcX - 1, qwordSrcY];
+      sPixel stC4 = objSrc[qwordSrcX, qwordSrcY];
+      sPixel stC5 = objSrc[qwordSrcX + 1, qwordSrcY];
+      sPixel stC6 = objSrc[qwordSrcX - 1, qwordSrcY + 1];
+      sPixel stC7 = objSrc[qwordSrcX, qwordSrcY + 1];
+      sPixel stC8 = objSrc[qwordSrcX + 1, qwordSrcY + 1];
+      sPixel stE00 = stC4;
+      sPixel stE01 = stC4;
+      sPixel stE10 = stC4;
+      sPixel stE11 = stC4;
+      
+      if (stC3.IsNotLike(stC5) && stC7.IsNotLike(stC1)) {
+        bool boolNQ40 = stC4.IsNotLike(stC0);
+        bool boolNQ41 = stC4.IsNotLike(stC1);
+        bool boolNQ42 = stC4.IsNotLike(stC2);
+        bool boolNQ43 = stC4.IsNotLike(stC3);
+        bool boolNQ45 = stC4.IsNotLike(stC5);
+        bool boolNQ46 = stC4.IsNotLike(stC6);
+        bool boolNQ47 = stC4.IsNotLike(stC7);
+        bool boolNQ48 = stC4.IsNotLike(stC8);
+
+        bool boolEQ13 = stC1.IsLike(stC3) && (boolNQ40 || boolNQ48 || stC1.IsNotLike(stC2) || stC3.IsNotLike(stC6));
+        bool boolEQ37 = stC3.IsLike(stC7) && (boolNQ46 || boolNQ42 || stC3.IsNotLike(stC0) || stC7.IsNotLike(stC8));
+        bool boolEQ75 = stC7.IsLike(stC5) && (boolNQ48 || boolNQ40 || stC7.IsNotLike(stC6) || stC5.IsNotLike(stC2));
+        bool boolEQ51 = stC5.IsLike(stC1) && (boolNQ42 || boolNQ46 || stC5.IsNotLike(stC8) || stC1.IsNotLike(stC0));
+        if (
+          (!boolNQ40) ||
+          (!boolNQ41) ||
+          (!boolNQ42) ||
+          (!boolNQ43) ||
+          (!boolNQ45) ||
+          (!boolNQ46) ||
+          (!boolNQ47) ||
+          (!boolNQ48)
+        ) {
+          sPixel stC3A;
+          if ((boolEQ13 && boolNQ46) && (boolEQ37 && boolNQ40))
+            stC3A = sPixel.Interpolate( stC3,stC1,stC7);
+          else if (boolEQ13 && boolNQ46)
+            stC3A = sPixel.Interpolate( stC3, stC1);
+          else if (boolEQ37 && boolNQ40)
+            stC3A = sPixel.Interpolate( stC3, stC7);
+          else
+            stC3A = stC4;
+          
+          sPixel stC7B;
+          if ((boolEQ37 && boolNQ48) && (boolEQ75 && boolNQ46))
+            stC7B = sPixel.Interpolate(stC7,stC3,stC5);
+          else if (boolEQ37 && boolNQ48)
+            stC7B = sPixel.Interpolate(stC7,stC3);
+          else if (boolEQ75 && boolNQ46)
+            stC7B = sPixel.Interpolate(stC7,stC5);
+          else
+            stC7B = stC4;
+
+          sPixel stC5C;
+          if ((boolEQ75 && boolNQ42) && (boolEQ51 && boolNQ48))
+            stC5C = sPixel.Interpolate( stC5,stC1,stC7);
+          else if (boolEQ75 && boolNQ42)
+            stC5C = sPixel.Interpolate( stC5,stC7);
+          else if (boolEQ51 && boolNQ48)
+            stC5C = sPixel.Interpolate( stC5,stC1);
+          else
+            stC5C = stC4;
+
+          sPixel stC1D;
+          
+          if ((boolEQ51 && boolNQ40) && (boolEQ13 && boolNQ42))
+            stC1D = sPixel.Interpolate(stC1,stC3,stC5);
+          else if (boolEQ51 && boolNQ40) 
+            stC1D = sPixel.Interpolate(stC1,stC5);
+          else if (boolEQ13 && boolNQ42)
+            stC1D = sPixel.Interpolate(stC1,stC3);
+          else
+            stC1D = stC4;
+      
+          if (boolEQ13)
+            stE00 = sPixel.Interpolate(stC1, stC3);
+          if (boolEQ51)
+            stE01 = sPixel.Interpolate(stC5, stC1);
+          if (boolEQ37)
+            stE10 = sPixel.Interpolate(stC3, stC7);
+          if (boolEQ75)
+            stE11 = sPixel.Interpolate(stC7, stC5);
+
+          stE00 = sPixel.Interpolate(stE00, stC1D, stC3A, stC4, 5, 1, 1, 1);
+          stE01 = sPixel.Interpolate(stE01, stC7B, stC5C, stC4, 5, 1, 1, 1);
+          stE10 = sPixel.Interpolate(stE10, stC3A, stC7B, stC4, 5, 1, 1, 1);
+          stE11 = sPixel.Interpolate(stE11, stC5C, stC1D, stC4, 5, 1, 1, 1);
+        
+        } else {
+          
+          if (boolEQ13 && boolNQ47 && boolNQ45)
+            stE00 = sPixel.Interpolate(stC1, stC3);
+          if (boolEQ51 && boolNQ43 && boolNQ47)
+            stE01 = sPixel.Interpolate(stC5, stC1);
+          if (boolEQ37 && boolNQ45 && boolNQ41)
+            stE10 = sPixel.Interpolate(stC3, stC7);
+          if (boolEQ75 && boolNQ41 && boolNQ43)
+            stE11 = sPixel.Interpolate(stC7, stC5);
+
+          stE00 = sPixel.Interpolate(stC4, stE00, 3, 1);
+          stE01 = sPixel.Interpolate(stC4, stE01, 3, 1);
+          stE10 = sPixel.Interpolate(stC4, stE10, 3, 1);
+          stE11 = sPixel.Interpolate(stC4, stE11, 3, 1);
+           
+       }
+      }
+
+      objTgt[qwordTgtX + 0, qwordTgtY + 0] = stE00;
+      objTgt[qwordTgtX + 1, qwordTgtY + 0] = stE01;
+      objTgt[qwordTgtX + 0, qwordTgtY + 1] = stE10;
+      objTgt[qwordTgtX + 1, qwordTgtY + 1] = stE11;
     }
     
 
