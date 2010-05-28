@@ -23,23 +23,23 @@ namespace nImager.Filters {
     }
 
     // Kreed's SuperEagle
-    public static void voidSuperEagle(cImage objSrc, ulong qwordSrcX, ulong qwordSrcY, cImage objTgt, ulong qwordTgtX, ulong qwordTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[qwordSrcX, qwordSrcY];
-      sPixel stC0 = objSrc[qwordSrcX - 1, qwordSrcY - 1];
-      sPixel stC1 = objSrc[qwordSrcX, qwordSrcY - 1];
-      sPixel stC2 = objSrc[qwordSrcX + 1, qwordSrcY - 1];
-      sPixel stC3 = objSrc[qwordSrcX - 1, qwordSrcY];
-      sPixel stC4 = objSrc[qwordSrcX, qwordSrcY];
-      sPixel stC5 = objSrc[qwordSrcX + 1, qwordSrcY];
-      sPixel stC6 = objSrc[qwordSrcX - 1, qwordSrcY + 1];
-      sPixel stC7 = objSrc[qwordSrcX, qwordSrcY + 1];
-      sPixel stC8 = objSrc[qwordSrcX + 1, qwordSrcY + 1];
-      sPixel stD0 = objSrc[qwordSrcX - 1, qwordSrcY + 2];
-      sPixel stD1 = objSrc[qwordSrcX, qwordSrcY + 2];
-      sPixel stD2 = objSrc[qwordSrcX + 1, qwordSrcY + 2];
-      sPixel stD3 = objSrc[qwordSrcX + 2, qwordSrcY - 1];
-      sPixel stD4 = objSrc[qwordSrcX + 2, qwordSrcY];
-      sPixel stD5 = objSrc[qwordSrcX + 2, qwordSrcY + 1];
+    public static void voidSuperEagle(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
+      sPixel stPixel = objSrc[intSrcX, intSrcY];
+      sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
+      sPixel stC1 = objSrc[intSrcX, intSrcY - 1];
+      sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
+      sPixel stC3 = objSrc[intSrcX - 1, intSrcY];
+      sPixel stC4 = objSrc[intSrcX, intSrcY];
+      sPixel stC5 = objSrc[intSrcX + 1, intSrcY];
+      sPixel stC6 = objSrc[intSrcX - 1, intSrcY + 1];
+      sPixel stC7 = objSrc[intSrcX, intSrcY + 1];
+      sPixel stC8 = objSrc[intSrcX + 1, intSrcY + 1];
+      sPixel stD0 = objSrc[intSrcX - 1, intSrcY + 2];
+      sPixel stD1 = objSrc[intSrcX, intSrcY + 2];
+      sPixel stD2 = objSrc[intSrcX + 1, intSrcY + 2];
+      sPixel stD3 = objSrc[intSrcX + 2, intSrcY - 1];
+      sPixel stD4 = objSrc[intSrcX + 2, intSrcY];
+      sPixel stD5 = objSrc[intSrcX + 2, intSrcY + 1];
 
       sPixel stE00 = stC4;
       sPixel stE01 = stC4;
@@ -101,30 +101,30 @@ namespace nImager.Filters {
         }
       }
 
-      objTgt[qwordTgtX + 0, qwordTgtY + 0] = stE00;
-      objTgt[qwordTgtX + 1, qwordTgtY + 0] = stE01;
-      objTgt[qwordTgtX + 0, qwordTgtY + 1] = stE10;
-      objTgt[qwordTgtX + 1, qwordTgtY + 1] = stE11;
+      objTgt[intTgtX + 0, intTgtY + 0] = stE00;
+      objTgt[intTgtX + 1, intTgtY + 0] = stE01;
+      objTgt[intTgtX + 0, intTgtY + 1] = stE10;
+      objTgt[intTgtX + 1, intTgtY + 1] = stE11;
     }
 
     // Derek Liauw Kie Fa's 2XSaI
-    public static void voidSaI2X(cImage objSrc, ulong qwordSrcX, ulong qwordSrcY, cImage objTgt, ulong qwordTgtX, ulong qwordTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[qwordSrcX, qwordSrcY];
-      sPixel stC0 = objSrc[qwordSrcX - 1, qwordSrcY - 1];
-      sPixel stC1 = objSrc[qwordSrcX, qwordSrcY - 1];
-      sPixel stC2 = objSrc[qwordSrcX + 1, qwordSrcY - 1];
-      sPixel stC3 = objSrc[qwordSrcX - 1, qwordSrcY];
-      sPixel stC4 = objSrc[qwordSrcX, qwordSrcY];
-      sPixel stC5 = objSrc[qwordSrcX + 1, qwordSrcY];
-      sPixel stC6 = objSrc[qwordSrcX - 1, qwordSrcY + 1];
-      sPixel stC7 = objSrc[qwordSrcX, qwordSrcY + 1];
-      sPixel stC8 = objSrc[qwordSrcX + 1, qwordSrcY + 1];
-      sPixel stD0 = objSrc[qwordSrcX - 1, qwordSrcY + 2];
-      sPixel stD1 = objSrc[qwordSrcX, qwordSrcY + 2];
-      sPixel stD2 = objSrc[qwordSrcX + 1, qwordSrcY + 2];
-      sPixel stD3 = objSrc[qwordSrcX + 2, qwordSrcY - 1];
-      sPixel stD4 = objSrc[qwordSrcX + 2, qwordSrcY];
-      sPixel stD5 = objSrc[qwordSrcX + 2, qwordSrcY + 1];
+    public static void voidSaI2X(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
+      sPixel stPixel = objSrc[intSrcX, intSrcY];
+      sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
+      sPixel stC1 = objSrc[intSrcX, intSrcY - 1];
+      sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
+      sPixel stC3 = objSrc[intSrcX - 1, intSrcY];
+      sPixel stC4 = objSrc[intSrcX, intSrcY];
+      sPixel stC5 = objSrc[intSrcX + 1, intSrcY];
+      sPixel stC6 = objSrc[intSrcX - 1, intSrcY + 1];
+      sPixel stC7 = objSrc[intSrcX, intSrcY + 1];
+      sPixel stC8 = objSrc[intSrcX + 1, intSrcY + 1];
+      sPixel stD0 = objSrc[intSrcX - 1, intSrcY + 2];
+      sPixel stD1 = objSrc[intSrcX, intSrcY + 2];
+      sPixel stD2 = objSrc[intSrcX + 1, intSrcY + 2];
+      sPixel stD3 = objSrc[intSrcX + 2, intSrcY - 1];
+      sPixel stD4 = objSrc[intSrcX + 2, intSrcY];
+      sPixel stD5 = objSrc[intSrcX + 2, intSrcY + 1];
 
       sPixel stE00 = stC4;
       sPixel stE01 = stC4;
@@ -200,31 +200,31 @@ namespace nImager.Filters {
         }
       }
 
-      objTgt[qwordTgtX + 0, qwordTgtY + 0] = stE00;
-      objTgt[qwordTgtX + 1, qwordTgtY + 0] = stE01;
-      objTgt[qwordTgtX + 0, qwordTgtY + 1] = stE10;
-      objTgt[qwordTgtX + 1, qwordTgtY + 1] = stE11;
+      objTgt[intTgtX + 0, intTgtY + 0] = stE00;
+      objTgt[intTgtX + 1, intTgtY + 0] = stE01;
+      objTgt[intTgtX + 0, intTgtY + 1] = stE10;
+      objTgt[intTgtX + 1, intTgtY + 1] = stE11;
     }
 
     // Kreed's SuperSaI
-    public static void voidSuperSaI(cImage objSrc, ulong qwordSrcX, ulong qwordSrcY, cImage objTgt, ulong qwordTgtX, ulong qwordTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[qwordSrcX, qwordSrcY];
-      sPixel stC0 = objSrc[qwordSrcX - 1, qwordSrcY - 1];
-      sPixel stC1 = objSrc[qwordSrcX, qwordSrcY - 1];
-      sPixel stC2 = objSrc[qwordSrcX + 1, qwordSrcY - 1];
-      sPixel stC3 = objSrc[qwordSrcX - 1, qwordSrcY];
-      sPixel stC4 = objSrc[qwordSrcX, qwordSrcY];
-      sPixel stC5 = objSrc[qwordSrcX + 1, qwordSrcY];
-      sPixel stC6 = objSrc[qwordSrcX - 1, qwordSrcY + 1];
-      sPixel stC7 = objSrc[qwordSrcX, qwordSrcY + 1];
-      sPixel stC8 = objSrc[qwordSrcX + 1, qwordSrcY + 1];
-      sPixel stD0 = objSrc[qwordSrcX - 1, qwordSrcY + 2];
-      sPixel stD1 = objSrc[qwordSrcX, qwordSrcY + 2];
-      sPixel stD2 = objSrc[qwordSrcX + 1, qwordSrcY + 2];
-      sPixel stD3 = objSrc[qwordSrcX + 2, qwordSrcY - 1];
-      sPixel stD4 = objSrc[qwordSrcX + 2, qwordSrcY];
-      sPixel stD5 = objSrc[qwordSrcX + 2, qwordSrcY + 1];
-      sPixel stD6 = objSrc[qwordSrcX + 2, qwordSrcY + 2];
+    public static void voidSuperSaI(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
+      sPixel stPixel = objSrc[intSrcX, intSrcY];
+      sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
+      sPixel stC1 = objSrc[intSrcX, intSrcY - 1];
+      sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
+      sPixel stC3 = objSrc[intSrcX - 1, intSrcY];
+      sPixel stC4 = objSrc[intSrcX, intSrcY];
+      sPixel stC5 = objSrc[intSrcX + 1, intSrcY];
+      sPixel stC6 = objSrc[intSrcX - 1, intSrcY + 1];
+      sPixel stC7 = objSrc[intSrcX, intSrcY + 1];
+      sPixel stC8 = objSrc[intSrcX + 1, intSrcY + 1];
+      sPixel stD0 = objSrc[intSrcX - 1, intSrcY + 2];
+      sPixel stD1 = objSrc[intSrcX, intSrcY + 2];
+      sPixel stD2 = objSrc[intSrcX + 1, intSrcY + 2];
+      sPixel stD3 = objSrc[intSrcX + 2, intSrcY - 1];
+      sPixel stD4 = objSrc[intSrcX + 2, intSrcY];
+      sPixel stD5 = objSrc[intSrcX + 2, intSrcY + 1];
+      sPixel stD6 = objSrc[intSrcX + 2, intSrcY + 2];
 
       sPixel stE00 = stC4;
       sPixel stE01 = stC4;
@@ -279,10 +279,10 @@ namespace nImager.Filters {
         stE00 = sPixel.Interpolate(stC7, stC4);
       }
 
-      objTgt[qwordTgtX + 0, qwordTgtY + 0] = stE00;
-      objTgt[qwordTgtX + 1, qwordTgtY + 0] = stE01;
-      objTgt[qwordTgtX + 0, qwordTgtY + 1] = stE10;
-      objTgt[qwordTgtX + 1, qwordTgtY + 1] = stE11;
+      objTgt[intTgtX + 0, intTgtY + 0] = stE00;
+      objTgt[intTgtX + 1, intTgtY + 0] = stE01;
+      objTgt[intTgtX + 0, intTgtY + 1] = stE10;
+      objTgt[intTgtX + 1, intTgtY + 1] = stE11;
     }
 
 

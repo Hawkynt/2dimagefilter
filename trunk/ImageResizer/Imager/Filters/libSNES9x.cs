@@ -3,16 +3,16 @@
 namespace nImager.Filters {
   static class libSNES9x {
     // SNES9x's EPXB modified by Hawkynt to support thresholds
-    public static void voidEPXB(cImage objSrc, ulong qwordSrcX, ulong qwordSrcY, cImage objTgt, ulong qwordTgtX, ulong qwordTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stC0 = objSrc[qwordSrcX - 1, qwordSrcY - 1];
-      sPixel stC1 = objSrc[qwordSrcX, qwordSrcY - 1];
-      sPixel stC2 = objSrc[qwordSrcX + 1, qwordSrcY - 1];
-      sPixel stC3 = objSrc[qwordSrcX - 1, qwordSrcY];
-      sPixel stC4 = objSrc[qwordSrcX, qwordSrcY];
-      sPixel stC5 = objSrc[qwordSrcX + 1, qwordSrcY];
-      sPixel stC6 = objSrc[qwordSrcX - 1, qwordSrcY + 1];
-      sPixel stC7 = objSrc[qwordSrcX, qwordSrcY + 1];
-      sPixel stC8 = objSrc[qwordSrcX + 1, qwordSrcY + 1];
+    public static void voidEPXB(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
+      sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
+      sPixel stC1 = objSrc[intSrcX + 0, intSrcY - 1];
+      sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
+      sPixel stC3 = objSrc[intSrcX - 1, intSrcY + 0];
+      sPixel stC4 = objSrc[intSrcX + 0, intSrcY + 0];
+      sPixel stC5 = objSrc[intSrcX + 1, intSrcY + 0];
+      sPixel stC6 = objSrc[intSrcX - 1, intSrcY + 1];
+      sPixel stC7 = objSrc[intSrcX + 0, intSrcY + 1];
+      sPixel stC8 = objSrc[intSrcX + 1, intSrcY + 1];
       sPixel stE00 = stC4;
       sPixel stE01 = stC4;
       sPixel stE10 = stC4;
@@ -80,23 +80,23 @@ namespace nImager.Filters {
         }
       }
   
-      objTgt[qwordTgtX + 0, qwordTgtY + 0] = stE00;
-      objTgt[qwordTgtX + 1, qwordTgtY + 0] = stE01;
-      objTgt[qwordTgtX + 0, qwordTgtY + 1] = stE10;
-      objTgt[qwordTgtX + 1, qwordTgtY + 1] = stE11;
+      objTgt[intTgtX + 0, intTgtY + 0] = stE00;
+      objTgt[intTgtX + 1, intTgtY + 0] = stE01;
+      objTgt[intTgtX + 0, intTgtY + 1] = stE10;
+      objTgt[intTgtX + 1, intTgtY + 1] = stE11;
     }
     
     // SNES9x's EPX3 modified by Hawkynt to support thresholds
-    public static void voidEPX3(cImage objSrc, ulong qwordSrcX, ulong qwordSrcY, cImage objTgt, ulong qwordTgtX, ulong qwordTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stC0 = objSrc[qwordSrcX - 1, qwordSrcY - 1];
-      sPixel stC1 = objSrc[qwordSrcX, qwordSrcY - 1];
-      sPixel stC2 = objSrc[qwordSrcX + 1, qwordSrcY - 1];
-      sPixel stC3 = objSrc[qwordSrcX - 1, qwordSrcY];
-      sPixel stC4 = objSrc[qwordSrcX, qwordSrcY];
-      sPixel stC5 = objSrc[qwordSrcX + 1, qwordSrcY];
-      sPixel stC6 = objSrc[qwordSrcX - 1, qwordSrcY + 1];
-      sPixel stC7 = objSrc[qwordSrcX, qwordSrcY + 1];
-      sPixel stC8 = objSrc[qwordSrcX + 1, qwordSrcY + 1];
+    public static void voidEPX3(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
+      sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
+      sPixel stC1 = objSrc[intSrcX + 0, intSrcY - 1];
+      sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
+      sPixel stC3 = objSrc[intSrcX - 1, intSrcY + 0];
+      sPixel stC4 = objSrc[intSrcX + 0, intSrcY + 0];
+      sPixel stC5 = objSrc[intSrcX + 1, intSrcY + 0];
+      sPixel stC6 = objSrc[intSrcX - 1, intSrcY + 1];
+      sPixel stC7 = objSrc[intSrcX + 0, intSrcY + 1];
+      sPixel stC8 = objSrc[intSrcX + 1, intSrcY + 1];
       sPixel stE00 = stC4;
       sPixel stE01 = stC4;
       sPixel stE02 = stC4;
@@ -180,28 +180,28 @@ namespace nImager.Filters {
         }
       }
 
-      objTgt[qwordTgtX + 0, qwordTgtY + 0] = stE00;
-      objTgt[qwordTgtX + 1, qwordTgtY + 0] = stE01;
-      objTgt[qwordTgtX + 2, qwordTgtY + 0] = stE02;
-      objTgt[qwordTgtX + 0, qwordTgtY + 1] = stE10;
-      objTgt[qwordTgtX + 1, qwordTgtY + 1] = stE11;
-      objTgt[qwordTgtX + 2, qwordTgtY + 1] = stE12;
-      objTgt[qwordTgtX + 0, qwordTgtY + 2] = stE20;
-      objTgt[qwordTgtX + 1, qwordTgtY + 2] = stE21;
-      objTgt[qwordTgtX + 2, qwordTgtY + 2] = stE22;
+      objTgt[intTgtX + 0, intTgtY + 0] = stE00;
+      objTgt[intTgtX + 1, intTgtY + 0] = stE01;
+      objTgt[intTgtX + 2, intTgtY + 0] = stE02;
+      objTgt[intTgtX + 0, intTgtY + 1] = stE10;
+      objTgt[intTgtX + 1, intTgtY + 1] = stE11;
+      objTgt[intTgtX + 2, intTgtY + 1] = stE12;
+      objTgt[intTgtX + 0, intTgtY + 2] = stE20;
+      objTgt[intTgtX + 1, intTgtY + 2] = stE21;
+      objTgt[intTgtX + 2, intTgtY + 2] = stE22;
     }
     
     // SNES9x's EPXC modified by Hawkynt to support thresholds
-    public static void voidEPXC(cImage objSrc, ulong qwordSrcX, ulong qwordSrcY, cImage objTgt, ulong qwordTgtX, ulong qwordTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stC0 = objSrc[qwordSrcX - 1, qwordSrcY - 1];
-      sPixel stC1 = objSrc[qwordSrcX, qwordSrcY - 1];
-      sPixel stC2 = objSrc[qwordSrcX + 1, qwordSrcY - 1];
-      sPixel stC3 = objSrc[qwordSrcX - 1, qwordSrcY];
-      sPixel stC4 = objSrc[qwordSrcX, qwordSrcY];
-      sPixel stC5 = objSrc[qwordSrcX + 1, qwordSrcY];
-      sPixel stC6 = objSrc[qwordSrcX - 1, qwordSrcY + 1];
-      sPixel stC7 = objSrc[qwordSrcX, qwordSrcY + 1];
-      sPixel stC8 = objSrc[qwordSrcX + 1, qwordSrcY + 1];
+    public static void voidEPXC(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
+      sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
+      sPixel stC1 = objSrc[intSrcX + 0, intSrcY - 1];
+      sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
+      sPixel stC3 = objSrc[intSrcX - 1, intSrcY + 0];
+      sPixel stC4 = objSrc[intSrcX + 0, intSrcY + 0];
+      sPixel stC5 = objSrc[intSrcX + 1, intSrcY + 0];
+      sPixel stC6 = objSrc[intSrcX - 1, intSrcY + 1];
+      sPixel stC7 = objSrc[intSrcX + 0, intSrcY + 1];
+      sPixel stC8 = objSrc[intSrcX + 1, intSrcY + 1];
       sPixel stE00 = stC4;
       sPixel stE01 = stC4;
       sPixel stE10 = stC4;
@@ -305,10 +305,10 @@ namespace nImager.Filters {
        }
       }
 
-      objTgt[qwordTgtX + 0, qwordTgtY + 0] = stE00;
-      objTgt[qwordTgtX + 1, qwordTgtY + 0] = stE01;
-      objTgt[qwordTgtX + 0, qwordTgtY + 1] = stE10;
-      objTgt[qwordTgtX + 1, qwordTgtY + 1] = stE11;
+      objTgt[intTgtX + 0, intTgtY + 0] = stE00;
+      objTgt[intTgtX + 1, intTgtY + 0] = stE01;
+      objTgt[intTgtX + 0, intTgtY + 1] = stE10;
+      objTgt[intTgtX + 1, intTgtY + 1] = stE11;
     }
     
 

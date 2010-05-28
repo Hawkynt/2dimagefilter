@@ -35,11 +35,11 @@ namespace nImager {
       public byte ScaleY;
       public string Name;
       public object Parameter;
-      public Action<cImage, ulong, ulong, cImage, ulong, ulong, byte, byte, object> FilterFunction;
-      public sFilter(string strName, byte byteScaleX, byte byteScaleY, Action<cImage, ulong, ulong, cImage, ulong, ulong, byte, byte, object> ptrFilter) :
+      public Action<cImage, int, int, cImage, int, int, byte, byte, object> FilterFunction;
+      public sFilter(string strName, byte byteScaleX, byte byteScaleY, Action<cImage, int, int, cImage, int, int, byte, byte, object> ptrFilter) :
         this(strName, byteScaleX, byteScaleY, ptrFilter, null) {
       }
-      public sFilter(string strName, byte byteScaleX, byte byteScaleY, Action<cImage, ulong, ulong, cImage, ulong, ulong, byte, byte, object> ptrFilter, object objParam) {
+      public sFilter(string strName, byte byteScaleX, byte byteScaleY, Action<cImage, int, int, cImage, int, int, byte, byte, object> ptrFilter, object objParam) {
         this.Name = strName;
         this.Parameter = objParam;
         this.ScaleX = byteScaleX;
@@ -66,6 +66,8 @@ namespace nImager {
       new sFilter("Hawkynt TV 2x",2,2,libHawkynt.voidTV2X),
       new sFilter("Hawkynt TV 3x",3,3,libHawkynt.voidTV3X),
       */
+      new sFilter("Bilinear Plus Original",2,2,libVBA.voidBilinearPlusOriginal),
+      new sFilter("Bilinear Plus",2,2,libVBA.voidBilinearPlus),
       new sFilter("Eagle 2x",2,2,libEagle.voidEagle2x),
       new sFilter("Eagle 3x",3,3,libEagle.voidEagle3x),
       new sFilter("Eagle 3xB",3,3,libEagle.voidEagle3xB),
@@ -79,7 +81,6 @@ namespace nImager {
       new sFilter("EPXB",2,2,libSNES9x.voidEPXB),
       new sFilter("EPXC",2,2,libSNES9x.voidEPXC),
       new sFilter("EPX3",3,3,libSNES9x.voidEPX3),
-      //new sFilter("EPXC 2x",2,2,libMAME.voidEPXC),
       new sFilter("HQ 2x",2,2,libHQ.voidComplex_nQwXh,new libHQ.delHQFilter(libHQ._arrHQ2x)),
       new sFilter("HQ 2x3",2,3,libHQ.voidComplex_nQwXh,new libHQ.delHQFilter(libHQ._arrHQ2x3)),
       new sFilter("HQ 2x4",2,4,libHQ.voidComplex_nQwXh,new libHQ.delHQFilter(libHQ._arrHQ2x4)),
@@ -117,8 +118,8 @@ namespace nImager {
 
     // image data
     private sPixel[] _arrImageData = null;
-    private ulong _qwordWidth = 0;
-    private ulong _qwordHeight = 0;
+    private int _intWidth = 0;
+    private int _intHeight = 0;
 
     #region properties
     public static sFilter[] Filters {
@@ -126,33 +127,33 @@ namespace nImager {
         return (cImage._arrFilters.ToArray());
       }
     }
-    public ulong Width {
+    public int Width {
       get {
-        return (this._qwordWidth);
+        return (this._intWidth);
       }
     }
-    public ulong Height {
+    public int Height {
       get {
-        return (this._qwordHeight);
+        return (this._intHeight);
       }
     }
     #endregion
     #region ctor dtor idx
     // NOTE: Bitmap objects does not support parallel read-outs blame Microsoft
     public cImage(System.Drawing.Bitmap objBitmap)
-      : this(objBitmap != null ? (ulong)objBitmap.Width : 0, objBitmap != null ? (ulong)objBitmap.Height : 0) {
+      : this(objBitmap != null ? objBitmap.Width : 0, objBitmap != null ? objBitmap.Height : 0) {
 
       System.Drawing.Imaging.BitmapData objBitmapData = objBitmap.LockBits(
-        new System.Drawing.Rectangle(0, 0, (int)this._qwordWidth, (int)this._qwordHeight),
+        new System.Drawing.Rectangle(0, 0, (int)this._intWidth, (int)this._intHeight),
         System.Drawing.Imaging.ImageLockMode.ReadOnly,
         System.Drawing.Imaging.PixelFormat.Format24bppRgb
         );
       int intFillX = objBitmapData.Stride - objBitmapData.Width * 3;
       unsafe {
         byte* ptrOffset = (byte*)objBitmapData.Scan0.ToPointer();
-        for (ulong qwordY = 0; qwordY < this._qwordHeight; qwordY++) {
-          for (ulong qwordX = 0; qwordX < this._qwordWidth; qwordX++) {
-            this[qwordX, qwordY] = new sPixel(*(ptrOffset+2), *(ptrOffset + 1), *(ptrOffset + 0));
+        for (int intY = 0; intY < this._intHeight; intY++) {
+          for (int intX = 0; intX < this._intWidth; intX++) {
+            this[intX, intY] = new sPixel(*(ptrOffset+2), *(ptrOffset + 1), *(ptrOffset + 0));
             ptrOffset += 3;
           }
           ptrOffset += intFillX;
@@ -165,23 +166,27 @@ namespace nImager {
           this[(ulong)intX, (ulong)intY] = new sPixel(objBitmap.GetPixel(intX, intY));
       */
     }
-    public cImage(ulong qwordWidth, ulong qwordHeight) {
-      this._qwordWidth = qwordWidth;
-      this._qwordHeight = qwordHeight;
-      this._arrImageData = new sPixel[qwordWidth * qwordHeight];
+    public cImage(int intWidth, int intHeight) {
+      this._intWidth = intWidth;
+      this._intHeight = intHeight;
+      this._arrImageData = new sPixel[intWidth * intHeight];
     }
-    public sPixel this[ulong qwordX, ulong qwordY] {
+    public sPixel this[int intX, int intY] {
       get {
-        if (qwordX >= this._qwordWidth)
-          qwordX = this._qwordWidth - 1;
-        if (qwordY >= this._qwordHeight)
-          qwordY = this._qwordHeight - 1;
+        if (intX < 0)
+          intX = 0;
+        if (intY < 0)
+          intY = 0;
+        if (intX >= this._intWidth)
+          intX = this._intWidth - 1;
+        if (intY >= this._intHeight)
+          intY = this._intHeight - 1;
         
-        return (this._arrImageData[qwordY * this._qwordWidth + qwordX]);
+        return (this._arrImageData[intY * this._intWidth + intX]);
       }
       set {
-        if(qwordX<this._qwordWidth && qwordY<this._qwordHeight)
-          this._arrImageData[qwordY * this._qwordWidth + qwordX] = value;
+        if(intX<this._intWidth && intY<this._intHeight)
+          this._arrImageData[intY * this._intWidth + intX] = value;
       }
     }
     ~cImage() {
@@ -191,15 +196,12 @@ namespace nImager {
     #region generic image filter
     private cImage _objFilterImage(sFilter stFilter) {
       cImage objRet;
-      ulong dwordNewWidth = (ulong)(this._qwordWidth * stFilter.ScaleX);
-      ulong dwordNewHeight = (ulong)(this._qwordHeight * stFilter.ScaleY);
-      objRet = new cImage(dwordNewWidth, dwordNewHeight);
-      Parallel.For(0, (long)this._qwordHeight, qwordSrcY => {
-        /*Parallel.For(0, (long)this._qwordWidth, qwordSrcX => {
-          stFilter.FilterFunction(this, (ulong)qwordSrcX, (ulong)qwordSrcY, objRet, (ulong)qwordSrcX * stFilter.ScaleX, (ulong)qwordSrcY * stFilter.ScaleY, stFilter.ScaleX, stFilter.ScaleY, stFilter.Parameter);
-        });*/
-        for(ulong qwordSrcX =0; qwordSrcX < this._qwordWidth; qwordSrcX++) {
-          stFilter.FilterFunction(this, (ulong)qwordSrcX, (ulong)qwordSrcY, objRet, (ulong)qwordSrcX * stFilter.ScaleX, (ulong)qwordSrcY * stFilter.ScaleY, stFilter.ScaleX, stFilter.ScaleY, stFilter.Parameter);
+      int intNewWidth = this._intWidth * stFilter.ScaleX;
+      int intNewHeight = this._intHeight * stFilter.ScaleY;
+      objRet = new cImage(intNewWidth, intNewHeight);
+      Parallel.For(0, this._intHeight, intSrcY => {
+        for(int intSrcX =0; intSrcX < this._intWidth; intSrcX++) {
+          stFilter.FilterFunction(this, intSrcX, intSrcY, objRet, intSrcX * stFilter.ScaleX, intSrcY * stFilter.ScaleY, stFilter.ScaleX, stFilter.ScaleY, stFilter.Parameter);
         };
       });
       return (objRet);
@@ -218,7 +220,7 @@ namespace nImager {
     }
     #endregion
     public System.Drawing.Bitmap ToBitmap() {
-      System.Drawing.Bitmap objRet = new System.Drawing.Bitmap((int)this.Width, (int)this.Height);
+      System.Drawing.Bitmap objRet = new System.Drawing.Bitmap(this.Width, this.Height);
       // NOTE: fucking bitmap does not allow parallel writes
       System.Drawing.Imaging.BitmapData objBitmapData = objRet.LockBits(
         new System.Drawing.Rectangle(0, 0, objRet.Width, objRet.Height),
@@ -228,11 +230,11 @@ namespace nImager {
       int intFillX = objBitmapData.Stride - objBitmapData.Width * 3;
       unsafe {
         byte* ptrOffset = (byte*)objBitmapData.Scan0.ToPointer();
-        for (ulong qwordY = 0; qwordY < this._qwordHeight; qwordY++) {
-          for (ulong qwordX = 0; qwordX < this._qwordWidth; qwordX++) {
-            *(ptrOffset+0) = this[qwordX, qwordY].B;
-            *(ptrOffset+1) = this[qwordX, qwordY].G;
-            *(ptrOffset+2) = this[qwordX, qwordY].R;
+        for (int intY = 0; intY < this._intHeight; intY++) {
+          for (int intX = 0; intX < this._intWidth; intX++) {
+            *(ptrOffset+0) = this[intX, intY].B;
+            *(ptrOffset+1) = this[intX, intY].G;
+            *(ptrOffset+2) = this[intX, intY].R;
             ptrOffset += 3;
           }
           ptrOffset += intFillX;

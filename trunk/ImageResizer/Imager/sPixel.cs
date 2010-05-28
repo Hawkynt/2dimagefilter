@@ -1,4 +1,5 @@
-﻿using System;
+﻿#undef PREFERARRAYCACHE
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,35 @@ namespace nImager {
     private UInt32 _dwordPixel;
 
     #region caches
+#if PREFERARRAYCACHE
+    private class cRGBCache {
+      private byte[] _arrCache = new byte[256 * 256 * 256];
+      private byte[] _arrExists = new byte[256 * 256 * 256];
+      private object _objLock = new object();
+      public cRGBCache() {
+      }
+      public bool TryGetValue(UInt32 dwordKey, out byte byteData) {
+        if (_arrExists[dwordKey] > 0) {
+          byteData = _arrCache[dwordKey];
+          return (true);
+        } else {
+          byteData = 0;
+          return (false);
+        }
+      }
+      public byte this[UInt32 dwordKey] {
+        set {
+          lock (this._objLock) {
+            this._arrCache[dwordKey] = value;
+            this._arrExists[dwordKey] = 1;
+          }
+        }
+        get {
+          return (this._arrCache[dwordKey]);
+        }
+      }
+    }
+#else
     private class cRGBCache {
       private Dictionary<UInt32, byte> _hashCache = new Dictionary<uint, byte>();
       public cRGBCache(){
@@ -26,6 +56,8 @@ namespace nImager {
         }
       }
     }
+#endif
+
     private static cRGBCache _hashCache_Y = new cRGBCache();
     private static cRGBCache _hashCache_U = new cRGBCache();
     private static cRGBCache _hashCache_V = new cRGBCache();
@@ -118,7 +150,8 @@ namespace nImager {
         byte byteRet;
         UInt32 dwordC = this._dwordPixel;
         if (!_hashCache_Brightness.TryGetValue(dwordC, out byteRet)) {
-          byteRet = (byte)((this.R << 1 + this.G << 1 + this.B << 1 + this.R + this.G) >> 3);
+          //byteRet = (byte)((this.R << 1 + this.G << 1 + this.B << 1 + this.R + this.G) >> 3);
+          byteRet = (byte)((this.R * 3 + this.G * 3 + this.B * 2 ) >> 3);
           _hashCache_Brightness[dwordC] = byteRet;
         }
         return (byteRet);
@@ -199,8 +232,7 @@ namespace nImager {
       this.Color = objColor;
     }
     public sPixel(byte byteR, byte byteG, byte byteB) {
-      this._dwordPixel = 0;
-      this.SetRGB(byteR, byteG, byteB);
+      this._dwordPixel = (UInt32)byteR << 16 | (UInt32)byteG << 8 | (UInt32)byteB;
     }
     #endregion
     public override string ToString() {
@@ -295,15 +327,28 @@ namespace nImager {
     public bool IsLike(sPixel stA) {
       bool boolRet;
       if (AllowThresholds) {
+        int intTmp;
+        intTmp = this.V - stA.V;
+        if (intTmp > byteVTrigger || intTmp < -byteVTrigger)
+          return false;
+        intTmp = this.Y - stA.Y;
+        if (intTmp > byteYTrigger || intTmp < -byteYTrigger)
+          return false;
+        intTmp = this.U - stA.U;
+        if (intTmp > byteUTrigger || intTmp < -byteUTrigger)
+          return false;
+        return true;
+        /*
         if (
+          (Math.Abs(this.V - stA.V) > byteVTrigger) ||
           (Math.Abs(this.Y - stA.Y) > byteYTrigger) ||
-          (Math.Abs(this.U - stA.U) > byteUTrigger) ||
-          (Math.Abs(this.V - stA.V) > byteVTrigger)
+          (Math.Abs(this.U - stA.U) > byteUTrigger)
           ) {
           boolRet = false;
         } else {
           boolRet = true;
         }
+        */
       } else {
         boolRet = this == stA;
       }
