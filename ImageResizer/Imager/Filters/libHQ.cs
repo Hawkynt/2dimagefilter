@@ -5,16 +5,16 @@ namespace nImager.Filters {
     #region Common
     public delegate sPixel[] delHQFilter(byte bytePattern, sPixel stC0, sPixel stC1, sPixel stC2, sPixel stC3, sPixel stC4, sPixel stC5, sPixel stC6, sPixel stC7, sPixel stC8);
     // body for HQ2x etc.
-    public static void voidComplex_nQwXh(cImage objSrc, ulong qwordSrcX, ulong qwordSrcY, cImage objTgt, ulong qwordTgtX, ulong qwordTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stC0 = objSrc[qwordSrcX - 1, qwordSrcY - 1];
-      sPixel stC1 = objSrc[qwordSrcX, qwordSrcY - 1];
-      sPixel stC2 = objSrc[qwordSrcX + 1, qwordSrcY - 1];
-      sPixel stC3 = objSrc[qwordSrcX - 1, qwordSrcY];
-      sPixel stC4 = objSrc[qwordSrcX, qwordSrcY];
-      sPixel stC5 = objSrc[qwordSrcX + 1, qwordSrcY];
-      sPixel stC6 = objSrc[qwordSrcX - 1, qwordSrcY + 1];
-      sPixel stC7 = objSrc[qwordSrcX, qwordSrcY + 1];
-      sPixel stC8 = objSrc[qwordSrcX + 1, qwordSrcY + 1];
+    public static void voidComplex_nQwXh(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
+      sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
+      sPixel stC1 = objSrc[intSrcX + 0, intSrcY - 1];
+      sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
+      sPixel stC3 = objSrc[intSrcX - 1, intSrcY + 0];
+      sPixel stC4 = objSrc[intSrcX + 0, intSrcY + 0];
+      sPixel stC5 = objSrc[intSrcX + 1, intSrcY + 0];
+      sPixel stC6 = objSrc[intSrcX - 1, intSrcY + 1];
+      sPixel stC7 = objSrc[intSrcX + 0, intSrcY + 1];
+      sPixel stC8 = objSrc[intSrcX + 1, intSrcY + 1];
       byte bytePattern = 0;
       if ((stC4.IsNotLike(stC0)))
         bytePattern |= 1;
@@ -36,71 +36,82 @@ namespace nImager.Filters {
       byte byteI = 0;
       for (byte byteY = 0; byteY < byteScaleY; byteY++) {
         for (byte byteX = 0; byteX < byteScaleX; byteX++) {
-          objTgt[qwordTgtX + byteX, qwordTgtY + byteY] = arrResult[byteI++];
+          objTgt[intTgtX + byteX, intTgtY + byteY] = arrResult[byteI++];
         }
       }
     } // end sub
 
     // body for HQ2xBold etc. as seen in SNES9x
-    public static void voidComplex_nQwXhBold(cImage objSrc, ulong qwordSrcX, ulong qwordSrcY, cImage objTgt, ulong qwordTgtX, ulong qwordTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stC0 = objSrc[qwordSrcX - 1, qwordSrcY - 1];
-      sPixel stC1 = objSrc[qwordSrcX, qwordSrcY - 1];
-      sPixel stC2 = objSrc[qwordSrcX + 1, qwordSrcY - 1];
-      sPixel stC3 = objSrc[qwordSrcX - 1, qwordSrcY];
-      sPixel stC4 = objSrc[qwordSrcX, qwordSrcY];
-      sPixel stC5 = objSrc[qwordSrcX + 1, qwordSrcY];
-      sPixel stC6 = objSrc[qwordSrcX - 1, qwordSrcY + 1];
-      sPixel stC7 = objSrc[qwordSrcX, qwordSrcY + 1];
-      sPixel stC8 = objSrc[qwordSrcX + 1, qwordSrcY + 1];
-      byte byteAvgBrightness = (byte)((
-        stC0.Brightness +
-        stC1.Brightness +
-        stC2.Brightness +
-        stC3.Brightness +
-        stC4.Brightness +
-        stC5.Brightness +
-        stC6.Brightness +
-        stC7.Brightness +
+    public static void voidComplex_nQwXhBold(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
+      sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
+      sPixel stC1 = objSrc[intSrcX + 0, intSrcY - 1];
+      sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
+      sPixel stC3 = objSrc[intSrcX - 1, intSrcY + 0];
+      sPixel stC4 = objSrc[intSrcX + 0, intSrcY + 0];
+      sPixel stC5 = objSrc[intSrcX + 1, intSrcY + 0];
+      sPixel stC6 = objSrc[intSrcX - 1, intSrcY + 1];
+      sPixel stC7 = objSrc[intSrcX + 0, intSrcY + 1];
+      sPixel stC8 = objSrc[intSrcX + 1, intSrcY + 1];
+      byte[] arrBrightness = new byte[] { 
+        stC0.Brightness,
+        stC1.Brightness,
+        stC2.Brightness,
+        stC3.Brightness,
+        stC4.Brightness,
+        stC5.Brightness,
+        stC6.Brightness,
+        stC7.Brightness,
         stC8.Brightness
+      };
+      byte byteAvgBrightness = (byte)((
+        arrBrightness[0] +
+        arrBrightness[1] +
+        arrBrightness[2] +
+        arrBrightness[3] +
+        arrBrightness[4] +
+        arrBrightness[5] +
+        arrBrightness[6] +
+        arrBrightness[7] +
+        arrBrightness[8]
         ) / 9);
       bool boolDC4 = stC4.Brightness > byteAvgBrightness;
       byte bytePattern = 0;
-      if ((stC4.IsNotLike(stC0)) && ((stC0.Brightness > byteAvgBrightness) != boolDC4))
+      if ((stC4.IsNotLike(stC0)) && ((arrBrightness[0] > byteAvgBrightness) != boolDC4))
         bytePattern |= 1;
-      if ((stC4.IsNotLike(stC1)) && ((stC1.Brightness > byteAvgBrightness) != boolDC4))
+      if ((stC4.IsNotLike(stC1)) && ((arrBrightness[1] > byteAvgBrightness) != boolDC4))
         bytePattern |= 2;
-      if ((stC4.IsNotLike(stC2)) && ((stC2.Brightness > byteAvgBrightness) != boolDC4))
+      if ((stC4.IsNotLike(stC2)) && ((arrBrightness[2] > byteAvgBrightness) != boolDC4))
         bytePattern |= 4;
-      if ((stC4.IsNotLike(stC3)) && ((stC3.Brightness > byteAvgBrightness) != boolDC4))
+      if ((stC4.IsNotLike(stC3)) && ((arrBrightness[3] > byteAvgBrightness) != boolDC4))
         bytePattern |= 8;
-      if ((stC4.IsNotLike(stC5)) && ((stC5.Brightness > byteAvgBrightness) != boolDC4))
+      if ((stC4.IsNotLike(stC5)) && ((arrBrightness[5] > byteAvgBrightness) != boolDC4))
         bytePattern |= 16;
-      if ((stC4.IsNotLike(stC6)) && ((stC6.Brightness > byteAvgBrightness) != boolDC4))
+      if ((stC4.IsNotLike(stC6)) && ((arrBrightness[6] > byteAvgBrightness) != boolDC4))
         bytePattern |= 32;
-      if ((stC4.IsNotLike(stC7)) && ((stC7.Brightness > byteAvgBrightness) != boolDC4))
+      if ((stC4.IsNotLike(stC7)) && ((arrBrightness[7] > byteAvgBrightness) != boolDC4))
         bytePattern |= 64;
-      if ((stC4.IsNotLike(stC8)) && ((stC8.Brightness > byteAvgBrightness) != boolDC4))
+      if ((stC4.IsNotLike(stC8)) && ((arrBrightness[8] > byteAvgBrightness) != boolDC4))
         bytePattern |= 128;
       sPixel[] arrResult = ((delHQFilter)objParam)(bytePattern, stC0, stC1, stC2, stC3, stC4, stC5, stC6, stC7, stC8);
       byte byteI = 0;
       for (byte byteY = 0; byteY < byteScaleY; byteY++) {
         for (byte byteX = 0; byteX < byteScaleX; byteX++) {
-          objTgt[qwordTgtX + byteX, qwordTgtY + byteY] = arrResult[byteI++];
+          objTgt[intTgtX + byteX, intTgtY + byteY] = arrResult[byteI++];
         }
       }
     } // end sub
 
     // body for HQ2xSmart etc. as seen in SNES9x
-    public static void voidComplex_nQwXhSmart(cImage objSrc, ulong qwordSrcX, ulong qwordSrcY, cImage objTgt, ulong qwordTgtX, ulong qwordTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stC0 = objSrc[qwordSrcX - 1, qwordSrcY - 1];
-      sPixel stC2 = objSrc[qwordSrcX + 1, qwordSrcY - 1];
-      sPixel stC4 = objSrc[qwordSrcX, qwordSrcY];
-      sPixel stC6 = objSrc[qwordSrcX - 1, qwordSrcY + 1];
-      sPixel stC8 = objSrc[qwordSrcX + 1, qwordSrcY + 1];
+    public static void voidComplex_nQwXhSmart(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
+      sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
+      sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
+      sPixel stC4 = objSrc[intSrcX, intSrcY];
+      sPixel stC6 = objSrc[intSrcX - 1, intSrcY + 1];
+      sPixel stC8 = objSrc[intSrcX + 1, intSrcY + 1];
       if (stC0.IsLike(stC4) || stC2.IsLike(stC4) || stC6.IsLike(stC4) || stC8.IsLike(stC4))
-        libHQ.voidComplex_nQwXh(objSrc, qwordSrcX, qwordSrcY, objTgt, qwordTgtX, qwordTgtY, byteScaleX, byteScaleY, objParam);
+        libHQ.voidComplex_nQwXh(objSrc, intSrcX, intSrcY, objTgt, intTgtX, intTgtY, byteScaleX, byteScaleY, objParam);
       else
-        libHQ.voidComplex_nQwXhBold(objSrc, qwordSrcX, qwordSrcY, objTgt, qwordTgtX, qwordTgtY, byteScaleX, byteScaleY, objParam);
+        libHQ.voidComplex_nQwXhBold(objSrc, intSrcX, intSrcY, objTgt, intTgtX, intTgtY, byteScaleX, byteScaleY, objParam);
     } // end sub
     #endregion
 

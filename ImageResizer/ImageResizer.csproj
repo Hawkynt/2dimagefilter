@@ -102,6 +102,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Imager\cImage.cs" />
+    <Compile Include="Imager\Filters\libVBA.cs" />
     <Compile Include="Imager\Filters\libSNES9x.cs" />
     <Compile Include="Imager\Filters\libHQ.cs" />
     <Compile Include="Imager\Filters\libKreed.cs" />
