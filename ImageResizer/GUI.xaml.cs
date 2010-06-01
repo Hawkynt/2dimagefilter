@@ -201,6 +201,5 @@ namespace ImageResizer {
       DeleteObject(hndlBitmap);
       return (objRet);
     }
-
   }
 }
