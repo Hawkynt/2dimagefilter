@@ -14412,7 +14412,6 @@ namespace nImager.Filters {
       sPixel stE11 = stC4;
       switch (bytePattern) {
         #region LQ2x PATTERNS
-
         case 0:
         case 2:
         case 4:
