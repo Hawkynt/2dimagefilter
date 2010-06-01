@@ -1,28 +1,31 @@
 ﻿using nImager;
-// TODO: this module is completely unable to work with thresholds I'll fix it later (Hawkynt)
 namespace nImager.Filters {
   static class libKreed {
     // used for 2xSaI, Super Eagle, Super 2xSaI
+    // using thresholds when comparing (Hawkynt)
     private static int _intConc2d(sPixel stColA, sPixel stColB, sPixel stColC, sPixel stColD) {
-      int intRet=0;
-      
-      bool boolAC = stColA == stColC;
+      int intRet = 0;
+
+      bool boolAC = stColA .IsLike(stColC);
       int intX = boolAC ? 1 : 0;
-      int intY = ((stColB == stColC) && !(boolAC)) ? 1 : 0;
-      
-      bool boolAD = stColA == stColD;
+      int intY = (stColB.IsLike(stColC) && !(boolAC)) ? 1 : 0;
+
+      bool boolAD = stColA .IsLike(stColD);
       intX += boolAD ? 1 : 0;
-      intY += ((stColB == stColD) && !(boolAD)) ? 1 : 0;
+      intY += (stColB.IsLike(stColD) && !(boolAD)) ? 1 : 0;
 
       if (intX <= 1)
         intRet++;
       if (intY <= 1)
         intRet--;
-      
+
       return (intRet);
     }
 
-    // Kreed's SuperEagle
+    // TODO: to be really exact, the comparisons are not that right by comparing to already interpolated values
+    // TODO: when interpolating 3 or more points I'm using already calculated interpolations and weight them further
+    //       which is not the mathematically correct approach, but it's enough - at least for now
+    // Kreed's SuperEagle modified by Hawkynt to allow thresholds
     public static void voidSuperEagle(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
       sPixel stPixel = objSrc[intSrcX, intSrcY];
       sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
@@ -45,59 +48,77 @@ namespace nImager.Filters {
       sPixel stE01 = stC4;
       sPixel stE10 = stC4;
       sPixel stE11 = stC4;
-      if ((stC4 != stC8)) {
-        if ((stC7 == stC5)) {
-          stE01 = stC7;
-          stE10 = stC7;
-          if ((stC6 == stC7) || (stC5 == stC2)) {
-            stE00 = sPixel.Interpolate(stC7, stC4, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC5);
-          }
+      if (stC4.IsLike(stC8)) {
+        sPixel stC48 = sPixel.Interpolate(stC4, stC8);
+        if (stC7.IsLike(stC5)) {
+          sPixel stC57 = sPixel.Interpolate(stC5, stC7);
+          int intR = 0;
+          intR += _intConc2d(stC57, stC48, stC6, stD1);
+          intR += _intConc2d(stC57, stC48, stC3, stC1);
+          intR += _intConc2d(stC57, stC48, stD2, stD5);
+          intR += _intConc2d(stC57, stC48, stC2, stD4);
 
-          if ((stC5 == stD4) || (stC7 == stD1)) {
-            stE11 = sPixel.Interpolate(stC7, stC8, 3, 1);
+          if (intR > 0) {
+            stE10 = stC57;
+            stE01 = stC57;
+            stE11 = sPixel.Interpolate(stC48, stC57);
+            stE00 = sPixel.Interpolate(stC48, stC57);
+          } else if (intR < 0) {
+            stE10 = sPixel.Interpolate(stC48, stC57);
+            stE01 = sPixel.Interpolate(stC48, stC57);
           } else {
-            stE11 = sPixel.Interpolate(stC7, stC8);
+            stE10 = stC57;
+            stE01 = stC57;
           }
+        } else {
+          if (stC48.IsLike(stC1) && stC48.IsLike(stD5))
+            stE01 = sPixel.Interpolate(sPixel.Interpolate(stC48, stC1, stD5), stC5, 3, 1);
+          else if (stC48.IsLike(stC1))
+            stE01 = sPixel.Interpolate(sPixel.Interpolate(stC48, stC1), stC5, 3, 1);
+          else if (stC48.IsLike(stD5))
+            stE01 = sPixel.Interpolate(sPixel.Interpolate(stC48, stD5), stC5, 3, 1);
+          else
+            stE01 = sPixel.Interpolate(stC48, stC5);
+          
+          if (stC48 .IsLike(stD2) && stC48.IsLike(stC3))
+            stE10 = sPixel.Interpolate(sPixel.Interpolate(stC48,stD2,stC3), stC7, 3, 1);
+          else if (stC48 .IsLike(stD2))
+            stE10 = sPixel.Interpolate(sPixel.Interpolate(stC48,stD2), stC7, 3, 1);
+          else if (stC48.IsLike(stC3))
+            stE10 = sPixel.Interpolate(sPixel.Interpolate(stC48,stC3), stC7, 3, 1);
+          else
+            stE10 = sPixel.Interpolate(stC48, stC7);
+
+        }
+      } else {
+        if (stC7.IsLike(stC5)) {
+          sPixel stC57 = sPixel.Interpolate(stC5, stC7);
+          stE01 = stC57;
+          stE10 = stC57;
+          
+          if (stC57.IsLike (stC6) && stC57.IsLike(stC2))
+            stE00 = sPixel.Interpolate(sPixel.Interpolate(stC57,stC6,stC2), stC4, 3, 1);
+          else if (stC57.IsLike(stC6))
+            stE00 = sPixel.Interpolate(sPixel.Interpolate(stC57,stC6), stC4, 3, 1);
+          else if (stC57.IsLike(stC2))
+            stE00 = sPixel.Interpolate(sPixel.Interpolate(stC57,stC2), stC4, 3, 1);
+          else
+            stE00 = sPixel.Interpolate(stC57, stC4);
+
+          if (stC57.IsLike(stD4) && stC57.IsLike(stD1))
+            stE11 = sPixel.Interpolate(sPixel.Interpolate(stC57,stD4,stD1), stC8, 3, 1);
+          else if (stC57.IsLike(stD4))
+            stE11 = sPixel.Interpolate(sPixel.Interpolate(stC57,stD4), stC8, 3, 1);
+          else if (stC57.IsLike(stD1))
+            stE11 = sPixel.Interpolate(sPixel.Interpolate(stC57,stD1), stC8, 3, 1);
+          else
+            stE11 = sPixel.Interpolate(stC57, stC8);
+
         } else {
           stE11 = sPixel.Interpolate(stC8, stC7, stC5, 6, 1, 1);
           stE00 = sPixel.Interpolate(stC4, stC7, stC5, 6, 1, 1);
           stE10 = sPixel.Interpolate(stC7, stC4, stC8, 6, 1, 1);
           stE01 = sPixel.Interpolate(stC5, stC4, stC8, 6, 1, 1);
-        }
-      } else {
-        if ((stC7 != stC5)) {
-          if ((stC1 == stC4) || (stC8 == stD5)) {
-            stE01 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC5);
-          }
-
-          if ((stC8 == stD2) || (stC3 == stC4)) {
-            stE10 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC7, stC8);
-          }
-        } else {
-          int intR = 0;
-          intR += _intConc2d(stC5, stC4, stC6, stD1);
-          intR += _intConc2d(stC5, stC4, stC3, stC1);
-          intR += _intConc2d(stC5, stC4, stD2, stD5);
-          intR += _intConc2d(stC5, stC4, stC2, stD4);
-
-          if (intR > 0) {
-            stE10 = stC7;
-            stE01 = stC7;
-            stE11 = sPixel.Interpolate(stC4, stC5);
-            stE00 = sPixel.Interpolate(stC4, stC5);
-          } else if (intR < 0) {
-            stE10 = sPixel.Interpolate(stC4, stC5);
-            stE01 = sPixel.Interpolate(stC4, stC5);
-          } else {
-            stE10 = stC7;
-            stE01 = stC7;
-          }
         }
       }
 
@@ -131,70 +152,66 @@ namespace nImager.Filters {
       sPixel stE10 = stC4;
       sPixel stE11 = stC4;
 
-      if ((stC4 == stC8) && (stC5 != stC7)) {
-        if (((stC4 == stC1) && (stC5 == stD5)) ||
-          ((stC4 == stC7) && (stC4 == stC2) && (stC5 != stC1) && (stC5 == stD3))) {
+      if (stC4 .IsLike(stC8) && stC5.IsNotLike(stC7)) {
+        sPixel stC48 = sPixel.Interpolate(stC4, stC8);
+        if ((stC48.IsLike(stC1) && stC5.IsLike(stD5)) || (stC48.IsLike(stC7) && stC48.IsLike(stC2) && stC5.IsNotLike(stC1) && stC5.IsLike(stD3))) {
           //nothing
         } else {
-          stE01 = sPixel.Interpolate(stC4, stC5);
+          stE01 = sPixel.Interpolate(stC48, stC5);
         }
 
-        if (((stC4 == stC3) && (stC7 == stD2)) ||
-          ((stC4 == stC5) && (stC4 == stC6) && (stC3 != stC7) && (stC7 == stD0))) {
+        if ((stC48.IsLike(stC3) && stC7.IsLike(stD2)) || (stC48.IsLike(stC5) && stC48.IsLike(stC6) && stC3.IsNotLike(stC7) && stC7.IsLike(stD0))) {
           //nothing
         } else {
-          stE10 = sPixel.Interpolate(stC4, stC7);
+          stE10 = sPixel.Interpolate(stC48, stC7);
         }
-      } else if ((stC5 == stC7) && (stC4 != stC8)) {
-        if (((stC5 == stC2) && (stC4 == stC6)) ||
-          ((stC5 == stC1) && (stC5 == stC8) && (stC4 != stC2) && (stC4 == stC0))) {
-          stE01 = stC5;
+      } else if (stC5.IsLike(stC7) && stC4.IsNotLike(stC8)) {
+        sPixel stC57 = sPixel.Interpolate(stC5, stC7);
+        if ((stC57.IsLike(stC2) && stC4.IsLike(stC6)) || (stC57.IsLike(stC1) && stC57.IsLike(stC8) && stC4.IsNotLike(stC2) && stC4.IsLike(stC0))) {
+          stE01 = stC57;
         } else {
-          stE01 = sPixel.Interpolate(stC4, stC5);
+          stE01 = sPixel.Interpolate(stC4, stC57);
         }
 
-        if (((stC7 == stC6) && (stC4 == stC2)) ||
-          ((stC7 == stC3) && (stC7 == stC8) && (stC4 != stC6) && (stC4 == stC0))) {
-          stE10 = stC7;
+        if ((stC57.IsLike(stC6) && stC4.IsLike(stC2)) || (stC57.IsLike(stC3) && stC57.IsLike(stC8) && stC4.IsNotLike(stC6) && stC4.IsLike(stC0))) {
+          stE10 = stC57;
         } else {
-          stE10 = sPixel.Interpolate(stC4, stC7);
+          stE10 = sPixel.Interpolate(stC4, stC57);
         }
-        stE11 = stC5;
-      } else if ((stC4 == stC8) && (stC5 == stC7)) {
-        if ((stC4 != stC5)) {
+        stE11 = stC57;
+      } else if (stC4.IsLike(stC8) && stC5.IsLike(stC7)) {
+        sPixel stC48 = sPixel.Interpolate(stC4, stC8);
+        sPixel stC57 = sPixel.Interpolate(stC5, stC7);
+        if (stC48.IsNotLike(stC57)) {
           int intR = 0;
-          intR += _intConc2d(stC4, stC5, stC3, stC1);
-          intR -= _intConc2d(stC5, stC4, stD4, stC2);
-          intR -= _intConc2d(stC5, stC4, stC6, stD1);
-          intR += _intConc2d(stC4, stC5, stD5, stD2);
+          intR += _intConc2d(stC48, stC57, stC3, stC1);
+          intR -= _intConc2d(stC57, stC48, stD4, stC2);
+          intR -= _intConc2d(stC57, stC48, stC6, stD1);
+          intR += _intConc2d(stC48, stC57, stD5, stD2);
 
           if (intR < 0) {
-            stE11 = stC5;
+            stE11 = stC57;
           } else if (intR == 0) {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, stC8);
+            stE11 = sPixel.Interpolate(stC48, stC57);
           }
-          stE10 = sPixel.Interpolate(stC4, stC7);
-          stE01 = sPixel.Interpolate(stC4, stC5);
+          stE10 = sPixel.Interpolate(stC48, stC57);
+          stE01 = sPixel.Interpolate(stC48, stC57);
         }
       } else {
         stE11 = sPixel.Interpolate(stC4, stC5, stC7, stC8);
 
-        if ((stC4 == stC7) && (stC4 == stC2)
-          && (stC5 != stC1) && (stC5 == stD3)) {
+        if (stC4.IsLike(stC7) && stC4.IsLike(stC2) && stC5.IsNotLike(stC1) && stC5.IsLike(stD3)) {
           //nothing
-        } else if ((stC5 == stC1) && (stC5 == stC8)
-          && (stC4 != stC2) && (stC4 == stC0)) {
-          stE01 = stC5;
+        } else if (stC5.IsLike(stC1) && stC5.IsLike(stC8) && stC4.IsNotLike(stC2) && stC4.IsLike(stC0)) {
+          stE01 = sPixel.Interpolate(stC5, stC1, stC8);
         } else {
           stE01 = sPixel.Interpolate(stC4, stC5);
         }
 
-        if ((stC4 == stC5) && (stC4 == stC6)
-          && (stC3 != stC7) && (stC7 == stD0)) {
+        if (stC4.IsLike(stC5) && stC4.IsLike(stC6) && stC3.IsNotLike(stC7) && stC7.IsLike(stD0)) {
           //nothing
-        } else if ((stC7 == stC3) && (stC7 == stC8)
-          && (stC4 != stC6) && (stC4 == stC0)) {
-          stE10 = stC7;
+        } else if (stC7.IsLike(stC3) && stC7.IsLike(stC8) && stC4.IsNotLike(stC6) && stC4.IsLike(stC0)) {
+          stE10 = sPixel.Interpolate(stC7, stC3, stC8);
         } else {
           stE10 = sPixel.Interpolate(stC4, stC7);
         }
@@ -231,52 +248,56 @@ namespace nImager.Filters {
       sPixel stE10 = stC4;
       sPixel stE11 = stC4;
 
-      if ((stC7 == stC5) && (stC4 != stC8)) {
-        stE11 = stC7;
-        stE01 = stC7;
-      } else if ((stC4 == stC8) && (stC7 != stC5)) {
+      if (stC7.IsLike(stC5) && stC4.IsNotLike(stC8)) {
+        sPixel stC57=sPixel.Interpolate(stC7, stC5);
+        stE11 = stC57;
+        stE01 = stC57;
+      } else if (stC4.IsLike(stC8) && stC7.IsNotLike(stC5)) {
         //nothing
-      } else if ((stC4 == stC8) && (stC7 == stC5)) {
+      } else if (stC4.IsLike(stC8) && stC7.IsLike(stC5)) {
+        sPixel stC57 = sPixel.Interpolate(stC7, stC5);
+        sPixel stC48 = sPixel.Interpolate(stC4, stC8);
         int intR = 0;
-        intR += _intConc2d(stC5, stC4, stC6, stD1);
-        intR += _intConc2d(stC5, stC4, stC3, stC1);
-        intR += _intConc2d(stC5, stC4, stD2, stD5);
-        intR += _intConc2d(stC5, stC4, stC2, stD4);
+        intR += _intConc2d(stC57, stC48, stC6, stD1);
+        intR += _intConc2d(stC57, stC48, stC3, stC1);
+        intR += _intConc2d(stC57, stC48, stD2, stD5);
+        intR += _intConc2d(stC57, stC48, stC2, stD4);
 
         if (intR > 0) {
-          stE11 = stC5;
-          stE01 = stC5;
+          stE11 = stC57;
+          stE01 = stC57;
         } else if (intR == 0) {
-          stE11 = sPixel.Interpolate(stC4, stC5);
-          stE01 = sPixel.Interpolate(stC4, stC5);
+          stE11 = sPixel.Interpolate(stC48, stC57);
+          stE01 = sPixel.Interpolate(stC48, stC57);
         }
       } else {
-        if ((stC5 == stC8) && (stC8 == stD1) && (stC7 != stD2) && (stC8 != stD0)) {
-          stE11 = sPixel.Interpolate(stC8, stC7, 3, 1);
-        } else if ((stC4 == stC7) && (stC7 == stD2) && (stD1 != stC8) && (stC7 != stD6)) {
-          stE11 = sPixel.Interpolate(stC7, stC8, 3, 1);
+        if (stC8.IsLike(stC5) && stC8.IsLike(stD1) && stC7.IsNotLike(stD2) && stC8.IsNotLike(stD0)) {
+          stE11 = sPixel.Interpolate(sPixel.Interpolate(stC8,stC5,stD1), stC7, 3, 1);
+        } else if (stC7.IsLike(stC4) && stC7.IsLike(stD2) && stC7.IsNotLike(stD6) && stC8.IsNotLike(stD1)) {
+          stE11 = sPixel.Interpolate(sPixel.Interpolate(stC7,stC4,stD2), stC8, 3, 1);
         } else {
           stE11 = sPixel.Interpolate(stC7, stC8);
         }
-        if ((stC5 == stC8) && (stC5 == stC1) && (stC4 != stC2) && (stC5 != stC0)) {
-          stE01 = sPixel.Interpolate(stC5, stC4, 3, 1);
-        } else if ((stC4 == stC7) && (stC4 == stC2) && (stC1 != stC5) && (stC4 != stD3)) {
-          stE01 = sPixel.Interpolate(stC4, stC5, 3, 1);
+        if (stC5.IsLike(stC8) && stC5.IsLike(stC1) && stC5.IsNotLike(stC0) && stC4.IsNotLike(stC2)) {
+          stE01 = sPixel.Interpolate(sPixel.Interpolate(stC5,stC8,stC1), stC4, 3, 1);
+        } else if (stC4.IsLike(stC7) && stC4.IsLike(stC2) && stC5.IsNotLike(stC1) && stC4.IsNotLike(stD3)) {
+          stE01 = sPixel.Interpolate(sPixel.Interpolate(stC4,stC7,stC2), stC5, 3, 1);
         } else {
           stE01 = sPixel.Interpolate(stC4, stC5);
         }
       }
-      if ((stC4 == stC8) && (stC7 != stC5) && (stC3 == stC4) && (stC4 != stD2)) {
-        stE10 = sPixel.Interpolate(stC7, stC4);
-      } else if ((stC4 == stC6) && (stC5 == stC4) && (stC3 != stC7) && (stC4 != stD0)) {
-        stE10 = sPixel.Interpolate(stC7, stC4);
+      if (stC4.IsLike(stC8) && stC4.IsLike(stC3) && stC7.IsNotLike(stC5) && stC4.IsNotLike(stD2)) {
+        stE10 = sPixel.Interpolate(stC7, sPixel.Interpolate(stC4,stC8,stC3));
+      } else if (stC4.IsLike (stC6) && stC4.IsLike(stC5) && stC7.IsNotLike(stC3) && stC4.IsNotLike(stD0)) {
+        stE10 = sPixel.Interpolate(stC7, sPixel.Interpolate(stC4,stC6,stC5));
       } else {
         stE10 = stC7;
       }
-      if ((stC7 == stC5) && (stC4 != stC8) && (stC6 == stC7) && (stC7 != stC2)) {
-        stE00 = sPixel.Interpolate(stC7, stC4);
-      } else if ((stC3 == stC7) && (stC8 == stC7) && (stC6 != stC4) && (stC7 != stC0)) {
-        stE00 = sPixel.Interpolate(stC7, stC4);
+      
+      if (stC7.IsLike(stC5) && stC7.IsLike(stC6) && stC4 .IsNotLike(stC8) && stC7 .IsNotLike(stC2)) {
+        stE00 = sPixel.Interpolate(sPixel.Interpolate(stC7,stC5,stC6), stC4);
+      } else if (stC7.IsLike(stC3) && stC7.IsLike(stC8) && stC4.IsNotLike(stC6) && stC7.IsNotLike(stC0)) {
+        stE00 = sPixel.Interpolate(sPixel.Interpolate(stC7,stC3,stC8), stC4);
       }
 
       objTgt[intTgtX + 0, intTgtY + 0] = stE00;
