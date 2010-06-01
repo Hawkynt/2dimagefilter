@@ -338,17 +338,6 @@ namespace nImager {
         if (intTmp > byteUTrigger || intTmp < -byteUTrigger)
           return false;
         return true;
-        /*
-        if (
-          (Math.Abs(this.V - stA.V) > byteVTrigger) ||
-          (Math.Abs(this.Y - stA.Y) > byteYTrigger) ||
-          (Math.Abs(this.U - stA.U) > byteUTrigger)
-          ) {
-          boolRet = false;
-        } else {
-          boolRet = true;
-        }
-        */
       } else {
         boolRet = this == stA;
       }
