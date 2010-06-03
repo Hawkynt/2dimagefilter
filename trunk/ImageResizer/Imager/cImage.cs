@@ -28,7 +28,7 @@ using nImager.Filters;
 using System.Threading.Tasks;
 
 namespace nImager {
-  public class cImage {
+  public class cImage:ICloneable {
     #region helper structs
     public struct sFilter {
       public byte ScaleX;
@@ -36,6 +36,10 @@ namespace nImager {
       public string Name;
       public object Parameter;
       public Action<cImage, int, int, cImage, int, int, byte, byte, object> FilterFunction;
+      public Func<cImage, cImage> CreationFunction;
+      public sFilter(string strName, Func<cImage, cImage> ptrFunc):this(strName,1,1,null) {
+        this.CreationFunction = ptrFunc;
+      }
       public sFilter(string strName, byte byteScaleX, byte byteScaleY, Action<cImage, int, int, cImage, int, int, byte, byte, object> ptrFilter) :
         this(strName, byteScaleX, byteScaleY, ptrFilter, null) {
       }
@@ -45,6 +49,7 @@ namespace nImager {
         this.ScaleX = byteScaleX;
         this.ScaleY = byteScaleY;
         this.FilterFunction = ptrFilter;
+        this.CreationFunction=objSource=>new cImage(objSource.Width*byteScaleX,objSource.Height*byteScaleY);
       }
     }
     #endregion
@@ -112,7 +117,18 @@ namespace nImager {
       new sFilter("LQ 3x Smart",3,3,libHQ.voidComplex_nQwXhSmart,new libHQ.delHQFilter(libHQ._arrLQ3x)),
       new sFilter("LQ 4x Smart",4,4,libHQ.voidComplex_nQwXhSmart,new libHQ.delHQFilter(libHQ._arrLQ4x)),
       
-      new sFilter()
+      new sFilter("Red",objS=>objS.R),
+      new sFilter("Green",objS=>objS.G),
+      new sFilter("Blue",objS=>objS.B),
+      new sFilter("Y",objS=>objS.Y),
+      new sFilter("U",objS=>objS.U),
+      new sFilter("V",objS=>objS.V),
+      new sFilter("u",objS=>objS.u),
+      new sFilter("v",objS=>objS.v),
+      new sFilter("Hue",objS=>objS.Hue),
+      new sFilter("Brightness",objS=>objS.Brightness),
+      new sFilter("Min",objS=>objS.Min),
+      new sFilter("Max",objS=>objS.Max)
     };
     #endregion
 
@@ -127,16 +143,92 @@ namespace nImager {
         return (cImage._arrFilters.ToArray());
       }
     }
+    // get width
     public int Width {
       get {
         return (this._intWidth);
       }
     }
+    // get height
     public int Height {
       get {
         return (this._intHeight);
       }
     }
+    // get red component
+    public cImage R {
+      get {
+        return (new cImage(this, stA => stA.R));
+      }
+    }
+    // get green component
+    public cImage G {
+      get {
+        return (new cImage(this, stA => stA.G));
+      }
+    }
+    // get blue component
+    public cImage B {
+      get {
+        return (new cImage(this, stA => stA.B));
+      }
+    }
+    // get Y component
+    public cImage Y {
+      get {
+        return (new cImage(this, stA => stA.Y));
+      }
+    }
+    // get U component
+    public cImage U {
+      get {
+        return (new cImage(this, stA => stA.U));
+      }
+    }
+    // get V component
+    public cImage V {
+      get {
+        return (new cImage(this, stA => stA.V));
+      }
+    }
+    // get u component
+    public cImage u {
+      get {
+        return (new cImage(this, stA => stA.u));
+      }
+    }
+    // get v component
+    public cImage v {
+      get {
+        return (new cImage(this, stA => stA.v));
+      }
+    }
+    // get Brightness component
+    public cImage Brightness {
+      get {
+        return (new cImage(this, stA => stA.Brightness));
+      }
+    }
+    // get min component from RGB
+    public cImage Min {
+      get {
+        return (new cImage(this, stA => stA.Min));
+      }
+    }
+    // get max component from RGB
+    public cImage Max {
+      get {
+        return (new cImage(this, stA => stA.Max));
+      }
+    }
+    // get hue component
+    public cImage Hue {
+      get {
+        return (new cImage(this, stA => stA.Hue));
+      }
+    }
+    
+    
     #endregion
     #region ctor dtor idx
     // NOTE: Bitmap objects does not support parallel read-outs blame Microsoft
@@ -166,11 +258,40 @@ namespace nImager {
           this[(ulong)intX, (ulong)intY] = new sPixel(objBitmap.GetPixel(intX, intY));
       */
     }
+    // normal ctor
     public cImage(int intWidth, int intHeight) {
       this._intWidth = intWidth;
       this._intHeight = intHeight;
       this._arrImageData = new sPixel[intWidth * intHeight];
     }
+    // copy ctor
+    public cImage(cImage objSource):this(objSource._intWidth,objSource._intHeight) {
+      for (long lngI = 0; lngI < objSource._arrImageData.LongLength; lngI++)
+        this._arrImageData[lngI] = objSource._arrImageData[lngI];
+    }
+    // filter ctor
+    public cImage(cImage objSource, Func<sPixel, sPixel> ptrFilter) {
+      this._intWidth = objSource._intWidth;
+      this._intHeight = objSource._intHeight;
+      this._arrImageData = new sPixel[objSource._arrImageData.LongLength];
+      Parallel.For(0, this._intHeight, intY => {
+        for (int intX = 0; intX < this._intWidth; intX++)
+          this[intX, intY] = ptrFilter(objSource[intX, intY]);
+      });
+    }
+    // filter greyscale ctor
+    public cImage(cImage objSource, Func<sPixel, byte> ptrFilter) {
+      this._intWidth = objSource._intWidth;
+      this._intHeight = objSource._intHeight;
+      this._arrImageData = new sPixel[objSource._arrImageData.LongLength];
+      Parallel.For(0, this._intHeight, intY => {
+        for (int intX = 0; intX < this._intWidth; intX++) {
+          byte byteD = ptrFilter(objSource[intX, intY]);
+          this[intX, intY] = new sPixel(byteD,byteD,byteD);
+        }
+      });
+    }
+    // idx
     public sPixel this[int intX, int intY] {
       get {
         if (intX < 0)
@@ -195,15 +316,14 @@ namespace nImager {
     #endregion
     #region generic image filter
     private cImage _objFilterImage(sFilter stFilter) {
-      cImage objRet;
-      int intNewWidth = this._intWidth * stFilter.ScaleX;
-      int intNewHeight = this._intHeight * stFilter.ScaleY;
-      objRet = new cImage(intNewWidth, intNewHeight);
-      Parallel.For(0, this._intHeight, intSrcY => {
-        for(int intSrcX =0; intSrcX < this._intWidth; intSrcX++) {
-          stFilter.FilterFunction(this, intSrcX, intSrcY, objRet, intSrcX * stFilter.ScaleX, intSrcY * stFilter.ScaleY, stFilter.ScaleX, stFilter.ScaleY, stFilter.Parameter);
-        };
-      });
+      cImage objRet = stFilter.CreationFunction(this);
+      if (stFilter.FilterFunction != null) {
+        Parallel.For(0, this._intHeight, intSrcY => {
+          for (int intSrcX = 0; intSrcX < this._intWidth; intSrcX++) {
+            stFilter.FilterFunction(this, intSrcX, intSrcY, objRet, intSrcX * stFilter.ScaleX, intSrcY * stFilter.ScaleY, stFilter.ScaleX, stFilter.ScaleY, stFilter.Parameter);
+          };
+        });
+      }
       return (objRet);
     }
     public cImage FilterImage(string strFilter) {
@@ -214,7 +334,7 @@ namespace nImager {
         for (int intI = 0; intI < cImage._arrFilters.Length && stFilter.FilterFunction == null; intI++)
           if (cImage._arrFilters[intI].Name.ToLower() == strFilter)
             stFilter = cImage._arrFilters[intI];
-      if (stFilter.FilterFunction != null)
+      if (stFilter.FilterFunction != null || stFilter.CreationFunction!=null)
         objRet = this._objFilterImage(stFilter);
       return (objRet);
     }
@@ -254,5 +374,11 @@ namespace nImager {
     public void Fill(sPixel stPixel) {
       Parallel.For(0, this._arrImageData.LongLength, qwordOffset => this._arrImageData[qwordOffset] = stPixel);
     }
+
+    #region ICloneable Members
+    public object Clone() {
+      return (new cImage(this));
+    }
+    #endregion
   }
 }

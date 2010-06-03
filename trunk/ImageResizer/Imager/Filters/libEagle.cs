@@ -125,7 +125,7 @@ namespace nImager.Filters {
 
       if ((stC8.IsLike(stC5)) && (stC8.IsLike(stC7)))
         stE22 = sPixel.Interpolate(stC8, stC5, stC7);
-      
+
       objTgt[intTgtX + 0, intTgtY + 0] = stE00;
       objTgt[intTgtX + 1, intTgtY + 0] = stE01;
       objTgt[intTgtX + 2, intTgtY + 0] = stE02;
