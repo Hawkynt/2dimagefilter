@@ -86,7 +86,13 @@ namespace ImageResizer {
       this.lbMethods.SelectedIndex = 0;
     }
 
-    private void voidResize_Click(object sender, RoutedEventArgs e) {
+    private void _voidSwitch_Click(object sender, RoutedEventArgs e) {
+      BitmapSource objSourceImage = (BitmapSource)this.imgTarget.Source;
+      this.imgSource.Source = objSourceImage;
+      this.lblSrcDim.Content = string.Format("{0} x {1}", objSourceImage.PixelWidth, objSourceImage.PixelHeight);
+    }
+
+    private void _voidResize_Click(object sender, RoutedEventArgs e) {
       sPixel.AllowThresholds=(bool)this.cbThresholds.IsChecked ;
       BitmapSource objSourceImage = (BitmapSource)this.imgSource.Source;
       int intX, intY;
@@ -100,7 +106,7 @@ namespace ImageResizer {
       this.miSave.IsEnabled = true;
     }
 
-    private void voidOpen_Click(object sender, RoutedEventArgs e) {
+    private void _voidOpen_Click(object sender, RoutedEventArgs e) {
       System.Windows.Forms.OpenFileDialog objFileDialog = new System.Windows.Forms.OpenFileDialog();
       objFileDialog.Filter = "Image Files|*.bmp;*.jpg;*.jpeg;*.png";
       objFileDialog.Title = "Select Image to resize";

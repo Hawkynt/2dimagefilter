@@ -5,7 +5,7 @@
     <Grid>
         <Menu Height="22" VerticalAlignment="Top">
             <MenuItem Header="File">
-                <MenuItem Header="Open" Click="voidOpen_Click" />
+                <MenuItem Header="Open" Click="_voidOpen_Click" />
                 <MenuItem Name="miSave" Header="Save" Click="voidSave_Click" IsEnabled="False" />
                 <MenuItem Header="Close"  Click="voidClose_Click"/>
                 <Separator />
@@ -20,11 +20,12 @@
                 <TextBox Height="24" Name="txtHeight" Margin="0,83,54,256" />
                 <Label Margin="0,0,-6,204" Height="24" VerticalAlignment="Bottom">Method</Label>
                 <ComboBox Height="24" Margin="0,0,8,174" Name="lbMethods" VerticalAlignment="Bottom" />
-                <Button Height="24" Margin="21,0,19,13" Name="btnResize" VerticalAlignment="Bottom" Click="voidResize_Click" IsEnabled="False">Resize -&gt;</Button>
+                <Button Height="24" Margin="21,0,19,13" Name="btnResize" VerticalAlignment="Bottom" Click="_voidResize_Click" IsEnabled="False" Width="66">Resize -&gt;</Button>
                 <CheckBox Content="Use Thresholds" Height="16" HorizontalAlignment="Left" Margin="0,113,0,0" Name="cbThresholds" VerticalAlignment="Top" />
-            </Grid>
+                <Button Content="&lt;- Switch" Height="24" HorizontalAlignment="Left" Margin="21,289,0,0" Name="btSwitch" VerticalAlignment="Top" Width="66" Click="_voidSwitch_Click"  />
+      </Grid>
         </GroupBox>
-        <GroupBox Header="Source" Margin="4,24,505,4" MouseLeftButtonDown="voidOpen_Click" >
+        <GroupBox Header="Source" Margin="4,24,505,4" MouseLeftButtonDown="_voidOpen_Click" >
             <Grid>
               <Image Name="imgSource" Stretch="Fill" Margin="0,0,0,28" Visibility="Visible"/>
               <Label Name="lblSrcDim" Height="28" VerticalAlignment="Bottom" HorizontalAlignment="Center" Visibility="Hidden">Width x Height</Label>
