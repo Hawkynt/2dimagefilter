@@ -84,15 +84,23 @@ namespace ImageResizer {
       });
 
       this.lbMethods.SelectedIndex = 0;
+      this.btResize.Click += (object sender, RoutedEventArgs e) => this._voidResize_Click();
+      this.btSwitch.Click += (object sender, RoutedEventArgs e) => this._voidSwitch_Click();
+      this.btRepeat.Click += (object sender, RoutedEventArgs e) => this._voidRepeat_Click();
     }
 
-    private void _voidSwitch_Click(object sender, RoutedEventArgs e) {
+    private void _voidRepeat_Click() {
+      this._voidSwitch_Click();
+      this._voidResize_Click();
+    }
+
+    private void _voidSwitch_Click() {
       BitmapSource objSourceImage = (BitmapSource)this.imgTarget.Source;
       this.imgSource.Source = objSourceImage;
       this.lblSrcDim.Content = string.Format("{0} x {1}", objSourceImage.PixelWidth, objSourceImage.PixelHeight);
     }
 
-    private void _voidResize_Click(object sender, RoutedEventArgs e) {
+    private void _voidResize_Click() {
       sPixel.AllowThresholds=(bool)this.cbThresholds.IsChecked ;
       BitmapSource objSourceImage = (BitmapSource)this.imgSource.Source;
       int intX, intY;
@@ -119,7 +127,9 @@ namespace ImageResizer {
             this.imgSource.Visibility = Visibility.Visible;
             this.lblSrcDim.Visibility = Visibility.Visible;
             this.lblSrcDim.Content = string.Format("{0} x {1}", objBitmapImage.PixelWidth, objBitmapImage.PixelHeight);
-            this.btnResize.IsEnabled = true;
+            this.btResize.IsEnabled = true;
+            this.btRepeat.IsEnabled = true;
+            this.btSwitch.IsEnabled = true;
           } catch (Exception excE) {
             System.Windows.MessageBox.Show(string.Format("Could not load {0}\r\n\r\n{1}", objFileDialog.FileName, excE.Message));
           }
@@ -148,7 +158,7 @@ namespace ImageResizer {
       this.imgSource.Visibility = Visibility.Hidden;
       this.lblTgtDim.Visibility = Visibility.Hidden;
       this.imgTarget.Visibility = Visibility.Hidden;
-      this.btnResize.IsEnabled = false;
+      this.btResize.IsEnabled = false;
       this.miSave.IsEnabled = false;
     }
 
