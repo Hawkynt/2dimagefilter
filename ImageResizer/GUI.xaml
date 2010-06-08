@@ -19,10 +19,11 @@
                 <Label Height="24" Margin="0,61,-6,0" VerticalAlignment="Top">Height</Label>
                 <TextBox Height="24" Name="txtHeight" Margin="0,83,54,256" />
                 <Label Margin="0,0,-6,204" Height="24" VerticalAlignment="Bottom">Method</Label>
-                <ComboBox Height="24" Margin="0,0,8,174" Name="lbMethods" VerticalAlignment="Bottom" />
-                <Button Height="24" Margin="21,0,19,13" Name="btnResize" VerticalAlignment="Bottom" Click="_voidResize_Click" IsEnabled="False" Width="66">Resize -&gt;</Button>
                 <CheckBox Content="Use Thresholds" Height="16" HorizontalAlignment="Left" Margin="0,113,0,0" Name="cbThresholds" VerticalAlignment="Top" />
-                <Button Content="&lt;- Switch" Height="24" HorizontalAlignment="Left" Margin="21,289,0,0" Name="btSwitch" VerticalAlignment="Top" Width="66" Click="_voidSwitch_Click"  />
+                <ComboBox Height="24" Margin="0,0,8,174" Name="lbMethods" VerticalAlignment="Bottom" />
+        <Button Height="24" Margin="0,0,0,84" Name="btRepeat" VerticalAlignment="Bottom"  IsEnabled="False" Width="66">Repeat</Button>
+        <Button Height="24" Margin="0,0,0,48" Name="btSwitch" VerticalAlignment="Bottom"  IsEnabled="False" Width="66">&lt;- Switch</Button>
+        <Button Height="24" Margin="0,0,0,12" Name="btResize" VerticalAlignment="Bottom" IsEnabled="False" Width="66">Resize -&gt;</Button>
       </Grid>
         </GroupBox>
         <GroupBox Header="Source" Margin="4,24,505,4" MouseLeftButtonDown="_voidOpen_Click" >
