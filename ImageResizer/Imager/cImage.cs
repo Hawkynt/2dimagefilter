@@ -306,7 +306,7 @@ namespace nImager {
         return (this._arrImageData[intY * this._intWidth + intX]);
       }
       set {
-        if(intX<this._intWidth && intY<this._intHeight)
+        if(intX<this._intWidth && intY<this._intHeight && intX>=0 && intY>=0)
           this._arrImageData[intY * this._intWidth + intX] = value;
       }
     }
