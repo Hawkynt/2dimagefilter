@@ -38,6 +38,8 @@
 #endregion
 #define PREFERARRAYCACHE
 using System;
+using System.Threading;
+using System.Drawing;
 
 namespace nImager {
   public struct sPixel : ICloneable, System.Runtime.Serialization.ISerializable {
@@ -48,7 +50,6 @@ namespace nImager {
     private class cRGBCache {
       private readonly byte[] _arrCache = new byte[256 * 256 * 256];
       private readonly byte[] _arrExists = new byte[256 * 256 * 256];
-      private readonly object _objLock = new object();
 
       public bool TryGetValue(UInt32 dwordKey, out byte byteData) {
         if (_arrExists[dwordKey] > 0) {
@@ -61,10 +62,9 @@ namespace nImager {
       }
       public byte this[UInt32 dwordKey] {
         set {
-          lock (this._objLock) {
-            this._arrCache[dwordKey] = value;
-            this._arrExists[dwordKey] = 1;
-          }
+          this._arrCache[dwordKey] = value;
+          this._arrExists[dwordKey] = 1;
+          Thread.MemoryBarrier();
         }
       }
     }
@@ -100,14 +100,7 @@ namespace nImager {
     private static readonly cRGBCache _hashCache_Hue = new cRGBCache();
     #endregion
     private static byte _byteFloat2Byte(float fltA) {
-      byte byteRet;
-      if (fltA < byte.MinValue)
-        byteRet = byte.MinValue;
-      else if (fltA > byte.MaxValue)
-        byteRet = byte.MaxValue;
-      else
-        byteRet = (byte)fltA;
-      return (byteRet);
+      return((fltA < byte.MinValue)?byte.MinValue:(fltA > byte.MaxValue)?byte.MaxValue:(byte)fltA);
     }
     #region Properties
 
@@ -209,18 +202,21 @@ namespace nImager {
             fltRet = 60 * (4 + (byteR - byteG) / (byteMax - byteMin));
           else
             fltRet = 0;
-          if (fltRet < 0)
+          while (fltRet < 0)
             fltRet += 360;
-          fltRet *= (255f / 360f);
-          _hashCache_Hue[dwordC] = (byte)fltRet;
+          while (fltRet > 360)
+            fltRet -= 360;
+          fltRet *= (256f / 360f);
+          byteRet = (byte)fltRet;
+          _hashCache_Hue[dwordC] = byteRet;
         }
         return (byteRet);
       }
     }
 
-    public System.Drawing.Color Color {
+    public Color Color {
       get {
-        return (System.Drawing.Color.FromArgb(this.R, this.G, this.B));
+        return (Color.FromArgb(this.R, this.G, this.B));
       }
       set {
         this.SetRGB(value.R, value.G, value.B);
@@ -255,10 +251,13 @@ namespace nImager {
     }
     #endregion
     #region ctor
+    public static sPixel FromRGB(byte byteR, byte byteG, byte byteB) {
+      return (new sPixel(byteR, byteG, byteB));
+    }
     public sPixel(sPixel stPixel) {
       this._dwordPixel = stPixel._dwordPixel;
     }
-    public sPixel(System.Drawing.Color objColor) {
+    public sPixel(Color objColor) {
       this._dwordPixel = 0;
       this.Color = objColor;
     }
