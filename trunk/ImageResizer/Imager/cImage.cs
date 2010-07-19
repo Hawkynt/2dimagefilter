@@ -41,6 +41,8 @@ using System.Linq;
 using nImager.Filters;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace nImager {
   public class cImage:ICloneable {
@@ -141,6 +143,7 @@ namespace nImager {
       new sFilter("u",objS=>objS.u),
       new sFilter("v",objS=>objS.v),
       new sFilter("Hue",objS=>objS.Hue),
+      new sFilter("Hue Colored",objS=>objS.HueColored),
       new sFilter("Brightness",objS=>objS.Brightness),
       new sFilter("Min",objS=>objS.Min),
       new sFilter("Max",objS=>objS.Max)
@@ -242,19 +245,32 @@ namespace nImager {
         return (new cImage(this, stA => stA.Hue));
       }
     }
-    
+    // colored hue
+    public cImage HueColored {
+      get {
+        return (new cImage(this, stA => {
+          byte byteR, byteG, byteB;
+          float fltHue = stA.Hue * 360f / 256f;
+          float fltFactor = 255f / 120f;
+          byteR = (byte)((fltHue <= 120) ? 255 - fltHue * fltFactor : (fltHue >= 240) ? (fltHue - 240) * fltFactor : 0);
+          byteG = (byte)((fltHue <= 120) ? fltHue * fltFactor : (fltHue <= 240) ? 255 - (fltHue - 120) * fltFactor : 0);
+          byteB = (byte)((fltHue >= 240) ? 255 - (fltHue - 240) * fltFactor : (fltHue >= 120) ? (fltHue - 120) * fltFactor : 0);
+          return (new sPixel(byteR, byteG, byteB));
+        }));
+      }
+    }
     
     #endregion
     #region ctor dtor idx
     // NOTE: Bitmap objects does not support parallel read-outs blame Microsoft
-    public cImage(System.Drawing.Bitmap objBitmap)
+    public cImage(Bitmap objBitmap)
       : this(objBitmap != null ? objBitmap.Width : 0, objBitmap != null ? objBitmap.Height : 0) {
       if (objBitmap == null) return;
-      System.Drawing.Imaging.BitmapData objBitmapData = objBitmap.LockBits(
-        new System.Drawing.Rectangle(0, 0, this._intWidth, this._intHeight),
-        System.Drawing.Imaging.ImageLockMode.ReadOnly,
-        System.Drawing.Imaging.PixelFormat.Format24bppRgb
-        );
+      BitmapData objBitmapData = objBitmap.LockBits(
+        new Rectangle(0, 0, this._intWidth, this._intHeight),
+        ImageLockMode.ReadOnly,
+        PixelFormat.Format24bppRgb
+      );
       int intFillX = objBitmapData.Stride - objBitmapData.Width * 3;
       unsafe {
         byte* ptrOffset = (byte*)objBitmapData.Scan0.ToPointer();
@@ -267,11 +283,6 @@ namespace nImager {
         }
       }
       objBitmap.UnlockBits(objBitmapData);
-      /*
-      for (int intY = 0; intY < objBitmap.Height; intY++)
-        for (int intX = 0; intX < objBitmap.Width; intX++)
-          this[(ulong)intX, (ulong)intY] = new sPixel(objBitmap.GetPixel(intX, intY));
-      */
     }
     // normal ctor
     public cImage(int intWidth, int intHeight) {
@@ -289,9 +300,12 @@ namespace nImager {
       this._intWidth = objSource._intWidth;
       this._intHeight = objSource._intHeight;
       this._arrImageData = new sPixel[objSource._arrImageData.LongLength];
-      Parallel.For(0, this._intHeight, intY => {
-        for (int intX = 0; intX < this._intWidth; intX++)
-          this[intX, intY] = ptrFilter(objSource[intX, intY]);
+      Parallel.ForEach(Partitioner.Create(0, this._intHeight), () => 0, (objRange, objParallelState, objThreadStorage) => {
+        for (int intY = objRange.Item1; intY < objRange.Item2; intY++)
+          for (int intX = 0; intX < this._intWidth; intX++)
+            this[intX, intY] = ptrFilter(objSource[intX, intY]);
+        return (objThreadStorage);
+      }, objFinalLocal => {
       });
     }
     // filter greyscale ctor
@@ -299,11 +313,14 @@ namespace nImager {
       this._intWidth = objSource._intWidth;
       this._intHeight = objSource._intHeight;
       this._arrImageData = new sPixel[objSource._arrImageData.LongLength];
-      Parallel.For(0, this._intHeight, intY => {
-        for (int intX = 0; intX < this._intWidth; intX++) {
-          byte byteD = ptrFilter(objSource[intX, intY]);
-          this[intX, intY] = new sPixel(byteD,byteD,byteD);
-        }
+      Parallel.ForEach(Partitioner.Create(0, this._intHeight), () => 0, (objRange, objParallelState, objThreadStorage) => {
+        for (int intY = objRange.Item1; intY < objRange.Item2; intY++)
+          for (int intX = 0; intX < this._intWidth; intX++) {
+            byte byteD = ptrFilter(objSource[intX, intY]);
+            this[intX, intY] = new sPixel(byteD, byteD, byteD);
+          }
+        return (objThreadStorage);
+      }, objFinalLocal => {
       });
     }
     // idx
@@ -344,8 +361,7 @@ namespace nImager {
               }
             return (objThreadStorage);
           },
-          (objFinalLocal) => {
-            ;
+          objFinalLocal => {
           }
         );
       }
@@ -364,13 +380,13 @@ namespace nImager {
       return (objRet);
     }
     #endregion
-    public System.Drawing.Bitmap ToBitmap() {
-      System.Drawing.Bitmap objRet = new System.Drawing.Bitmap(this.Width, this.Height);
+    public Bitmap ToBitmap() {
+      Bitmap objRet = new Bitmap(this.Width, this.Height);
       // NOTE: fucking bitmap does not allow parallel writes
-      System.Drawing.Imaging.BitmapData objBitmapData = objRet.LockBits(
-        new System.Drawing.Rectangle(0, 0, objRet.Width, objRet.Height),
-        System.Drawing.Imaging.ImageLockMode.WriteOnly,
-        System.Drawing.Imaging.PixelFormat.Format24bppRgb
+      BitmapData objBitmapData = objRet.LockBits(
+        new Rectangle(0, 0, objRet.Width, objRet.Height),
+        ImageLockMode.WriteOnly,
+        PixelFormat.Format24bppRgb
       );
       int intFillX = objBitmapData.Stride - objBitmapData.Width * 3;
       unsafe {
@@ -386,11 +402,6 @@ namespace nImager {
         }
       }
       objRet.UnlockBits(objBitmapData);
-      /*
-      for (ulong qwordY = 0; qwordY < this._qwordHeight; qwordY++)
-        for (ulong qwordX = 0; qwordX < this._qwordWidth; qwordX++)
-          objRet.SetPixel((int)qwordX, (int)qwordY, this[qwordX, qwordY].Color);
-      */
       return (objRet);
     }
     public void Fill(byte byteR, byte byteG, byte byteB) {
