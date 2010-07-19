@@ -36,13 +36,11 @@
       
  */
 #endregion
-using nImager;
 
 namespace nImager.Filters {
   static class libEagle {
     // good old Eagle Engine modified by Hawkynt to support thresholds
     public static void voidEagle2x(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[intSrcX, intSrcY];
       sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
       sPixel stC1 = objSrc[intSrcX, intSrcY - 1];
       sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
@@ -76,7 +74,6 @@ namespace nImager.Filters {
 
     // AFAIK there is no eagle 3x so I made one (Hawkynt)
     public static void voidEagle3x(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[intSrcX, intSrcY];
       sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
       sPixel stC1 = objSrc[intSrcX, intSrcY - 1];
       sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
@@ -133,7 +130,6 @@ namespace nImager.Filters {
     // another one that takes into account that normal eagle means that 3 surroundings should be equal
     // looks ugly sometimes depends heavily on source image
     public static void voidEagle3xB(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[intSrcX, intSrcY];
       sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
       sPixel stC1 = objSrc[intSrcX, intSrcY - 1];
       sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];

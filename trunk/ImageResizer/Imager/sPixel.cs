@@ -38,9 +38,6 @@
 #endregion
 #define PREFERARRAYCACHE
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace nImager {
   public struct sPixel : ICloneable, System.Runtime.Serialization.ISerializable {
@@ -49,11 +46,10 @@ namespace nImager {
     #region caches
 #if PREFERARRAYCACHE
     private class cRGBCache {
-      private byte[] _arrCache = new byte[256 * 256 * 256];
-      private byte[] _arrExists = new byte[256 * 256 * 256];
-      private object _objLock = new object();
-      public cRGBCache() {
-      }
+      private readonly byte[] _arrCache = new byte[256 * 256 * 256];
+      private readonly byte[] _arrExists = new byte[256 * 256 * 256];
+      private readonly object _objLock = new object();
+
       public bool TryGetValue(UInt32 dwordKey, out byte byteData) {
         if (_arrExists[dwordKey] > 0) {
           byteData = _arrCache[dwordKey];
@@ -69,9 +65,6 @@ namespace nImager {
             this._arrCache[dwordKey] = value;
             this._arrExists[dwordKey] = 1;
           }
-        }
-        get {
-          return (this._arrCache[dwordKey]);
         }
       }
     }
@@ -96,15 +89,15 @@ namespace nImager {
     }
 #endif
 
-    private static cRGBCache _hashCache_Y = new cRGBCache();
-    private static cRGBCache _hashCache_U = new cRGBCache();
-    private static cRGBCache _hashCache_V = new cRGBCache();
+    private static readonly cRGBCache _hashCache_Y = new cRGBCache();
+    private static readonly cRGBCache _hashCache_U = new cRGBCache();
+    private static readonly cRGBCache _hashCache_V = new cRGBCache();
 
-    private static cRGBCache _hashCache_u = new cRGBCache();
-    private static cRGBCache _hashCache_v = new cRGBCache();
+    private static readonly cRGBCache _hashCache_u = new cRGBCache();
+    private static readonly cRGBCache _hashCache_v = new cRGBCache();
 
-    private static cRGBCache _hashCache_Brightness = new cRGBCache();
-    private static cRGBCache _hashCache_Hue = new cRGBCache();
+    private static readonly cRGBCache _hashCache_Brightness = new cRGBCache();
+    private static readonly cRGBCache _hashCache_Hue = new cRGBCache();
     #endregion
     private static byte _byteFloat2Byte(float fltA) {
       byte byteRet;
@@ -234,7 +227,7 @@ namespace nImager {
       }
     }
     public void SetRGB(byte byteR, byte byteG, byte byteB) {
-      this._dwordPixel = (UInt32)byteR << 16 | (UInt32)byteG << 8 | (UInt32)byteB;
+      this._dwordPixel = (UInt32)byteR << 16 | (UInt32)byteG << 8 | byteB;
     }
     public byte R {
       get {
@@ -270,7 +263,7 @@ namespace nImager {
       this.Color = objColor;
     }
     public sPixel(byte byteR, byte byteG, byte byteB) {
-      this._dwordPixel = (UInt32)byteR << 16 | (UInt32)byteG << 8 | (UInt32)byteB;
+      this._dwordPixel = (UInt32)byteR << 16 | (UInt32)byteG << 8 | byteB;
     }
     #endregion
     public override string ToString() {
@@ -363,23 +356,18 @@ namespace nImager {
     private const byte byteVTrigger = 6;
     public static bool AllowThresholds = true;
     public bool IsLike(sPixel stA) {
-      bool boolRet;
       if (AllowThresholds) {
-        int intTmp;
-        intTmp = this.V - stA.V;
+        int intTmp = this.V - stA.V;
         if (intTmp > byteVTrigger || intTmp < -byteVTrigger)
           return false;
         intTmp = this.Y - stA.Y;
         if (intTmp > byteYTrigger || intTmp < -byteYTrigger)
           return false;
         intTmp = this.U - stA.U;
-        if (intTmp > byteUTrigger || intTmp < -byteUTrigger)
-          return false;
-        return true;
+        return intTmp <= byteUTrigger && intTmp >= -byteUTrigger;
       } else {
-        boolRet = this == stA;
+        return( this == stA);
       }
-      return (boolRet);
     }
     public bool IsNotLike(sPixel stA) {
       return (!this.IsLike(stA));

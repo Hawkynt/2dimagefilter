@@ -37,8 +37,6 @@
  */
 #endregion
 
-using nImager;
-
 namespace nImager.Filters {
   static class libMAME {
     // MAME's TV effect in 2x
@@ -140,16 +138,16 @@ namespace nImager.Filters {
       if (stC1.IsNotLike(stC7) && stC3.IsNotLike(stC5)) {
         if (stC3.IsLike(stC1)) {
           stE00 = sPixel.Interpolate(sPixel.Interpolate( stC3,stC1), stC4, 5, 3);
-        };
+        }
         if (stC1.IsLike(stC5)) {
           stE02 = sPixel.Interpolate(sPixel.Interpolate( stC5,stC1), stC4, 5, 3);
-        };
+        }
         if (stC3.IsLike(stC7)) {
           stE20 = sPixel.Interpolate(sPixel.Interpolate( stC3,stC7), stC4, 5, 3);
-        };
+        }
         if (stC7.IsLike(stC5)) {
           stE22 = sPixel.Interpolate(sPixel.Interpolate( stC7,stC5), stC4, 5, 3);
-        };
+        }
 
         if (
           (stC3.IsLike(stC1) && stC4.IsNotLike(stC2)) &&
@@ -204,15 +202,11 @@ namespace nImager.Filters {
 
     // Andrea Mazzoleni's Scale2X modified by Hawkynt to support thresholds
     public static void voidScale2x(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
       sPixel stC1 = objSrc[intSrcX + 0, intSrcY - 1];
-      sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
       sPixel stC3 = objSrc[intSrcX - 1, intSrcY + 0];
       sPixel stC4 = objSrc[intSrcX + 0, intSrcY + 0];
       sPixel stC5 = objSrc[intSrcX + 1, intSrcY + 0];
-      sPixel stC6 = objSrc[intSrcX - 1, intSrcY + 1];
       sPixel stC7 = objSrc[intSrcX + 0, intSrcY + 1];
-      sPixel stC8 = objSrc[intSrcX + 1, intSrcY + 1];
       sPixel stE00 = stC4;
       sPixel stE01 = stC4;
       sPixel stE10 = stC4;
@@ -220,16 +214,16 @@ namespace nImager.Filters {
       if (stC3.IsNotLike(stC5) && stC1.IsNotLike(stC7)) {
         if (stC1.IsLike(stC3)) {
           stE00 = sPixel.Interpolate(stC1, stC3);
-        };
+        }
         if (stC1.IsLike(stC5)) {
           stE01 = sPixel.Interpolate(stC1, stC5);
-        };
+        }
         if (stC7.IsLike(stC3)) {
           stE10 = sPixel.Interpolate(stC7, stC3);
-        };
+        }
         if (stC7.IsLike(stC5)) {
           stE11 = sPixel.Interpolate(stC7, stC5);
-        };
+        }
       }
       objTgt[intTgtX + 0, intTgtY + 0] = stE00;
       objTgt[intTgtX + 1, intTgtY + 0] = stE01;

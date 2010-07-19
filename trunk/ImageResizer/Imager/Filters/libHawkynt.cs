@@ -36,7 +36,6 @@
       
  */
 #endregion
-using nImager;
 
 namespace nImager.Filters {
   static class libHawkynt {
@@ -52,7 +51,6 @@ namespace nImager.Filters {
     // another bad one
     public static void voidTV3X(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
       sPixel stPixel = objSrc[intSrcX, intSrcY];
-      byte byteY = stPixel.Y;
       sbyte sbyteAP = (sbyte)(1 - ((intSrcX % 2) << 1));
       objTgt[intTgtX + 0, intTgtY + 0] = new sPixel(stPixel.R, 0, 0);
       objTgt[intTgtX + 1, intTgtY + 0] = new sPixel(0, stPixel.G, 0);

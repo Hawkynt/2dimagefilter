@@ -36,7 +36,6 @@
       
  */
 #endregion
-using nImager;
 
 namespace nImager.Filters {
   static class libSNES9x {
@@ -207,13 +206,13 @@ namespace nImager.Filters {
             stE21 = sPixel.Interpolate(stC7, stC3);
 
         } else {
-          if (boolEQ13 && boolNQ47 && boolNQ45)
+          if (boolEQ13)
             stE00 = sPixel.Interpolate(stC1, stC3);
-          if (boolEQ51 && boolNQ43 && boolNQ47)
+          if (boolEQ51)
             stE02 = sPixel.Interpolate(stC5, stC1);
-          if (boolEQ37 && boolNQ45 && boolNQ41)
+          if (boolEQ37)
             stE20 = sPixel.Interpolate(stC3, stC7);
-          if (boolEQ75 && boolNQ41 && boolNQ43)
+          if (boolEQ75)
             stE22 = sPixel.Interpolate(stC7, stC5);
         }
       }
@@ -326,13 +325,13 @@ namespace nImager.Filters {
         
         } else {
           
-          if (boolEQ13 && boolNQ47 && boolNQ45)
+          if (boolEQ13)
             stE00 = sPixel.Interpolate(stC1, stC3);
-          if (boolEQ51 && boolNQ43 && boolNQ47)
+          if (boolEQ51)
             stE01 = sPixel.Interpolate(stC5, stC1);
-          if (boolEQ37 && boolNQ45 && boolNQ41)
+          if (boolEQ37)
             stE10 = sPixel.Interpolate(stC3, stC7);
-          if (boolEQ75 && boolNQ41 && boolNQ43)
+          if (boolEQ75)
             stE11 = sPixel.Interpolate(stC7, stC5);
 
           stE00 = sPixel.Interpolate(stC4, stE00, 3, 1);
