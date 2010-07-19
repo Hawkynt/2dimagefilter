@@ -36,7 +36,6 @@
       
  */
 #endregion
-using nImager;
 
 namespace nImager.Filters {
   static class libHQ {
@@ -90,7 +89,7 @@ namespace nImager.Filters {
       sPixel stC6 = objSrc[intSrcX - 1, intSrcY + 1];
       sPixel stC7 = objSrc[intSrcX + 0, intSrcY + 1];
       sPixel stC8 = objSrc[intSrcX + 1, intSrcY + 1];
-      byte[] arrBrightness = new byte[] { 
+      byte[] arrBrightness = new[] { 
         stC0.Brightness,
         stC1.Brightness,
         stC2.Brightness,
@@ -251,11 +250,7 @@ namespace nImager.Filters {
           stE01 = sPixel.Interpolate(stC4, stC2, stC5, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC6, stC7, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = stC1.IsNotLike(stC3) ? sPixel.Interpolate(stC4, stC0, 3, 1) : sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
         }
         break;
         case 11:
@@ -263,11 +258,7 @@ namespace nImager.Filters {
           stE01 = sPixel.Interpolate(stC4, stC2, stC5, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC6, stC7, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = stC1.IsNotLike(stC3) ? stC4 : sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
         }
         break;
         case 14:
@@ -311,11 +302,7 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC0, stC3, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, stC8, 2, 1, 1);
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE01 = stC1.IsNotLike(stC5) ? sPixel.Interpolate(stC4, stC2, 3, 1) : sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
         }
         break;
         case 19:
@@ -346,11 +333,7 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC0, stC3, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, stC8, 2, 1, 1);
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE01 = stC1.IsNotLike(stC5) ? stC4 : sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
         }
         break;
         case 23:
@@ -384,27 +367,15 @@ namespace nImager.Filters {
         case 31: {
           stE10 = sPixel.Interpolate(stC4, stC6, stC7, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, stC8, 2, 1, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = stC1.IsNotLike(stC3) ? stC4 : sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
+          stE01 = stC1.IsNotLike(stC5) ? stC4 : sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
         }
         break;
         case 27: {
           stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC6, stC7, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, stC8, 2, 1, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = stC1.IsNotLike(stC3) ? stC4 : sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
         }
         break;
         case 28: {
@@ -425,11 +396,7 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC6, stC7, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, stC8, 2, 1, 1);
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE01 = stC1.IsNotLike(stC5) ? stC4 : sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
         }
         break;
         case 40:
@@ -483,11 +450,7 @@ namespace nImager.Filters {
           stE01 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE00 = stC1.IsNotLike(stC3) ? sPixel.Interpolate(stC4, stC0, 3, 1) : sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
         }
         break;
         case 47:
@@ -495,11 +458,7 @@ namespace nImager.Filters {
           stE01 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1));
         }
         break;
         case 56: {
@@ -519,31 +478,15 @@ namespace nImager.Filters {
         case 58: {
           stE10 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, stC8, 2, 1, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 59: {
           stE10 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, stC8, 2, 1, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 60: {
@@ -564,26 +507,14 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, stC8, 2, 1, 1);
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 63: {
           stE10 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, stC8, 2, 1, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 64:
@@ -629,11 +560,7 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC0, stC1, 2, 1, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, stC8, 2, 1, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
         }
         break;
         case 73:
@@ -653,57 +580,29 @@ namespace nImager.Filters {
         case 107: {
           stE01 = sPixel.Interpolate(stC4, stC2, stC5, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, stC8, 2, 1, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 75: {
           stE01 = sPixel.Interpolate(stC4, stC2, stC5, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, stC8, 2, 1, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 78: {
           stE01 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, stC8, 2, 1, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
         }
         break;
         case 79: {
           stE01 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, stC8, 2, 1, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 80:
@@ -711,42 +610,22 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, stC2, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, stC6, 2, 1, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 82:
         case 214: {
           stE00 = sPixel.Interpolate(stC4, stC0, stC3, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, stC6, 2, 1, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 83: {
           stE00 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, stC6, 2, 1, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 84:
@@ -766,171 +645,71 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC0, stC3, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, stC6, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 87: {
           stE00 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, stC6, 2, 1, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 88:
         case 248: {
           stE00 = sPixel.Interpolate(stC4, stC0, stC1, 2, 1, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, stC2, 2, 1, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 89: {
           stE00 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, stC2, 2, 1, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
         }
         break;
         case 90: {
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 91: {
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 92: {
           stE00 = sPixel.Interpolate(stC4, stC0, stC1, 2, 1, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
         }
         break;
         case 93: {
           stE00 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
         }
         break;
         case 94: {
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 95: {
           stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 96:
@@ -976,11 +755,7 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC0, stC1, 2, 1, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, stC8, 2, 1, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
         }
         break;
         case 105:
@@ -1000,37 +775,21 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
           stE01 = sPixel.Interpolate(stC4, stC2, stC5, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, stC8, 2, 1, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
         }
         break;
         case 110: {
           stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
           stE01 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, stC8, 2, 1, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
         }
         break;
         case 111: {
           stE01 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, stC8, 2, 1, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1));
         }
         break;
         case 112:
@@ -1049,31 +808,15 @@ namespace nImager.Filters {
         case 114: {
           stE00 = sPixel.Interpolate(stC4, stC0, stC3, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 115: {
           stE00 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 116:
@@ -1081,22 +824,14 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
         }
         break;
         case 118: {
           stE00 = sPixel.Interpolate(stC4, stC0, stC3, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 119: {
@@ -1115,75 +850,35 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC0, stC1, 2, 1, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, stC2, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
         }
         break;
         case 121: {
           stE00 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, stC2, 2, 1, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
         }
         break;
         case 122: {
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 123: {
           stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 124: {
           stE00 = sPixel.Interpolate(stC4, stC0, stC1, 2, 1, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
         }
         break;
         case 125: {
@@ -1201,35 +896,15 @@ namespace nImager.Filters {
         case 126: {
           stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 127: {
           stE11 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 144:
@@ -1260,11 +935,7 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 148:
@@ -1295,11 +966,7 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1));
         }
         break;
         case 152: {
@@ -1319,27 +986,15 @@ namespace nImager.Filters {
         case 154: {
           stE10 = sPixel.Interpolate(stC4, stC6, stC7, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 155: {
           stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC6, stC7, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 156: {
@@ -1359,31 +1014,15 @@ namespace nImager.Filters {
         case 158: {
           stE10 = sPixel.Interpolate(stC4, stC6, stC7, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 159: {
           stE10 = sPixel.Interpolate(stC4, stC6, stC7, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1));
         }
         break;
         case 184: {
@@ -1403,16 +1042,8 @@ namespace nImager.Filters {
         case 186: {
           stE10 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 187: {
@@ -1456,16 +1087,8 @@ namespace nImager.Filters {
         case 191: {
           stE10 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1));
         }
         break;
         case 192:
@@ -1524,52 +1147,28 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
         }
         break;
         case 202: {
           stE01 = sPixel.Interpolate(stC4, stC2, stC5, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
         }
         break;
         case 203: {
           stE01 = sPixel.Interpolate(stC4, stC2, stC5, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 206: {
           stE01 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
         }
         break;
         case 207: {
@@ -1589,33 +1188,21 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, stC2, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, stC6, 2, 1, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 210: {
           stE00 = sPixel.Interpolate(stC4, stC0, stC3, 2, 1, 1);
           stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, stC6, 2, 1, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 211: {
           stE00 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, stC6, 2, 1, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 212:
@@ -1634,91 +1221,43 @@ namespace nImager.Filters {
         case 215: {
           stE00 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, stC6, 2, 1, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1));
         }
         break;
         case 216: {
           stE00 = sPixel.Interpolate(stC4, stC0, stC1, 2, 1, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, stC2, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 217: {
           stE00 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, stC2, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 218: {
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 219: {
           stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 220: {
           stE00 = sPixel.Interpolate(stC4, stC0, stC1, 2, 1, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 221: {
@@ -1736,35 +1275,15 @@ namespace nImager.Filters {
         case 222: {
           stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 223: {
           stE10 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1));
         }
         break;
         case 224:
@@ -1823,41 +1342,21 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1));
         }
         break;
         case 234: {
           stE01 = sPixel.Interpolate(stC4, stC2, stC5, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
         }
         break;
         case 235: {
           stE01 = sPixel.Interpolate(stC4, stC2, stC5, 2, 1, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 238: {
@@ -1875,16 +1374,8 @@ namespace nImager.Filters {
         case 239: {
           stE01 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE11 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1));
         }
         break;
         case 240:
@@ -1903,16 +1394,8 @@ namespace nImager.Filters {
         case 242: {
           stE00 = sPixel.Interpolate(stC4, stC0, stC3, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 243: {
@@ -1932,167 +1415,75 @@ namespace nImager.Filters {
           stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1));
         }
         break;
         case 246: {
           stE00 = sPixel.Interpolate(stC4, stC0, stC3, 2, 1, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 247: {
           stE00 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE10 = sPixel.Interpolate(stC4, stC3, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1));
         }
         break;
         case 249: {
           stE00 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, stC2, 2, 1, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 250: {
           stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
           stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 251: {
           stE01 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 252: {
           stE00 = sPixel.Interpolate(stC4, stC0, stC1, 2, 1, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1));
         }
         break;
         case 253: {
           stE00 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE01 = sPixel.Interpolate(stC4, stC1, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1));
         }
         break;
         case 254: {
           stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 255: {
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1));
         }
         break;
         #endregion
       }
-      return (new sPixel[]{
+      return (new[]{
       stE00, stE01, 
       stE10, stE11, 
       });
@@ -2508,11 +1899,7 @@ namespace nImager.Filters {
           stE11 = sPixel.Interpolate(stC4, stC5, 13, 3);
           stE20 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, stC5, 9, 4, 3);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 13, 3);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
         }
         break;
         case 47:
@@ -2522,11 +1909,7 @@ namespace nImager.Filters {
           stE11 = sPixel.Interpolate(stC4, stC5, 13, 3);
           stE20 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, stC5, 9, 4, 3);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
         }
         break;
         case 56: {
@@ -2552,16 +1935,8 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC8, stC7, 12, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 13, 3);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 13, 3);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 59: {
@@ -2623,11 +1998,7 @@ namespace nImager.Filters {
           stE10 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC8, stC7, 12, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE11 = stC4;
@@ -2758,26 +2129,14 @@ namespace nImager.Filters {
           stE10 = stC4;
           stE11 = sPixel.Interpolate(stC4, stC5, 13, 3);
           stE21 = sPixel.Interpolate(stC4, stC8, 13, 3);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 13, 3);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 13, 3);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 13, 3)) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
         }
         break;
         case 79: {
           stE11 = sPixel.Interpolate(stC4, stC5, 13, 3);
           stE21 = sPixel.Interpolate(stC4, stC8, 13, 3);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 13, 3);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 13, 3)) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC4;
             stE01 = sPixel.Interpolate(stC4, stC5, 13, 3);
@@ -2830,16 +2189,8 @@ namespace nImager.Filters {
           stE10 = sPixel.Interpolate(stC4, stC3, 13, 3);
           stE11 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC6, 13, 3);
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = sPixel.Interpolate(stC4, stC8, 13, 3);
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 13, 3);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 13, 3)) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 84:
@@ -2877,11 +2228,7 @@ namespace nImager.Filters {
         case 87: {
           stE10 = sPixel.Interpolate(stC4, stC3, 13, 3);
           stE20 = sPixel.Interpolate(stC4, stC6, 13, 3);
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = sPixel.Interpolate(stC4, stC8, 13, 3);
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 13, 3)) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
           if (stC1.IsNotLike(stC5)) {
             stE00 = sPixel.Interpolate(stC4, stC3, 13, 3);
             stE01 = stC4;
@@ -2918,41 +2265,17 @@ namespace nImager.Filters {
           stE01 = sPixel.Interpolate(stC4, stC2, stC1, 12, 3, 1);
           stE10 = stC4;
           stE11 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 13, 3);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = sPixel.Interpolate(stC4, stC8, 13, 3);
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 13, 3)) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
+          stE21 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 13, 3)) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
         }
         break;
         case 90: {
           stE10 = stC4;
           stE11 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 13, 3);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = sPixel.Interpolate(stC4, stC8, 13, 3);
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 13, 3);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 13, 3);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 13, 3)) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
+          stE21 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 13, 3)) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 91: {
@@ -2966,16 +2289,8 @@ namespace nImager.Filters {
           if ((stC1.IsNotLike(stC5) && stC1.IsNotLike(stC3))) {
             stE01 = sPixel.Interpolate(stC4, stC2, 13, 3);
           }
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 13, 3);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = sPixel.Interpolate(stC4, stC8, 13, 3);
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 13, 3)) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
+          stE21 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 13, 3)) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC4;
             stE10 = stC4;
@@ -2990,16 +2305,8 @@ namespace nImager.Filters {
           stE01 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE10 = stC4;
           stE11 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 13, 3);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = sPixel.Interpolate(stC4, stC8, 13, 3);
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 13, 3)) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
+          stE21 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 13, 3)) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
         }
         break;
         case 93: {
@@ -3007,16 +2314,8 @@ namespace nImager.Filters {
           stE01 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE10 = stC4;
           stE11 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 13, 3);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = sPixel.Interpolate(stC4, stC8, 13, 3);
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 13, 3)) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
+          stE21 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 13, 3)) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
         }
         break;
         case 94: {
@@ -3030,16 +2329,8 @@ namespace nImager.Filters {
           if ((stC1.IsNotLike(stC5) && stC1.IsNotLike(stC3))) {
             stE00 = sPixel.Interpolate(stC4, stC0, 13, 3);
           }
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 13, 3);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = sPixel.Interpolate(stC4, stC8, 13, 3);
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 13, 3)) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
+          stE21 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 13, 3)) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE11 = stC4;
@@ -3190,11 +2481,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC4, stC3, stC7, 6, 5, 5);
             stE21 = sPixel.Interpolate(stC4, stC8, stC7, 12, 3, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
         }
         break;
         case 112:
@@ -3218,16 +2505,8 @@ namespace nImager.Filters {
           stE10 = sPixel.Interpolate(stC4, stC3, 13, 3);
           stE11 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC3, 13, 3);
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = sPixel.Interpolate(stC4, stC8, 13, 3);
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 13, 3);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 13, 3)) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 115: {
@@ -3235,16 +2514,8 @@ namespace nImager.Filters {
           stE10 = sPixel.Interpolate(stC4, stC3, 13, 3);
           stE11 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC3, 13, 3);
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = sPixel.Interpolate(stC4, stC8, 13, 3);
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 13, 3);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 13, 3)) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 116:
@@ -3254,11 +2525,7 @@ namespace nImager.Filters {
           stE10 = sPixel.Interpolate(stC4, stC3, 13, 3);
           stE11 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC3, 13, 3);
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = sPixel.Interpolate(stC4, stC8, 13, 3);
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 13, 3)) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
         }
         break;
         case 118: {
@@ -3346,16 +2613,8 @@ namespace nImager.Filters {
             stE10 = sPixel.Interpolate(stC4, stC3, 15, 1);
             stE20 = sPixel.Interpolate(stC4, stC3, stC7, 6, 5, 5);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 13, 3);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 13, 3);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 123: {
@@ -3453,11 +2712,7 @@ namespace nImager.Filters {
             stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
             stE10 = sPixel.Interpolate(stC4, stC3, 15, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, 15, 1);
-          }
+          stE11 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, 15, 1));
         }
         break;
         case 144:
@@ -3496,11 +2751,7 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC7, stC3, 9, 4, 3);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 13, 3);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 148:
@@ -3539,11 +2790,7 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC7, stC3, 9, 4, 3);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 152: {
@@ -3569,16 +2816,8 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC6, stC7, 12, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 13, 3);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 13, 3);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 155: {
@@ -3647,11 +2886,7 @@ namespace nImager.Filters {
             stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 5, 5);
             stE10 = sPixel.Interpolate(stC4, stC3, 15, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 184: {
@@ -3677,16 +2912,8 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 13, 3);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 13, 3);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 187: {
@@ -3744,16 +2971,8 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 192:
@@ -3827,11 +3046,7 @@ namespace nImager.Filters {
           stE10 = stC4;
           stE11 = sPixel.Interpolate(stC4, stC5, 13, 3);
           stE21 = sPixel.Interpolate(stC4, stC5, 13, 3);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 13, 3);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 13, 3)) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
         }
         break;
         case 202: {
@@ -3839,16 +3054,8 @@ namespace nImager.Filters {
           stE10 = stC4;
           stE11 = sPixel.Interpolate(stC4, stC5, 13, 3);
           stE21 = sPixel.Interpolate(stC4, stC5, 13, 3);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 13, 3);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 13, 3);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 13, 3)) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
         }
         break;
         case 203: {
@@ -3871,16 +3078,8 @@ namespace nImager.Filters {
           stE10 = stC4;
           stE11 = sPixel.Interpolate(stC4, stC5, 13, 3);
           stE21 = sPixel.Interpolate(stC4, stC5, 13, 3);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 13, 3);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 13, 3);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 13, 3)) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
         }
         break;
         case 207: {
@@ -3972,11 +3171,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC4, stC6, stC7, 12, 3, 1);
             stE21 = sPixel.Interpolate(stC4, stC5, stC7, 6, 5, 5);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 216: {
@@ -4027,16 +3222,8 @@ namespace nImager.Filters {
             stE11 = sPixel.Interpolate(stC4, stC5, 15, 1);
             stE21 = sPixel.Interpolate(stC4, stC5, stC7, 6, 5, 5);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 13, 3);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 13, 3);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 219: {
@@ -4134,11 +3321,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC4, stC6, stC7, 12, 3, 1);
             stE21 = sPixel.Interpolate(stC4, stC5, stC7, 6, 5, 5);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, 15, 1);
-          }
+          stE10 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, 15, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE11 = stC4;
@@ -4219,11 +3402,7 @@ namespace nImager.Filters {
           stE10 = stC4;
           stE11 = sPixel.Interpolate(stC4, stC5, 13, 3);
           stE21 = sPixel.Interpolate(stC4, stC5, 13, 3);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
         }
         break;
         case 234: {
@@ -4238,22 +3417,14 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC4, stC3, stC7, 6, 5, 5);
             stE21 = sPixel.Interpolate(stC4, stC5, stC7, 12, 3, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 13, 3);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
         }
         break;
         case 235: {
           stE10 = stC4;
           stE11 = sPixel.Interpolate(stC4, stC5, 13, 3);
           stE21 = sPixel.Interpolate(stC4, stC5, 13, 3);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC4;
             stE01 = sPixel.Interpolate(stC4, stC2, 13, 3);
@@ -4283,16 +3454,8 @@ namespace nImager.Filters {
           stE10 = stC4;
           stE11 = sPixel.Interpolate(stC4, stC5, 13, 3);
           stE21 = sPixel.Interpolate(stC4, stC5, 13, 3);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
         }
         break;
         case 240:
@@ -4323,11 +3486,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC4, stC3, stC7, 12, 3, 1);
             stE21 = sPixel.Interpolate(stC4, stC5, stC7, 6, 5, 5);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = sPixel.Interpolate(stC4, stC2, 13, 3);
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 13, 3)) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 243: {
@@ -4352,22 +3511,14 @@ namespace nImager.Filters {
           stE10 = sPixel.Interpolate(stC4, stC3, 13, 3);
           stE11 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC3, 13, 3);
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC4;
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
         }
         break;
         case 246: {
           stE10 = sPixel.Interpolate(stC4, stC3, 13, 3);
           stE11 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC3, 13, 3);
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC4;
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
           if (stC1.IsNotLike(stC5)) {
             stE00 = sPixel.Interpolate(stC4, stC0, 13, 3);
             stE01 = stC4;
@@ -4382,27 +3533,15 @@ namespace nImager.Filters {
           stE10 = sPixel.Interpolate(stC4, stC3, 13, 3);
           stE11 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC3, 13, 3);
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC4;
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 249: {
           stE00 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE01 = sPixel.Interpolate(stC4, stC2, stC1, 12, 3, 1);
           stE10 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
           if (stC7.IsNotLike(stC5)) {
             stE11 = stC4;
             stE21 = stC4;
@@ -4448,11 +3587,7 @@ namespace nImager.Filters {
             stE10 = sPixel.Interpolate(stC4, stC3, 15, 1);
             stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, 15, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, 15, 1));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC4;
             stE01 = sPixel.Interpolate(stC4, stC2, 13, 3);
@@ -4473,11 +3608,7 @@ namespace nImager.Filters {
             stE10 = sPixel.Interpolate(stC4, stC3, 15, 1);
             stE20 = sPixel.Interpolate(stC4, stC3, stC7, 6, 5, 5);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC4;
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
         }
         break;
         case 253: {
@@ -4485,16 +3616,8 @@ namespace nImager.Filters {
           stE01 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE10 = stC4;
           stE11 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC4;
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
         }
         break;
         case 254: {
@@ -4507,11 +3630,7 @@ namespace nImager.Filters {
           if ((stC7.IsNotLike(stC5) && stC7.IsNotLike(stC3))) {
             stE20 = stC4;
           }
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, 15, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, 15, 1));
           if (stC7.IsNotLike(stC5)) {
             stE11 = stC4;
             stE21 = stC4;
@@ -4531,31 +3650,15 @@ namespace nImager.Filters {
         case 255: {
           stE10 = stC4;
           stE11 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC4;
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         #endregion
       }
-      return (new sPixel[]{
+      return (new[]{
       stE00, stE01, 
       stE10, stE11, 
       stE20, stE21, 
@@ -5043,11 +4146,7 @@ namespace nImager.Filters {
           stE21 = sPixel.Interpolate(stC4, stC5, stC7, 11, 3, 2);
           stE30 = sPixel.Interpolate(stC4, stC7, 5, 3);
           stE31 = sPixel.Interpolate(stC4, stC7, stC5, 9, 4, 3);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
         }
         break;
         case 56: {
@@ -5158,11 +4257,7 @@ namespace nImager.Filters {
           stE21 = sPixel.Interpolate(stC4, stC8, 13, 3);
           stE30 = sPixel.Interpolate(stC4, stC7, 5, 3);
           stE31 = sPixel.Interpolate(stC4, stC8, stC7, 5, 2, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE11 = stC4;
@@ -5800,11 +4895,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
             stE30 = sPixel.Interpolate(stC7, stC3, stC4, 2, 1, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
         }
         break;
         case 112:
@@ -6072,11 +5163,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
             stE30 = sPixel.Interpolate(stC7, stC3, stC4, 2, 1, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE11 = stC4;
@@ -6178,11 +5265,7 @@ namespace nImager.Filters {
           stE21 = sPixel.Interpolate(stC4, stC7, 7, 1);
           stE30 = sPixel.Interpolate(stC4, stC7, stC3, 9, 4, 3);
           stE31 = sPixel.Interpolate(stC4, stC7, 5, 3);
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 152: {
@@ -6300,11 +5383,7 @@ namespace nImager.Filters {
             stE00 = sPixel.Interpolate(stC1, stC3, stC4, 2, 1, 1);
             stE10 = sPixel.Interpolate(stC4, stC3, 3, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 184: {
@@ -6415,16 +5494,8 @@ namespace nImager.Filters {
           stE21 = sPixel.Interpolate(stC4, stC7, 7, 1);
           stE30 = sPixel.Interpolate(stC4, stC7, 5, 3);
           stE31 = sPixel.Interpolate(stC4, stC7, 5, 3);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 192:
@@ -6676,11 +5747,7 @@ namespace nImager.Filters {
             stE21 = sPixel.Interpolate(stC4, stC5, 3, 1);
             stE31 = sPixel.Interpolate(stC7, stC4, stC5, 2, 1, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 216: {
@@ -6845,11 +5912,7 @@ namespace nImager.Filters {
             stE00 = sPixel.Interpolate(stC1, stC3, stC4, 2, 1, 1);
             stE10 = sPixel.Interpolate(stC4, stC3, 3, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 224:
@@ -6937,11 +6000,7 @@ namespace nImager.Filters {
           stE20 = stC4;
           stE21 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE31 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
         }
         break;
         case 234: {
@@ -6971,11 +6030,7 @@ namespace nImager.Filters {
           stE20 = stC4;
           stE21 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE31 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC4;
             stE10 = stC4;
@@ -7009,16 +6064,8 @@ namespace nImager.Filters {
           stE20 = stC4;
           stE21 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE31 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
         }
         break;
         case 240:
@@ -7086,11 +6133,7 @@ namespace nImager.Filters {
           stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE21 = stC4;
           stE30 = sPixel.Interpolate(stC4, stC3, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC4;
-          } else {
-            stE31 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
         }
         break;
         case 246: {
@@ -7099,11 +6142,7 @@ namespace nImager.Filters {
           stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE21 = stC4;
           stE30 = sPixel.Interpolate(stC4, stC3, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC4;
-          } else {
-            stE31 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE11 = stC4;
@@ -7120,16 +6159,8 @@ namespace nImager.Filters {
           stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE21 = stC4;
           stE30 = sPixel.Interpolate(stC4, stC3, 3, 1);
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC4;
-          } else {
-            stE31 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 249: {
@@ -7138,11 +6169,7 @@ namespace nImager.Filters {
           stE10 = sPixel.Interpolate(stC4, stC1, 7, 1);
           stE11 = sPixel.Interpolate(stC4, stC2, 13, 3);
           stE20 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
           if (stC7.IsNotLike(stC5)) {
             stE21 = stC4;
             stE31 = stC4;
@@ -7177,11 +6204,7 @@ namespace nImager.Filters {
           stE01 = sPixel.Interpolate(stC4, stC2, 11, 5);
           stE11 = sPixel.Interpolate(stC4, stC2, 13, 3);
           stE20 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
           if (stC7.IsNotLike(stC5)) {
             stE21 = stC4;
             stE31 = stC4;
@@ -7211,11 +6234,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
             stE30 = sPixel.Interpolate(stC7, stC3, stC4, 2, 1, 1);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC4;
-          } else {
-            stE31 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
         }
         break;
         case 253: {
@@ -7225,16 +6244,8 @@ namespace nImager.Filters {
           stE11 = sPixel.Interpolate(stC4, stC1, 7, 1);
           stE20 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC4;
-          } else {
-            stE31 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
         }
         break;
         case 254: {
@@ -7248,11 +6259,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
             stE30 = sPixel.Interpolate(stC7, stC3, stC4, 2, 1, 1);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC4;
-          } else {
-            stE31 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE11 = stC4;
@@ -7267,31 +6274,15 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE20 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC4;
-          } else {
-            stE31 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         #endregion
       }
-      return (new sPixel[]{
+      return (new[]{
       stE00, stE01, 
       stE10, stE11, 
       stE20, stE21, 
@@ -7803,11 +6794,7 @@ namespace nImager.Filters {
           stE20 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 47:
@@ -7820,11 +6807,7 @@ namespace nImager.Filters {
           stE20 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 56: {
@@ -7859,16 +6842,8 @@ namespace nImager.Filters {
           stE20 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 59: {
@@ -7886,11 +6861,7 @@ namespace nImager.Filters {
             stE01 = sPixel.Interpolate(stC4, stC1, 7, 1);
             stE10 = sPixel.Interpolate(stC4, stC3, 7, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE02 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 60: {
@@ -7942,11 +6913,7 @@ namespace nImager.Filters {
           stE20 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE02 = stC4;
             stE12 = stC4;
@@ -8107,16 +7074,8 @@ namespace nImager.Filters {
           stE12 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE21 = stC4;
           stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 79: {
@@ -8125,11 +7084,7 @@ namespace nImager.Filters {
           stE12 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE21 = stC4;
           stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC4;
             stE01 = stC4;
@@ -8191,16 +7146,8 @@ namespace nImager.Filters {
           stE12 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
           stE21 = stC4;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 84:
@@ -8247,11 +7194,7 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
           stE21 = stC4;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE02 = stC4;
@@ -8294,16 +7237,8 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE12 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE22 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 90: {
@@ -8312,42 +7247,18 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE12 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE22 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 91: {
           stE11 = stC4;
           stE12 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE22 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC4;
             stE01 = stC4;
@@ -8357,11 +7268,7 @@ namespace nImager.Filters {
             stE01 = sPixel.Interpolate(stC4, stC1, 7, 1);
             stE10 = sPixel.Interpolate(stC4, stC3, 7, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE02 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 92: {
@@ -8372,16 +7279,8 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE12 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE22 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 93: {
@@ -8392,37 +7291,17 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE12 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE22 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 94: {
           stE10 = stC4;
           stE11 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE22 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE02 = stC4;
@@ -8608,11 +7487,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC3, stC7, stC4, 7, 7, 2);
             stE21 = sPixel.Interpolate(stC4, stC7, 7, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 112:
@@ -8643,16 +7518,8 @@ namespace nImager.Filters {
           stE12 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE21 = stC4;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 115: {
@@ -8663,16 +7530,8 @@ namespace nImager.Filters {
           stE12 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE21 = stC4;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 116:
@@ -8685,11 +7544,7 @@ namespace nImager.Filters {
           stE12 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE21 = stC4;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 118: {
@@ -8762,11 +7617,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC3, stC7, stC4, 7, 7, 2);
             stE21 = sPixel.Interpolate(stC4, stC7, 7, 1);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 122: {
@@ -8782,21 +7633,9 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC3, stC7, stC4, 7, 7, 2);
             stE21 = sPixel.Interpolate(stC4, stC7, 7, 1);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = sPixel.Interpolate(stC4, stC8, 3, 1);
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC8, 3, 1)) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 123: {
@@ -8955,11 +7794,7 @@ namespace nImager.Filters {
           stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE22 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE02 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 148:
@@ -9007,11 +7842,7 @@ namespace nImager.Filters {
           stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE22 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC4;
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 152: {
@@ -9046,16 +7877,8 @@ namespace nImager.Filters {
           stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE22 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 155: {
@@ -9106,11 +7929,7 @@ namespace nImager.Filters {
           stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE22 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE02 = stC4;
@@ -9136,11 +7955,7 @@ namespace nImager.Filters {
             stE00 = sPixel.Interpolate(stC1, stC3, stC4, 7, 7, 2);
             stE10 = sPixel.Interpolate(stC4, stC3, 7, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC4;
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 184: {
@@ -9175,16 +7990,8 @@ namespace nImager.Filters {
           stE20 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE22 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 187: {
@@ -9257,16 +8064,8 @@ namespace nImager.Filters {
           stE20 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE21 = sPixel.Interpolate(stC4, stC7, 3, 1);
           stE22 = sPixel.Interpolate(stC4, stC7, 3, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC4;
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 192:
@@ -9362,11 +8161,7 @@ namespace nImager.Filters {
           stE12 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE21 = stC4;
           stE22 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
         }
         break;
         case 202: {
@@ -9377,16 +8172,8 @@ namespace nImager.Filters {
           stE12 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE21 = stC4;
           stE22 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 203: {
@@ -9415,16 +8202,8 @@ namespace nImager.Filters {
           stE12 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE21 = stC4;
           stE22 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 207: {
@@ -9535,11 +8314,7 @@ namespace nImager.Filters {
             stE21 = sPixel.Interpolate(stC4, stC7, 7, 1);
             stE22 = sPixel.Interpolate(stC5, stC7, stC4, 7, 7, 2);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC4;
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 216: {
@@ -9582,11 +8357,7 @@ namespace nImager.Filters {
           stE01 = stC4;
           stE10 = stC4;
           stE11 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
           if (stC7.IsNotLike(stC5)) {
             stE12 = stC4;
             stE21 = stC4;
@@ -9596,16 +8367,8 @@ namespace nImager.Filters {
             stE21 = sPixel.Interpolate(stC4, stC7, 7, 1);
             stE22 = sPixel.Interpolate(stC5, stC7, stC4, 7, 7, 2);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 219: {
@@ -9638,11 +8401,7 @@ namespace nImager.Filters {
           stE02 = sPixel.Interpolate(stC4, stC1, 3, 1);
           stE10 = stC4;
           stE11 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = sPixel.Interpolate(stC4, stC6, 3, 1);
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC6, 3, 1)) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
           if (stC7.IsNotLike(stC5)) {
             stE12 = stC4;
             stE21 = stC4;
@@ -9816,11 +8575,7 @@ namespace nImager.Filters {
           stE12 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE21 = stC4;
           stE22 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
         }
         break;
         case 234: {
@@ -9838,11 +8593,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC3, stC7, stC4, 7, 7, 2);
             stE21 = sPixel.Interpolate(stC4, stC7, 7, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = sPixel.Interpolate(stC4, stC0, 3, 1);
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (sPixel.Interpolate(stC4, stC0, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 235: {
@@ -9852,11 +8603,7 @@ namespace nImager.Filters {
           stE12 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE21 = stC4;
           stE22 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC4;
             stE01 = stC4;
@@ -9893,16 +8640,8 @@ namespace nImager.Filters {
           stE12 = sPixel.Interpolate(stC4, stC5, 3, 1);
           stE21 = stC4;
           stE22 = sPixel.Interpolate(stC4, stC5, 3, 1);
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 240:
@@ -9940,11 +8679,7 @@ namespace nImager.Filters {
             stE21 = sPixel.Interpolate(stC4, stC7, 7, 1);
             stE22 = sPixel.Interpolate(stC5, stC7, stC4, 7, 7, 2);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = sPixel.Interpolate(stC4, stC2, 3, 1);
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE02 = (stC1.IsNotLike(stC5)) ? (sPixel.Interpolate(stC4, stC2, 3, 1)) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 243: {
@@ -9976,11 +8711,7 @@ namespace nImager.Filters {
           stE12 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE21 = stC4;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC4;
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 246: {
@@ -9990,11 +8721,7 @@ namespace nImager.Filters {
           stE12 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE21 = stC4;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC4;
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE02 = stC4;
@@ -10012,16 +8739,8 @@ namespace nImager.Filters {
           stE12 = stC4;
           stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
           stE21 = stC4;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC4;
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC4;
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 249: {
@@ -10031,11 +8750,7 @@ namespace nImager.Filters {
           stE10 = stC4;
           stE11 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
           if (stC7.IsNotLike(stC5)) {
             stE12 = stC4;
             stE22 = stC4;
@@ -10109,11 +8824,7 @@ namespace nImager.Filters {
             stE10 = sPixel.Interpolate(stC4, stC3, 7, 1);
             stE20 = sPixel.Interpolate(stC3, stC7, stC4, 7, 7, 2);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC4;
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 253: {
@@ -10124,16 +8835,8 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE12 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC4;
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 254: {
@@ -10170,31 +8873,15 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE12 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC4;
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC4;
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         #endregion
       }
-      return (new sPixel[]{
+      return (new[]{
       stE00, stE01, stE02, 
       stE10, stE11, stE12, 
       stE20, stE21, stE22, 
@@ -10958,11 +9645,7 @@ namespace nImager.Filters {
           stE31 = sPixel.Interpolate(stC4, stC7, 5, 3);
           stE32 = sPixel.Interpolate(stC4, stC7, stC5, 5, 2, 1);
           stE33 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 56: {
@@ -11144,11 +9827,7 @@ namespace nImager.Filters {
           stE31 = sPixel.Interpolate(stC4, stC7, 5, 3);
           stE32 = sPixel.Interpolate(stC4, stC7, stC8, 5, 2, 1);
           stE33 = sPixel.Interpolate(stC4, stC8, 5, 3);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE02 = stC4;
             stE03 = stC4;
@@ -12140,11 +10819,7 @@ namespace nImager.Filters {
             stE30 = sPixel.Interpolate(stC3, stC7, 1, 1);
             stE31 = sPixel.Interpolate(stC4, stC7, 1, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 112:
@@ -12559,11 +11234,7 @@ namespace nImager.Filters {
             stE30 = sPixel.Interpolate(stC3, stC7, 1, 1);
             stE31 = sPixel.Interpolate(stC4, stC7, 1, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE02 = stC4;
             stE03 = stC4;
@@ -12721,11 +11392,7 @@ namespace nImager.Filters {
           stE31 = sPixel.Interpolate(stC4, stC7, stC3, 5, 2, 1);
           stE32 = sPixel.Interpolate(stC4, stC7, 5, 3);
           stE33 = sPixel.Interpolate(stC4, stC7, 5, 3);
-          if (stC1.IsNotLike(stC5)) {
-            stE03 = stC4;
-          } else {
-            stE03 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE03 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 152: {
@@ -12916,11 +11583,7 @@ namespace nImager.Filters {
             stE01 = sPixel.Interpolate(stC1, stC4, 1, 1);
             stE10 = sPixel.Interpolate(stC3, stC4, 1, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE03 = stC4;
-          } else {
-            stE03 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE03 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 184: {
@@ -13103,16 +11766,8 @@ namespace nImager.Filters {
           stE31 = sPixel.Interpolate(stC4, stC7, 5, 3);
           stE32 = sPixel.Interpolate(stC4, stC7, 5, 3);
           stE33 = sPixel.Interpolate(stC4, stC7, 5, 3);
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE03 = stC4;
-          } else {
-            stE03 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE03 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 192:
@@ -13515,11 +12170,7 @@ namespace nImager.Filters {
             stE32 = sPixel.Interpolate(stC4, stC7, 1, 1);
             stE33 = sPixel.Interpolate(stC5, stC7, 1, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE03 = stC4;
-          } else {
-            stE03 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE03 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 216: {
@@ -13768,11 +12419,7 @@ namespace nImager.Filters {
             stE01 = sPixel.Interpolate(stC1, stC4, 1, 1);
             stE10 = sPixel.Interpolate(stC3, stC4, 1, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE03 = stC4;
-          } else {
-            stE03 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE03 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 224:
@@ -13919,11 +12566,7 @@ namespace nImager.Filters {
           stE31 = stC4;
           stE32 = sPixel.Interpolate(stC4, stC5, 7, 1);
           stE33 = sPixel.Interpolate(stC4, stC5, 5, 3);
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
         }
         break;
         case 234: {
@@ -13971,11 +12614,7 @@ namespace nImager.Filters {
           stE31 = stC4;
           stE32 = sPixel.Interpolate(stC4, stC5, 7, 1);
           stE33 = sPixel.Interpolate(stC4, stC5, 5, 3);
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC4;
             stE01 = stC4;
@@ -14030,16 +12669,8 @@ namespace nImager.Filters {
           stE31 = stC4;
           stE32 = sPixel.Interpolate(stC4, stC5, 7, 1);
           stE33 = sPixel.Interpolate(stC4, stC5, 5, 3);
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 240:
@@ -14148,11 +12779,7 @@ namespace nImager.Filters {
           stE30 = sPixel.Interpolate(stC4, stC3, 5, 3);
           stE31 = sPixel.Interpolate(stC4, stC3, 7, 1);
           stE32 = stC4;
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC4;
-          } else {
-            stE33 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 246: {
@@ -14168,11 +12795,7 @@ namespace nImager.Filters {
           stE30 = sPixel.Interpolate(stC4, stC3, 5, 3);
           stE31 = sPixel.Interpolate(stC4, stC3, 7, 1);
           stE32 = stC4;
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC4;
-          } else {
-            stE33 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE02 = stC4;
             stE03 = stC4;
@@ -14199,16 +12822,8 @@ namespace nImager.Filters {
           stE30 = sPixel.Interpolate(stC4, stC3, 5, 3);
           stE31 = sPixel.Interpolate(stC4, stC3, 7, 1);
           stE32 = stC4;
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC4;
-          } else {
-            stE33 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE03 = stC4;
-          } else {
-            stE03 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE03 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 249: {
@@ -14224,11 +12839,7 @@ namespace nImager.Filters {
           stE21 = stC4;
           stE22 = stC4;
           stE31 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
           if (stC7.IsNotLike(stC5)) {
             stE23 = stC4;
             stE32 = stC4;
@@ -14281,11 +12892,7 @@ namespace nImager.Filters {
           stE21 = stC4;
           stE22 = stC4;
           stE31 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
           if (stC7.IsNotLike(stC5)) {
             stE23 = stC4;
             stE32 = stC4;
@@ -14328,11 +12935,7 @@ namespace nImager.Filters {
             stE30 = sPixel.Interpolate(stC3, stC7, 1, 1);
             stE31 = sPixel.Interpolate(stC4, stC7, 1, 1);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC4;
-          } else {
-            stE33 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 253: {
@@ -14350,16 +12953,8 @@ namespace nImager.Filters {
           stE23 = stC4;
           stE31 = stC4;
           stE32 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC4;
-          } else {
-            stE33 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
         }
         break;
         case 254: {
@@ -14381,11 +12976,7 @@ namespace nImager.Filters {
             stE30 = sPixel.Interpolate(stC3, stC7, 1, 1);
             stE31 = sPixel.Interpolate(stC4, stC7, 1, 1);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC4;
-          } else {
-            stE33 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE02 = stC4;
             stE03 = stC4;
@@ -14410,31 +13001,15 @@ namespace nImager.Filters {
           stE23 = stC4;
           stE31 = stC4;
           stE32 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC4;
-          } else {
-            stE33 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE03 = stC4;
-          } else {
-            stE03 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE03 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         #endregion
       }
-      return (new sPixel[]{
+      return (new[]{
       stE00, stE01, stE02, stE03, 
       stE10, stE11, stE12, stE13, 
       stE20, stE21, stE22, stE23, 
@@ -14591,11 +13166,7 @@ namespace nImager.Filters {
           stE01 = stC0;
           stE10 = stC0;
           stE11 = stC0;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1));
         }
         break;
         case 11:
@@ -14607,11 +13178,7 @@ namespace nImager.Filters {
           stE01 = stC2;
           stE10 = stC2;
           stE11 = stC2;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC2;
-          } else {
-            stE00 = sPixel.Interpolate(stC2, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC3, 2, 1, 1));
         }
         break;
         case 14:
@@ -14652,11 +13219,7 @@ namespace nImager.Filters {
           stE00 = stC0;
           stE10 = stC0;
           stE11 = stC0;
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1));
         }
         break;
         case 19:
@@ -14689,32 +13252,16 @@ namespace nImager.Filters {
         case 26: {
           stE10 = stC0;
           stE11 = stC0;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1));
         }
         break;
         case 31:
         case 95: {
           stE10 = stC4;
           stE11 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 42:
@@ -14749,11 +13296,7 @@ namespace nImager.Filters {
           stE01 = stC0;
           stE10 = stC0;
           stE11 = stC0;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1));
         }
         break;
         case 47:
@@ -14761,11 +13304,7 @@ namespace nImager.Filters {
           stE01 = stC4;
           stE10 = stC4;
           stE11 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1));
         }
         break;
         case 58:
@@ -14773,46 +13312,22 @@ namespace nImager.Filters {
         case 186: {
           stE10 = stC0;
           stE11 = stC0;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 6, 1, 1));
         }
         break;
         case 59: {
           stE10 = stC2;
           stE11 = stC2;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC2;
-          } else {
-            stE00 = sPixel.Interpolate(stC2, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC2;
-          } else {
-            stE01 = sPixel.Interpolate(stC2, stC1, stC5, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC3, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC5, 6, 1, 1));
         }
         break;
         case 63: {
           stE10 = stC4;
           stE11 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 72:
@@ -14826,11 +13341,7 @@ namespace nImager.Filters {
           stE00 = stC0;
           stE01 = stC0;
           stE11 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1));
         }
         break;
         case 73:
@@ -14852,16 +13363,8 @@ namespace nImager.Filters {
         case 74: {
           stE01 = stC0;
           stE11 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1));
         }
         break;
         case 78:
@@ -14869,31 +13372,15 @@ namespace nImager.Filters {
         case 206: {
           stE01 = stC0;
           stE11 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1);
-          }
+          stE10 = stC7.IsNotLike(stC3) ? stC0 : sPixel.Interpolate(stC0, stC3, stC7, 6, 1, 1);
+          stE00 = stC1.IsNotLike(stC3) ? stC0 : sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1);
         }
         break;
         case 79: {
           stE01 = stC4;
           stE11 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE10 = stC7.IsNotLike(stC3) ? stC4 : sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
+          stE00 = stC1.IsNotLike(stC3) ? stC4 : sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
         }
         break;
         case 80:
@@ -14903,11 +13390,7 @@ namespace nImager.Filters {
           stE00 = stC0;
           stE01 = stC0;
           stE10 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
+          stE11 = stC7.IsNotLike(stC5) ? stC0 : sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
         }
         break;
         case 81:
@@ -14916,11 +13399,7 @@ namespace nImager.Filters {
           stE00 = stC1;
           stE01 = stC1;
           stE10 = stC1;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC1;
-          } else {
-            stE11 = sPixel.Interpolate(stC1, stC5, stC7, 2, 1, 1);
-          }
+          stE11 = stC7.IsNotLike(stC5) ? stC1 : sPixel.Interpolate(stC1, stC5, stC7, 2, 1, 1);
         }
         break;
         case 82:
@@ -14928,32 +13407,16 @@ namespace nImager.Filters {
         case 222: {
           stE00 = stC0;
           stE10 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
-          }
+          stE11 = stC7.IsNotLike(stC5) ? stC0 : sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
+          stE01 = stC1.IsNotLike(stC5) ? stC0 : sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
         }
         break;
         case 83:
         case 115: {
           stE00 = stC2;
           stE10 = stC2;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC2;
-          } else {
-            stE11 = sPixel.Interpolate(stC2, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC2;
-          } else {
-            stE01 = sPixel.Interpolate(stC2, stC1, stC5, 6, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC5, stC7, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC5, 6, 1, 1));
         }
         break;
         case 84:
@@ -14986,16 +13449,8 @@ namespace nImager.Filters {
         case 87: {
           stE00 = stC3;
           stE10 = stC3;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC3;
-          } else {
-            stE11 = sPixel.Interpolate(stC3, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC3;
-          } else {
-            stE01 = sPixel.Interpolate(stC3, stC1, stC5, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC5, stC7, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 2, 1, 1));
         }
         break;
         case 88:
@@ -15003,147 +13458,59 @@ namespace nImager.Filters {
         case 250: {
           stE00 = stC0;
           stE01 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
         }
         break;
         case 89:
         case 93: {
           stE00 = stC1;
           stE01 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC1;
-          } else {
-            stE10 = sPixel.Interpolate(stC1, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC1;
-          } else {
-            stE11 = sPixel.Interpolate(stC1, stC5, stC7, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 6, 1, 1));
         }
         break;
         case 90: {
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 6, 1, 1));
         }
         break;
         case 91: {
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC2;
-          } else {
-            stE10 = sPixel.Interpolate(stC2, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC2;
-          } else {
-            stE11 = sPixel.Interpolate(stC2, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC2;
-          } else {
-            stE00 = sPixel.Interpolate(stC2, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC2;
-          } else {
-            stE01 = sPixel.Interpolate(stC2, stC1, stC5, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC5, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC3, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC5, 6, 1, 1));
         }
         break;
         case 92: {
           stE00 = stC0;
           stE01 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1));
         }
         break;
         case 94: {
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1));
         }
         break;
         case 107:
         case 123: {
           stE01 = stC2;
           stE11 = stC2;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC2;
-          } else {
-            stE10 = sPixel.Interpolate(stC2, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC2;
-          } else {
-            stE00 = sPixel.Interpolate(stC2, stC1, stC3, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC3, 2, 1, 1));
         }
         break;
         case 111: {
           stE01 = stC4;
           stE11 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1));
         }
         break;
         case 112:
@@ -15175,110 +13542,50 @@ namespace nImager.Filters {
         case 114: {
           stE00 = stC0;
           stE10 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 6, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 6, 1, 1));
         }
         break;
         case 116: {
           stE00 = stC0;
           stE01 = stC0;
           stE10 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1));
         }
         break;
         case 117: {
           stE00 = stC1;
           stE01 = stC1;
           stE10 = stC1;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC1;
-          } else {
-            stE11 = sPixel.Interpolate(stC1, stC5, stC7, 6, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 6, 1, 1));
         }
         break;
         case 121: {
           stE00 = stC1;
           stE01 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC1;
-          } else {
-            stE10 = sPixel.Interpolate(stC1, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC1;
-          } else {
-            stE11 = sPixel.Interpolate(stC1, stC5, stC7, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 2, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 6, 1, 1));
         }
         break;
         case 122: {
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 6, 1, 1));
         }
         break;
         case 126: {
           stE00 = stC0;
           stE11 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1));
         }
         break;
         case 127: {
           stE11 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 146:
@@ -15302,11 +13609,7 @@ namespace nImager.Filters {
           stE00 = stC2;
           stE10 = stC2;
           stE11 = stC2;
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC2;
-          } else {
-            stE01 = sPixel.Interpolate(stC2, stC1, stC5, 6, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC5, 6, 1, 1));
         }
         break;
         case 151:
@@ -15314,56 +13617,28 @@ namespace nImager.Filters {
           stE00 = stC3;
           stE10 = stC3;
           stE11 = stC3;
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC3;
-          } else {
-            stE01 = sPixel.Interpolate(stC3, stC1, stC5, 14, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 14, 1, 1));
         }
         break;
         case 158: {
           stE10 = stC0;
           stE11 = stC0;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1));
         }
         break;
         case 159: {
           stE10 = stC4;
           stE11 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1));
         }
         break;
         case 191: {
           stE10 = stC4;
           stE11 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1));
         }
         break;
         case 200:
@@ -15387,109 +13662,49 @@ namespace nImager.Filters {
           stE00 = stC1;
           stE01 = stC1;
           stE11 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC1;
-          } else {
-            stE10 = sPixel.Interpolate(stC1, stC3, stC7, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 6, 1, 1));
         }
         break;
         case 211: {
           stE00 = stC2;
           stE01 = stC2;
           stE10 = stC2;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC2;
-          } else {
-            stE11 = sPixel.Interpolate(stC2, stC5, stC7, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC5, stC7, 2, 1, 1));
         }
         break;
         case 215: {
           stE00 = stC3;
           stE10 = stC3;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC3;
-          } else {
-            stE11 = sPixel.Interpolate(stC3, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC3;
-          } else {
-            stE01 = sPixel.Interpolate(stC3, stC1, stC5, 14, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC5, stC7, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 14, 1, 1));
         }
         break;
         case 218: {
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 6, 1, 1));
         }
         break;
         case 219: {
           stE01 = stC2;
           stE10 = stC2;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC2;
-          } else {
-            stE11 = sPixel.Interpolate(stC2, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC2;
-          } else {
-            stE00 = sPixel.Interpolate(stC2, stC1, stC3, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC3, 2, 1, 1));
         }
         break;
         case 220: {
           stE00 = stC0;
           stE01 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 6, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
         }
         break;
         case 223: {
           stE10 = stC4;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1));
         }
         break;
         case 233:
@@ -15497,71 +13712,35 @@ namespace nImager.Filters {
           stE00 = stC1;
           stE01 = stC1;
           stE11 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC1;
-          } else {
-            stE10 = sPixel.Interpolate(stC1, stC3, stC7, 14, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 14, 1, 1));
         }
         break;
         case 234: {
           stE01 = stC0;
           stE11 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 6, 1, 1));
         }
         break;
         case 235: {
           stE01 = stC2;
           stE11 = stC2;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC2;
-          } else {
-            stE10 = sPixel.Interpolate(stC2, stC3, stC7, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC2;
-          } else {
-            stE00 = sPixel.Interpolate(stC2, stC1, stC3, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC3, stC7, 14, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC3, 2, 1, 1));
         }
         break;
         case 239: {
           stE01 = stC4;
           stE11 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1));
         }
         break;
         case 242: {
           stE00 = stC0;
           stE10 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 6, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 6, 1, 1));
         }
         break;
         case 243: {
@@ -15580,163 +13759,75 @@ namespace nImager.Filters {
           stE00 = stC0;
           stE01 = stC0;
           stE10 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 14, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 14, 1, 1));
         }
         break;
         case 245: {
           stE00 = stC1;
           stE01 = stC1;
           stE10 = stC1;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC1;
-          } else {
-            stE11 = sPixel.Interpolate(stC1, stC5, stC7, 14, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 14, 1, 1));
         }
         break;
         case 246: {
           stE00 = stC0;
           stE10 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 14, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1));
         }
         break;
         case 247: {
           stE00 = stC3;
           stE10 = stC3;
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC3;
-          } else {
-            stE11 = sPixel.Interpolate(stC3, stC5, stC7, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC3;
-          } else {
-            stE01 = sPixel.Interpolate(stC3, stC1, stC5, 14, 1, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC5, stC7, 14, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 14, 1, 1));
         }
         break;
         case 249: {
           stE00 = stC1;
           stE01 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC1;
-          } else {
-            stE10 = sPixel.Interpolate(stC1, stC3, stC7, 14, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC1;
-          } else {
-            stE11 = sPixel.Interpolate(stC1, stC5, stC7, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 14, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 2, 1, 1));
         }
         break;
         case 251: {
           stE01 = stC2;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC2;
-          } else {
-            stE10 = sPixel.Interpolate(stC2, stC3, stC7, 14, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC2;
-          } else {
-            stE11 = sPixel.Interpolate(stC2, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC2;
-          } else {
-            stE00 = sPixel.Interpolate(stC2, stC1, stC3, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC3, stC7, 14, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC3, 2, 1, 1));
         }
         break;
         case 252: {
           stE00 = stC0;
           stE01 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 14, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 14, 1, 1));
         }
         break;
         case 253: {
           stE00 = stC1;
           stE01 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC1;
-          } else {
-            stE10 = sPixel.Interpolate(stC1, stC3, stC7, 14, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC1;
-          } else {
-            stE11 = sPixel.Interpolate(stC1, stC5, stC7, 14, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 14, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 14, 1, 1));
         }
         break;
         case 254: {
           stE00 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC0;
-          } else {
-            stE11 = sPixel.Interpolate(stC0, stC5, stC7, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 14, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1));
         }
         break;
         case 255: {
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 14, 1, 1));
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 14, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 14, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 14, 1, 1));
         }
         break;
         #endregion
       }
-      return (new sPixel[]{
+      return (new[]{
       stE00, stE01, 
       stE10, stE11, 
       });
@@ -16102,11 +14193,7 @@ namespace nImager.Filters {
           stE11 = stC0;
           stE20 = stC0;
           stE21 = stC0;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 10, 3, 3));
         }
         break;
         case 47:
@@ -16116,11 +14203,7 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE20 = stC4;
           stE21 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
         }
         break;
         case 58:
@@ -16130,16 +14213,8 @@ namespace nImager.Filters {
           stE11 = stC0;
           stE20 = stC0;
           stE21 = stC0;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 10, 3, 3));
         }
         break;
         case 59: {
@@ -16168,11 +14243,7 @@ namespace nImager.Filters {
           stE10 = stC4;
           stE20 = stC4;
           stE21 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE11 = stC4;
@@ -16250,26 +14321,14 @@ namespace nImager.Filters {
           stE10 = stC0;
           stE11 = stC0;
           stE21 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC0;
-          } else {
-            stE20 = sPixel.Interpolate(stC0, stC3, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 10, 3, 3));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 10, 3, 3));
         }
         break;
         case 79: {
           stE11 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC4;
             stE01 = stC4;
@@ -16343,16 +14402,8 @@ namespace nImager.Filters {
           stE10 = stC2;
           stE11 = stC2;
           stE20 = stC2;
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC2;
-          } else {
-            stE21 = sPixel.Interpolate(stC2, stC5, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC2;
-          } else {
-            stE01 = sPixel.Interpolate(stC2, stC1, stC5, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC5, stC7, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC5, 10, 3, 3));
         }
         break;
         case 84:
@@ -16393,11 +14444,7 @@ namespace nImager.Filters {
         case 87: {
           stE10 = stC3;
           stE20 = stC3;
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC3;
-          } else {
-            stE21 = sPixel.Interpolate(stC3, stC5, stC7, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC5, stC7, 10, 3, 3));
           if (stC1.IsNotLike(stC5)) {
             stE00 = stC3;
             stE01 = stC3;
@@ -16437,41 +14484,17 @@ namespace nImager.Filters {
           stE01 = stC1;
           stE10 = stC1;
           stE11 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC1;
-          } else {
-            stE20 = sPixel.Interpolate(stC1, stC3, stC7, 10, 3, 3);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC1;
-          } else {
-            stE21 = sPixel.Interpolate(stC1, stC5, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 10, 3, 3));
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 10, 3, 3));
         }
         break;
         case 90: {
           stE10 = stC0;
           stE11 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC0;
-          } else {
-            stE20 = sPixel.Interpolate(stC0, stC3, stC7, 10, 3, 3);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC0;
-          } else {
-            stE21 = sPixel.Interpolate(stC0, stC5, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 10, 3, 3));
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 10, 3, 3));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 10, 3, 3));
         }
         break;
         case 91: {
@@ -16485,16 +14508,8 @@ namespace nImager.Filters {
           if ((stC1.IsNotLike(stC5) && stC1.IsNotLike(stC3))) {
             stE01 = stC2;
           }
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC2;
-          } else {
-            stE20 = sPixel.Interpolate(stC2, stC3, stC7, 10, 3, 3);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC2;
-          } else {
-            stE21 = sPixel.Interpolate(stC2, stC5, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC3, stC7, 10, 3, 3));
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC5, stC7, 10, 3, 3));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC2;
             stE10 = stC2;
@@ -16509,16 +14524,8 @@ namespace nImager.Filters {
           stE01 = stC0;
           stE10 = stC0;
           stE11 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC0;
-          } else {
-            stE20 = sPixel.Interpolate(stC0, stC3, stC7, 10, 3, 3);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC0;
-          } else {
-            stE21 = sPixel.Interpolate(stC0, stC5, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 10, 3, 3));
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 10, 3, 3));
         }
         break;
         case 94: {
@@ -16532,16 +14539,8 @@ namespace nImager.Filters {
           if ((stC1.IsNotLike(stC5) && stC1.IsNotLike(stC3))) {
             stE00 = stC0;
           }
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC0;
-          } else {
-            stE20 = sPixel.Interpolate(stC0, stC3, stC7, 10, 3, 3);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC0;
-          } else {
-            stE21 = sPixel.Interpolate(stC0, stC5, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 10, 3, 3));
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 10, 3, 3));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC0;
             stE11 = stC0;
@@ -16582,11 +14581,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC4, stC3, stC7, 6, 5, 5);
             stE21 = sPixel.Interpolate(stC4, stC7, 15, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
         }
         break;
         case 112:
@@ -16626,16 +14621,8 @@ namespace nImager.Filters {
           stE10 = stC0;
           stE11 = stC0;
           stE20 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC0;
-          } else {
-            stE21 = sPixel.Interpolate(stC0, stC5, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 10, 3, 3));
         }
         break;
         case 116:
@@ -16645,11 +14632,7 @@ namespace nImager.Filters {
           stE10 = stC0;
           stE11 = stC0;
           stE20 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC0;
-          } else {
-            stE21 = sPixel.Interpolate(stC0, stC5, stC7, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 10, 3, 3));
         }
         break;
         case 117:
@@ -16659,11 +14642,7 @@ namespace nImager.Filters {
           stE10 = stC1;
           stE11 = stC1;
           stE20 = stC1;
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC1;
-          } else {
-            stE21 = sPixel.Interpolate(stC1, stC5, stC7, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 10, 3, 3));
         }
         break;
         case 121: {
@@ -16706,16 +14685,8 @@ namespace nImager.Filters {
             stE10 = sPixel.Interpolate(stC0, stC3, 15, 1);
             stE20 = sPixel.Interpolate(stC0, stC3, stC7, 6, 5, 5);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 10, 3, 3));
         }
         break;
         case 126: {
@@ -16763,11 +14734,7 @@ namespace nImager.Filters {
             stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
             stE10 = sPixel.Interpolate(stC4, stC3, 15, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE11 = stC4;
-          } else {
-            stE11 = sPixel.Interpolate(stC4, stC5, 15, 1);
-          }
+          stE11 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, 15, 1));
         }
         break;
         case 146:
@@ -16797,11 +14764,7 @@ namespace nImager.Filters {
           stE11 = stC2;
           stE20 = stC2;
           stE21 = stC2;
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC2;
-          } else {
-            stE01 = sPixel.Interpolate(stC2, stC1, stC5, 10, 3, 3);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC5, 10, 3, 3));
         }
         break;
         case 151:
@@ -16811,11 +14774,7 @@ namespace nImager.Filters {
           stE11 = stC3;
           stE20 = stC3;
           stE21 = stC3;
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC3;
-          } else {
-            stE01 = sPixel.Interpolate(stC3, stC1, stC5, 10, 3, 3);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 10, 3, 3));
         }
         break;
         case 158: {
@@ -16851,11 +14810,7 @@ namespace nImager.Filters {
             stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 5, 5);
             stE10 = sPixel.Interpolate(stC4, stC3, 15, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 191: {
@@ -16863,16 +14818,8 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE20 = stC4;
           stE21 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         case 200:
@@ -16903,11 +14850,7 @@ namespace nImager.Filters {
           stE10 = stC1;
           stE11 = stC1;
           stE21 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC1;
-          } else {
-            stE20 = sPixel.Interpolate(stC1, stC3, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 10, 3, 3));
         }
         break;
         case 211: {
@@ -16936,11 +14879,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC3, stC7, 15, 1);
             stE21 = sPixel.Interpolate(stC3, stC5, stC7, 6, 5, 5);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC3;
-          } else {
-            stE01 = sPixel.Interpolate(stC3, stC1, stC5, 10, 3, 3);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 10, 3, 3));
         }
         break;
         case 218: {
@@ -16961,16 +14900,8 @@ namespace nImager.Filters {
             stE11 = sPixel.Interpolate(stC0, stC5, 15, 1);
             stE21 = sPixel.Interpolate(stC0, stC5, stC7, 6, 5, 5);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 10, 3, 3));
         }
         break;
         case 219: {
@@ -17033,11 +14964,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC4, stC7, 15, 1);
             stE21 = sPixel.Interpolate(stC4, stC5, stC7, 6, 5, 5);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE10 = stC4;
-          } else {
-            stE10 = sPixel.Interpolate(stC4, stC3, 15, 1);
-          }
+          stE10 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, 15, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE11 = stC4;
@@ -17059,22 +14986,14 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC0, stC3, stC7, 6, 5, 5);
             stE21 = sPixel.Interpolate(stC0, stC7, 15, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 10, 3, 3);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 10, 3, 3));
         }
         break;
         case 235: {
           stE10 = stC2;
           stE11 = stC2;
           stE21 = stC2;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC2;
-          } else {
-            stE20 = sPixel.Interpolate(stC2, stC3, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC3, stC7, 10, 3, 3));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC2;
             stE01 = stC2;
@@ -17089,16 +15008,8 @@ namespace nImager.Filters {
           stE10 = stC4;
           stE11 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
         }
         break;
         case 242: {
@@ -17113,11 +15024,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC0, stC7, 15, 1);
             stE21 = sPixel.Interpolate(stC0, stC5, stC7, 6, 5, 5);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC0;
-          } else {
-            stE01 = sPixel.Interpolate(stC0, stC1, stC5, 10, 3, 3);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 10, 3, 3));
         }
         break;
         case 243: {
@@ -17139,11 +15046,7 @@ namespace nImager.Filters {
           stE10 = stC0;
           stE11 = stC0;
           stE20 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC0;
-          } else {
-            stE21 = sPixel.Interpolate(stC0, stC5, stC7, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 10, 3, 3));
           if (stC1.IsNotLike(stC5)) {
             stE00 = stC0;
             stE01 = stC0;
@@ -17158,27 +15061,15 @@ namespace nImager.Filters {
           stE10 = stC3;
           stE11 = stC3;
           stE20 = stC3;
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC3;
-          } else {
-            stE21 = sPixel.Interpolate(stC3, stC5, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC3;
-          } else {
-            stE01 = sPixel.Interpolate(stC3, stC1, stC5, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC5, stC7, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 10, 3, 3));
         }
         break;
         case 249: {
           stE00 = stC1;
           stE01 = stC1;
           stE10 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC1;
-          } else {
-            stE20 = sPixel.Interpolate(stC1, stC3, stC7, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 10, 3, 3));
           if (stC7.IsNotLike(stC5)) {
             stE11 = stC1;
             stE21 = stC1;
@@ -17205,11 +15096,7 @@ namespace nImager.Filters {
             stE10 = sPixel.Interpolate(stC2, stC3, 15, 1);
             stE20 = sPixel.Interpolate(stC2, stC3, stC7, 10, 3, 3);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE11 = stC2;
-          } else {
-            stE11 = sPixel.Interpolate(stC2, stC5, 15, 1);
-          }
+          stE11 = (stC7.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC5, 15, 1));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC2;
             stE01 = stC2;
@@ -17230,11 +15117,7 @@ namespace nImager.Filters {
             stE10 = sPixel.Interpolate(stC0, stC3, 15, 1);
             stE20 = sPixel.Interpolate(stC0, stC3, stC7, 6, 5, 5);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC0;
-          } else {
-            stE21 = sPixel.Interpolate(stC0, stC5, stC7, 10, 3, 3);
-          }
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 10, 3, 3));
         }
         break;
         case 254: {
@@ -17247,11 +15130,7 @@ namespace nImager.Filters {
           if ((stC7.IsNotLike(stC5) && stC7.IsNotLike(stC3))) {
             stE20 = stC0;
           }
-          if (stC7.IsNotLike(stC3)) {
-            stE10 = stC0;
-          } else {
-            stE10 = sPixel.Interpolate(stC0, stC3, 15, 1);
-          }
+          stE10 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, 15, 1));
           if (stC7.IsNotLike(stC5)) {
             stE11 = stC0;
             stE21 = stC0;
@@ -17271,31 +15150,15 @@ namespace nImager.Filters {
         case 255: {
           stE10 = stC4;
           stE11 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE21 = stC4;
-          } else {
-            stE21 = sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 10, 3, 3));
+          stE21 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 10, 3, 3));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 10, 3, 3));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 10, 3, 3));
         }
         break;
         #endregion
       }
-      return (new sPixel[]{
+      return (new[]{
       stE00, stE01, 
       stE10, stE11, 
       stE20, stE21, 
@@ -17710,11 +15573,7 @@ namespace nImager.Filters {
           stE21 = stC4;
           stE30 = stC4;
           stE31 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
         }
         break;
         case 58:
@@ -17767,11 +15626,7 @@ namespace nImager.Filters {
           stE21 = stC4;
           stE30 = stC4;
           stE31 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE11 = stC4;
@@ -18227,11 +16082,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
             stE30 = sPixel.Interpolate(stC7, stC3, stC4, 2, 1, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
         }
         break;
         case 112:
@@ -18407,11 +16258,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC4, stC3, 3, 1);
             stE30 = sPixel.Interpolate(stC7, stC3, stC4, 2, 1, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC4;
             stE11 = stC4;
@@ -18469,11 +16316,7 @@ namespace nImager.Filters {
           stE21 = stC3;
           stE30 = stC3;
           stE31 = stC3;
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC3;
-          } else {
-            stE01 = sPixel.Interpolate(stC3, stC1, stC5, 6, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 6, 1, 1));
         }
         break;
         case 158: {
@@ -18510,11 +16353,7 @@ namespace nImager.Filters {
             stE00 = sPixel.Interpolate(stC1, stC3, stC4, 2, 1, 1);
             stE10 = sPixel.Interpolate(stC4, stC3, 3, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 191: {
@@ -18524,16 +16363,8 @@ namespace nImager.Filters {
           stE21 = stC4;
           stE30 = stC4;
           stE31 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 200:
@@ -18603,11 +16434,7 @@ namespace nImager.Filters {
             stE21 = sPixel.Interpolate(stC3, stC5, 3, 1);
             stE31 = sPixel.Interpolate(stC7, stC3, stC5, 2, 1, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC3;
-          } else {
-            stE01 = sPixel.Interpolate(stC3, stC1, stC5, 6, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 6, 1, 1));
         }
         break;
         case 218: {
@@ -18701,11 +16528,7 @@ namespace nImager.Filters {
             stE00 = sPixel.Interpolate(stC1, stC3, stC4, 2, 1, 1);
             stE10 = sPixel.Interpolate(stC4, stC3, 3, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         case 233:
@@ -18717,11 +16540,7 @@ namespace nImager.Filters {
           stE20 = stC1;
           stE21 = stC1;
           stE31 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC1;
-          } else {
-            stE30 = sPixel.Interpolate(stC1, stC3, stC7, 6, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 6, 1, 1));
         }
         break;
         case 234: {
@@ -18751,11 +16570,7 @@ namespace nImager.Filters {
           stE20 = stC2;
           stE21 = stC2;
           stE31 = stC2;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC2;
-          } else {
-            stE30 = sPixel.Interpolate(stC2, stC3, stC7, 6, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC3, stC7, 6, 1, 1));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC2;
             stE10 = stC2;
@@ -18772,16 +16587,8 @@ namespace nImager.Filters {
           stE20 = stC4;
           stE21 = stC4;
           stE31 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
         }
         break;
         case 242: {
@@ -18830,11 +16637,7 @@ namespace nImager.Filters {
           stE20 = stC0;
           stE21 = stC0;
           stE30 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC0;
-          } else {
-            stE31 = sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1);
-          }
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1));
         }
         break;
         case 245: {
@@ -18845,11 +16648,7 @@ namespace nImager.Filters {
           stE20 = stC1;
           stE21 = stC1;
           stE30 = stC1;
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC1;
-          } else {
-            stE31 = sPixel.Interpolate(stC1, stC5, stC7, 6, 1, 1);
-          }
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 6, 1, 1));
         }
         break;
         case 246: {
@@ -18858,11 +16657,7 @@ namespace nImager.Filters {
           stE20 = stC0;
           stE21 = stC0;
           stE30 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC0;
-          } else {
-            stE31 = sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1);
-          }
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC0;
             stE11 = stC0;
@@ -18879,16 +16674,8 @@ namespace nImager.Filters {
           stE20 = stC3;
           stE21 = stC3;
           stE30 = stC3;
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC3;
-          } else {
-            stE31 = sPixel.Interpolate(stC3, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC3;
-          } else {
-            stE01 = sPixel.Interpolate(stC3, stC1, stC5, 6, 1, 1);
-          }
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC5, stC7, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 6, 1, 1));
         }
         break;
         case 249: {
@@ -18897,11 +16684,7 @@ namespace nImager.Filters {
           stE10 = stC1;
           stE11 = stC1;
           stE20 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC1;
-          } else {
-            stE30 = sPixel.Interpolate(stC1, stC3, stC7, 6, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 6, 1, 1));
           if (stC7.IsNotLike(stC5)) {
             stE21 = stC1;
             stE31 = stC1;
@@ -18915,11 +16698,7 @@ namespace nImager.Filters {
           stE01 = stC2;
           stE11 = stC2;
           stE20 = stC2;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC2;
-          } else {
-            stE30 = sPixel.Interpolate(stC2, stC3, stC7, 6, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC3, stC7, 6, 1, 1));
           if (stC7.IsNotLike(stC5)) {
             stE21 = stC2;
             stE31 = stC2;
@@ -18949,11 +16728,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC0, stC3, 3, 1);
             stE30 = sPixel.Interpolate(stC7, stC0, stC3, 2, 1, 1);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC0;
-          } else {
-            stE31 = sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1);
-          }
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1));
         }
         break;
         case 253: {
@@ -18963,16 +16738,8 @@ namespace nImager.Filters {
           stE11 = stC1;
           stE20 = stC1;
           stE21 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC1;
-          } else {
-            stE30 = sPixel.Interpolate(stC1, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC1;
-          } else {
-            stE31 = sPixel.Interpolate(stC1, stC5, stC7, 6, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 6, 1, 1));
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 6, 1, 1));
         }
         break;
         case 254: {
@@ -18986,11 +16753,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC0, stC3, 3, 1);
             stE30 = sPixel.Interpolate(stC7, stC0, stC3, 2, 1, 1);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC0;
-          } else {
-            stE31 = sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1);
-          }
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 6, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC0;
             stE11 = stC0;
@@ -19005,31 +16768,15 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE20 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE31 = stC4;
-          } else {
-            stE31 = sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE01 = stC4;
-          } else {
-            stE01 = sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 6, 1, 1));
+          stE31 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 6, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 6, 1, 1));
+          stE01 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 6, 1, 1));
         }
         break;
         #endregion
       }
-      return (new sPixel[]{
+      return (new[]{
       stE00, stE01, 
       stE10, stE11, 
       stE20, stE21, 
@@ -19452,11 +17199,7 @@ namespace nImager.Filters {
           stE20 = stC0;
           stE21 = stC0;
           stE22 = stC0;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1));
         }
         break;
         case 47:
@@ -19469,11 +17212,7 @@ namespace nImager.Filters {
           stE20 = stC4;
           stE21 = stC4;
           stE22 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 58:
@@ -19486,16 +17225,8 @@ namespace nImager.Filters {
           stE20 = stC0;
           stE21 = stC0;
           stE22 = stC0;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC0;
-          } else {
-            stE02 = sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1));
         }
         break;
         case 59: {
@@ -19513,11 +17244,7 @@ namespace nImager.Filters {
             stE01 = sPixel.Interpolate(stC2, stC1, 7, 1);
             stE10 = sPixel.Interpolate(stC2, stC3, 7, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC2;
-          } else {
-            stE02 = sPixel.Interpolate(stC2, stC1, stC5, 2, 1, 1);
-          }
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC5, 2, 1, 1));
         }
         break;
         case 63: {
@@ -19527,11 +17254,7 @@ namespace nImager.Filters {
           stE20 = stC4;
           stE21 = stC4;
           stE22 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE02 = stC4;
             stE12 = stC4;
@@ -19621,16 +17344,8 @@ namespace nImager.Filters {
           stE12 = stC0;
           stE21 = stC0;
           stE22 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC0;
-          } else {
-            stE20 = sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1));
         }
         break;
         case 79: {
@@ -19639,11 +17354,7 @@ namespace nImager.Filters {
           stE12 = stC4;
           stE21 = stC4;
           stE22 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC4;
             stE01 = stC4;
@@ -19729,16 +17440,8 @@ namespace nImager.Filters {
           stE12 = stC2;
           stE20 = stC2;
           stE21 = stC2;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC2;
-          } else {
-            stE22 = sPixel.Interpolate(stC2, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC2;
-          } else {
-            stE02 = sPixel.Interpolate(stC2, stC1, stC5, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC5, stC7, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC5, 2, 1, 1));
         }
         break;
         case 84:
@@ -19788,11 +17491,7 @@ namespace nImager.Filters {
           stE11 = stC3;
           stE20 = stC3;
           stE21 = stC3;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC3;
-          } else {
-            stE22 = sPixel.Interpolate(stC3, stC5, stC7, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC5, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC3;
             stE02 = stC3;
@@ -19838,16 +17537,8 @@ namespace nImager.Filters {
           stE11 = stC1;
           stE12 = stC1;
           stE21 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC1;
-          } else {
-            stE20 = sPixel.Interpolate(stC1, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC1;
-          } else {
-            stE22 = sPixel.Interpolate(stC1, stC5, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 2, 1, 1));
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 2, 1, 1));
         }
         break;
         case 90: {
@@ -19856,42 +17547,18 @@ namespace nImager.Filters {
           stE11 = stC0;
           stE12 = stC0;
           stE21 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC0;
-          } else {
-            stE20 = sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC0;
-          } else {
-            stE22 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC0;
-          } else {
-            stE02 = sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1));
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1));
         }
         break;
         case 91: {
           stE11 = stC2;
           stE12 = stC2;
           stE21 = stC2;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC2;
-          } else {
-            stE20 = sPixel.Interpolate(stC2, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC2;
-          } else {
-            stE22 = sPixel.Interpolate(stC2, stC5, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC3, stC7, 2, 1, 1));
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC5, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC2;
             stE01 = stC2;
@@ -19901,11 +17568,7 @@ namespace nImager.Filters {
             stE01 = sPixel.Interpolate(stC2, stC1, 7, 1);
             stE10 = sPixel.Interpolate(stC2, stC3, 7, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC2;
-          } else {
-            stE02 = sPixel.Interpolate(stC2, stC1, stC5, 2, 1, 1);
-          }
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC5, 2, 1, 1));
         }
         break;
         case 92: {
@@ -19916,37 +17579,17 @@ namespace nImager.Filters {
           stE11 = stC0;
           stE12 = stC0;
           stE21 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC0;
-          } else {
-            stE20 = sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC0;
-          } else {
-            stE22 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1));
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
         }
         break;
         case 94: {
           stE10 = stC0;
           stE11 = stC0;
           stE21 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC0;
-          } else {
-            stE20 = sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC0;
-          } else {
-            stE22 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1));
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC0;
             stE02 = stC0;
@@ -19995,11 +17638,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC3, stC7, stC4, 7, 7, 2);
             stE21 = sPixel.Interpolate(stC4, stC7, 7, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 112:
@@ -20050,16 +17689,8 @@ namespace nImager.Filters {
           stE12 = stC0;
           stE20 = stC0;
           stE21 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC0;
-          } else {
-            stE22 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC0;
-          } else {
-            stE02 = sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1));
         }
         break;
         case 116:
@@ -20072,11 +17703,7 @@ namespace nImager.Filters {
           stE12 = stC0;
           stE20 = stC0;
           stE21 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC0;
-          } else {
-            stE22 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
         }
         break;
         case 117:
@@ -20089,11 +17716,7 @@ namespace nImager.Filters {
           stE12 = stC1;
           stE20 = stC1;
           stE21 = stC1;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC1;
-          } else {
-            stE22 = sPixel.Interpolate(stC1, stC5, stC7, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 2, 1, 1));
         }
         break;
         case 121: {
@@ -20111,11 +17734,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC3, stC7, stC1, 7, 7, 2);
             stE21 = sPixel.Interpolate(stC1, stC7, 7, 1);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC1;
-          } else {
-            stE22 = sPixel.Interpolate(stC1, stC5, stC7, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 2, 1, 1));
         }
         break;
         case 122: {
@@ -20131,21 +17750,9 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC3, stC7, stC0, 7, 7, 2);
             stE21 = sPixel.Interpolate(stC0, stC7, 7, 1);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC0;
-          } else {
-            stE22 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC0;
-          } else {
-            stE02 = sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1));
         }
         break;
         case 126: {
@@ -20233,11 +17840,7 @@ namespace nImager.Filters {
           stE20 = stC2;
           stE21 = stC2;
           stE22 = stC2;
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC2;
-          } else {
-            stE02 = sPixel.Interpolate(stC2, stC1, stC5, 2, 1, 1);
-          }
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC2) : (sPixel.Interpolate(stC2, stC1, stC5, 2, 1, 1));
         }
         break;
         case 151:
@@ -20250,11 +17853,7 @@ namespace nImager.Filters {
           stE20 = stC3;
           stE21 = stC3;
           stE22 = stC3;
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC3;
-          } else {
-            stE02 = sPixel.Interpolate(stC3, stC1, stC5, 2, 1, 1);
-          }
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 2, 1, 1));
         }
         break;
         case 158: {
@@ -20263,11 +17862,7 @@ namespace nImager.Filters {
           stE20 = stC0;
           stE21 = stC0;
           stE22 = stC0;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC0;
             stE02 = stC0;
@@ -20293,11 +17888,7 @@ namespace nImager.Filters {
             stE00 = sPixel.Interpolate(stC1, stC3, stC4, 7, 7, 2);
             stE10 = sPixel.Interpolate(stC4, stC3, 7, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC4;
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 191: {
@@ -20308,16 +17899,8 @@ namespace nImager.Filters {
           stE20 = stC4;
           stE21 = stC4;
           stE22 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC4;
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 200:
@@ -20355,11 +17938,7 @@ namespace nImager.Filters {
           stE12 = stC1;
           stE21 = stC1;
           stE22 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC1;
-          } else {
-            stE20 = sPixel.Interpolate(stC1, stC3, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 2, 1, 1));
         }
         break;
         case 211: {
@@ -20394,22 +17973,14 @@ namespace nImager.Filters {
             stE21 = sPixel.Interpolate(stC3, stC7, 7, 1);
             stE22 = sPixel.Interpolate(stC5, stC7, stC3, 7, 7, 2);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC3;
-          } else {
-            stE02 = sPixel.Interpolate(stC3, stC1, stC5, 2, 1, 1);
-          }
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 2, 1, 1));
         }
         break;
         case 218: {
           stE01 = stC0;
           stE10 = stC0;
           stE11 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC0;
-          } else {
-            stE20 = sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1));
           if (stC7.IsNotLike(stC5)) {
             stE12 = stC0;
             stE21 = stC0;
@@ -20419,16 +17990,8 @@ namespace nImager.Filters {
             stE21 = sPixel.Interpolate(stC0, stC7, 7, 1);
             stE22 = sPixel.Interpolate(stC5, stC7, stC0, 7, 7, 2);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC0;
-          } else {
-            stE02 = sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1));
         }
         break;
         case 219: {
@@ -20461,11 +18024,7 @@ namespace nImager.Filters {
           stE02 = stC0;
           stE10 = stC0;
           stE11 = stC0;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC0;
-          } else {
-            stE20 = sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC3, stC7, 2, 1, 1));
           if (stC7.IsNotLike(stC5)) {
             stE12 = stC0;
             stE21 = stC0;
@@ -20520,11 +18079,7 @@ namespace nImager.Filters {
             stE20 = sPixel.Interpolate(stC3, stC7, stC0, 7, 7, 2);
             stE21 = sPixel.Interpolate(stC0, stC7, 7, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC0;
-          } else {
-            stE00 = sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC3, 2, 1, 1));
         }
         break;
         case 235: {
@@ -20534,11 +18089,7 @@ namespace nImager.Filters {
           stE12 = stC2;
           stE21 = stC2;
           stE22 = stC2;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC2;
-          } else {
-            stE20 = sPixel.Interpolate(stC2, stC3, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC3, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC2;
             stE01 = stC2;
@@ -20556,16 +18107,8 @@ namespace nImager.Filters {
           stE12 = stC4;
           stE21 = stC4;
           stE22 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 242: {
@@ -20583,11 +18126,7 @@ namespace nImager.Filters {
             stE21 = sPixel.Interpolate(stC0, stC7, 7, 1);
             stE22 = sPixel.Interpolate(stC5, stC7, stC0, 7, 7, 2);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC0;
-          } else {
-            stE02 = sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1);
-          }
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC1, stC5, 2, 1, 1));
         }
         break;
         case 243: {
@@ -20616,11 +18155,7 @@ namespace nImager.Filters {
           stE12 = stC0;
           stE20 = stC0;
           stE21 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC0;
-          } else {
-            stE22 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE01 = stC0;
             stE02 = stC0;
@@ -20638,16 +18173,8 @@ namespace nImager.Filters {
           stE12 = stC3;
           stE20 = stC3;
           stE21 = stC3;
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC3;
-          } else {
-            stE22 = sPixel.Interpolate(stC3, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC3;
-          } else {
-            stE02 = sPixel.Interpolate(stC3, stC1, stC5, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC5, stC7, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 2, 1, 1));
         }
         break;
         case 249: {
@@ -20657,11 +18184,7 @@ namespace nImager.Filters {
           stE10 = stC1;
           stE11 = stC1;
           stE21 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC1;
-          } else {
-            stE20 = sPixel.Interpolate(stC1, stC3, stC7, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 2, 1, 1));
           if (stC7.IsNotLike(stC5)) {
             stE12 = stC1;
             stE22 = stC1;
@@ -20713,11 +18236,7 @@ namespace nImager.Filters {
             stE10 = sPixel.Interpolate(stC0, stC3, 7, 1);
             stE20 = sPixel.Interpolate(stC3, stC7, stC0, 7, 7, 2);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC0;
-          } else {
-            stE22 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
         }
         break;
         case 254: {
@@ -20754,31 +18273,15 @@ namespace nImager.Filters {
           stE11 = stC4;
           stE12 = stC4;
           stE21 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE20 = stC4;
-          } else {
-            stE20 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE22 = stC4;
-          } else {
-            stE22 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE02 = stC4;
-          } else {
-            stE02 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE20 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE22 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE02 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         #endregion
       }
-      return (new sPixel[]{
+      return (new[]{
       stE00, stE01, stE02, 
       stE10, stE11, stE12, 
       stE20, stE21, stE22, 
@@ -21361,11 +18864,7 @@ namespace nImager.Filters {
           stE31 = stC4;
           stE32 = stC4;
           stE33 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 58:
@@ -21445,11 +18944,7 @@ namespace nImager.Filters {
           stE31 = stC4;
           stE32 = stC4;
           stE33 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE02 = stC4;
             stE03 = stC4;
@@ -22109,11 +19604,7 @@ namespace nImager.Filters {
             stE30 = sPixel.Interpolate(stC3, stC7, 1, 1);
             stE31 = sPixel.Interpolate(stC4, stC7, 1, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 112:
@@ -22379,11 +19870,7 @@ namespace nImager.Filters {
             stE30 = sPixel.Interpolate(stC3, stC7, 1, 1);
             stE31 = sPixel.Interpolate(stC4, stC7, 1, 1);
           }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE02 = stC4;
             stE03 = stC4;
@@ -22470,11 +19957,7 @@ namespace nImager.Filters {
           stE31 = stC3;
           stE32 = stC3;
           stE33 = stC3;
-          if (stC1.IsNotLike(stC5)) {
-            stE03 = stC3;
-          } else {
-            stE03 = sPixel.Interpolate(stC3, stC1, stC5, 2, 1, 1);
-          }
+          stE03 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 2, 1, 1));
         }
         break;
         case 158: {
@@ -22530,11 +20013,7 @@ namespace nImager.Filters {
             stE01 = sPixel.Interpolate(stC1, stC4, 1, 1);
             stE10 = sPixel.Interpolate(stC3, stC4, 1, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE03 = stC4;
-          } else {
-            stE03 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE03 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 191: {
@@ -22552,16 +20031,8 @@ namespace nImager.Filters {
           stE31 = stC4;
           stE32 = stC4;
           stE33 = stC4;
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE03 = stC4;
-          } else {
-            stE03 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE03 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 200:
@@ -22669,11 +20140,7 @@ namespace nImager.Filters {
             stE32 = sPixel.Interpolate(stC3, stC7, 1, 1);
             stE33 = sPixel.Interpolate(stC5, stC7, 1, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE03 = stC3;
-          } else {
-            stE03 = sPixel.Interpolate(stC3, stC1, stC5, 2, 1, 1);
-          }
+          stE03 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 2, 1, 1));
         }
         break;
         case 218: {
@@ -22809,11 +20276,7 @@ namespace nImager.Filters {
             stE01 = sPixel.Interpolate(stC1, stC4, 1, 1);
             stE10 = sPixel.Interpolate(stC3, stC4, 1, 1);
           }
-          if (stC1.IsNotLike(stC5)) {
-            stE03 = stC4;
-          } else {
-            stE03 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE03 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         case 233:
@@ -22833,11 +20296,7 @@ namespace nImager.Filters {
           stE31 = stC1;
           stE32 = stC1;
           stE33 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC1;
-          } else {
-            stE30 = sPixel.Interpolate(stC1, stC3, stC7, 2, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 2, 1, 1));
         }
         break;
         case 234: {
@@ -22884,11 +20343,7 @@ namespace nImager.Filters {
           stE31 = stC2;
           stE32 = stC2;
           stE33 = stC2;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC2;
-          } else {
-            stE30 = sPixel.Interpolate(stC2, stC3, stC7, 2, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC3, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC3)) {
             stE00 = stC2;
             stE01 = stC2;
@@ -22915,16 +20370,8 @@ namespace nImager.Filters {
           stE31 = stC4;
           stE32 = stC4;
           stE33 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
         }
         break;
         case 242: {
@@ -23002,11 +20449,7 @@ namespace nImager.Filters {
           stE30 = stC0;
           stE31 = stC0;
           stE32 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC0;
-          } else {
-            stE33 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
         }
         break;
         case 245: {
@@ -23025,11 +20468,7 @@ namespace nImager.Filters {
           stE30 = stC1;
           stE31 = stC1;
           stE32 = stC1;
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC1;
-          } else {
-            stE33 = sPixel.Interpolate(stC1, stC5, stC7, 2, 1, 1);
-          }
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 2, 1, 1));
         }
         break;
         case 246: {
@@ -23045,11 +20484,7 @@ namespace nImager.Filters {
           stE30 = stC0;
           stE31 = stC0;
           stE32 = stC0;
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC0;
-          } else {
-            stE33 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE02 = stC0;
             stE03 = stC0;
@@ -23076,16 +20511,8 @@ namespace nImager.Filters {
           stE30 = stC3;
           stE31 = stC3;
           stE32 = stC3;
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC3;
-          } else {
-            stE33 = sPixel.Interpolate(stC3, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE03 = stC3;
-          } else {
-            stE03 = sPixel.Interpolate(stC3, stC1, stC5, 2, 1, 1);
-          }
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC5, stC7, 2, 1, 1));
+          stE03 = (stC1.IsNotLike(stC5)) ? (stC3) : (sPixel.Interpolate(stC3, stC1, stC5, 2, 1, 1));
         }
         break;
         case 249: {
@@ -23101,11 +20528,7 @@ namespace nImager.Filters {
           stE21 = stC1;
           stE22 = stC1;
           stE31 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC1;
-          } else {
-            stE30 = sPixel.Interpolate(stC1, stC3, stC7, 2, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 2, 1, 1));
           if (stC7.IsNotLike(stC5)) {
             stE23 = stC1;
             stE32 = stC1;
@@ -23127,11 +20550,7 @@ namespace nImager.Filters {
           stE21 = stC2;
           stE22 = stC2;
           stE31 = stC2;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC2;
-          } else {
-            stE30 = sPixel.Interpolate(stC2, stC3, stC7, 2, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC2) : (sPixel.Interpolate(stC2, stC3, stC7, 2, 1, 1));
           if (stC7.IsNotLike(stC5)) {
             stE23 = stC2;
             stE32 = stC2;
@@ -23174,11 +20593,7 @@ namespace nImager.Filters {
             stE30 = sPixel.Interpolate(stC3, stC7, 1, 1);
             stE31 = sPixel.Interpolate(stC0, stC7, 1, 1);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC0;
-          } else {
-            stE33 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
         }
         break;
         case 253: {
@@ -23196,16 +20611,8 @@ namespace nImager.Filters {
           stE23 = stC1;
           stE31 = stC1;
           stE32 = stC1;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC1;
-          } else {
-            stE30 = sPixel.Interpolate(stC1, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC1;
-          } else {
-            stE33 = sPixel.Interpolate(stC1, stC5, stC7, 2, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC1) : (sPixel.Interpolate(stC1, stC3, stC7, 2, 1, 1));
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC1) : (sPixel.Interpolate(stC1, stC5, stC7, 2, 1, 1));
         }
         break;
         case 254: {
@@ -23227,11 +20634,7 @@ namespace nImager.Filters {
             stE30 = sPixel.Interpolate(stC3, stC7, 1, 1);
             stE31 = sPixel.Interpolate(stC0, stC7, 1, 1);
           }
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC0;
-          } else {
-            stE33 = sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1);
-          }
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC0) : (sPixel.Interpolate(stC0, stC5, stC7, 2, 1, 1));
           if (stC1.IsNotLike(stC5)) {
             stE02 = stC0;
             stE03 = stC0;
@@ -23256,31 +20659,15 @@ namespace nImager.Filters {
           stE23 = stC4;
           stE31 = stC4;
           stE32 = stC4;
-          if (stC7.IsNotLike(stC3)) {
-            stE30 = stC4;
-          } else {
-            stE30 = sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1);
-          }
-          if (stC7.IsNotLike(stC5)) {
-            stE33 = stC4;
-          } else {
-            stE33 = sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC3)) {
-            stE00 = stC4;
-          } else {
-            stE00 = sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1);
-          }
-          if (stC1.IsNotLike(stC5)) {
-            stE03 = stC4;
-          } else {
-            stE03 = sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1);
-          }
+          stE30 = (stC7.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC3, stC7, 2, 1, 1));
+          stE33 = (stC7.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC5, stC7, 2, 1, 1));
+          stE00 = (stC1.IsNotLike(stC3)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC3, 2, 1, 1));
+          stE03 = (stC1.IsNotLike(stC5)) ? (stC4) : (sPixel.Interpolate(stC4, stC1, stC5, 2, 1, 1));
         }
         break;
         #endregion
       }
-      return (new sPixel[]{
+      return (new[]{
       stE00, stE01, stE02, stE03, 
       stE10, stE11, stE12, stE13, 
       stE20, stE21, stE22, stE23, 

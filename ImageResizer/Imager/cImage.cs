@@ -40,6 +40,7 @@ using System;
 using System.Linq;
 using nImager.Filters;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace nImager {
   public class cImage:ICloneable {
@@ -70,7 +71,7 @@ namespace nImager {
 
     #region class fields
     // available filters
-    private static sFilter[] _arrFilters = new sFilter[]{
+    private static readonly sFilter[] _arrFilters = new[]{
       /*
       new sFilter("-50% Scanlines",1,2,libBasic.voidHScanlines,-50f),
       new sFilter("+50% Scanlines",1,2,libBasic.voidHScanlines,50f),
@@ -148,8 +149,8 @@ namespace nImager {
 
     // image data
     private sPixel[] _arrImageData = null;
-    private int _intWidth = 0;
-    private int _intHeight = 0;
+    private readonly int _intWidth = 0;
+    private readonly int _intHeight = 0;
 
     #region properties
     public static sFilter[] Filters {
@@ -248,9 +249,9 @@ namespace nImager {
     // NOTE: Bitmap objects does not support parallel read-outs blame Microsoft
     public cImage(System.Drawing.Bitmap objBitmap)
       : this(objBitmap != null ? objBitmap.Width : 0, objBitmap != null ? objBitmap.Height : 0) {
-
+      if (objBitmap == null) return;
       System.Drawing.Imaging.BitmapData objBitmapData = objBitmap.LockBits(
-        new System.Drawing.Rectangle(0, 0, (int)this._intWidth, (int)this._intHeight),
+        new System.Drawing.Rectangle(0, 0, this._intWidth, this._intHeight),
         System.Drawing.Imaging.ImageLockMode.ReadOnly,
         System.Drawing.Imaging.PixelFormat.Format24bppRgb
         );
@@ -332,11 +333,21 @@ namespace nImager {
     private cImage _objFilterImage(sFilter stFilter) {
       cImage objRet = stFilter.CreationFunction(this);
       if (stFilter.FilterFunction != null) {
-        Parallel.For(0, this._intHeight, intSrcY => {
-          for (int intSrcX = 0; intSrcX < this._intWidth; intSrcX++) {
-            stFilter.FilterFunction(this, intSrcX, intSrcY, objRet, intSrcX * stFilter.ScaleX, intSrcY * stFilter.ScaleY, stFilter.ScaleX, stFilter.ScaleY, stFilter.Parameter);
-          };
-        });
+        //Parallel.For(0, this._intHeight, intSrcY => {
+        Parallel.ForEach(
+          Partitioner.Create(0, this._intHeight),
+          () => 0,
+          (objRange, objParallelState, objThreadStorage) => {
+            for (int intSrcY = objRange.Item1; intSrcY < objRange.Item2; intSrcY++)
+              for (int intSrcX = 0; intSrcX < this._intWidth; intSrcX++) {
+                stFilter.FilterFunction(this, intSrcX, intSrcY, objRet, intSrcX * stFilter.ScaleX, intSrcY * stFilter.ScaleY, stFilter.ScaleX, stFilter.ScaleY, stFilter.Parameter);
+              }
+            return (objThreadStorage);
+          },
+          (objFinalLocal) => {
+            ;
+          }
+        );
       }
       return (objRet);
     }

@@ -36,7 +36,6 @@
       
  */
 #endregion
-using nImager;
 
 namespace nImager.Filters {
   static class libVBA {

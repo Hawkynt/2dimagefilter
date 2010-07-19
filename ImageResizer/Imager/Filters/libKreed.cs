@@ -36,7 +36,7 @@
       
  */
 #endregion
-using nImager;
+
 namespace nImager.Filters {
   static class libKreed {
     // used for 2xSaI, Super Eagle, Super 2xSaI
@@ -65,8 +65,6 @@ namespace nImager.Filters {
     //       which is not the mathematically correct approach, but it's enough - at least for now
     // Kreed's SuperEagle modified by Hawkynt to allow thresholds
     public static void voidSuperEagle(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[intSrcX, intSrcY];
-      sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
       sPixel stC1 = objSrc[intSrcX, intSrcY - 1];
       sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
       sPixel stC3 = objSrc[intSrcX - 1, intSrcY];
@@ -75,10 +73,8 @@ namespace nImager.Filters {
       sPixel stC6 = objSrc[intSrcX - 1, intSrcY + 1];
       sPixel stC7 = objSrc[intSrcX, intSrcY + 1];
       sPixel stC8 = objSrc[intSrcX + 1, intSrcY + 1];
-      sPixel stD0 = objSrc[intSrcX - 1, intSrcY + 2];
       sPixel stD1 = objSrc[intSrcX, intSrcY + 2];
       sPixel stD2 = objSrc[intSrcX + 1, intSrcY + 2];
-      sPixel stD3 = objSrc[intSrcX + 2, intSrcY - 1];
       sPixel stD4 = objSrc[intSrcX + 2, intSrcY];
       sPixel stD5 = objSrc[intSrcX + 2, intSrcY + 1];
 
@@ -168,7 +164,6 @@ namespace nImager.Filters {
 
     // Derek Liauw Kie Fa's 2XSaI
     public static void voidSaI2X(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[intSrcX, intSrcY];
       sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
       sPixel stC1 = objSrc[intSrcX, intSrcY - 1];
       sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
@@ -263,7 +258,6 @@ namespace nImager.Filters {
 
     // Kreed's SuperSaI
     public static void voidSuperSaI(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[intSrcX, intSrcY];
       sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
       sPixel stC1 = objSrc[intSrcX, intSrcY - 1];
       sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
