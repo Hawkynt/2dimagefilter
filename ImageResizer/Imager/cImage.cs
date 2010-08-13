@@ -37,30 +37,64 @@
  */
 #endregion
 using System;
-using System.Linq;
-using nImager.Filters;
-using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Linq;
+using System.Threading.Tasks;
+using nImager.Filters;
 
 namespace nImager {
+  /// <summary>
+  /// A bitmap image
+  /// </summary>
   public class cImage:ICloneable {
     #region helper structs
+    /// <summary>
+    /// A filter structure containing necessary fields used in filtering.
+    /// </summary>
     public struct sFilter {
+      /// <summary>
+      /// The scale factor in X-direction.
+      /// </summary>
       public byte ScaleX;
+      /// <summary>
+      /// The scale factor in Y-direction.
+      /// </summary>
       public byte ScaleY;
+      /// <summary>
+      /// The name of the filter.
+      /// </summary>
       public string Name;
+      /// <summary>
+      /// Additional parameters.
+      /// </summary>
       public object Parameter;
+      /// <summary>
+      /// An action that filters a specified pixel from the source image into a destination area.
+      /// </summary>
       public Action<cImage, int, int, cImage, int, int, byte, byte, object> FilterFunction;
+      /// <summary>
+      /// A function that takes an image and creates a new one based on that one.
+      /// </summary>
       public Func<cImage, cImage> CreationFunction;
-      public sFilter(string strName, Func<cImage, cImage> ptrFunc):this(strName,1,1,null) {
+      /// <summary>
+      /// Initializes a new instance of the <see cref="sFilter"/> struct.
+      /// </summary>
+      /// <param name="strName">Name of the filter.</param>
+      /// <param name="ptrFunc">The function that creates the new image with the same dimensions.</param>
+      public sFilter(string strName, Func<cImage, cImage> ptrFunc):this(strName) {
         this.CreationFunction = ptrFunc;
       }
-      public sFilter(string strName, byte byteScaleX, byte byteScaleY, Action<cImage, int, int, cImage, int, int, byte, byte, object> ptrFilter) :
-        this(strName, byteScaleX, byteScaleY, ptrFilter, null) {
-      }
-      public sFilter(string strName, byte byteScaleX, byte byteScaleY, Action<cImage, int, int, cImage, int, int, byte, byte, object> ptrFilter, object objParam) {
+      /// <summary>
+      /// Initializes a new instance of the <see cref="sFilter"/> struct.
+      /// </summary>
+      /// <param name="strName">Name of the filter.</param>
+      /// <param name="byteScaleX">The X-scale factor, defaults to <c>1</c>.</param>
+      /// <param name="byteScaleY">The Y-scale factor, defaults to <c>1</c>.</param>
+      /// <param name="ptrFilter">The filter function, defaults to <c>null</c>.</param>
+      /// <param name="objParam">The additional parameters, default to <c>null</c>.</param>
+      public sFilter(string strName, byte byteScaleX=1, byte byteScaleY=1, Action<cImage, int, int, cImage, int, int, byte, byte, object> ptrFilter=null, object objParam=null) {
         this.Name = strName;
         this.Parameter = objParam;
         this.ScaleX = byteScaleX;
@@ -72,7 +106,9 @@ namespace nImager {
     #endregion
 
     #region class fields
-    // available filters
+    /// <summary>
+    /// available image filters
+    /// </summary>
     private static readonly sFilter[] _arrFilters = new[]{
       /*
       new sFilter("-50% Scanlines",1,2,libBasic.voidHScanlines,-50f),
@@ -151,101 +187,159 @@ namespace nImager {
     #endregion
 
     // image data
-    private sPixel[] _arrImageData = null;
+    /// <summary>
+    /// An array containing the images' pixel data
+    /// </summary>
+    private readonly sPixel[] _arrImageData;
+    /// <summary>
+    /// The images' width
+    /// </summary>
     private readonly int _intWidth = 0;
+    /// <summary>
+    /// The images' height
+    /// </summary>
     private readonly int _intHeight = 0;
 
     #region properties
+    /// <summary>
+    /// Gets the available image filters.
+    /// </summary>
+    /// <value>The filters.</value>
     public static sFilter[] Filters {
       get {
         return (cImage._arrFilters.ToArray());
       }
     }
-    // get width
+    /// <summary>
+    /// Gets the width of the image.
+    /// </summary>
+    /// <value>The width.</value>
     public int Width {
       get {
         return (this._intWidth);
       }
     }
-    // get height
+    /// <summary>
+    /// Gets the height of the image.
+    /// </summary>
+    /// <value>The height.</value>
     public int Height {
       get {
         return (this._intHeight);
       }
     }
-    // get red component
+    /// <summary>
+    /// Gets the a new instance containing a greyscale image of the red values only.
+    /// </summary>
+    /// <value>The greyscale image from the red components.</value>
     public cImage R {
       get {
         return (new cImage(this, stA => stA.R));
       }
     }
-    // get green component
+    /// <summary>
+    /// Gets the a new instance containing a greyscale image of the green values only.
+    /// </summary>
+    /// <value>The greyscale image from the green components.</value>
     public cImage G {
       get {
         return (new cImage(this, stA => stA.G));
       }
     }
-    // get blue component
+    /// <summary>
+    /// Gets the a new instance containing a greyscale image of the blue values only.
+    /// </summary>
+    /// <value>The greyscale image from the blue components.</value>
     public cImage B {
       get {
         return (new cImage(this, stA => stA.B));
       }
     }
-    // get Y component
+    /// <summary>
+    /// Gets the a new instance containing a greyscale image of the luminance values only.
+    /// </summary>
+    /// <value>The greyscale image from the luminance components.</value>
     public cImage Y {
       get {
         return (new cImage(this, stA => stA.Y));
       }
     }
-    // get U component
+    /// <summary>
+    /// Gets the a new instance containing a greyscale image of the color(U) values only.
+    /// </summary>
+    /// <value>The greyscale image from the color(U) components.</value>
     public cImage U {
       get {
         return (new cImage(this, stA => stA.U));
       }
     }
-    // get V component
+    /// <summary>
+    /// Gets the a new instance containing a greyscale image of the color(V) values only.
+    /// </summary>
+    /// <value>The greyscale image from the color(V) components.</value>
     public cImage V {
       get {
         return (new cImage(this, stA => stA.V));
       }
     }
-    // get u component
+    /// <summary>
+    /// Gets the a new instance containing a greyscale image of the color(u) values only.
+    /// </summary>
+    /// <value>The greyscale image from the color(u) components.</value>
     public cImage u {
       get {
         return (new cImage(this, stA => stA.u));
       }
     }
-    // get v component
+    /// <summary>
+    /// Gets the a new instance containing a greyscale image of the color(v) values only.
+    /// </summary>
+    /// <value>The greyscale image from the color(v) components.</value>
     public cImage v {
       get {
         return (new cImage(this, stA => stA.v));
       }
     }
-    // get Brightness component
+    /// <summary>
+    /// Gets the a new instance containing a greyscale image of the brightness values only.
+    /// </summary>
+    /// <value>The greyscale image from the brightness components.</value>
     public cImage Brightness {
       get {
         return (new cImage(this, stA => stA.Brightness));
       }
     }
-    // get min component from RGB
+    /// <summary>
+    /// Gets the a new instance containing a greyscale image of the minimum values only.
+    /// </summary>
+    /// <value>The greyscale image from the minimum of all components.</value>
     public cImage Min {
       get {
         return (new cImage(this, stA => stA.Min));
       }
     }
-    // get max component from RGB
+    /// <summary>
+    /// Gets the a new instance containing a greyscale image of the maximum values only.
+    /// </summary>
+    /// <value>The greyscale image from the maximum of all components.</value>
     public cImage Max {
       get {
         return (new cImage(this, stA => stA.Max));
       }
     }
-    // get hue component
+    /// <summary>
+    /// Gets the a new instance containing a greyscale image of the hue values only.
+    /// </summary>
+    /// <value>The greyscale image from the hue components.</value>
     public cImage Hue {
       get {
         return (new cImage(this, stA => stA.Hue));
       }
     }
-    // colored hue
+    /// <summary>
+    /// Gets the a new instance containing an image of the hue values only.
+    /// </summary>
+    /// <value>The image from the hue components.</value>
     public cImage HueColored {
       get {
         return (new cImage(this, stA => {
@@ -259,10 +353,13 @@ namespace nImager {
         }));
       }
     }
-    
     #endregion
     #region ctor dtor idx
     // NOTE: Bitmap objects does not support parallel read-outs blame Microsoft
+    /// <summary>
+    /// Initializes a new instance of the <see cref="cImage"/> class from a <see cref="Bitmap"/> instance.
+    /// </summary>
+    /// <param name="objBitmap">The bitmap.</param>
     public cImage(Bitmap objBitmap)
       : this(objBitmap != null ? objBitmap.Width : 0, objBitmap != null ? objBitmap.Height : 0) {
       if (objBitmap == null) return;
@@ -284,18 +381,29 @@ namespace nImager {
       }
       objBitmap.UnlockBits(objBitmapData);
     }
-    // normal ctor
+    /// <summary>
+    /// Initializes a new instance of the <see cref="cImage"/> class.
+    /// </summary>
+    /// <param name="intWidth">Width of the image.</param>
+    /// <param name="intHeight">Height of the image.</param>
     public cImage(int intWidth, int intHeight) {
       this._intWidth = intWidth;
       this._intHeight = intHeight;
       this._arrImageData = new sPixel[intWidth * intHeight];
     }
-    // copy ctor
+    /// <summary>
+    /// Initializes a new instance of the <see cref="cImage"/> class from a given one.
+    /// </summary>
+    /// <param name="objSource">The source image.</param>
     public cImage(cImage objSource):this(objSource._intWidth,objSource._intHeight) {
       for (long lngI = 0; lngI < objSource._arrImageData.LongLength; lngI++)
         this._arrImageData[lngI] = objSource._arrImageData[lngI];
     }
-    // filter ctor
+    /// <summary>
+    /// Initializes a new instance of the <see cref="cImage"/> class by filtering a given one.
+    /// </summary>
+    /// <param name="objSource">The source image.</param>
+    /// <param name="ptrFilter">The filter.</param>
     public cImage(cImage objSource, Func<sPixel, sPixel> ptrFilter) {
       this._intWidth = objSource._intWidth;
       this._intHeight = objSource._intHeight;
@@ -308,7 +416,11 @@ namespace nImager {
       }, objFinalLocal => {
       });
     }
-    // filter greyscale ctor
+    /// <summary>
+    /// Initializes a new greyscale instance of the <see cref="cImage"/> class by filtering a given one.
+    /// </summary>
+    /// <param name="objSource">The source image.</param>
+    /// <param name="ptrFilter">The greyscale filter.</param>
     public cImage(cImage objSource, Func<sPixel, byte> ptrFilter) {
       this._intWidth = objSource._intWidth;
       this._intHeight = objSource._intHeight;
@@ -323,7 +435,10 @@ namespace nImager {
       }, objFinalLocal => {
       });
     }
-    // idx
+    /// <summary>
+    /// Gets or sets the <see cref="nImager.sPixel"/> with the specified X, Y coordinates.
+    /// </summary>
+    /// <value>The pixel</value>
     public sPixel this[int intX, int intY] {
       get {
         if (intX < 0)
@@ -342,11 +457,13 @@ namespace nImager {
           this._arrImageData[intY * this._intWidth + intX] = value;
       }
     }
-    ~cImage() {
-      this._arrImageData = null;
-    }
     #endregion
     #region generic image filter
+    /// <summary>
+    /// Filters this image by using a given filter structure.
+    /// </summary>
+    /// <param name="stFilter">The filter.</param>
+    /// <returns>A new instance containing the filtered image.</returns>
     private cImage _objFilterImage(sFilter stFilter) {
       cImage objRet = stFilter.CreationFunction(this);
       if (stFilter.FilterFunction != null) {
@@ -367,6 +484,11 @@ namespace nImager {
       }
       return (objRet);
     }
+    /// <summary>
+    /// Filters the current image using a named filter.
+    /// </summary>
+    /// <param name="strFilter">The name of the filter.</param>
+    /// <returns>A new instance containing the filtered image or <c>null</c>, if the specified filter could not be found.</returns>
     public cImage FilterImage(string strFilter) {
       cImage objRet = null;
       strFilter = strFilter.ToLower();
@@ -380,6 +502,10 @@ namespace nImager {
       return (objRet);
     }
     #endregion
+    /// <summary>
+    /// Converts this image to a <see cref="Bitmap"/> instance.
+    /// </summary>
+    /// <returns>The <see cref="Bitmap"/> instance</returns>
     public Bitmap ToBitmap() {
       Bitmap objRet = new Bitmap(this.Width, this.Height);
       // NOTE: fucking bitmap does not allow parallel writes
@@ -404,14 +530,30 @@ namespace nImager {
       objRet.UnlockBits(objBitmapData);
       return (objRet);
     }
+    /// <summary>
+    /// Fills the image with the specified color.
+    /// </summary>
+    /// <param name="byteR">The red-value.</param>
+    /// <param name="byteG">The green-value.</param>
+    /// <param name="byteB">The blue-value.</param>
     public void Fill(byte byteR, byte byteG, byte byteB) {
       this.Fill(new sPixel(byteR, byteG, byteB));
     }
+    /// <summary>
+    /// Fills the image with the specified pixel.
+    /// </summary>
+    /// <param name="stPixel">The pixel instance.</param>
     public void Fill(sPixel stPixel) {
       Parallel.For(0, this._arrImageData.LongLength, qwordOffset => this._arrImageData[qwordOffset] = stPixel);
     }
 
     #region ICloneable Members
+    /// <summary>
+    /// Creates a new object that is a copy of the current instance.
+    /// </summary>
+    /// <returns>
+    /// A new object that is a copy of this instance.
+    /// </returns>
     public object Clone() {
       return (new cImage(this));
     }
