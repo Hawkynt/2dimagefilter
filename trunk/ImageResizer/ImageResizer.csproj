@@ -95,6 +95,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Framework\System.Drawing.BitmapExtensions.cs" />
+    <Compile Include="Framework\System.Windows.Media.Imaging.BitmapSourceExtensions.cs" />
     <Compile Include="GUI.xaml.cs">
       <DependentUpon>GUI.xaml</DependentUpon>
       <SubType>Code</SubType>
