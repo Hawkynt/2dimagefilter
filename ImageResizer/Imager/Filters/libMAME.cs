@@ -1,8 +1,8 @@
-﻿#region (c)2010 Hawkynt
+﻿#region (c)2010-2011 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010 Hawkynt
+    Copyright (C) 2010-2011 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,280 +39,265 @@
 
 namespace nImager.Filters {
   static class libMAME {
+    private const float _gamma58 = 5f / 8f;
+    private const float _gamma516 = 5f / 16f;
+
     // MAME's TV effect in 2x
-    public static void voidTV2X(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[intSrcX, intSrcY];
-      sPixel stSubPixel = stPixel * (5f / 8f);
-      objTgt[intTgtX + 0, intTgtY + 0] = stPixel;
-      objTgt[intTgtX + 1, intTgtY + 0] = stPixel;
-      objTgt[intTgtX + 0, intTgtY + 1] = stSubPixel;
-      objTgt[intTgtX + 1, intTgtY + 1] = stSubPixel;
+    public static void Tv2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+      var pixel = sourceImage[srcX, srcY];
+      var subPixel = pixel * _gamma58;
+      targetImage[tgtX + 0, tgtY + 0] = pixel;
+      targetImage[tgtX + 1, tgtY + 0] = pixel;
+      targetImage[tgtX + 0, tgtY + 1] = subPixel;
+      targetImage[tgtX + 1, tgtY + 1] = subPixel;
     }
 
     // MAME's TV effect 3x
-    public static void voidTV3X(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[intSrcX, intSrcY];
-      sPixel stSubPixel = stPixel * (5f / 8f);
-      sPixel stSubPixel2 = stPixel * (5f / 16f);
-      objTgt[intTgtX + 0, intTgtY + 0] = stPixel;
-      objTgt[intTgtX + 1, intTgtY + 0] = stPixel;
-      objTgt[intTgtX + 2, intTgtY + 0] = stPixel;
-      objTgt[intTgtX + 0, intTgtY + 1] = stSubPixel;
-      objTgt[intTgtX + 1, intTgtY + 1] = stSubPixel;
-      objTgt[intTgtX + 2, intTgtY + 1] = stSubPixel;
-      objTgt[intTgtX + 0, intTgtY + 2] = stSubPixel2;
-      objTgt[intTgtX + 1, intTgtY + 2] = stSubPixel2;
-      objTgt[intTgtX + 2, intTgtY + 2] = stSubPixel2;
+    public static void Tv3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+      var pixel = sourceImage[srcX, srcY];
+      var subPixel = pixel * _gamma58;
+      var subPixel2 = pixel * _gamma516;
+      targetImage[tgtX + 0, tgtY + 0] = pixel;
+      targetImage[tgtX + 1, tgtY + 0] = pixel;
+      targetImage[tgtX + 2, tgtY + 0] = pixel;
+      targetImage[tgtX + 0, tgtY + 1] = subPixel;
+      targetImage[tgtX + 1, tgtY + 1] = subPixel;
+      targetImage[tgtX + 2, tgtY + 1] = subPixel;
+      targetImage[tgtX + 0, tgtY + 2] = subPixel2;
+      targetImage[tgtX + 1, tgtY + 2] = subPixel2;
+      targetImage[tgtX + 2, tgtY + 2] = subPixel2;
     }
 
     // MAME's RGB 2x
-    public static void voidRGB2X(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[intSrcX, intSrcY];
-      objTgt[intTgtX + 0, intTgtY + 0] = new sPixel(stPixel.R, 0, 0);
-      objTgt[intTgtX + 1, intTgtY + 0] = new sPixel(0, stPixel.G, 0);
-      objTgt[intTgtX + 0, intTgtY + 1] = new sPixel(0, 0, stPixel.B);
-      objTgt[intTgtX + 1, intTgtY + 1] = stPixel;
+    public static void Rgb2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+      var pixel = sourceImage[srcX, srcY];
+      targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0);
+      targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0);
+      targetImage[tgtX + 0, tgtY + 1] = new sPixel(0, 0, pixel.Blue);
+      targetImage[tgtX + 1, tgtY + 1] = pixel;
     }
 
     // MAME's RGB 3x
-    public static void voidRGB3X(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[intSrcX, intSrcY];
-      objTgt[intTgtX + 0, intTgtY + 0] = stPixel;
-      objTgt[intTgtX + 1, intTgtY + 0] = new sPixel(0, stPixel.G, 0);
-      objTgt[intTgtX + 2, intTgtY + 0] = new sPixel(0, 0, stPixel.B);
-      objTgt[intTgtX + 0, intTgtY + 1] = new sPixel(0, 0, stPixel.B);
-      objTgt[intTgtX + 1, intTgtY + 1] = stPixel;
-      objTgt[intTgtX + 2, intTgtY + 1] = new sPixel(stPixel.R, 0, 0);
-      objTgt[intTgtX + 0, intTgtY + 2] = new sPixel(stPixel.R, 0, 0);
-      objTgt[intTgtX + 1, intTgtY + 2] = new sPixel(0, stPixel.G, 0);
-      objTgt[intTgtX + 2, intTgtY + 2] = stPixel;
+    public static void Rgb3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+      var pixel = sourceImage[srcX, srcY];
+      targetImage[tgtX + 0, tgtY + 0] = pixel;
+      targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0);
+      targetImage[tgtX + 2, tgtY + 0] = new sPixel(0, 0, pixel.Blue);
+      targetImage[tgtX + 0, tgtY + 1] = new sPixel(0, 0, pixel.Blue);
+      targetImage[tgtX + 1, tgtY + 1] = pixel;
+      targetImage[tgtX + 2, tgtY + 1] = new sPixel(pixel.Red, 0, 0);
+      targetImage[tgtX + 0, tgtY + 2] = new sPixel(pixel.Red, 0, 0);
+      targetImage[tgtX + 1, tgtY + 2] = new sPixel(0, pixel.Green, 0);
+      targetImage[tgtX + 2, tgtY + 2] = pixel;
     }
 
     // MAME's AdvInterp2x, very similar to Scale2x but uses interpolation, modified by Hawkynt to support thresholds
-    public static void voidAdvInterp2x(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stC1 = objSrc[intSrcX + 0, intSrcY - 1];
-      sPixel stC3 = objSrc[intSrcX - 1, intSrcY + 0];
-      sPixel stC4 = objSrc[intSrcX + 0, intSrcY + 0];
-      sPixel stC5 = objSrc[intSrcX + 1, intSrcY + 0];
-      sPixel stC7 = objSrc[intSrcX + 0, intSrcY + 1];
-      sPixel stE00 = stC4;
-      sPixel stE01 = stC4;
-      sPixel stE10 = stC4;
-      sPixel stE11 = stC4;
-      if (stC1.IsNotLike(stC7) && stC3.IsNotLike(stC5)) {
-        if (stC3.IsLike(stC1))
-          stE00 = sPixel.Interpolate(sPixel.Interpolate(stC1, stC3), stC4, 5, 3);
-        if (stC5.IsLike(stC1))
-          stE01 = sPixel.Interpolate(sPixel.Interpolate(stC1, stC5), stC4, 5, 3);
-        if (stC3.IsLike(stC7))
-          stE10 = sPixel.Interpolate(sPixel.Interpolate(stC7, stC3), stC4, 5, 3);
-        if (stC5.IsLike(stC7))
-          stE11 = sPixel.Interpolate(sPixel.Interpolate(stC7, stC5), stC4, 5, 3);
+    public static void AdvInterp2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+      var c1 = sourceImage[srcX + 0, srcY - 1];
+      var c3 = sourceImage[srcX - 1, srcY + 0];
+      var c4 = sourceImage[srcX + 0, srcY + 0];
+      var c5 = sourceImage[srcX + 1, srcY + 0];
+      var c7 = sourceImage[srcX + 0, srcY + 1];
+      sPixel e01, e10, e11;
+      var e00 = e01 = e10 = e11 = c4;
+      if (c1.IsNotLike(c7) && c3.IsNotLike(c5)) {
+        if (c3.IsLike(c1))
+          e00 = sPixel.Interpolate(sPixel.Interpolate(c1, c3), c4, 5, 3);
+        if (c5.IsLike(c1))
+          e01 = sPixel.Interpolate(sPixel.Interpolate(c1, c5), c4, 5, 3);
+        if (c3.IsLike(c7))
+          e10 = sPixel.Interpolate(sPixel.Interpolate(c7, c3), c4, 5, 3);
+        if (c5.IsLike(c7))
+          e11 = sPixel.Interpolate(sPixel.Interpolate(c7, c5), c4, 5, 3);
       }
-      objTgt[intTgtX + 0, intTgtY + 0] = stE00;
-      objTgt[intTgtX + 1, intTgtY + 0] = stE01;
-      objTgt[intTgtX + 0, intTgtY + 1] = stE10;
-      objTgt[intTgtX + 1, intTgtY + 1] = stE11;
+      targetImage[tgtX + 0, tgtY + 0] = e00;
+      targetImage[tgtX + 1, tgtY + 0] = e01;
+      targetImage[tgtX + 0, tgtY + 1] = e10;
+      targetImage[tgtX + 1, tgtY + 1] = e11;
     }
 
     // MAME's AdvInterp3x, very similar to Scale3x but uses interpolation, modified by Hawkynt to support thresholds
-    public static void voidAdvInterp3x(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
-      sPixel stC1 = objSrc[intSrcX + 0, intSrcY - 1];
-      sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
-      sPixel stC3 = objSrc[intSrcX - 1, intSrcY + 0];
-      sPixel stC4 = objSrc[intSrcX + 0, intSrcY + 0];
-      sPixel stC5 = objSrc[intSrcX + 1, intSrcY + 0];
-      sPixel stC6 = objSrc[intSrcX - 1, intSrcY + 1];
-      sPixel stC7 = objSrc[intSrcX + 0, intSrcY + 1];
-      sPixel stC8 = objSrc[intSrcX + 1, intSrcY + 1];
-      sPixel stE00 = stC4;
-      sPixel stE01 = stC4;
-      sPixel stE02 = stC4;
-      sPixel stE10 = stC4;
-      sPixel stE11 = stC4;
-      sPixel stE12 = stC4;
-      sPixel stE20 = stC4;
-      sPixel stE21 = stC4;
-      sPixel stE22 = stC4;
-      if (stC1.IsNotLike(stC7) && stC3.IsNotLike(stC5)) {
-        if (stC3.IsLike(stC1)) {
-          stE00 = sPixel.Interpolate(sPixel.Interpolate( stC3,stC1), stC4, 5, 3);
+    public static void AdvInterp3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+      var c0 = sourceImage[srcX - 1, srcY - 1];
+      var c1 = sourceImage[srcX + 0, srcY - 1];
+      var c2 = sourceImage[srcX + 1, srcY - 1];
+      var c3 = sourceImage[srcX - 1, srcY + 0];
+      var c4 = sourceImage[srcX + 0, srcY + 0];
+      var c5 = sourceImage[srcX + 1, srcY + 0];
+      var c6 = sourceImage[srcX - 1, srcY + 1];
+      var c7 = sourceImage[srcX + 0, srcY + 1];
+      var c8 = sourceImage[srcX + 1, srcY + 1];
+      sPixel e01, e02, e10, e11, e12, e20, e21, e22;
+      var e00 = e01 = e02 = e10 = e11 = e12 = e20 = e21 = e22 = c4;
+      if (c1.IsNotLike(c7) && c3.IsNotLike(c5)) {
+        if (c3.IsLike(c1)) {
+          e00 = sPixel.Interpolate(sPixel.Interpolate(c3, c1), c4, 5, 3);
         }
-        if (stC1.IsLike(stC5)) {
-          stE02 = sPixel.Interpolate(sPixel.Interpolate( stC5,stC1), stC4, 5, 3);
+        if (c1.IsLike(c5)) {
+          e02 = sPixel.Interpolate(sPixel.Interpolate(c5, c1), c4, 5, 3);
         }
-        if (stC3.IsLike(stC7)) {
-          stE20 = sPixel.Interpolate(sPixel.Interpolate( stC3,stC7), stC4, 5, 3);
+        if (c3.IsLike(c7)) {
+          e20 = sPixel.Interpolate(sPixel.Interpolate(c3, c7), c4, 5, 3);
         }
-        if (stC7.IsLike(stC5)) {
-          stE22 = sPixel.Interpolate(sPixel.Interpolate( stC7,stC5), stC4, 5, 3);
+        if (c7.IsLike(c5)) {
+          e22 = sPixel.Interpolate(sPixel.Interpolate(c7, c5), c4, 5, 3);
         }
 
         if (
-          (stC3.IsLike(stC1) && stC4.IsNotLike(stC2)) &&
-          (stC5.IsLike(stC1) && stC4.IsNotLike(stC0))
+          (c3.IsLike(c1) && c4.IsNotLike(c2)) &&
+          (c5.IsLike(c1) && c4.IsNotLike(c0))
         )
-          stE01 = sPixel.Interpolate(stC1, stC3, stC5);
-        else if (stC3.IsLike(stC1) && stC4.IsNotLike(stC2))
-          stE01 = sPixel.Interpolate(stC3, stC1);
-        else if (stC5.IsLike(stC1) && stC4.IsNotLike(stC0))
-          stE01 = sPixel.Interpolate(stC5, stC1);
+          e01 = sPixel.Interpolate(c1, c3, c5);
+        else if (c3.IsLike(c1) && c4.IsNotLike(c2))
+          e01 = sPixel.Interpolate(c3, c1);
+        else if (c5.IsLike(c1) && c4.IsNotLike(c0))
+          e01 = sPixel.Interpolate(c5, c1);
 
         if (
-          (stC3.IsLike(stC1) && stC4.IsNotLike(stC6)) &&
-          (stC3.IsLike(stC7) && stC4.IsNotLike(stC0))
+          (c3.IsLike(c1) && c4.IsNotLike(c6)) &&
+          (c3.IsLike(c7) && c4.IsNotLike(c0))
         )
-          stE10 = sPixel.Interpolate(stC3, stC1, stC7);
-        else if (stC3.IsLike(stC1) && stC4.IsNotLike(stC6))
-          stE10 = sPixel.Interpolate(stC3, stC1);
-        else if (stC3.IsLike(stC7) && stC4.IsNotLike(stC0))
-          stE10 = sPixel.Interpolate(stC3, stC7);
+          e10 = sPixel.Interpolate(c3, c1, c7);
+        else if (c3.IsLike(c1) && c4.IsNotLike(c6))
+          e10 = sPixel.Interpolate(c3, c1);
+        else if (c3.IsLike(c7) && c4.IsNotLike(c0))
+          e10 = sPixel.Interpolate(c3, c7);
 
         if (
-          (stC5.IsLike(stC1) && stC4.IsNotLike(stC8)) &&
-          (stC5.IsLike(stC7) && stC4.IsNotLike(stC2))
+          (c5.IsLike(c1) && c4.IsNotLike(c8)) &&
+          (c5.IsLike(c7) && c4.IsNotLike(c2))
         )
-          stE12 = sPixel.Interpolate(stC5, stC1, stC7);
-        else if (stC5.IsLike(stC1) && stC4.IsNotLike(stC8))
-          stE12 = sPixel.Interpolate(stC5, stC1);
-        else if (stC5.IsLike(stC7) && stC4.IsNotLike(stC2))
-          stE12 = sPixel.Interpolate(stC5, stC7);
+          e12 = sPixel.Interpolate(c5, c1, c7);
+        else if (c5.IsLike(c1) && c4.IsNotLike(c8))
+          e12 = sPixel.Interpolate(c5, c1);
+        else if (c5.IsLike(c7) && c4.IsNotLike(c2))
+          e12 = sPixel.Interpolate(c5, c7);
 
         if (
-          (stC3.IsLike(stC7) && stC4.IsNotLike(stC8)) &&
-          (stC5.IsLike(stC7) && stC4.IsNotLike(stC6))
+          (c3.IsLike(c7) && c4.IsNotLike(c8)) &&
+          (c5.IsLike(c7) && c4.IsNotLike(c6))
         )
-          stE21 = sPixel.Interpolate(stC7, stC3, stC5);
-        else if (stC3.IsLike(stC7) && stC4.IsNotLike(stC8))
-          stE21 = sPixel.Interpolate(stC3, stC7);
-        else if (stC5.IsLike(stC7) && stC4.IsNotLike(stC6))
-          stE21 = sPixel.Interpolate(stC5, stC7);
+          e21 = sPixel.Interpolate(c7, c3, c5);
+        else if (c3.IsLike(c7) && c4.IsNotLike(c8))
+          e21 = sPixel.Interpolate(c3, c7);
+        else if (c5.IsLike(c7) && c4.IsNotLike(c6))
+          e21 = sPixel.Interpolate(c5, c7);
       }
-      objTgt[intTgtX + 0, intTgtY + 0] = stE00;
-      objTgt[intTgtX + 1, intTgtY + 0] = stE01;
-      objTgt[intTgtX + 2, intTgtY + 0] = stE02;
-      objTgt[intTgtX + 0, intTgtY + 1] = stE10;
-      objTgt[intTgtX + 1, intTgtY + 1] = stE11;
-      objTgt[intTgtX + 2, intTgtY + 1] = stE12;
-      objTgt[intTgtX + 0, intTgtY + 2] = stE20;
-      objTgt[intTgtX + 1, intTgtY + 2] = stE21;
-      objTgt[intTgtX + 2, intTgtY + 2] = stE22;
+      targetImage[tgtX + 0, tgtY + 0] = e00;
+      targetImage[tgtX + 1, tgtY + 0] = e01;
+      targetImage[tgtX + 2, tgtY + 0] = e02;
+      targetImage[tgtX + 0, tgtY + 1] = e10;
+      targetImage[tgtX + 1, tgtY + 1] = e11;
+      targetImage[tgtX + 2, tgtY + 1] = e12;
+      targetImage[tgtX + 0, tgtY + 2] = e20;
+      targetImage[tgtX + 1, tgtY + 2] = e21;
+      targetImage[tgtX + 2, tgtY + 2] = e22;
     }
 
     // Andrea Mazzoleni's Scale2X modified by Hawkynt to support thresholds
-    public static void voidScale2x(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stC1 = objSrc[intSrcX + 0, intSrcY - 1];
-      sPixel stC3 = objSrc[intSrcX - 1, intSrcY + 0];
-      sPixel stC4 = objSrc[intSrcX + 0, intSrcY + 0];
-      sPixel stC5 = objSrc[intSrcX + 1, intSrcY + 0];
-      sPixel stC7 = objSrc[intSrcX + 0, intSrcY + 1];
-      sPixel stE00 = stC4;
-      sPixel stE01 = stC4;
-      sPixel stE10 = stC4;
-      sPixel stE11 = stC4;
-      if (stC3.IsNotLike(stC5) && stC1.IsNotLike(stC7)) {
-        if (stC1.IsLike(stC3)) {
-          stE00 = sPixel.Interpolate(stC1, stC3);
+    public static void Scale2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+      var c1 = sourceImage[srcX + 0, srcY - 1];
+      var c3 = sourceImage[srcX - 1, srcY + 0];
+      var c4 = sourceImage[srcX + 0, srcY + 0];
+      var c5 = sourceImage[srcX + 1, srcY + 0];
+      var c7 = sourceImage[srcX + 0, srcY + 1];
+      sPixel e01, e10, e11;
+      var e00 = e01 = e10 = e11 = c4;
+      if (c3.IsNotLike(c5) && c1.IsNotLike(c7)) {
+        if (c1.IsLike(c3)) {
+          e00 = sPixel.Interpolate(c1, c3);
         }
-        if (stC1.IsLike(stC5)) {
-          stE01 = sPixel.Interpolate(stC1, stC5);
+        if (c1.IsLike(c5)) {
+          e01 = sPixel.Interpolate(c1, c5);
         }
-        if (stC7.IsLike(stC3)) {
-          stE10 = sPixel.Interpolate(stC7, stC3);
+        if (c7.IsLike(c3)) {
+          e10 = sPixel.Interpolate(c7, c3);
         }
-        if (stC7.IsLike(stC5)) {
-          stE11 = sPixel.Interpolate(stC7, stC5);
+        if (c7.IsLike(c5)) {
+          e11 = sPixel.Interpolate(c7, c5);
         }
       }
-      objTgt[intTgtX + 0, intTgtY + 0] = stE00;
-      objTgt[intTgtX + 1, intTgtY + 0] = stE01;
-      objTgt[intTgtX + 0, intTgtY + 1] = stE10;
-      objTgt[intTgtX + 1, intTgtY + 1] = stE11;
+      targetImage[tgtX + 0, tgtY + 0] = e00;
+      targetImage[tgtX + 1, tgtY + 0] = e01;
+      targetImage[tgtX + 0, tgtY + 1] = e10;
+      targetImage[tgtX + 1, tgtY + 1] = e11;
     }
-    
+
     // Andrea Mazzoleni's Scale3X modified by Hawkynt to support thresholds
-    public static void voidScale3x(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stC0 = objSrc[intSrcX - 1, intSrcY - 1];
-      sPixel stC1 = objSrc[intSrcX + 0, intSrcY - 1];
-      sPixel stC2 = objSrc[intSrcX + 1, intSrcY - 1];
-      sPixel stC3 = objSrc[intSrcX - 1, intSrcY + 0];
-      sPixel stC4 = objSrc[intSrcX + 0, intSrcY + 0];
-      sPixel stC5 = objSrc[intSrcX + 1, intSrcY + 0];
-      sPixel stC6 = objSrc[intSrcX - 1, intSrcY + 1];
-      sPixel stC7 = objSrc[intSrcX + 0, intSrcY + 1];
-      sPixel stC8 = objSrc[intSrcX + 1, intSrcY + 1];
-      sPixel stE00 = stC4;
-      sPixel stE01 = stC4;
-      sPixel stE02 = stC4;
-      sPixel stE10 = stC4;
-      sPixel stE11 = stC4;
-      sPixel stE12 = stC4;
-      sPixel stE20 = stC4;
-      sPixel stE21 = stC4;
-      sPixel stE22 = stC4;
-      if (stC1.IsNotLike(stC7) && stC3.IsNotLike(stC5)) {
-        if (stC3.IsLike(stC1))
-          stE00 = sPixel.Interpolate(stC3, stC1);
-        if (stC1.IsLike(stC5))
-          stE02 = sPixel.Interpolate(stC1, stC5);
-        if (stC3.IsLike(stC7))
-          stE20 = sPixel.Interpolate(stC3, stC7);
-        if (stC7.IsLike(stC5))
-          stE22 = sPixel.Interpolate(stC7, stC5);
+    public static void Scale3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+      var c0 = sourceImage[srcX - 1, srcY - 1];
+      var c1 = sourceImage[srcX + 0, srcY - 1];
+      var c2 = sourceImage[srcX + 1, srcY - 1];
+      var c3 = sourceImage[srcX - 1, srcY + 0];
+      var c4 = sourceImage[srcX + 0, srcY + 0];
+      var c5 = sourceImage[srcX + 1, srcY + 0];
+      var c6 = sourceImage[srcX - 1, srcY + 1];
+      var c7 = sourceImage[srcX + 0, srcY + 1];
+      var c8 = sourceImage[srcX + 1, srcY + 1];
+      sPixel e01, e02, e10, e11, e12, e20, e21, e22 = c4;
+      var e00 = e01 = e02 = e10 = e11 = e12 = e20 = e21 = e22 = c4;
+      if (c1.IsNotLike(c7) && c3.IsNotLike(c5)) {
+        if (c3.IsLike(c1))
+          e00 = sPixel.Interpolate(c3, c1);
+        if (c1.IsLike(c5))
+          e02 = sPixel.Interpolate(c1, c5);
+        if (c3.IsLike(c7))
+          e20 = sPixel.Interpolate(c3, c7);
+        if (c7.IsLike(c5))
+          e22 = sPixel.Interpolate(c7, c5);
 
         if (
-          (stC3.IsLike(stC1) && stC4.IsNotLike(stC2)) &&
-          (stC5.IsLike(stC1) && stC4.IsNotLike(stC0))
+          (c3.IsLike(c1) && c4.IsNotLike(c2)) &&
+          (c5.IsLike(c1) && c4.IsNotLike(c0))
         )
-          stE01 = sPixel.Interpolate(stC1, stC3, stC5);
-        else if (stC3.IsLike(stC1) && stC4.IsNotLike(stC2))
-          stE01 = sPixel.Interpolate(stC3, stC1);
-        else if (stC5.IsLike(stC1) && stC4.IsNotLike(stC0))
-          stE01 = sPixel.Interpolate(stC5, stC1);
+          e01 = sPixel.Interpolate(c1, c3, c5);
+        else if (c3.IsLike(c1) && c4.IsNotLike(c2))
+          e01 = sPixel.Interpolate(c3, c1);
+        else if (c5.IsLike(c1) && c4.IsNotLike(c0))
+          e01 = sPixel.Interpolate(c5, c1);
 
         if (
-          (stC3.IsLike(stC1) && stC4.IsNotLike(stC6)) &&
-          (stC3.IsLike(stC7) && stC4.IsNotLike(stC0))
+          (c3.IsLike(c1) && c4.IsNotLike(c6)) &&
+          (c3.IsLike(c7) && c4.IsNotLike(c0))
         )
-          stE10 = sPixel.Interpolate(stC3, stC1, stC7);
-        else if (stC3.IsLike(stC1) && stC4.IsNotLike(stC6))
-          stE10 = sPixel.Interpolate(stC3, stC1);
-        else if (stC3.IsLike(stC7) && stC4.IsNotLike(stC0))
-          stE10 = sPixel.Interpolate(stC3, stC7);
+          e10 = sPixel.Interpolate(c3, c1, c7);
+        else if (c3.IsLike(c1) && c4.IsNotLike(c6))
+          e10 = sPixel.Interpolate(c3, c1);
+        else if (c3.IsLike(c7) && c4.IsNotLike(c0))
+          e10 = sPixel.Interpolate(c3, c7);
 
         if (
-          (stC5.IsLike(stC1) && stC4.IsNotLike(stC8)) &&
-          (stC5.IsLike(stC7) && stC4.IsNotLike(stC2))
+          (c5.IsLike(c1) && c4.IsNotLike(c8)) &&
+          (c5.IsLike(c7) && c4.IsNotLike(c2))
         )
-          stE12 = sPixel.Interpolate(stC5, stC1, stC7);
-        else if (stC5.IsLike(stC1) && stC4.IsNotLike(stC8))
-          stE12 = sPixel.Interpolate(stC5, stC1);
-        else if (stC5.IsLike(stC7) && stC4.IsNotLike(stC2))
-          stE12 = sPixel.Interpolate(stC5, stC7);
+          e12 = sPixel.Interpolate(c5, c1, c7);
+        else if (c5.IsLike(c1) && c4.IsNotLike(c8))
+          e12 = sPixel.Interpolate(c5, c1);
+        else if (c5.IsLike(c7) && c4.IsNotLike(c2))
+          e12 = sPixel.Interpolate(c5, c7);
 
         if (
-          (stC3.IsLike(stC7) && stC4.IsNotLike(stC8)) &&
-          (stC5.IsLike(stC7) && stC4.IsNotLike(stC6))
+          (c3.IsLike(c7) && c4.IsNotLike(c8)) &&
+          (c5.IsLike(c7) && c4.IsNotLike(c6))
         )
-          stE21 = sPixel.Interpolate(stC7, stC3, stC5);
-        else if (stC3.IsLike(stC7) && stC4.IsNotLike(stC8))
-          stE21 = sPixel.Interpolate(stC3, stC7);
-        else if (stC5.IsLike(stC7) && stC4.IsNotLike(stC6))
-          stE21 = sPixel.Interpolate(stC5, stC7);
+          e21 = sPixel.Interpolate(c7, c3, c5);
+        else if (c3.IsLike(c7) && c4.IsNotLike(c8))
+          e21 = sPixel.Interpolate(c3, c7);
+        else if (c5.IsLike(c7) && c4.IsNotLike(c6))
+          e21 = sPixel.Interpolate(c5, c7);
 
       }
-      objTgt[intTgtX + 0, intTgtY + 0] = stE00;
-      objTgt[intTgtX + 1, intTgtY + 0] = stE01;
-      objTgt[intTgtX + 2, intTgtY + 0] = stE02;
-      objTgt[intTgtX + 0, intTgtY + 1] = stE10;
-      objTgt[intTgtX + 1, intTgtY + 1] = stE11;
-      objTgt[intTgtX + 2, intTgtY + 1] = stE12;
-      objTgt[intTgtX + 0, intTgtY + 2] = stE20;
-      objTgt[intTgtX + 1, intTgtY + 2] = stE21;
-      objTgt[intTgtX + 2, intTgtY + 2] = stE22;
+      targetImage[tgtX + 0, tgtY + 0] = e00;
+      targetImage[tgtX + 1, tgtY + 0] = e01;
+      targetImage[tgtX + 2, tgtY + 0] = e02;
+      targetImage[tgtX + 0, tgtY + 1] = e10;
+      targetImage[tgtX + 1, tgtY + 1] = e11;
+      targetImage[tgtX + 2, tgtY + 1] = e12;
+      targetImage[tgtX + 0, tgtY + 2] = e20;
+      targetImage[tgtX + 1, tgtY + 2] = e21;
+      targetImage[tgtX + 2, tgtY + 2] = e22;
     }
-    
+
 
   } // end class
 } // end namespace

@@ -1,8 +1,8 @@
-﻿#region (c)2010 Hawkynt
+﻿#region (c)2010-2011 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010 Hawkynt
+    Copyright (C) 2010-2011 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,46 +25,45 @@
 #endregion
 #define PREFERARRAYCACHE
 using System;
+
 namespace nImager {
   /// <summary>
   /// A little cache that holds calculation results based on the three color components red, green and blue.
   /// </summary>
   public class cRGBCache {
 #if PREFERARRAYCACHE
-    private readonly byte[] _arrCache = new byte[256 * 256 * 256];
-    private readonly byte[] _arrExists = new byte[256 * 256 * 256];
+    private readonly byte[] _valueCache = new byte[256 * 256 * 256];
+    private readonly byte[] _existsCache = new byte[256 * 256 * 256];
 
     /// <summary>
     /// Gets a value directly from the cache or first calculates that value and writes it the cache.
     /// </summary>
-    /// <param name="dwordKey">The 32-bit color code.</param>
-    /// <param name="ptrFactory">The factory that would calculate a result if it's not already in the cache.</param>
+    /// <param name="key">The 32-bit color code.</param>
+    /// <param name="factory">The factory that would calculate a result if it's not already in the cache.</param>
     /// <returns>The calculation result.</returns>
-    public byte GetOrAdd(UInt32 dwordKey, Func<UInt32, byte> ptrFactory) {
-      byte byteRet;
-      if (_arrExists[dwordKey] != 0) {
-        byteRet = _arrCache[dwordKey];
-      } else {
-        byteRet = ptrFactory(dwordKey);
-        this._arrCache[dwordKey] = byteRet;
-        this._arrExists[dwordKey] = 1;
-        System.Threading.Thread.MemoryBarrier();
-      }
-      return (byteRet);
+    public byte GetOrAdd(UInt32 key, Func<UInt32, byte> factory) {
+      if (this._existsCache[key] != 0)
+        return (this._valueCache[key]);
+
+      var result = factory(key);
+      this._valueCache[key] = result;
+      this._existsCache[key] = 1;
+      System.Threading.Thread.MemoryBarrier();
+      return (result);
     }
 #else
     /// <summary>
     /// Our thread-safe dictionary cache
     /// </summary>
-    private readonly ConcurrentDictionary<UInt32, byte> _hashCache = new ConcurrentDictionary<uint, byte>();
+    private readonly ConcurrentDictionary<UInt32, byte> _cache = new ConcurrentDictionary<uint, byte>();
     /// <summary>
     /// Gets a value directly from the cache or first calculates that value and writes it the cache.
     /// </summary>
-    /// <param name="dwordKey">The 32-bit color code.</param>
-    /// <param name="ptrFactory">The factory that would calculate a result if it's not already in the cache.</param>
+    /// <param name="key">The 32-bit color code.</param>
+    /// <param name="factory">The factory that would calculate a result if it's not already in the cache.</param>
     /// <returns>The calculation result.</returns>
-    public byte GetOrAdd(UInt32 dwordKey, Func<UInt32, byte> ptrFactory) {
-      return (this._hashCache.GetOrAdd(dwordKey, ptrFactory));
+    public byte GetOrAdd(UInt32 key, Func<UInt32, byte> factory) {
+      return (this._cache.GetOrAdd(key, factory));
     }
 #endif
   } // end class

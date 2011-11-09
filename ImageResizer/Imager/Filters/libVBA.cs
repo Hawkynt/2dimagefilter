@@ -1,8 +1,8 @@
-﻿#region (c)2010 Hawkynt
+﻿#region (c)2010-2011 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010 Hawkynt
+    Copyright (C) 2010-2011 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,38 +40,40 @@
 namespace nImager.Filters {
   static class libVBA {
     // Bilinear Plus Original
-    public static void voidBilinearPlusOriginal(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stA = objSrc[intSrcX + 0, intSrcY + 0];
-      sPixel stB = objSrc[intSrcX + 1, intSrcY + 0];
-      sPixel stC = objSrc[intSrcX + 0, intSrcY + 1];
-      sPixel stD = objSrc[intSrcX + 1, intSrcY + 1];
+    public static void BilinearPlusOriginal(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+      var c00 = sourceImage[srcX + 0, srcY + 0];
+      var c01 = sourceImage[srcX + 1, srcY + 0];
+      var c10 = sourceImage[srcX + 0, srcY + 1];
+      var c11 = sourceImage[srcX + 1, srcY + 1];
 
-      sPixel stE00 = sPixel.Interpolate(stA, stB, stC, 5, 2, 1);
-      sPixel stE01 = sPixel.Interpolate(stA, stB);
-      sPixel stE10 = sPixel.Interpolate(stA, stC);
-      sPixel stE11 = sPixel.Interpolate(stA, stB, stC, stD);
+      var e00 = sPixel.Interpolate(c00, c01, c10, 5, 2, 1);
+      var e01 = sPixel.Interpolate(c00, c01);
+      var e10 = sPixel.Interpolate(c00, c10);
+      var e11 = sPixel.Interpolate(c00, c01, c10, c11);
 
-      objTgt[intTgtX + 0, intTgtY + 0] = stE00;
-      objTgt[intTgtX + 1, intTgtY + 0] = stE01;
-      objTgt[intTgtX + 0, intTgtY + 1] = stE10;
-      objTgt[intTgtX + 1, intTgtY + 1] = stE11;
+      targetImage[tgtX + 0, tgtY + 0] = e00;
+      targetImage[tgtX + 1, tgtY + 0] = e01;
+      targetImage[tgtX + 0, tgtY + 1] = e10;
+      targetImage[tgtX + 1, tgtY + 1] = e11;
     }
     // Bilinear Plus
-    public static void voidBilinearPlus(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stA = objSrc[intSrcX + 0, intSrcY + 0];
-      sPixel stB = objSrc[intSrcX + 1, intSrcY + 0];
-      sPixel stC = objSrc[intSrcX + 0, intSrcY + 1];
-      sPixel stD = objSrc[intSrcX + 1, intSrcY + 1];
+    public static void BilinearPlus(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+      var c00 = sourceImage[srcX + 0, srcY + 0];
+      var c01 = sourceImage[srcX + 1, srcY + 0];
+      var c10 = sourceImage[srcX + 0, srcY + 1];
+      var c11 = sourceImage[srcX + 1, srcY + 1];
 
-      sPixel stE00 = sPixel.Interpolate(stA, stB, stC, 10, 2, 2)*(14f/16f);
-      sPixel stE01 = sPixel.Interpolate(stA, stB);
-      sPixel stE10 = sPixel.Interpolate(stA, stC);
-      sPixel stE11 = sPixel.Interpolate(stA, stB, stC, stD);
+      const float gamma = 14f / 16f;
 
-      objTgt[intTgtX + 0, intTgtY + 0] = stE00;
-      objTgt[intTgtX + 1, intTgtY + 0] = stE01;
-      objTgt[intTgtX + 0, intTgtY + 1] = stE10;
-      objTgt[intTgtX + 1, intTgtY + 1] = stE11;
+      var e00 = sPixel.Interpolate(c00, c01, c10, 10, 2, 2) * gamma;
+      var e01 = sPixel.Interpolate(c00, c01);
+      var e10 = sPixel.Interpolate(c00, c10);
+      var e11 = sPixel.Interpolate(c00, c01, c10, c11);
+
+      targetImage[tgtX + 0, tgtY + 0] = e00;
+      targetImage[tgtX + 1, tgtY + 0] = e01;
+      targetImage[tgtX + 0, tgtY + 1] = e10;
+      targetImage[tgtX + 1, tgtY + 1] = e11;
     }
   } // end class
 } // end namespace
