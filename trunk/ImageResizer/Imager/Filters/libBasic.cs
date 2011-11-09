@@ -1,8 +1,8 @@
-﻿#region (c)2010 Hawkynt
+﻿#region (c)2010-2011 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010 Hawkynt
+    Copyright (C) 2010-2011 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,19 +38,19 @@
 #endregion
 
 namespace nImager.Filters {
-  static class libBasic{
-    public static void voidHScanlines(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[intSrcX, intSrcY];
-      objTgt[intTgtX, intTgtY] = stPixel;
-      float fltFactor = (float)objParam / 100f + 1f;
-      objTgt[intTgtX, intTgtY + 1] = stPixel * fltFactor;
+  static class libBasic {
+    public static void HorizontalScanlines(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object grayFactor) {
+      var pixel = sourceImage[srcX, srcY];
+      targetImage[tgtX, tgtY] = pixel;
+      var factor = (float)grayFactor / 100f + 1f;
+      targetImage[tgtX, tgtY + 1] = pixel * factor;
     }
-    public static void voidVScanlines(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[intSrcX, intSrcY];
-      objTgt[intTgtX, intTgtY] = stPixel;
-      float fltFactor = (float)objParam / 100f + 1f;
-      objTgt[intTgtX + 1, intTgtY] = stPixel * fltFactor;
+    public static void VerticalScanlines(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object grayFactor) {
+      var pixel = sourceImage[srcX, srcY];
+      targetImage[tgtX, tgtY] = pixel;
+      var factor = (float)grayFactor / 100f + 1f;
+      targetImage[tgtX + 1, tgtY] = pixel * factor;
     }
-    
+
   }
 }

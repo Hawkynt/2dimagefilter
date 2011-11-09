@@ -1,43 +1,61 @@
-﻿using nImager;
-using System.Drawing.Drawing2D;
+﻿using System;
 using System.Collections.Generic;
-using System;
-using System.Linq;
 using System.Drawing;
-using System.Windows.Media.Imaging;
-using System.Windows;
-using System.IO;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
+using System.Windows;
+using System.Windows.Media.Imaging;
+using nImager;
 
 namespace ImageResizer {
-  public struct sPixelBlitter {
-    public Func<Bitmap, Bitmap> ptrPixelCalculator;
-    public int intScaleX;
-    public int intScaleY;
-    public sPixelBlitter(int intScaleX, int intScaleY, Func<Bitmap, Bitmap> ptrPixelCalculator) {
-      this.intScaleX = intScaleX;
-      this.intScaleY = intScaleY;
-      this.ptrPixelCalculator = ptrPixelCalculator;
+  /// <summary>
+  /// Holds the different pixel blitters.
+  /// </summary>
+  public struct PixelBlitter {
+    /// <summary>
+    /// The delegate that generates anew image from an existing one.
+    /// </summary>
+    public Func<Bitmap, Bitmap> PixelCalculator;
+    /// <summary>
+    /// Width is multiplied with this value.
+    /// </summary>
+    public int ScaleX;
+    /// <summary>
+    /// Height is multiplied with this value.
+    /// </summary>
+    public int ScaleY;
+    /// <summary>
+    /// Creates a new pixel blitter structure.
+    /// </summary>
+    /// <param name="scaleX">Width is multiplied with this value.</param>
+    /// <param name="scaleY">Height is multiplied with this value.</param>
+    /// <param name="pixelCalculator">The delegate that generates anew image from an existing one.</param>
+    public PixelBlitter(int scaleX, int scaleY, Func<Bitmap, Bitmap> pixelCalculator) {
+      this.ScaleX = scaleX;
+      this.ScaleY = scaleY;
+      this.PixelCalculator = pixelCalculator;
     }
   }
 
   public struct sImageResizer {
     public string szName;
     public InterpolationMode InterpolationMode;
-    public sPixelBlitter structPixelBlitter;
-    public sImageResizer(string szName, sPixelBlitter structPixelBlitter, InterpolationMode InterpolationMode) {
+    public PixelBlitter structPixelBlitter;
+    public sImageResizer(string szName, PixelBlitter structPixelBlitter, InterpolationMode InterpolationMode) {
       this.szName = szName;
       this.structPixelBlitter = structPixelBlitter;
       this.InterpolationMode = InterpolationMode;
     }
     public sImageResizer(string szName)
-      : this(szName, new sPixelBlitter(), InterpolationMode.HighQualityBicubic) {
+      : this(szName, new PixelBlitter(), InterpolationMode.HighQualityBicubic) {
     }
-    public sImageResizer(string szName, sPixelBlitter structPixelBlitter)
+    public sImageResizer(string szName, PixelBlitter structPixelBlitter)
       : this(szName, structPixelBlitter, InterpolationMode.HighQualityBicubic) {
     }
     public sImageResizer(string szName, InterpolationMode InterpolationMode)
-      : this(szName, new sPixelBlitter(), InterpolationMode) {
+      : this(szName, new PixelBlitter(), InterpolationMode) {
     }
     public override string ToString() {
       return this.szName;
@@ -47,8 +65,7 @@ namespace ImageResizer {
   /// <summary>
   /// Interaktionslogik für "App.xaml"
   /// </summary>
-  public partial class App
-  {
+  public partial class App {
     /// <summary>
     /// A list containing all available resize methods
     /// </summary>
@@ -57,12 +74,12 @@ namespace ImageResizer {
       new sImageResizer("BiLinear", InterpolationMode.HighQualityBilinear),
       new sImageResizer("BiCubic")
     };
-    
+
     /// <summary>
     /// An image loaded through the CLI
     /// </summary>
     public BitmapSource objBitmapSource = null;
-  
+
     public App() {
       // TODO: tests here
       sPixel.AllowThresholds = true;
@@ -72,13 +89,13 @@ namespace ImageResizer {
       // add image filters from cImage
       Array.ForEach(cImage.Filters, stFilter => {
         if (!string.IsNullOrEmpty(stFilter.Name)) {
-          arrImageResizers.Add(new sImageResizer(stFilter.Name, new sPixelBlitter(stFilter.ScaleX, stFilter.ScaleY,
+          arrImageResizers.Add(new sImageResizer(stFilter.Name, new PixelBlitter(stFilter.ScaleX, stFilter.ScaleY,
             objSource => new cImage(objSource).FilterImage(stFilter.Name).ToBitmap())));
         } else {
           // just skip null entries
         }
       });
-      
+
       // parse command line if needed
       if (e != null && e.Args != null && e.Args.Length > 0) {
         string[] arrArgs = e.Args;
@@ -153,22 +170,22 @@ namespace ImageResizer {
                   if (strExt == ".JPG" || strExt == ".JPEG") {
                     ImageCodecInfo[] arrCodecs = ImageCodecInfo.GetImageEncoders();
                     if (arrCodecs != null) {
-                      arrCodecs = arrCodecs.Where(objInfo => objInfo.MimeType == "image/jpeg").ToArray();
-                      if (arrCodecs.Length > 0) {
-                        this.objBitmapSource.AsBitmap().Save(
-                          strFile,
-                          arrCodecs[0],
-                          new EncoderParameters {
-                            Param = new EncoderParameter[] { 
-                              new EncoderParameter(Encoder.Quality,(long)100),
-                            }
+                    arrCodecs = arrCodecs.Where(objInfo => objInfo.MimeType == "image/jpeg").ToArray();
+                    if (arrCodecs.Length > 0) {
+                      this.objBitmapSource.AsBitmap().Save(
+                        strFile,
+                        arrCodecs[0],
+                        new EncoderParameters {
+                          Param = new EncoderParameter[] { 
+                            new EncoderParameter(Encoder.Quality,(long)100),
                           }
+                        }
                         );
-                      } else {
-                        MessageBox.Show("System has no support to save as JPEG !", "Fatal Error");
-                        intI = intLen;
-                      }
                     } else {
+                      MessageBox.Show("System has no support to save as JPEG !", "Fatal Error");
+                      intI = intLen;
+                    }
+                  } else {
                       MessageBox.Show("System seems to support no encoders !", "Fatal Error");
                       intI = intLen;
                     }
@@ -202,7 +219,7 @@ namespace ImageResizer {
     }
 
     private void voidShowHelp() {
-      System.Reflection.Assembly objAssembly=System.Reflection.Assembly.GetExecutingAssembly();
+      System.Reflection.Assembly objAssembly = System.Reflection.Assembly.GetExecutingAssembly();
       MessageBox.Show(string.Join("\r\n", new string[] { 
         Path.GetFileName(objAssembly.Location)+" [/load <source>] [/resize <x>x<y> <method>[(<repeat>)]] [/save <target>] ... [/exit]",
         "  + /load    - loads a file into the source buffer",
@@ -215,7 +232,7 @@ namespace ImageResizer {
         "    + <method> - the method to use",
         "    + <repeat> - the number of repetitions using this method",
         "  + /exit      - quits the program without showing the gui",
-        "You can load and process multiple file at once by loading after saving again.",
+        "You can load and process multiple files at once by loading after saving again.",
         "  + ie. /load 1.bmp /resize 10x10 Pixel /save 1.jpg /load 2.bmp /resize 10x10 Pixel /save 2.jpg",
         "You can also save to multiple files by adding another save parameter.",
         "  + ie. /load 1.bmp /resize 10x10 Pixel /save 1.jpg /save 2.jpg",
@@ -228,8 +245,8 @@ namespace ImageResizer {
       BitmapSource objRet;
 
       Bitmap objBitmapSrc = objSource.AsBitmap();
-      if (structImageResizer.structPixelBlitter.ptrPixelCalculator != null) {
-        Bitmap objBitmapTmp = structImageResizer.structPixelBlitter.ptrPixelCalculator.Invoke(objBitmapSrc);
+      if (structImageResizer.structPixelBlitter.PixelCalculator != null) {
+        Bitmap objBitmapTmp = structImageResizer.structPixelBlitter.PixelCalculator.Invoke(objBitmapSrc);
         objBitmapSrc.Dispose();
         objBitmapSrc = objBitmapTmp;
       } else {

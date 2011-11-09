@@ -1,8 +1,8 @@
-﻿#region (c)2010 Hawkynt
+﻿#region (c)2010-2011 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010 Hawkynt
+    Copyright (C) 2010-2011 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,27 +40,27 @@
 namespace nImager.Filters {
   static class libHawkynt {
     // just a bad TV effect
-    public static void voidTV2X(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[intSrcX, intSrcY];
-      byte byteY = stPixel.Y;
-      objTgt[intTgtX + 0, intTgtY + 0] = new sPixel(stPixel.R, 0, 0);
-      objTgt[intTgtX + 1, intTgtY + 0] = new sPixel(0, stPixel.G, 0);
-      objTgt[intTgtX + 0, intTgtY + 1] = new sPixel(0, 0, stPixel.B);
-      objTgt[intTgtX + 1, intTgtY + 1] = new sPixel(byteY, byteY, byteY);
+    public static void Tv2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+      var pixel = sourceImage[srcX, srcY];
+      var luminance = pixel.Luminance;
+      targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0);
+      targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0);
+      targetImage[tgtX + 0, tgtY + 1] = new sPixel(0, 0, pixel.Blue);
+      targetImage[tgtX + 1, tgtY + 1] = sPixel.FromGrey(luminance);
     }
     // another bad one
-    public static void voidTV3X(cImage objSrc, int intSrcX, int intSrcY, cImage objTgt, int intTgtX, int intTgtY, byte byteScaleX, byte byteScaleY, object objParam) {
-      sPixel stPixel = objSrc[intSrcX, intSrcY];
-      sbyte sbyteAP = (sbyte)(1 - ((intSrcX % 2) << 1));
-      objTgt[intTgtX + 0, intTgtY + 0] = new sPixel(stPixel.R, 0, 0);
-      objTgt[intTgtX + 1, intTgtY + 0] = new sPixel(0, stPixel.G, 0);
-      objTgt[intTgtX + 2, intTgtY + 0] = new sPixel(0, 0, stPixel.B);
-      objTgt[intTgtX + 0, intTgtY + 1] = new sPixel(0, 0, 0);
-      objTgt[intTgtX + 1, intTgtY + 1] = new sPixel(0, 0, 0);
-      objTgt[intTgtX + 2, intTgtY + 1] = new sPixel(0, 0, 0);
-      objTgt[intTgtX + 0, intTgtY - sbyteAP] = new sPixel(stPixel.R, 0, 0);
-      objTgt[intTgtX + 1, intTgtY + sbyteAP] = new sPixel(0, stPixel.G, 0);
-      objTgt[intTgtX + 2, intTgtY - sbyteAP] = new sPixel(0, 0, stPixel.B);
+    public static void Tv3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+      var pixel = sourceImage[srcX, srcY];
+      var ap = (sbyte)(1 - ((srcX & 1) << 1));
+      targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0);
+      targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0);
+      targetImage[tgtX + 2, tgtY + 0] = new sPixel(0, 0, pixel.Blue);
+      targetImage[tgtX + 0, tgtY + 1] = sPixel.Black;
+      targetImage[tgtX + 1, tgtY + 1] = sPixel.Black;
+      targetImage[tgtX + 2, tgtY + 1] = sPixel.Black;
+      targetImage[tgtX + 0, tgtY - ap] = new sPixel(pixel.Red, 0, 0);
+      targetImage[tgtX + 1, tgtY + ap] = new sPixel(0, pixel.Green, 0);
+      targetImage[tgtX + 2, tgtY - ap] = new sPixel(0, 0, pixel.Blue);
     }
 
   }

@@ -1,8 +1,8 @@
-﻿#region (c)2010 Hawkynt
+﻿#region (c)2010-2011 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010 Hawkynt
+    Copyright (C) 2010-2011 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,108 +45,160 @@ namespace nImager {
   /// The top 8-Bits of this dword are unused.
   /// </summary>
   public struct sPixel : ICloneable, ISerializable {
-    private const byte byteYTrigger = 48;
-    private const byte byteUTrigger = 7;
-    private const byte byteVTrigger = 6;
+    private const byte luminanceTrigger = 48;
+    private const byte chromaUTrigger = 7;
+    private const byte chromaVTrigger = 6;
 
     /// <summary>
     /// The value holding the red, green and blue component
     /// </summary>
-    private UInt32 _dwordPixel;
+    private UInt32 _rgbBytes;
 
     #region caches
-    private static readonly cRGBCache _hashCache_Y = new cRGBCache();
-    private static readonly cRGBCache _hashCache_U = new cRGBCache();
-    private static readonly cRGBCache _hashCache_V = new cRGBCache();
+    private static readonly cRGBCache _cacheY = new cRGBCache();
+    private static readonly cRGBCache _cacheU = new cRGBCache();
+    private static readonly cRGBCache _cacheV = new cRGBCache();
 
-    private static readonly cRGBCache _hashCache_u = new cRGBCache();
-    private static readonly cRGBCache _hashCache_v = new cRGBCache();
+    private static readonly cRGBCache _cacheAlternateU = new cRGBCache();
+    private static readonly cRGBCache _cacheAlternateV = new cRGBCache();
 
-    private static readonly cRGBCache _hashCache_Brightness = new cRGBCache();
-    private static readonly cRGBCache _hashCache_Hue = new cRGBCache();
+    private static readonly cRGBCache _cacheBrightness = new cRGBCache();
+    private static readonly cRGBCache _cacheHue = new cRGBCache();
     #endregion
     #region private methods
     /// <summary>
     /// Clips a float value within 0-255 range and returns it.
     /// </summary>
-    /// <param name="fltA">The float value to clip.</param>
+    /// <param name="value">The float value to clip.</param>
     /// <returns>The clipped value</returns>
-    private static byte _byteFloat2Byte(float fltA) {
-      return((fltA < byte.MinValue)?byte.MinValue:(fltA > byte.MaxValue)?byte.MaxValue:(byte)fltA);
+    private static byte _Float2Byte(float value) {
+      return ((value < byte.MinValue) ? byte.MinValue : (value > byte.MaxValue) ? byte.MaxValue : (byte)value);
     }
     /// <summary>
     /// Gets the value for red, hopefully the compiler inlines that.
     /// </summary>
-    /// <param name="dwordVal">The pixel value.</param>
+    /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The red component</returns>
-    private static byte _byteR(UInt32 dwordVal) {
-      return ((byte)(dwordVal >> 16));
+    private static byte _getRed(UInt32 rgbBytes) {
+      return ((byte)(rgbBytes >> 16));
     }
     /// <summary>
     /// Gets the value for green, hopefully the compiler inlines that.
     /// </summary>
-    /// <param name="dwordVal">The pixel value.</param>
+    /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The green component</returns>
-    private static byte _byteG(UInt32 dwordVal) {
-      return ((byte)(dwordVal >> 8));
+    private static byte _getGreen(UInt32 rgbBytes) {
+      return ((byte)(rgbBytes >> 8));
     }
     /// <summary>
     /// Gets the value for blue, hopefully the compiler inlines that.
     /// </summary>
-    /// <param name="dwordVal">The pixel value.</param>
+    /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The blue component</returns>
-    private static byte _byteB(UInt32 dwordVal) {
-      return ((byte)(dwordVal));
+    private static byte _getBlue(UInt32 rgbBytes) {
+      return ((byte)(rgbBytes));
     }
     #endregion
     #region Properties
+
+    /// <summary>
+    /// Black
+    /// </summary>
+    public static readonly sPixel Black = FromGrey(0);
+    /// <summary>
+    /// White
+    /// </summary>
+    public static readonly sPixel White = FromGrey(255);
     /// <summary>
     /// <c>true</c> when IsLike and IsNotLike should allow little differencies in comparison; otherwise, <c>false</c>.
     /// </summary>
     public static bool AllowThresholds = true;
     /// <summary>
-    /// Gets the minimum value of R, G and B.
+    /// Gets the minimum value of Red, Green and Blue.
     /// </summary>
     /// <value>The minimum.</value>
     public byte Min {
       get {
-        return ((this.R < this.G) && (this.R < this.B) ? this.R : this.G < this.B ? this.G : this.B);
+        return ((this.Red < this.Green) && (this.Red < this.Blue) ? this.Red : this.Green < this.Blue ? this.Green : this.Blue);
       }
     }
     /// <summary>
-    /// Gets the maximum value of R, G and B.
+    /// Gets the maximum value of Red, Green and Blue.
     /// </summary>
     /// <value>The maximum.</value>
     public byte Max {
       get {
-        return ((this.R > this.G) && (this.R > this.B) ? this.R : this.G > this.B ? this.G : this.B);
+        return ((this.Red > this.Green) && (this.Red > this.Blue) ? this.Red : this.Green > this.Blue ? this.Green : this.Blue);
+      }
+    }
+    /// <summary>
+    /// Factor that is used to avoid noise in color extraction.
+    /// The higher the factor, the lesser colors will be detected.
+    /// </summary>
+    public static double ColorExtractionFactor = 4;
+    /// <summary>
+    /// Extract the base color.
+    /// </summary>
+    public sPixel ExtractColors {
+      get {
+        var red = this.Red;
+        var green = this.Green;
+        var blue = this.Blue;
+        /*
+        var max = r > g ? r > b ? r : b > g ? b : g : b > g ? b : g;
+        var add = (255 - max);
+        float baseR = r;
+        float baseG = g;
+        float baseB = b;
+        */
+        float min = red < green ? red < blue ? red : blue < green ? blue : green : blue < green ? blue : green;
+        var baseR = red - min;
+        var baseG = green - min;
+        var baseB = blue - min;
+        var factorR = 255 / baseR;
+        var factorG = 255 / baseG;
+        var factorB = 255 / baseB;
+        var useFactor = Math.Min(factorR, Math.Min(factorG, factorB));
+        baseR = (float)(Math.Floor((baseR * useFactor) / ColorExtractionFactor) * ColorExtractionFactor);
+        baseG = (float)(Math.Floor((baseG * useFactor) / ColorExtractionFactor) * ColorExtractionFactor);
+        baseB = (float)(Math.Floor((baseB * useFactor) / ColorExtractionFactor) * ColorExtractionFactor);
+        return (new sPixel((byte)baseR, (byte)baseG, (byte)baseB));
+      }
+    }
+    public sPixel ExtractDeltas {
+      get {
+        var red = this.Red;
+        var green = this.Green;
+        var blue = this.Blue;
+        var color = this.ExtractColors;
+        return (new sPixel((byte)(color.Red - red), (byte)(color.Green - green), (byte)(color.Blue - blue)));
       }
     }
     /// <summary>
     /// Gets the luminance(Y).
     /// </summary>
     /// <value>The Y-value.</value>
-    public byte Y {
+    public byte Luminance {
       get {
-        return (_hashCache_Y.GetOrAdd(this._dwordPixel, dwordC => _byteFloat2Byte(_byteR(dwordC) * 0.299f + _byteG(dwordC) * 0.587f + _byteB(dwordC) * 0.114f)));
+        return (_cacheY.GetOrAdd(this._rgbBytes, rgbBytes => _Float2Byte(_getRed(rgbBytes) * 0.299f + _getGreen(rgbBytes) * 0.587f + _getBlue(rgbBytes) * 0.114f)));
       }
     }
     /// <summary>
     /// Gets the chrominance(U).
     /// </summary>
     /// <value>The U-value.</value>
-    public byte U {
+    public byte ChrominanceU {
       get {
-        return (_hashCache_U.GetOrAdd(this._dwordPixel, dwordC => _byteFloat2Byte(127.5f + _byteR(dwordC) * 0.5f - _byteG(dwordC) * 0.418688f - _byteB(dwordC) * 0.081312f)));
+        return (_cacheU.GetOrAdd(this._rgbBytes, rgbBytes => _Float2Byte(127.5f + _getRed(rgbBytes) * 0.5f - _getGreen(rgbBytes) * 0.418688f - _getBlue(rgbBytes) * 0.081312f)));
       }
     }
     /// <summary>
     /// Gets the chrominance(V).
     /// </summary>
     /// <value>The V-value.</value>
-    public byte V {
+    public byte ChrominanceV {
       get {
-        return (_hashCache_V.GetOrAdd(this._dwordPixel, dwordC => _byteFloat2Byte(127.5f - _byteR(dwordC) * 0.168736f - _byteG(dwordC) * 0.331264f + _byteB(dwordC) * 0.5f)));
+        return (_cacheV.GetOrAdd(this._rgbBytes, rgbBytes => _Float2Byte(127.5f - _getRed(rgbBytes) * 0.168736f - _getGreen(rgbBytes) * 0.331264f + _getBlue(rgbBytes) * 0.5f)));
       }
     }
     /// <summary>
@@ -155,7 +207,7 @@ namespace nImager {
     /// <value>The u-value.</value>
     public byte u {
       get {
-        return (_hashCache_u.GetOrAdd(this._dwordPixel, dwordC => _byteFloat2Byte(_byteR(dwordC) * 0.5f + _byteG(dwordC) * 0.418688f + _byteB(dwordC) * 0.081312f)));
+        return (_cacheAlternateU.GetOrAdd(this._rgbBytes, rgbBytes => _Float2Byte(_getRed(rgbBytes) * 0.5f + _getGreen(rgbBytes) * 0.418688f + _getBlue(rgbBytes) * 0.081312f)));
       }
     }
     /// <summary>
@@ -164,7 +216,7 @@ namespace nImager {
     /// <value>The v-value.</value>
     public byte v {
       get {
-        return (_hashCache_v.GetOrAdd(this._dwordPixel, dwordC => _byteFloat2Byte(_byteR(dwordC) * 0.168736f + _byteG(dwordC) * 0.331264f + _byteB(dwordC) * 0.5f)));
+        return (_cacheAlternateV.GetOrAdd(this._rgbBytes, rgbBytes => _Float2Byte(_getRed(rgbBytes) * 0.168736f + _getGreen(rgbBytes) * 0.331264f + _getBlue(rgbBytes) * 0.5f)));
       }
     }
     /// <summary>
@@ -173,8 +225,8 @@ namespace nImager {
     /// <value>The brightness.</value>
     public byte Brightness {
       get {
-        return (_hashCache_Brightness.GetOrAdd(this._dwordPixel, dwordC => (byte)((_byteR(dwordC) * 3 + _byteG(dwordC) * 3 + _byteB(dwordC) * 2) >> 3)));
-        //byteRet = (byte)((this.R << 1 + this.G << 1 + this.B << 1 + this.R + this.G) >> 3);
+        return (_cacheBrightness.GetOrAdd(this._rgbBytes, dwordC => (byte)((_getRed(dwordC) * 3 + _getGreen(dwordC) * 3 + _getBlue(dwordC) * 2) >> 3)));
+        //byteRet = (byte)((this.Red << 1 + this.Green << 1 + this.Blue << 1 + this.Red + this.Green) >> 3);
       }
     }
     /// <summary>
@@ -183,29 +235,30 @@ namespace nImager {
     /// <value>The hue.</value>
     public byte Hue {
       get {
-        return (_hashCache_Hue.GetOrAdd(this._dwordPixel, dwordC => {
-          float fltRet;
-          byte byteR = _byteR(dwordC);
-          byte byteG = _byteG(dwordC);
-          byte byteB = _byteB(dwordC);
-          byte byteMin = Math.Min(Math.Min(byteR, byteG), byteB);
-          byte byteMax = Math.Max(Math.Max(byteR, byteG), byteB);
-          if (byteMin == byteMax)
-            fltRet = 0;
-          else if (byteR == byteMax)
-            fltRet = 60 * (0 + (byteG - byteB) / (byteMax - byteMin));
-          else if (byteG == byteMax)
-            fltRet = 60 * (2 + (byteB - byteR) / (byteMax - byteMin));
-          else if (byteB == byteMax)
-            fltRet = 60 * (4 + (byteR - byteG) / (byteMax - byteMin));
+        return (_cacheHue.GetOrAdd(this._rgbBytes, rgbBytes => {
+          float hue;
+          var red = _getRed(rgbBytes);
+          var green = _getGreen(rgbBytes);
+          var blue = _getBlue(rgbBytes);
+          var min = Math.Min(Math.Min(red, green), blue);
+          var max = Math.Max(Math.Max(red, green), blue);
+          float delta = max - min;
+          if (max == min)
+            hue = 0;
+          else if (red == max)
+            hue = 60 * (0 + (green - blue) / delta);
+          else if (green == max)
+            hue = 60 * (2 + (blue - red) / delta);
+          else if (blue == max)
+            hue = 60 * (4 + (red - green) / delta);
           else
-            fltRet = 0;
-          while (fltRet < 0)
-            fltRet += 360;
-          while (fltRet > 360)
-            fltRet -= 360;
-          fltRet *= (256f / 360f);
-          return ((byte)fltRet);
+            hue = 0;
+          while (hue < 0)
+            hue += 360;
+          while (hue >= 360)
+            hue -= 360;
+          const float conversionFactor = 256f / 360f;
+          return ((byte)(hue * conversionFactor));
         }));
       }
     }
@@ -215,7 +268,7 @@ namespace nImager {
     /// <value>The color.</value>
     public Color Color {
       get {
-        return (Color.FromArgb(this.R, this.G, this.B));
+        return (Color.FromArgb(this.Red, this.Green, this.Blue));
       }
       set {
         this.SetRGB(value.R, value.G, value.B);
@@ -224,46 +277,46 @@ namespace nImager {
     /// <summary>
     /// Sets the red, green and blue value for that pixel.
     /// </summary>
-    /// <param name="byteR">The red-value.</param>
-    /// <param name="byteG">The green-value.</param>
-    /// <param name="byteB">The blue-value.</param>
-    public void SetRGB(byte byteR, byte byteG, byte byteB) {
-      this._dwordPixel = (UInt32)byteR << 16 | (UInt32)byteG << 8 | byteB;
+    /// <param name="red">The red-value.</param>
+    /// <param name="green">The green-value.</param>
+    /// <param name="blue">The blue-value.</param>
+    public void SetRGB(byte red, byte green, byte blue) {
+      this._rgbBytes = (UInt32)red << 16 | (UInt32)green << 8 | blue;
     }
     /// <summary>
     /// Gets or sets the red component.
     /// </summary>
     /// <value>The red-value.</value>
-    public byte R {
+    public byte Red {
       get {
-        return (_byteR(this._dwordPixel));
+        return (_getRed(this._rgbBytes));
       }
       set {
-        this.SetRGB(value, this.G, this.B);
+        this.SetRGB(value, this.Green, this.Blue);
       }
     }
     /// <summary>
     /// Gets or sets the green component.
     /// </summary>
     /// <value>The green-value.</value>
-    public byte G {
+    public byte Green {
       get {
-        return (_byteG(this._dwordPixel));
+        return (_getGreen(this._rgbBytes));
       }
       set {
-        this.SetRGB(this.R, value, this.B);
+        this.SetRGB(this.Red, value, this.Blue);
       }
     }
     /// <summary>
     /// Gets or sets the blue component.
     /// </summary>
     /// <value>The blue-value.</value>
-    public byte B {
+    public byte Blue {
       get {
-        return (_byteB(this._dwordPixel));
+        return (_getBlue(this._rgbBytes));
       }
       set {
-        this.SetRGB(this.R, this.G, value);
+        this.SetRGB(this.Red, this.Green, value);
       }
     }
     #endregion
@@ -271,36 +324,60 @@ namespace nImager {
     /// <summary>
     /// Factory to create a <see cref="sPixel"/> instance from red, green and blue value.
     /// </summary>
-    /// <param name="byteR">The red-value.</param>
-    /// <param name="byteG">The green-value.</param>
-    /// <param name="byteB">The blue-value.</param>
+    /// <param name="red">The red-value.</param>
+    /// <param name="green">The green-value.</param>
+    /// <param name="blue">The blue-value.</param>
     /// <returns></returns>
-    public static sPixel FromRGB(byte byteR, byte byteG, byte byteB) {
-      return (new sPixel(byteR, byteG, byteB));
+    public static sPixel FromRGB(byte red, byte green, byte blue) {
+      return (new sPixel(red, green, blue));
+    }
+    /// <summary>
+    /// Factory to create a <see cref="sPixel"/> instance from grey value.
+    /// </summary>
+    /// <param name="grey">The grey value.</param>
+    /// <returns></returns>
+    public static sPixel FromGrey(byte grey) {
+      return (new sPixel(grey));
     }
     /// <summary>
     /// Initializes a new instance of the <see cref="sPixel"/> struct by using an existing one.
     /// </summary>
-    /// <param name="stPixel">The pixel instance to copy from.</param>
-    public sPixel(sPixel stPixel) {
-      this._dwordPixel = stPixel._dwordPixel;
+    /// <param name="pixel">The pixel instance to copy from.</param>
+    public sPixel(sPixel pixel) {
+      this._rgbBytes = pixel._rgbBytes;
+    }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="sPixel"/> struct by using a grey value.
+    /// </summary>
+    /// <param name="grey">The grey value.</param>
+    public sPixel(byte grey)
+      : this(grey, grey, grey) {
     }
     /// <summary>
     /// Initializes a new instance of the <see cref="sPixel"/> struct by using an instance of a the <see cref="Color"/> class.
     /// </summary>
-    /// <param name="objColor">The color.</param>
-    public sPixel(Color objColor) {
-      this._dwordPixel = 0;
-      this.Color = objColor;
+    /// <param name="color">The color.</param>
+    public sPixel(Color color) {
+      this._rgbBytes = 0;
+      this.Color = color;
     }
     /// <summary>
     /// Initializes a new instance of the <see cref="sPixel"/> struct by using red, green and blue component.
     /// </summary>
-    /// <param name="byteR">The red-value.</param>
-    /// <param name="byteG">The green-value.</param>
-    /// <param name="byteB">The blue-value.</param>
-    public sPixel(byte byteR, byte byteG, byte byteB) {
-      this._dwordPixel = (UInt32)byteR << 16 | (UInt32)byteG << 8 | byteB;
+    /// <param name="red">The red-value.</param>
+    /// <param name="green">The green-value.</param>
+    /// <param name="blue">The blue-value.</param>
+    public sPixel(byte red, byte green, byte blue) {
+      this._rgbBytes = (UInt32)red << 16 | (UInt32)green << 8 | blue;
+    }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="sPixel"/> struct by using red, green and blue component.
+    /// </summary>
+    /// <param name="red">The red-value.</param>
+    /// <param name="green">The green-value.</param>
+    /// <param name="blue">The blue-value.</param>
+    public sPixel(double red, double green, double blue)
+      : this((byte)(red * 255), (byte)(green * 255), (byte)(blue * 255)) {
     }
     #endregion
     /// <summary>
@@ -310,7 +387,7 @@ namespace nImager {
     /// A <see cref="System.String"/> that represents this instance.
     /// </returns>
     public override string ToString() {
-      return ("(" + this._dwordPixel.ToString("X6") + ") Red:" + this.R + ", Green:" + this.G + ", Blue:" + B);
+      return ("(" + this._rgbBytes.ToString("X6") + ") Red:" + this.Red + ", Green:" + this.Green + ", Blue:" + this.Blue);
     }
     /// <summary>
     /// Returns a hash code for this instance.
@@ -319,245 +396,244 @@ namespace nImager {
     /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
     /// </returns>
     public override int GetHashCode() {
-      return ((int)this._dwordPixel);
+      return ((int)this._rgbBytes);
     }
     #region operators
     /// <summary>
     /// Sums up the components of two instances and clips the result within a 0-255 range.
     /// </summary>
-    /// <param name="stA">The first instance.</param>
-    /// <param name="stB">The second instance.</param>
+    /// <param name="pixel1">The first instance.</param>
+    /// <param name="pixel2">The second instance.</param>
     /// <returns>A new instance where each component gets added and overflows were clipped.</returns>
-    public static sPixel operator +(sPixel stA, sPixel stB) {
-      int intR = stA.R + stB.R;
-      int intG = stA.G + stB.G;
-      int intB = stA.B + stB.B;
-      intR = intR > byte.MaxValue ? byte.MaxValue : intR;
-      intG = intG > byte.MaxValue ? byte.MaxValue : intG;
-      intB = intB > byte.MaxValue ? byte.MaxValue : intB;
-      return (new sPixel((byte)intR, (byte)intG, (byte)intB));
+    public static sPixel operator +(sPixel pixel1, sPixel pixel2) {
+      var red = pixel1.Red + pixel2.Red;
+      var green = pixel1.Green + pixel2.Green;
+      var blue = pixel1.Blue + pixel2.Blue;
+      red = red > byte.MaxValue ? byte.MaxValue : red;
+      green = green > byte.MaxValue ? byte.MaxValue : green;
+      blue = blue > byte.MaxValue ? byte.MaxValue : blue;
+      return (new sPixel((byte)red, (byte)green, (byte)blue));
     }
     /// <summary>
     /// Substract the components of two instances and clips the result within a 0-255 range.
     /// </summary>
-    /// <param name="stA">The instance to substract from.</param>
-    /// <param name="stB">The instance that should be substracted.</param>
+    /// <param name="pixel1">The instance to substract from.</param>
+    /// <param name="pixel2">The instance that should be substracted.</param>
     /// <returns>A new instance where each component gets substracted and underflows were clipped.</returns>
-    public static sPixel operator -(sPixel stA, sPixel stB) {
-      int intR = stA.R - stB.R;
-      int intG = stA.G - stB.G;
-      int intB = stA.B - stB.B;
-      intR = intR < byte.MinValue ? byte.MinValue : intR;
-      intG = intG < byte.MinValue ? byte.MinValue : intG;
-      intB = intB < byte.MinValue ? byte.MinValue : intB;
-      return (new sPixel((byte)intR, (byte)intG, (byte)intB));
+    public static sPixel operator -(sPixel pixel1, sPixel pixel2) {
+      var red = pixel1.Red - pixel2.Red;
+      var green = pixel1.Green - pixel2.Green;
+      var blue = pixel1.Blue - pixel2.Blue;
+      red = red < byte.MinValue ? byte.MinValue : red;
+      green = green < byte.MinValue ? byte.MinValue : green;
+      blue = blue < byte.MinValue ? byte.MinValue : blue;
+      return (new sPixel((byte)red, (byte)green, (byte)blue));
     }
     /// <summary>
     /// Inverts the given color.
     /// </summary>
-    /// <param name="stA">The instance to invert.</param>
+    /// <param name="pixel">The instance to invert.</param>
     /// <returns>A new instance with the negative color.</returns>
-    public static sPixel operator !(sPixel stA) {
-      return (255 - stA);
+    public static sPixel operator !(sPixel pixel) {
+      return (255 - pixel);
     }
     /// <summary>
     /// Adds a value to all components and clips the result within a 0-255 range.
     /// </summary>
-    /// <param name="stA">The instance to add to.</param>
-    /// <param name="byteD">The value that should be added to each component.</param>
+    /// <param name="pixel">The instance to add to.</param>
+    /// <param name="grey">The value that should be added to each component.</param>
     /// <returns>A new instance containing the clipped values.</returns>
-    public static sPixel operator +(sPixel stA, byte byteD) {
-      int intR = stA.R + byteD;
-      int intG = stA.G + byteD;
-      int intB = stA.B + byteD;
-      intR = intR > byte.MaxValue ? byte.MaxValue : intR;
-      intG = intG > byte.MaxValue ? byte.MaxValue : intG;
-      intB = intB > byte.MaxValue ? byte.MaxValue : intB;
-      return (new sPixel((byte)intR, (byte)intG, (byte)intB));
+    public static sPixel operator +(sPixel pixel, byte grey) {
+      var red = pixel.Red + grey;
+      var green = pixel.Green + grey;
+      var blue = pixel.Blue + grey;
+      red = red > byte.MaxValue ? byte.MaxValue : red;
+      green = green > byte.MaxValue ? byte.MaxValue : green;
+      blue = blue > byte.MaxValue ? byte.MaxValue : blue;
+      return (new sPixel((byte)red, (byte)green, (byte)blue));
     }
     /// <summary>
     /// Multiplies each color component with a specific value and clips the result within a 0-255 range.
     /// </summary>
-    /// <param name="stA">The instance to multiply.</param>
-    /// <param name="fltD">The value to be multiplied with.</param>
+    /// <param name="pixel">The instance to multiply.</param>
+    /// <param name="gamma">The value to be multiplied with.</param>
     /// <returns>A new instance with the clipped values.</returns>
-    public static sPixel operator *(sPixel stA, float fltD) {
-      int intR = (int)(stA.R * fltD);
-      int intG = (int)(stA.G * fltD);
-      int intB = (int)(stA.B * fltD);
-      intR = intR > byte.MaxValue ? byte.MaxValue : intR < byte.MinValue ? byte.MinValue : intR;
-      intG = intG > byte.MaxValue ? byte.MaxValue : intG < byte.MinValue ? byte.MinValue : intG;
-      intB = intB > byte.MaxValue ? byte.MaxValue : intB < byte.MinValue ? byte.MinValue : intB;
-      return (new sPixel((byte)intR, (byte)intG, (byte)intB));
+    public static sPixel operator *(sPixel pixel, float gamma) {
+      var red = (int)(pixel.Red * gamma);
+      var green = (int)(pixel.Green * gamma);
+      var blue = (int)(pixel.Blue * gamma);
+      red = red > byte.MaxValue ? byte.MaxValue : red < byte.MinValue ? byte.MinValue : red;
+      green = green > byte.MaxValue ? byte.MaxValue : green < byte.MinValue ? byte.MinValue : green;
+      blue = blue > byte.MaxValue ? byte.MaxValue : blue < byte.MinValue ? byte.MinValue : blue;
+      return (new sPixel((byte)red, (byte)green, (byte)blue));
     }
     /// <summary>
     /// Substracts all color components from a given value and returns the results clipped within a 0-255 range.
     /// </summary>
-    /// <param name="byteD">The value to substract from.</param>
-    /// <param name="stA">The isntance that holds the color components.</param>
+    /// <param name="grey">The value to substract from.</param>
+    /// <param name="pixel">The isntance that holds the color components.</param>
     /// <returns>A new instance with the clipped values.</returns>
-    public static sPixel operator -(byte byteD, sPixel stA) {
-      int intR = byteD - stA.R;
-      int intG = byteD - stA.G;
-      int intB = byteD - stA.B;
-      intR = intR < byte.MinValue ? byte.MinValue : intR;
-      intG = intG < byte.MinValue ? byte.MinValue : intG;
-      intB = intB < byte.MinValue ? byte.MinValue : intB;
-      return (new sPixel((byte)intR, (byte)intG, (byte)intB));
+    public static sPixel operator -(byte grey, sPixel pixel) {
+      var red = grey - pixel.Red;
+      var green = grey - pixel.Green;
+      var blue = grey - pixel.Blue;
+      red = red < byte.MinValue ? byte.MinValue : red;
+      green = green < byte.MinValue ? byte.MinValue : green;
+      blue = blue < byte.MinValue ? byte.MinValue : blue;
+      return (new sPixel((byte)red, (byte)green, (byte)blue));
     }
     /// <summary>
     /// Substract a given value from all color components and returns the results clipped within a 0-255 range.
     /// </summary>
-    /// <param name="stA">The instance to substract from.</param>
-    /// <param name="byteD">The value to substract.</param>
+    /// <param name="pixel">The instance to substract from.</param>
+    /// <param name="grey">The value to substract.</param>
     /// <returns>A new instance with the clipped values.</returns>
-    public static sPixel operator -(sPixel stA, byte byteD) {
-      int intR = stA.R - byteD;
-      int intG = stA.G - byteD;
-      int intB = stA.B - byteD;
-      intR = intR < byte.MinValue ? byte.MinValue : intR;
-      intG = intG < byte.MinValue ? byte.MinValue : intG;
-      intB = intB < byte.MinValue ? byte.MinValue : intB;
-      return (new sPixel((byte)intR, (byte)intG, (byte)intB));
+    public static sPixel operator -(sPixel pixel, byte grey) {
+      var red = pixel.Red - grey;
+      var green = pixel.Green - grey;
+      var blue = pixel.Blue - grey;
+      red = red < byte.MinValue ? byte.MinValue : red;
+      green = green < byte.MinValue ? byte.MinValue : green;
+      blue = blue < byte.MinValue ? byte.MinValue : blue;
+      return (new sPixel((byte)red, (byte)green, (byte)blue));
     }
     /// <summary>
     /// Divides each color component by a given value and returns the results clipped within a 0-255 range.
     /// </summary>
-    /// <param name="stA">The instance to be divided.</param>
-    /// <param name="fltD">The value to divide by.</param>
+    /// <param name="pixel">The instance to be divided.</param>
+    /// <param name="gamma">The value to divide by.</param>
     /// <returns>A new instance with the clipped values.</returns>
-    public static sPixel operator /(sPixel stA, float fltD) {
-      return (stA * (1f / fltD));
+    public static sPixel operator /(sPixel pixel, float gamma) {
+      return (pixel * (1f / gamma));
     }
     /// <summary>
     /// Adds a value to all components and clips the result within a 0-255 range.
     /// </summary>
-    /// <param name="byteD">The value that should be added to each component.</param>
-    /// <param name="stA">The instance to add to.</param>
+    /// <param name="grey">The value that should be added to each component.</param>
+    /// <param name="pixel">The instance to add to.</param>
     /// <returns>A new instance containing the clipped values.</returns>
-    public static sPixel operator +(byte byteD, sPixel stA) {
-      return (stA + byteD);
+    public static sPixel operator +(byte grey, sPixel pixel) {
+      return (pixel + grey);
     }
     /// <summary>
     /// Multiplies each color component with a specific value and clips the result within a 0-255 range.
     /// </summary>
-    /// <param name="fltD">The value to be multiplied with.</param>
-    /// <param name="stA">The instance to multiply.</param>
+    /// <param name="gamma">The value to be multiplied with.</param>
+    /// <param name="pixel">The instance to multiply.</param>
     /// <returns>A new instance with the clipped values.</returns>
-    public static sPixel operator *(float fltD, sPixel stA) {
-      return (stA * fltD);
+    public static sPixel operator *(float gamma, sPixel pixel) {
+      return (pixel * gamma);
     }
     /// <summary>
     /// Test for equality of all color components.
     /// </summary>
-    /// <param name="stA">The first instance.</param>
-    /// <param name="stB">The second instance.</param>
+    /// <param name="pixel1">The first instance.</param>
+    /// <param name="pixel2">The second instance.</param>
     /// <returns><c>true</c> if both are equal; otherwise, <c>false</c>.</returns>
-    public static bool operator ==(sPixel stA, sPixel stB) {
-      return (stA._dwordPixel == stB._dwordPixel);
+    public static bool operator ==(sPixel pixel1, sPixel pixel2) {
+      return (pixel1._rgbBytes == pixel2._rgbBytes);
     }
     /// <summary>
     /// Test for inequality of at least one color component.
     /// </summary>
-    /// <param name="stA">The first instance.</param>
-    /// <param name="stB">The second instance.</param>
+    /// <param name="pixel1">The first instance.</param>
+    /// <param name="pixel2">The second instance.</param>
     /// <returns><c>true</c> if both instances differ in at least one color component; otherwise, <c>false</c>.</returns>
-    public static bool operator !=(sPixel stA, sPixel stB) {
-      return (stA._dwordPixel != stB._dwordPixel);
+    public static bool operator !=(sPixel pixel1, sPixel pixel2) {
+      return (pixel1._rgbBytes != pixel2._rgbBytes);
     }
     /// <summary>
     /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
     /// </summary>
-    /// <param name="objA">The <see cref="System.Object"/> to compare with this instance.</param>
+    /// <param name="o">The <see cref="System.Object"/> to compare with this instance.</param>
     /// <returns>
     /// 	<c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
     /// </returns>
-    public override bool Equals(object objA) {
-      return ((objA is sPixel) && (((sPixel)objA)._dwordPixel == this._dwordPixel));
+    public override bool Equals(object o) {
+      return ((o is sPixel) && (((sPixel)o)._rgbBytes == this._rgbBytes));
     }
     /// <summary>
     /// Determines whether the specified <see cref="sPixel"/> is equal to this instance.
     /// </summary>
-    /// <param name="stA">The <see cref="sPixel"/> to compare with this instance.</param>
+    /// <param name="pixel">The <see cref="sPixel"/> to compare with this instance.</param>
     /// <returns>
     /// 	<c>true</c> if the specified <see cref="sPixel"/> is equal to this instance; otherwise, <c>false</c>.
     /// </returns>
-    public bool Equals(sPixel stA) {
-      return (stA._dwordPixel == this._dwordPixel);
+    public bool Equals(sPixel pixel) {
+      return (pixel._rgbBytes == this._rgbBytes);
     }
     /// <summary>
     /// Determines whether the specified <see cref="sPixel"/> instance is similar to this instance.
     /// </summary>
-    /// <param name="stA">The instance to compare to.</param>
+    /// <param name="pixel">The instance to compare to.</param>
     /// <returns>
     /// 	<c>true</c> if the specified instance is alike; otherwise, <c>false</c>.
     /// </returns>
-    public bool IsLike(sPixel stA) {
-      if (AllowThresholds) {
-        int intTmp = this.V - stA.V;
-        if (intTmp > byteVTrigger || intTmp < -byteVTrigger)
-          return false;
-        intTmp = this.Y - stA.Y;
-        if (intTmp > byteYTrigger || intTmp < -byteYTrigger)
-          return false;
-        intTmp = this.U - stA.U;
-        return intTmp <= byteUTrigger && intTmp >= -byteUTrigger;
-      } else {
-        return( this == stA);
-      }
+    public bool IsLike(sPixel pixel) {
+      if (!AllowThresholds)
+        return (this == pixel);
+      var delta = this.ChrominanceV - pixel.ChrominanceV;
+      if (delta > chromaVTrigger || delta < -chromaVTrigger)
+        return false;
+      delta = this.Luminance - pixel.Luminance;
+      if (delta > luminanceTrigger || delta < -luminanceTrigger)
+        return false;
+      delta = this.ChrominanceU - pixel.ChrominanceU;
+      return delta <= chromaUTrigger && delta >= -chromaUTrigger;
     }
+
     /// <summary>
     /// Determines whether this instance is not like the specified <see cref="sPixel"/> instance.
     /// </summary>
-    /// <param name="stA">The instance to compare to.</param>
+    /// <param name="pixel">The instance to compare to.</param>
     /// <returns>
     /// 	<c>true</c> if the specified instance is not alike; otherwise, <c>false</c>.
     /// </returns>
-    public bool IsNotLike(sPixel stA) {
-      return (!this.IsLike(stA));
+    public bool IsNotLike(sPixel pixel) {
+      return (!this.IsLike(pixel));
     }
     #endregion
     #region optimized interpolators
     /// <summary>
     /// Interpolates two <see cref="sPixel"/> instances.
     /// </summary>
-    /// <param name="stA">The first pixel instance.</param>
-    /// <param name="stB">The second pixel instance.</param>
+    /// <param name="pixel1">The first pixel instance.</param>
+    /// <param name="pixel2">The second pixel instance.</param>
     /// <returns>A new instance with the interpolated color values.</returns>
-    public static sPixel Interpolate(sPixel stA, sPixel stB) {
+    public static sPixel Interpolate(sPixel pixel1, sPixel pixel2) {
       return (new sPixel(
-        (byte)((stA.R + stB.R) >> 1),
-        (byte)((stA.G + stB.G) >> 1),
-        (byte)((stA.B + stB.B) >> 1)
+        (byte)((pixel1.Red + pixel2.Red) >> 1),
+        (byte)((pixel1.Green + pixel2.Green) >> 1),
+        (byte)((pixel1.Blue + pixel2.Blue) >> 1)
       ));
     }
     /// <summary>
     /// Interpolates three <see cref="sPixel"/> instances.
     /// </summary>
-    /// <param name="stA">The first pixel instance.</param>
-    /// <param name="stB">The second pixel instance.</param>
-    /// <param name="stC">The third pixel instance.</param>
+    /// <param name="pixel1">The first pixel instance.</param>
+    /// <param name="pixel2">The second pixel instance.</param>
+    /// <param name="pixel3">The third pixel instance.</param>
     /// <returns>A new instance with the interpolated color values.</returns>
-    public static sPixel Interpolate(sPixel stA, sPixel stB, sPixel stC) {
+    public static sPixel Interpolate(sPixel pixel1, sPixel pixel2, sPixel pixel3) {
       return (new sPixel(
-        (byte)((stA.R + stB.R + stC.R) / 3),
-        (byte)((stA.G + stB.G + stC.G) / 3),
-        (byte)((stA.B + stB.B + stC.B) / 3)
+        (byte)((pixel1.Red + pixel2.Red + pixel3.Red) / 3),
+        (byte)((pixel1.Green + pixel2.Green + pixel3.Green) / 3),
+        (byte)((pixel1.Blue + pixel2.Blue + pixel3.Blue) / 3)
       ));
     }
     /// <summary>
     /// Interpolates four <see cref="sPixel"/> instances.
     /// </summary>
-    /// <param name="stA">The first pixel instance.</param>
-    /// <param name="stB">The second pixel instance.</param>
-    /// <param name="stC">The third pixel instance.</param>
-    /// <param name="stD">The fourth pixel instance.</param>
+    /// <param name="pixel1">The first pixel instance.</param>
+    /// <param name="pixel2">The second pixel instance.</param>
+    /// <param name="pixel3">The third pixel instance.</param>
+    /// <param name="pixel4">The fourth pixel instance.</param>
     /// <returns>A new instance with the interpolated color values.</returns>
-    public static sPixel Interpolate(sPixel stA, sPixel stB, sPixel stC, sPixel stD) {
+    public static sPixel Interpolate(sPixel pixel1, sPixel pixel2, sPixel pixel3, sPixel pixel4) {
       return (new sPixel(
-        (byte)((stA.R + stB.R + stC.R + stD.R) >> 2),
-        (byte)((stA.G + stB.G + stC.G + stD.G) >> 2),
-        (byte)((stA.B + stB.B + stC.B + stD.B) >> 2)
+        (byte)((pixel1.Red + pixel2.Red + pixel3.Red + pixel4.Red) >> 2),
+        (byte)((pixel1.Green + pixel2.Green + pixel3.Green + pixel4.Green) >> 2),
+        (byte)((pixel1.Blue + pixel2.Blue + pixel3.Blue + pixel4.Blue) >> 2)
       ));
     }
     #endregion
@@ -565,55 +641,55 @@ namespace nImager {
     /// <summary>
     /// Weighted interpolation of two <see cref="sPixel"/> instances.
     /// </summary>
-    /// <param name="stA">The first instance.</param>
-    /// <param name="stB">The second instance.</param>
-    /// <param name="byteA">The quantifier for the first instance.</param>
-    /// <param name="byteB">The quantifier for the second instance.</param>
+    /// <param name="pixel1">The first instance.</param>
+    /// <param name="pixel2">The second instance.</param>
+    /// <param name="quantifier1">The quantifier for the first instance.</param>
+    /// <param name="quantifier2">The quantifier for the second instance.</param>
     /// <returns>A new instance from the interpolated components.</returns>
-    public static sPixel Interpolate(sPixel stA, sPixel stB, byte byteA, byte byteB) {
-      UInt16 dwordW = (UInt16)(byteA + byteB);
+    public static sPixel Interpolate(sPixel pixel1, sPixel pixel2, byte quantifier1, byte quantifier2) {
+      var total = (UInt16)(quantifier1 + quantifier2);
       return (new sPixel(
-        (byte)((stA.R * byteA + stB.R * byteB) / dwordW),
-        (byte)((stA.G * byteA + stB.G * byteB) / dwordW),
-        (byte)((stA.B * byteA + stB.B * byteB) / dwordW)
+        (byte)((pixel1.Red * quantifier1 + pixel2.Red * quantifier2) / total),
+        (byte)((pixel1.Green * quantifier1 + pixel2.Green * quantifier2) / total),
+        (byte)((pixel1.Blue * quantifier1 + pixel2.Blue * quantifier2) / total)
       ));
     }
     /// <summary>
     /// Weighted interpolation of three <see cref="sPixel"/> instances.
     /// </summary>
-    /// <param name="stA">The first instance.</param>
-    /// <param name="stB">The second instance.</param>
-    /// <param name="stC">The third instance.</param>
-    /// <param name="byteA">The quantifier for the first instance.</param>
-    /// <param name="byteB">The quantifier for the second instance.</param>
-    /// <param name="byteC">The quantifier for the third instance.</param>
+    /// <param name="pixel1">The first instance.</param>
+    /// <param name="pixel2">The second instance.</param>
+    /// <param name="pixel3">The third instance.</param>
+    /// <param name="quantifier1">The quantifier for the first instance.</param>
+    /// <param name="quantifier2">The quantifier for the second instance.</param>
+    /// <param name="quantifier3">The quantifier for the third instance.</param>
     /// <returns>A new instance from the interpolated components.</returns>
-    public static sPixel Interpolate(sPixel stA, sPixel stB, sPixel stC, byte byteA, byte byteB, byte byteC) {
-      UInt16 dwordW = (UInt16)(byteA + byteB + byteC);
+    public static sPixel Interpolate(sPixel pixel1, sPixel pixel2, sPixel pixel3, byte quantifier1, byte quantifier2, byte quantifier3) {
+      var total = (UInt16)(quantifier1 + quantifier2 + quantifier3);
       return (new sPixel(
-        (byte)((stA.R * byteA + stB.R * byteB + stC.R * byteC) / dwordW),
-        (byte)((stA.G * byteA + stB.G * byteB + stC.G * byteC) / dwordW),
-        (byte)((stA.B * byteA + stB.B * byteB + stC.B * byteC) / dwordW)
+        (byte)((pixel1.Red * quantifier1 + pixel2.Red * quantifier2 + pixel3.Red * quantifier3) / total),
+        (byte)((pixel1.Green * quantifier1 + pixel2.Green * quantifier2 + pixel3.Green * quantifier3) / total),
+        (byte)((pixel1.Blue * quantifier1 + pixel2.Blue * quantifier2 + pixel3.Blue * quantifier3) / total)
       ));
     }
     /// <summary>
     /// Weighted interpolation of four <see cref="sPixel"/> instances.
     /// </summary>
-    /// <param name="stA">The first instance.</param>
-    /// <param name="stB">The second instance.</param>
-    /// <param name="stC">The third instance.</param>
-    /// <param name="stD">The fourth instance.</param>
-    /// <param name="byteA">The quantifier for the first instance.</param>
-    /// <param name="byteB">The quantifier for the second instance.</param>
-    /// <param name="byteC">The quantifier for the third instance.</param>
-    /// <param name="byteD">The quantifier for the fourth instance.</param>
+    /// <param name="pixel1">The first instance.</param>
+    /// <param name="pixel2">The second instance.</param>
+    /// <param name="pixel3">The third instance.</param>
+    /// <param name="pixel4">The fourth instance.</param>
+    /// <param name="quantifier1">The quantifier for the first instance.</param>
+    /// <param name="quantifier2">The quantifier for the second instance.</param>
+    /// <param name="quantifier3">The quantifier for the third instance.</param>
+    /// <param name="quantifier4">The quantifier for the fourth instance.</param>
     /// <returns>A new instance from the interpolated components.</returns>
-    public static sPixel Interpolate(sPixel stA, sPixel stB, sPixel stC, sPixel stD, byte byteA, byte byteB, byte byteC, byte byteD) {
-      UInt16 dwordW = (UInt16)(byteA + byteB + byteC + byteD);
+    public static sPixel Interpolate(sPixel pixel1, sPixel pixel2, sPixel pixel3, sPixel pixel4, byte quantifier1, byte quantifier2, byte quantifier3, byte quantifier4) {
+      var total = (UInt16)(quantifier1 + quantifier2 + quantifier3 + quantifier4);
       return (new sPixel(
-        (byte)((stA.R * byteA + stB.R * byteB + stC.R * byteC + stD.R * byteD) / dwordW),
-        (byte)((stA.G * byteA + stB.G * byteB + stC.G * byteC + stD.G * byteD) / dwordW),
-        (byte)((stA.B * byteA + stB.B * byteB + stC.B * byteC + stD.B * byteD) / dwordW)
+        (byte)((pixel1.Red * quantifier1 + pixel2.Red * quantifier2 + pixel3.Red * quantifier3 + pixel4.Red * quantifier4) / total),
+        (byte)((pixel1.Green * quantifier1 + pixel2.Green * quantifier2 + pixel3.Green * quantifier3 + pixel4.Green * quantifier4) / total),
+        (byte)((pixel1.Blue * quantifier1 + pixel2.Blue * quantifier2 + pixel3.Blue * quantifier3 + pixel4.Blue * quantifier4) / total)
       ));
     }
     #endregion
@@ -632,18 +708,18 @@ namespace nImager {
     /// <summary>
     /// Initializes a new instance of the <see cref="sPixel"/> struct by deserializing it.
     /// </summary>
-    /// <param name="objSerializationInfo">The serialization info.</param>
-    /// <param name="objStreamingContext">The streaming context.</param>
-    public sPixel(SerializationInfo objSerializationInfo, StreamingContext objStreamingContext) {
-      this._dwordPixel = (UInt32)objSerializationInfo.GetValue("value", typeof(UInt32));
+    /// <param name="serializationInfo">The serialization info.</param>
+    /// <param name="_">The streaming context.</param>
+    public sPixel(SerializationInfo serializationInfo, StreamingContext _) {
+      this._rgbBytes = (UInt32)serializationInfo.GetValue("value", typeof(UInt32));
     }
     /// <summary>
     /// Serializes this instance.
     /// </summary>
-    /// <param name="objSerializationInfo">The serialization info.</param>
-    /// <param name="objStreamingContext">The streaming context.</param>
-    public void GetObjectData(SerializationInfo objSerializationInfo, StreamingContext objStreamingContext) {
-      objSerializationInfo.AddValue("value", this._dwordPixel);
+    /// <param name="serializationInfo">The serialization info.</param>
+    /// <param name="_">The streaming context.</param>
+    public void GetObjectData(SerializationInfo serializationInfo, StreamingContext _) {
+      serializationInfo.AddValue("value", this._rgbBytes);
     }
     #endregion
   } // end struct
