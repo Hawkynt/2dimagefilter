@@ -37,7 +37,9 @@
  */
 #endregion
 using System;
+#if !NET35
 using System.Diagnostics.Contracts;
+#endif
 using System.Drawing;
 using System.Runtime.Serialization;
 using dword = System.UInt32;
@@ -405,10 +407,12 @@ namespace nImager {
     /// <param name="blue">The blue-value.</param>
     public sPixel(double red, double green, double blue, double alpha = 1)
       : this((byte)(red * 255), (byte)(green * 255), (byte)(blue * 255), (byte)(alpha * 255)) {
+#if !NET35
       Contract.Requires(red >= 0 && red <= 1);
       Contract.Requires(green >= 0 && green <= 1);
       Contract.Requires(blue >= 0 && blue <= 1);
       Contract.Requires(alpha >= 0 && alpha <= 1);
+#endif
     }
     #endregion
     /// <summary>
