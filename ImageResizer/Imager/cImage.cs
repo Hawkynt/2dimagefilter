@@ -37,11 +37,18 @@
  */
 #endregion
 using System;
+#if !NET35
+
+#endif
 using System.Collections.Concurrent;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+#if !NET35
+
+#endif
 using System.Threading.Tasks;
+
 using nImager.Filters;
 
 namespace nImager {
@@ -54,6 +61,9 @@ namespace nImager {
     /// A filter structure containing necessary fields used in filtering.
     /// </summary>
     public struct sFilter {
+      public delegate void FilterAction(cImage src, int srcX, int srcY, cImage tgt, int tgtX, int tgtY, byte scaleX, byte scaleY, object token);
+
+      public delegate sPixel[] HqFilterKernel(byte pattern, sPixel c00, sPixel c01, sPixel c02, sPixel c10, sPixel c11, sPixel c12, sPixel c20, sPixel c21, sPixel c22);
       /// <summary>
       /// The scale factor in X-direction.
       /// </summary>
@@ -73,7 +83,7 @@ namespace nImager {
       /// <summary>
       /// An action that filters a specified pixel from the source image into a destination area.
       /// </summary>
-      public readonly Action<cImage, int, int, cImage, int, int, byte, byte, object> FilterFunctionFunction;
+      public readonly FilterAction FilterFunctionFunction;
       /// <summary>
       /// A function that takes an image and creates a new one based on that one.
       /// </summary>
@@ -95,7 +105,7 @@ namespace nImager {
       /// <param name="scaleY">The Y-scale factor, defaults to <c>1</c>.</param>
       /// <param name="filterFunction">The filter function, defaults to <c>null</c>.</param>
       /// <param name="parameter">The additional parameters, default to <c>null</c>.</param>
-      public sFilter(string name, byte scaleX = 1, byte scaleY = 1, Action<cImage, int, int, cImage, int, int, byte, byte, object> filterFunction = null, object parameter = null) {
+      public sFilter(string name, byte scaleX = 1, byte scaleY = 1, FilterAction filterFunction = null, object parameter = null) {
         this.Name = name;
         this.Parameter = parameter;
         this.ScaleX = scaleX;
@@ -111,7 +121,7 @@ namespace nImager {
       /// <param name="scaleY">The Y-scale factor.</param>
       /// <param name="filterFunction">The filter function.</param>
       /// <param name="hqFilter">The hq filter kernel.</param>
-      public sFilter(string name, byte scaleX, byte scaleY, Action<cImage, int, int, cImage, int, int, byte, byte, object> filterFunction, Func<byte, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel[]> hqFilter)
+      public sFilter(string name, byte scaleX, byte scaleY, FilterAction filterFunction, HqFilterKernel hqFilter)
         : this(name, scaleX, scaleY, filterFunction, (object)hqFilter) {
       }
 
@@ -122,7 +132,7 @@ namespace nImager {
     /// <summary>
     /// available image filters
     /// </summary>
-    private static readonly sFilter[] _imageFilters = new[]{
+    private static readonly sFilter[] _IMAGE_FILTERS = new[]{
       new sFilter("-50% Scanlines",1,2,libBasic.HorizontalScanlines,-50f),
       new sFilter("+50% Scanlines",1,2,libBasic.HorizontalScanlines,50f),
       new sFilter("+100% Scanlines",1,2,libBasic.HorizontalScanlines,100f),
@@ -134,7 +144,7 @@ namespace nImager {
       new sFilter("MAME RGB 2x",2,2,libMAME.Rgb2x),
       new sFilter("MAME RGB 3x",3,3,libMAME.Rgb3x),
       new sFilter("Hawkynt TV 2x",2,2,libHawkynt.Tv2x),
-      new sFilter("Hawkynt TV 3x",3,3,libHawkynt.Tv3x),
+      new sFilter("Hawkynt TV 3x",3,2,libHawkynt.Tv3x),
       
       new sFilter("Bilinear Plus Original",2,2,libVBA.BilinearPlusOriginal),
       new sFilter("Bilinear Plus",2,2,libVBA.BilinearPlus),
@@ -185,6 +195,7 @@ namespace nImager {
       new sFilter("Red",image=>image.Red),
       new sFilter("Green",image=>image.Green),
       new sFilter("Blue",image=>image.Blue),
+      new sFilter("Alpha",image=>image.Alpha),
       new sFilter("Luminance",image=>image.Luminance),
       new sFilter("ChrominanceU",image=>image.ChrominanceU),
       new sFilter("ChrominanceV",image=>image.ChrominanceV),
@@ -222,7 +233,7 @@ namespace nImager {
     /// <value>The filters.</value>
     public static sFilter[] Filters {
       get {
-        return (_imageFilters);
+        return (_IMAGE_FILTERS);
       }
     }
     /// <summary>
@@ -268,6 +279,15 @@ namespace nImager {
     public cImage Blue {
       get {
         return (new cImage(this, pixel => pixel.Blue));
+      }
+    }
+    /// <summary>
+    /// Gets the a new instance containing a greyscale image of the alpha values only.
+    /// </summary>
+    /// <value>The greyscale image from the alpha components.</value>
+    public cImage Alpha {
+      get {
+        return (new cImage(this, pixel => pixel.Alpha));
       }
     }
     /// <summary>
@@ -431,7 +451,7 @@ namespace nImager {
               }
             }
           }
-          return (new sPixel(red, green, blue));
+          return (new sPixel(red, green, blue, pixel.Alpha/255.0));
         }));
       }
     }
@@ -452,15 +472,15 @@ namespace nImager {
       var bitmapData = bitmap.LockBits(
         new Rectangle(0, 0, width, height),
         ImageLockMode.ReadOnly,
-        PixelFormat.Format24bppRgb
+        PixelFormat.Format32bppArgb
       );
-      var intFillX = bitmapData.Stride - bitmapData.Width * 3;
+      var intFillX = bitmapData.Stride - bitmapData.Width * 4;
       unsafe {
         var ptrOffset = (byte*)bitmapData.Scan0.ToPointer();
-        for (var intY = 0; intY < height; intY++) {
-          for (var intX = 0; intX < width; intX++) {
-            this[intX, intY] = new sPixel(*(ptrOffset + 2), *(ptrOffset + 1), *(ptrOffset + 0));
-            ptrOffset += 3;
+        for (var y = 0; y < height; y++) {
+          for (var x = 0; x < width; x++) {
+            this[x, y] = new sPixel(*(ptrOffset + 2), *(ptrOffset + 1), *(ptrOffset + 0), *(ptrOffset + 3));
+            ptrOffset += 4;
           }
           ptrOffset += intFillX;
         }
@@ -492,16 +512,31 @@ namespace nImager {
     /// <param name="sourceImage">The source image.</param>
     /// <param name="filterFunction">The filter.</param>
     public cImage(cImage sourceImage, Func<sPixel, sPixel> filterFunction) {
-      this._width = sourceImage._width;
+      var width = sourceImage._width;
+      this._width = width;
       this._height = sourceImage._height;
       this._imageData = new sPixel[sourceImage._imageData.LongLength];
+#if !NET35
       Parallel.ForEach(Partitioner.Create(0, this._height), () => 0, (range, _, threadStorage) => {
-        for (var y = range.Item1; y < range.Item2; y++)
-          for (var x = 0; x < this._width; x++)
+        for (var y = range.Item2; y > range.Item1; ) {
+          --y;
+          for (var x = width; x > 0; ) {
+            --x;
             this[x, y] = filterFunction(sourceImage[x, y]);
+          }
+        }
         return (threadStorage);
       }, _ => {
       });
+#else
+      for (var y = this._height; y > 0; ) {
+        y--;
+        for (var x = width; x > 0; ) {
+          x--;
+          this[x, y] = filterFunction(sourceImage[x, y]);
+        }
+      }
+#endif
     }
     /// <summary>
     /// Initializes a new greyscale instance of the <see cref="cImage"/> class by filtering a given one.
@@ -509,16 +544,31 @@ namespace nImager {
     /// <param name="sourceImage">The source image.</param>
     /// <param name="colorFilter">The greyscale filter.</param>
     public cImage(cImage sourceImage, Func<sPixel, byte> colorFilter) {
-      this._width = sourceImage._width;
+      var width = sourceImage._width;
+      this._width = width;
       this._height = sourceImage._height;
       this._imageData = new sPixel[sourceImage._imageData.LongLength];
+#if !NET35
       Parallel.ForEach(Partitioner.Create(0, this._height), () => 0, (range, _, threadStorage) => {
-        for (var y = range.Item1; y < range.Item2; y++)
-          for (var x = 0; x < this._width; x++)
+        for (var y = range.Item2; y > range.Item1; ) {
+          --y;
+          for (var x = width; x > 0; ) {
+            --x;
             this[x, y] = sPixel.FromGrey(colorFilter(sourceImage[x, y]));
+          }
+        }
         return (threadStorage);
       }, _ => {
       });
+#else
+      for (var y = this._height; y > 0; ) {
+        y--;
+        for (var x = width; x > 0; ) {
+          x--;
+          this[x, y] = sPixel.FromGrey(colorFilter(sourceImage[x, y]));
+        }
+      }
+#endif
     }
     /// <summary>
     /// Gets or sets the <see cref="nImager.sPixel"/> with the specified X, Y coordinates.
@@ -548,22 +598,60 @@ namespace nImager {
     /// Filters this image by using a given filter structure.
     /// </summary>
     /// <param name="filter">The filter.</param>
-    /// <returns>A new instance containing the filtered image.</returns>
-    private cImage _FilterImage(sFilter filter) {
+    /// <param name="filterRegion">The filter region, defaults to <c>null</c>, which means filtering the whole image.</param>
+    /// <returns>
+    /// A new instance containing the filtered image.
+    /// </returns>
+    private cImage _FilterImage(sFilter filter, Rectangle? filterRegion = null) {
       var result = filter.CreationFunction(this);
       if (filter.FilterFunctionFunction != null) {
+        var startX = filterRegion == null ? 0 : filterRegion.Value.Left;
+        var startY = filterRegion == null ? 0 : filterRegion.Value.Top;
+        var endX = filterRegion == null ? this._width : filterRegion.Value.Right;
+        var endY = filterRegion == null ? this._height : filterRegion.Value.Bottom;
+#if !NET35
         Parallel.ForEach(
-          Partitioner.Create(0, this._height),
+          Partitioner.Create(startY, endY),
           () => 0,
           (range, _, threadStorage) => {
-            for (var y = range.Item1; y < range.Item2; y++)
-              for (var x = 0; x < this._width; x++)
-                filter.FilterFunctionFunction(this, x, y, result, x * filter.ScaleX, y * filter.ScaleY, filter.ScaleX, filter.ScaleY, filter.Parameter);
+
+            for (var y = range.Item2; y > range.Item1; ) {
+              --y;
+              for (var x = endX; x > startX; ) {
+                --x;
+                filter.FilterFunctionFunction(
+                  this,
+                  x,
+                  y,
+                  result,
+                  x * filter.ScaleX,
+                  y * filter.ScaleY,
+                  filter.ScaleX,
+                  filter.ScaleY,
+                  filter.Parameter
+                  );
+              }
+            }
             return (threadStorage);
           },
           _ => {
           }
-        );
+          );
+#else
+        for (var y = startY; y < endY; y++)
+          for (var x = startX; x < endX; x++)
+            filter.FilterFunctionFunction(
+              this,
+              x,
+              y,
+              result,
+              x * filter.ScaleX,
+              y * filter.ScaleY,
+              filter.ScaleX,
+              filter.ScaleY,
+              filter.Parameter
+            );
+#endif
       }
       return (result);
     }
@@ -571,15 +659,18 @@ namespace nImager {
     /// Filters the current image using a named filter.
     /// </summary>
     /// <param name="filterName">The name of the filter.</param>
-    /// <returns>A new instance containing the filtered image or <c>null</c>, if the specified filter could not be found.</returns>
-    public cImage FilterImage(string filterName) {
+    /// <param name="filterRegion">The filter region; defaults to <c>null</c>, which means whole image is filtered.</param>
+    /// <returns>
+    /// A new instance containing the filtered image or <c>null</c>, if the specified filter could not be found.
+    /// </returns>
+    public cImage FilterImage(string filterName, Rectangle? filterRegion = null) {
       var filter =
-        _imageFilters.FirstOrDefault(
+        _IMAGE_FILTERS.FirstOrDefault(
           f => string.Equals(f.Name, filterName, StringComparison.InvariantCultureIgnoreCase));
 
       return (
         (filter.FilterFunctionFunction != null || filter.CreationFunction != null)
-        ? this._FilterImage(filter)
+        ? this._FilterImage(filter, filterRegion)
         : null
       );
     }
@@ -597,17 +688,18 @@ namespace nImager {
       var bitmapData = result.LockBits(
         new Rectangle(0, 0, result.Width, result.Height),
         ImageLockMode.WriteOnly,
-        PixelFormat.Format24bppRgb
+        PixelFormat.Format32bppArgb
       );
-      var fillBytes = bitmapData.Stride - bitmapData.Width * 3;
+      var fillBytes = bitmapData.Stride - bitmapData.Width * 4;
       unsafe {
         var offset = (byte*)bitmapData.Scan0.ToPointer();
         for (var y = 0; y < height; y++) {
           for (var x = 0; x < width; x++) {
-            *(offset + 0) = this[x, y].Blue;
-            *(offset + 1) = this[x, y].Green;
+            *(offset + 3) = this[x, y].Alpha;
             *(offset + 2) = this[x, y].Red;
-            offset += 3;
+            *(offset + 1) = this[x, y].Green;
+            *(offset + 0) = this[x, y].Blue;
+            offset += 4;
           }
           offset += fillBytes;
         }
@@ -621,15 +713,21 @@ namespace nImager {
     /// <param name="red">The red-value.</param>
     /// <param name="green">The green-value.</param>
     /// <param name="blue">The blue-value.</param>
-    public void Fill(byte red, byte green, byte blue) {
-      this.Fill(new sPixel(red, green, blue));
+    /// <param name="alpha">The alpha-value.</param>
+    public void Fill(byte red, byte green, byte blue, byte alpha = 255) {
+      this.Fill(new sPixel(red, green, blue, alpha));
     }
     /// <summary>
     /// Fills the image with the specified pixel.
     /// </summary>
     /// <param name="pixel">The pixel instance.</param>
     public void Fill(sPixel pixel) {
+#if !NET35
       Parallel.For(0, this._imageData.LongLength, offset => this._imageData[offset] = pixel);
+#else
+      for (var offset = 0; offset < this._imageData.LongLength; offset++)
+        this._imageData[offset] = pixel;
+#endif
     }
 
     #region ICloneable Members

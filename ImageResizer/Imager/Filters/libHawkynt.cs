@@ -43,24 +43,26 @@ namespace nImager.Filters {
     public static void Tv2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var pixel = sourceImage[srcX, srcY];
       var luminance = pixel.Luminance;
-      targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0);
-      targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0);
-      targetImage[tgtX + 0, tgtY + 1] = new sPixel(0, 0, pixel.Blue);
-      targetImage[tgtX + 1, tgtY + 1] = sPixel.FromGrey(luminance);
+      targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);
+      targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0, pixel.Alpha);
+      targetImage[tgtX + 0, tgtY + 1] = new sPixel(0, 0, pixel.Blue, pixel.Alpha);
+      targetImage[tgtX + 1, tgtY + 1] = sPixel.FromGrey(luminance, pixel.Alpha);
     }
     // another bad one
     public static void Tv3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var pixel = sourceImage[srcX, srcY];
       var ap = (sbyte)(1 - ((srcX & 1) << 1));
-      targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0);
-      targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0);
-      targetImage[tgtX + 2, tgtY + 0] = new sPixel(0, 0, pixel.Blue);
-      targetImage[tgtX + 0, tgtY + 1] = sPixel.Black;
-      targetImage[tgtX + 1, tgtY + 1] = sPixel.Black;
-      targetImage[tgtX + 2, tgtY + 1] = sPixel.Black;
-      targetImage[tgtX + 0, tgtY - ap] = new sPixel(pixel.Red, 0, 0);
-      targetImage[tgtX + 1, tgtY + ap] = new sPixel(0, pixel.Green, 0);
-      targetImage[tgtX + 2, tgtY - ap] = new sPixel(0, 0, pixel.Blue);
+      var black = sPixel.Black;
+      black.Alpha = pixel.Alpha;
+      targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);
+      targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0, pixel.Alpha);
+      targetImage[tgtX + 2, tgtY + 0] = new sPixel(0, 0, pixel.Blue, pixel.Alpha);
+      targetImage[tgtX + 0, tgtY + 1] = black;
+      targetImage[tgtX + 1, tgtY + 1] = black;
+      targetImage[tgtX + 2, tgtY + 1] = black;
+      targetImage[tgtX + 0, tgtY - ap] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);
+      targetImage[tgtX + 1, tgtY + ap] = new sPixel(0, pixel.Green, 0, pixel.Alpha);
+      targetImage[tgtX + 2, tgtY - ap] = new sPixel(0, 0, pixel.Blue, pixel.Alpha);
     }
 
   }

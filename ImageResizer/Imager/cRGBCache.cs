@@ -25,7 +25,7 @@
 #endregion
 #define PREFERARRAYCACHE
 using System;
-
+using dword = System.UInt32;
 namespace nImager {
   /// <summary>
   /// A little cache that holds calculation results based on the three color components red, green and blue.
@@ -41,7 +41,7 @@ namespace nImager {
     /// <param name="key">The 32-bit color code.</param>
     /// <param name="factory">The factory that would calculate a result if it's not already in the cache.</param>
     /// <returns>The calculation result.</returns>
-    public byte GetOrAdd(UInt32 key, Func<UInt32, byte> factory) {
+    public byte GetOrAdd(dword key, Func<dword, byte> factory) {
       if (this._existsCache[key] != 0)
         return (this._valueCache[key]);
 
@@ -62,7 +62,7 @@ namespace nImager {
     /// <param name="key">The 32-bit color code.</param>
     /// <param name="factory">The factory that would calculate a result if it's not already in the cache.</param>
     /// <returns>The calculation result.</returns>
-    public byte GetOrAdd(UInt32 key, Func<UInt32, byte> factory) {
+    public byte GetOrAdd(dword key, Func<dword, byte> factory) {
       return (this._cache.GetOrAdd(key, factory));
     }
 #endif

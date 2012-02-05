@@ -41,19 +41,17 @@ namespace nImager.Filters {
   static class libSNES9x {
     // SNES9x's EPXB modified by Hawkynt to support thresholds
     public static void EpxB(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
-      sPixel c0 = sourceImage[srcX - 1, srcY - 1];
-      sPixel c1 = sourceImage[srcX + 0, srcY - 1];
-      sPixel c2 = sourceImage[srcX + 1, srcY - 1];
-      sPixel c3 = sourceImage[srcX - 1, srcY + 0];
-      sPixel c4 = sourceImage[srcX + 0, srcY + 0];
-      sPixel c5 = sourceImage[srcX + 1, srcY + 0];
-      sPixel c6 = sourceImage[srcX - 1, srcY + 1];
-      sPixel c7 = sourceImage[srcX + 0, srcY + 1];
-      sPixel c8 = sourceImage[srcX + 1, srcY + 1];
-      sPixel e00 = c4;
-      sPixel e01 = c4;
-      sPixel e10 = c4;
-      sPixel e11 = c4;
+      var c0 = sourceImage[srcX - 1, srcY - 1];
+      var c1 = sourceImage[srcX + 0, srcY - 1];
+      var c2 = sourceImage[srcX + 1, srcY - 1];
+      var c3 = sourceImage[srcX - 1, srcY + 0];
+      var c4 = sourceImage[srcX + 0, srcY + 0];
+      var c5 = sourceImage[srcX + 1, srcY + 0];
+      var c6 = sourceImage[srcX - 1, srcY + 1];
+      var c7 = sourceImage[srcX + 0, srcY + 1];
+      var c8 = sourceImage[srcX + 1, srcY + 1];
+      sPixel e01, e10, e11;
+      var e00 = e01 = e10 = e11 = c4;
       if (
     c3.IsNotLike(c5) &&
     c1.IsNotLike(c7) && ( // diagonal
