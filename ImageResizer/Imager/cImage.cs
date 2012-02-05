@@ -37,17 +37,13 @@
  */
 #endregion
 using System;
-#if !NET35
-
-#endif
-using System.Collections.Concurrent;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 #if !NET35
-
-#endif
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
+#endif
 
 using nImager.Filters;
 
@@ -451,7 +447,7 @@ namespace nImager {
               }
             }
           }
-          return (new sPixel(red, green, blue, pixel.Alpha/255.0));
+          return (new sPixel(red, green, blue, pixel.Alpha / 255.0));
         }));
       }
     }
@@ -530,9 +526,9 @@ namespace nImager {
       });
 #else
       for (var y = this._height; y > 0; ) {
-        y--;
+        --y;
         for (var x = width; x > 0; ) {
-          x--;
+          --x;
           this[x, y] = filterFunction(sourceImage[x, y]);
         }
       }
@@ -562,9 +558,9 @@ namespace nImager {
       });
 #else
       for (var y = this._height; y > 0; ) {
-        y--;
+        --y;
         for (var x = width; x > 0; ) {
-          x--;
+          --x;
           this[x, y] = sPixel.FromGrey(colorFilter(sourceImage[x, y]));
         }
       }
@@ -638,8 +634,10 @@ namespace nImager {
           }
           );
 #else
-        for (var y = startY; y < endY; y++)
-          for (var x = startX; x < endX; x++)
+        for (var y = endY; y > startY; ) {
+          --y;
+          for (var x = endX; x > startX; ) {
+            --x;
             filter.FilterFunctionFunction(
               this,
               x,
@@ -650,7 +648,9 @@ namespace nImager {
               filter.ScaleX,
               filter.ScaleY,
               filter.Parameter
-            );
+              );
+          }
+        }
 #endif
       }
       return (result);
