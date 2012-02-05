@@ -37,7 +37,6 @@
  */
 #endregion
 
-using System;
 
 namespace nImager.Filters {
   static class libHQ {
@@ -70,7 +69,7 @@ namespace nImager.Filters {
         pattern |= 64;
       if ((c4.IsNotLike(c8)))
         pattern |= 128;
-      var result = ((Func<byte, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel[]>)kernel)(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8);
+      var result = ((cImage.sFilter.HqFilterKernel)kernel)(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8);
       byte offset = 0;
       for (byte y = 0; y < scaleY; y++)
         for (byte x = 0; x < scaleX; x++)
@@ -128,7 +127,7 @@ namespace nImager.Filters {
         pattern |= 64;
       if ((c4.IsNotLike(c8)) && ((brightness[8] > avgBrightness) != dc4))
         pattern |= 128;
-      var result = ((Func<byte, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel, sPixel[]>)kernel)(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8);
+      var result = ((cImage.sFilter.HqFilterKernel)kernel)(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8);
       byte offset = 0;
       for (byte y = 0; y < scaleY; y++)
         for (byte x = 0; x < scaleX; x++)

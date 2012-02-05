@@ -71,9 +71,9 @@ namespace nImager.Filters {
     // MAME's RGB 2x
     public static void Rgb2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var pixel = sourceImage[srcX, srcY];
-      targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0);
-      targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0);
-      targetImage[tgtX + 0, tgtY + 1] = new sPixel(0, 0, pixel.Blue);
+      targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);
+      targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0, pixel.Alpha);
+      targetImage[tgtX + 0, tgtY + 1] = new sPixel(0, 0, pixel.Blue, pixel.Alpha);
       targetImage[tgtX + 1, tgtY + 1] = pixel;
     }
 
@@ -81,13 +81,13 @@ namespace nImager.Filters {
     public static void Rgb3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var pixel = sourceImage[srcX, srcY];
       targetImage[tgtX + 0, tgtY + 0] = pixel;
-      targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0);
-      targetImage[tgtX + 2, tgtY + 0] = new sPixel(0, 0, pixel.Blue);
-      targetImage[tgtX + 0, tgtY + 1] = new sPixel(0, 0, pixel.Blue);
+      targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0, pixel.Alpha);
+      targetImage[tgtX + 2, tgtY + 0] = new sPixel(0, 0, pixel.Blue, pixel.Alpha);
+      targetImage[tgtX + 0, tgtY + 1] = new sPixel(0, 0, pixel.Blue, pixel.Alpha);
       targetImage[tgtX + 1, tgtY + 1] = pixel;
-      targetImage[tgtX + 2, tgtY + 1] = new sPixel(pixel.Red, 0, 0);
-      targetImage[tgtX + 0, tgtY + 2] = new sPixel(pixel.Red, 0, 0);
-      targetImage[tgtX + 1, tgtY + 2] = new sPixel(0, pixel.Green, 0);
+      targetImage[tgtX + 2, tgtY + 1] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);
+      targetImage[tgtX + 0, tgtY + 2] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);
+      targetImage[tgtX + 1, tgtY + 2] = new sPixel(0, pixel.Green, 0, pixel.Alpha);
       targetImage[tgtX + 2, tgtY + 2] = pixel;
     }
 

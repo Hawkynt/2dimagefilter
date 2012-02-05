@@ -37,8 +37,10 @@
  */
 #endregion
 using System;
+using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Runtime.Serialization;
+using dword = System.UInt32;
 namespace nImager {
   /// <summary>
   /// A pixel (dword) 32Bits wide, 8 Bits for red, green and blue values.
@@ -52,7 +54,7 @@ namespace nImager {
     /// <summary>
     /// The value holding the red, green and blue component
     /// </summary>
-    private UInt32 _rgbBytes;
+    private dword _rgbBytes;
 
     #region caches
     private static readonly cRGBCache _cacheY = new cRGBCache();
@@ -75,11 +77,19 @@ namespace nImager {
       return ((value < byte.MinValue) ? byte.MinValue : (value > byte.MaxValue) ? byte.MaxValue : (byte)value);
     }
     /// <summary>
+    /// Gets the value for alpha, hopefully the compiler inlines that.
+    /// </summary>
+    /// <param name="rgbBytes">The pixel value.</param>
+    /// <returns>The alpha component</returns>
+    private static byte _getAlpha(uint rgbBytes) {
+      return ((byte)(rgbBytes >> 24));
+    }
+    /// <summary>
     /// Gets the value for red, hopefully the compiler inlines that.
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The red component</returns>
-    private static byte _getRed(UInt32 rgbBytes) {
+    private static byte _getRed(uint rgbBytes) {
       return ((byte)(rgbBytes >> 16));
     }
     /// <summary>
@@ -87,7 +97,7 @@ namespace nImager {
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The green component</returns>
-    private static byte _getGreen(UInt32 rgbBytes) {
+    private static byte _getGreen(uint rgbBytes) {
       return ((byte)(rgbBytes >> 8));
     }
     /// <summary>
@@ -95,7 +105,7 @@ namespace nImager {
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The blue component</returns>
-    private static byte _getBlue(UInt32 rgbBytes) {
+    private static byte _getBlue(uint rgbBytes) {
       return ((byte)(rgbBytes));
     }
     #endregion
@@ -162,7 +172,7 @@ namespace nImager {
         baseR = (float)(Math.Floor((baseR * useFactor) / ColorExtractionFactor) * ColorExtractionFactor);
         baseG = (float)(Math.Floor((baseG * useFactor) / ColorExtractionFactor) * ColorExtractionFactor);
         baseB = (float)(Math.Floor((baseB * useFactor) / ColorExtractionFactor) * ColorExtractionFactor);
-        return (new sPixel((byte)baseR, (byte)baseG, (byte)baseB));
+        return (new sPixel((byte)baseR, (byte)baseG, (byte)baseB, this.Alpha));
       }
     }
     public sPixel ExtractDeltas {
@@ -171,7 +181,7 @@ namespace nImager {
         var green = this.Green;
         var blue = this.Blue;
         var color = this.ExtractColors;
-        return (new sPixel((byte)(color.Red - red), (byte)(color.Green - green), (byte)(color.Blue - blue)));
+        return (new sPixel((byte)(color.Red - red), (byte)(color.Green - green), (byte)(color.Blue - blue), this.Alpha));
       }
     }
     /// <summary>
@@ -180,7 +190,7 @@ namespace nImager {
     /// <value>The Y-value.</value>
     public byte Luminance {
       get {
-        return (_cacheY.GetOrAdd(this._rgbBytes, rgbBytes => _Float2Byte(_getRed(rgbBytes) * 0.299f + _getGreen(rgbBytes) * 0.587f + _getBlue(rgbBytes) * 0.114f)));
+        return (_cacheY.GetOrAdd(this._rgbBytes & 0xFFFFFF, rgbBytes => _Float2Byte(_getRed(rgbBytes) * 0.299f + _getGreen(rgbBytes) * 0.587f + _getBlue(rgbBytes) * 0.114f)));
       }
     }
     /// <summary>
@@ -189,7 +199,7 @@ namespace nImager {
     /// <value>The U-value.</value>
     public byte ChrominanceU {
       get {
-        return (_cacheU.GetOrAdd(this._rgbBytes, rgbBytes => _Float2Byte(127.5f + _getRed(rgbBytes) * 0.5f - _getGreen(rgbBytes) * 0.418688f - _getBlue(rgbBytes) * 0.081312f)));
+        return (_cacheU.GetOrAdd(this._rgbBytes & 0xFFFFFF, rgbBytes => _Float2Byte(127.5f + _getRed(rgbBytes) * 0.5f - _getGreen(rgbBytes) * 0.418688f - _getBlue(rgbBytes) * 0.081312f)));
       }
     }
     /// <summary>
@@ -198,7 +208,7 @@ namespace nImager {
     /// <value>The V-value.</value>
     public byte ChrominanceV {
       get {
-        return (_cacheV.GetOrAdd(this._rgbBytes, rgbBytes => _Float2Byte(127.5f - _getRed(rgbBytes) * 0.168736f - _getGreen(rgbBytes) * 0.331264f + _getBlue(rgbBytes) * 0.5f)));
+        return (_cacheV.GetOrAdd(this._rgbBytes & 0xFFFFFF, rgbBytes => _Float2Byte(127.5f - _getRed(rgbBytes) * 0.168736f - _getGreen(rgbBytes) * 0.331264f + _getBlue(rgbBytes) * 0.5f)));
       }
     }
     /// <summary>
@@ -207,7 +217,7 @@ namespace nImager {
     /// <value>The u-value.</value>
     public byte u {
       get {
-        return (_cacheAlternateU.GetOrAdd(this._rgbBytes, rgbBytes => _Float2Byte(_getRed(rgbBytes) * 0.5f + _getGreen(rgbBytes) * 0.418688f + _getBlue(rgbBytes) * 0.081312f)));
+        return (_cacheAlternateU.GetOrAdd(this._rgbBytes & 0xFFFFFF, rgbBytes => _Float2Byte(_getRed(rgbBytes) * 0.5f + _getGreen(rgbBytes) * 0.418688f + _getBlue(rgbBytes) * 0.081312f)));
       }
     }
     /// <summary>
@@ -216,7 +226,7 @@ namespace nImager {
     /// <value>The v-value.</value>
     public byte v {
       get {
-        return (_cacheAlternateV.GetOrAdd(this._rgbBytes, rgbBytes => _Float2Byte(_getRed(rgbBytes) * 0.168736f + _getGreen(rgbBytes) * 0.331264f + _getBlue(rgbBytes) * 0.5f)));
+        return (_cacheAlternateV.GetOrAdd(this._rgbBytes & 0xFFFFFF, rgbBytes => _Float2Byte(_getRed(rgbBytes) * 0.168736f + _getGreen(rgbBytes) * 0.331264f + _getBlue(rgbBytes) * 0.5f)));
       }
     }
     /// <summary>
@@ -225,7 +235,7 @@ namespace nImager {
     /// <value>The brightness.</value>
     public byte Brightness {
       get {
-        return (_cacheBrightness.GetOrAdd(this._rgbBytes, dwordC => (byte)((_getRed(dwordC) * 3 + _getGreen(dwordC) * 3 + _getBlue(dwordC) * 2) >> 3)));
+        return (_cacheBrightness.GetOrAdd(this._rgbBytes & 0xFFFFFF, dwordC => (byte)((_getRed(dwordC) * 3 + _getGreen(dwordC) * 3 + _getBlue(dwordC) * 2) >> 3)));
         //byteRet = (byte)((this.Red << 1 + this.Green << 1 + this.Blue << 1 + this.Red + this.Green) >> 3);
       }
     }
@@ -235,7 +245,7 @@ namespace nImager {
     /// <value>The hue.</value>
     public byte Hue {
       get {
-        return (_cacheHue.GetOrAdd(this._rgbBytes, rgbBytes => {
+        return (_cacheHue.GetOrAdd(this._rgbBytes & 0xFFFFFF, rgbBytes => {
           float hue;
           var red = _getRed(rgbBytes);
           var green = _getGreen(rgbBytes);
@@ -268,10 +278,10 @@ namespace nImager {
     /// <value>The color.</value>
     public Color Color {
       get {
-        return (Color.FromArgb(this.Red, this.Green, this.Blue));
+        return (Color.FromArgb(this.Alpha, this.Red, this.Green, this.Blue));
       }
       set {
-        this.SetRGB(value.R, value.G, value.B);
+        this.SetRGB(value.R, value.G, value.B, value.A);
       }
     }
     /// <summary>
@@ -280,8 +290,21 @@ namespace nImager {
     /// <param name="red">The red-value.</param>
     /// <param name="green">The green-value.</param>
     /// <param name="blue">The blue-value.</param>
-    public void SetRGB(byte red, byte green, byte blue) {
-      this._rgbBytes = (UInt32)red << 16 | (UInt32)green << 8 | blue;
+    /// <param name="alpha">The alpha-value.</param>
+    public void SetRGB(byte red, byte green, byte blue, byte alpha = 255) {
+      this._rgbBytes = (uint)alpha << 24 | (uint)red << 16 | (uint)green << 8 | blue;
+    }
+    /// <summary>
+    /// Gets or sets the alpha component.
+    /// </summary>
+    /// <value>The alpha-value.</value>
+    public byte Alpha {
+      get {
+        return (_getAlpha(this._rgbBytes));
+      }
+      set {
+        this.SetRGB(this.Red, this.Green, this.Blue, value);
+      }
     }
     /// <summary>
     /// Gets or sets the red component.
@@ -292,7 +315,7 @@ namespace nImager {
         return (_getRed(this._rgbBytes));
       }
       set {
-        this.SetRGB(value, this.Green, this.Blue);
+        this.SetRGB(value, this.Green, this.Blue, this.Alpha);
       }
     }
     /// <summary>
@@ -304,7 +327,7 @@ namespace nImager {
         return (_getGreen(this._rgbBytes));
       }
       set {
-        this.SetRGB(this.Red, value, this.Blue);
+        this.SetRGB(this.Red, value, this.Blue, this.Alpha);
       }
     }
     /// <summary>
@@ -316,7 +339,7 @@ namespace nImager {
         return (_getBlue(this._rgbBytes));
       }
       set {
-        this.SetRGB(this.Red, this.Green, value);
+        this.SetRGB(this.Red, this.Green, value, this.Alpha);
       }
     }
     #endregion
@@ -327,17 +350,19 @@ namespace nImager {
     /// <param name="red">The red-value.</param>
     /// <param name="green">The green-value.</param>
     /// <param name="blue">The blue-value.</param>
+    /// <param name="alpha">The alpha-value.</param>
     /// <returns></returns>
-    public static sPixel FromRGB(byte red, byte green, byte blue) {
-      return (new sPixel(red, green, blue));
+    public static sPixel FromRGB(byte red, byte green, byte blue, byte alpha = 255) {
+      return (new sPixel(red, green, blue, alpha));
     }
     /// <summary>
     /// Factory to create a <see cref="sPixel"/> instance from grey value.
     /// </summary>
     /// <param name="grey">The grey value.</param>
+    /// <param name="alpha">The alpha value.</param>
     /// <returns></returns>
-    public static sPixel FromGrey(byte grey) {
-      return (new sPixel(grey));
+    public static sPixel FromGrey(byte grey, byte alpha = 255) {
+      return (new sPixel(grey, alpha));
     }
     /// <summary>
     /// Initializes a new instance of the <see cref="sPixel"/> struct by using an existing one.
@@ -350,8 +375,9 @@ namespace nImager {
     /// Initializes a new instance of the <see cref="sPixel"/> struct by using a grey value.
     /// </summary>
     /// <param name="grey">The grey value.</param>
-    public sPixel(byte grey)
-      : this(grey, grey, grey) {
+    /// <param name="alpha">The alpha value.</param>
+    public sPixel(byte grey, byte alpha = 255)
+      : this(grey, grey, grey, alpha) {
     }
     /// <summary>
     /// Initializes a new instance of the <see cref="sPixel"/> struct by using an instance of a the <see cref="Color"/> class.
@@ -367,8 +393,9 @@ namespace nImager {
     /// <param name="red">The red-value.</param>
     /// <param name="green">The green-value.</param>
     /// <param name="blue">The blue-value.</param>
-    public sPixel(byte red, byte green, byte blue) {
-      this._rgbBytes = (UInt32)red << 16 | (UInt32)green << 8 | blue;
+    /// <param name="alpha">The alpha-value.</param>
+    public sPixel(byte red, byte green, byte blue, byte alpha = 255) {
+      this._rgbBytes = (uint)alpha << 24 | (uint)red << 16 | (uint)green << 8 | blue;
     }
     /// <summary>
     /// Initializes a new instance of the <see cref="sPixel"/> struct by using red, green and blue component.
@@ -376,8 +403,12 @@ namespace nImager {
     /// <param name="red">The red-value.</param>
     /// <param name="green">The green-value.</param>
     /// <param name="blue">The blue-value.</param>
-    public sPixel(double red, double green, double blue)
-      : this((byte)(red * 255), (byte)(green * 255), (byte)(blue * 255)) {
+    public sPixel(double red, double green, double blue, double alpha = 1)
+      : this((byte)(red * 255), (byte)(green * 255), (byte)(blue * 255), (byte)(alpha * 255)) {
+      Contract.Requires(red >= 0 && red <= 1);
+      Contract.Requires(green >= 0 && green <= 1);
+      Contract.Requires(blue >= 0 && blue <= 1);
+      Contract.Requires(alpha >= 0 && alpha <= 1);
     }
     #endregion
     /// <summary>
@@ -387,7 +418,16 @@ namespace nImager {
     /// A <see cref="System.String"/> that represents this instance.
     /// </returns>
     public override string ToString() {
-      return ("(" + this._rgbBytes.ToString("X6") + ") Red:" + this.Red + ", Green:" + this.Green + ", Blue:" + this.Blue);
+      return (
+        string.Format(
+          "({0:X8}) Red:{1}, Green:{2}, Blue:{3}, Alpha:{4}",
+          this._rgbBytes,
+          this.Red,
+          this.Green,
+          this.Blue,
+          this.Alpha
+        )
+      );
     }
     /// <summary>
     /// Returns a hash code for this instance.
@@ -402,17 +442,21 @@ namespace nImager {
     /// <summary>
     /// Sums up the components of two instances and clips the result within a 0-255 range.
     /// </summary>
-    /// <param name="pixel1">The first instance.</param>
+    /// <param name="pixel">The first instance.</param>
     /// <param name="pixel2">The second instance.</param>
     /// <returns>A new instance where each component gets added and overflows were clipped.</returns>
-    public static sPixel operator +(sPixel pixel1, sPixel pixel2) {
-      var red = pixel1.Red + pixel2.Red;
-      var green = pixel1.Green + pixel2.Green;
-      var blue = pixel1.Blue + pixel2.Blue;
-      red = red > byte.MaxValue ? byte.MaxValue : red;
-      green = green > byte.MaxValue ? byte.MaxValue : green;
-      blue = blue > byte.MaxValue ? byte.MaxValue : blue;
-      return (new sPixel((byte)red, (byte)green, (byte)blue));
+    public static sPixel operator +(sPixel pixel, sPixel pixel2) {
+      int red, green, blue, alpha;
+      if (byte.MaxValue < (red = pixel.Red + pixel2.Red))
+        red = byte.MaxValue;
+      if (byte.MaxValue < (green = pixel.Green + pixel2.Green))
+        green = byte.MaxValue;
+      if (byte.MaxValue < (blue = pixel.Blue + pixel2.Blue))
+        blue = byte.MaxValue;
+      if (byte.MaxValue < (alpha = pixel.Alpha + pixel2.Alpha))
+        alpha = byte.MaxValue;
+
+      return (new sPixel((byte)red, (byte)green, (byte)blue, (byte)alpha));
     }
     /// <summary>
     /// Substract the components of two instances and clips the result within a 0-255 range.
@@ -421,13 +465,17 @@ namespace nImager {
     /// <param name="pixel2">The instance that should be substracted.</param>
     /// <returns>A new instance where each component gets substracted and underflows were clipped.</returns>
     public static sPixel operator -(sPixel pixel1, sPixel pixel2) {
-      var red = pixel1.Red - pixel2.Red;
-      var green = pixel1.Green - pixel2.Green;
-      var blue = pixel1.Blue - pixel2.Blue;
-      red = red < byte.MinValue ? byte.MinValue : red;
-      green = green < byte.MinValue ? byte.MinValue : green;
-      blue = blue < byte.MinValue ? byte.MinValue : blue;
-      return (new sPixel((byte)red, (byte)green, (byte)blue));
+      int red, green, blue, alpha;
+      if (byte.MinValue > (red = pixel1.Red - pixel2.Red))
+        red = byte.MinValue;
+      if (byte.MinValue > (green = pixel1.Green - pixel2.Green))
+        green = byte.MinValue;
+      if (byte.MinValue > (blue = pixel1.Blue - pixel2.Blue))
+        blue = byte.MinValue;
+      if (byte.MinValue > (alpha = pixel1.Alpha - pixel2.Alpha))
+        alpha = byte.MinValue;
+
+      return (new sPixel((byte)red, (byte)green, (byte)blue, (byte)alpha));
     }
     /// <summary>
     /// Inverts the given color.
@@ -444,13 +492,15 @@ namespace nImager {
     /// <param name="grey">The value that should be added to each component.</param>
     /// <returns>A new instance containing the clipped values.</returns>
     public static sPixel operator +(sPixel pixel, byte grey) {
-      var red = pixel.Red + grey;
-      var green = pixel.Green + grey;
-      var blue = pixel.Blue + grey;
-      red = red > byte.MaxValue ? byte.MaxValue : red;
-      green = green > byte.MaxValue ? byte.MaxValue : green;
-      blue = blue > byte.MaxValue ? byte.MaxValue : blue;
-      return (new sPixel((byte)red, (byte)green, (byte)blue));
+      int red, green, blue;
+      if (byte.MaxValue < (red = pixel.Red + grey))
+        red = byte.MaxValue;
+      if (byte.MaxValue < (green = pixel.Green + grey))
+        green = byte.MaxValue;
+      if (byte.MaxValue < (blue = pixel.Blue + grey))
+        blue = byte.MaxValue;
+
+      return (new sPixel((byte)red, (byte)green, (byte)blue, pixel.Alpha));
     }
     /// <summary>
     /// Multiplies each color component with a specific value and clips the result within a 0-255 range.
@@ -465,7 +515,7 @@ namespace nImager {
       red = red > byte.MaxValue ? byte.MaxValue : red < byte.MinValue ? byte.MinValue : red;
       green = green > byte.MaxValue ? byte.MaxValue : green < byte.MinValue ? byte.MinValue : green;
       blue = blue > byte.MaxValue ? byte.MaxValue : blue < byte.MinValue ? byte.MinValue : blue;
-      return (new sPixel((byte)red, (byte)green, (byte)blue));
+      return (new sPixel((byte)red, (byte)green, (byte)blue, pixel.Alpha));
     }
     /// <summary>
     /// Substracts all color components from a given value and returns the results clipped within a 0-255 range.
@@ -474,13 +524,15 @@ namespace nImager {
     /// <param name="pixel">The isntance that holds the color components.</param>
     /// <returns>A new instance with the clipped values.</returns>
     public static sPixel operator -(byte grey, sPixel pixel) {
-      var red = grey - pixel.Red;
-      var green = grey - pixel.Green;
-      var blue = grey - pixel.Blue;
-      red = red < byte.MinValue ? byte.MinValue : red;
-      green = green < byte.MinValue ? byte.MinValue : green;
-      blue = blue < byte.MinValue ? byte.MinValue : blue;
-      return (new sPixel((byte)red, (byte)green, (byte)blue));
+      int red, green, blue;
+      if (byte.MinValue > (red = grey - pixel.Red))
+        red = byte.MinValue;
+      if (byte.MinValue > (green = grey - pixel.Green))
+        green = byte.MinValue;
+      if (byte.MinValue > (blue = grey - pixel.Blue))
+        blue = byte.MinValue;
+
+      return (new sPixel((byte)red, (byte)green, (byte)blue, pixel.Alpha));
     }
     /// <summary>
     /// Substract a given value from all color components and returns the results clipped within a 0-255 range.
@@ -489,13 +541,15 @@ namespace nImager {
     /// <param name="grey">The value to substract.</param>
     /// <returns>A new instance with the clipped values.</returns>
     public static sPixel operator -(sPixel pixel, byte grey) {
-      var red = pixel.Red - grey;
-      var green = pixel.Green - grey;
-      var blue = pixel.Blue - grey;
-      red = red < byte.MinValue ? byte.MinValue : red;
-      green = green < byte.MinValue ? byte.MinValue : green;
-      blue = blue < byte.MinValue ? byte.MinValue : blue;
-      return (new sPixel((byte)red, (byte)green, (byte)blue));
+      int red, green, blue;
+      if (byte.MinValue > (red = pixel.Red - grey))
+        red = byte.MinValue;
+      if (byte.MinValue > (green = pixel.Green - grey))
+        green = byte.MinValue;
+      if (byte.MinValue > (blue = pixel.Blue - grey))
+        blue = byte.MinValue;
+
+      return (new sPixel((byte)red, (byte)green, (byte)blue, pixel.Alpha));
     }
     /// <summary>
     /// Divides each color component by a given value and returns the results clipped within a 0-255 range.
@@ -604,7 +658,8 @@ namespace nImager {
       return (new sPixel(
         (byte)((pixel1.Red + pixel2.Red) >> 1),
         (byte)((pixel1.Green + pixel2.Green) >> 1),
-        (byte)((pixel1.Blue + pixel2.Blue) >> 1)
+        (byte)((pixel1.Blue + pixel2.Blue) >> 1),
+        (byte)((pixel1.Alpha + pixel2.Alpha) >> 1)
       ));
     }
     /// <summary>
@@ -618,7 +673,8 @@ namespace nImager {
       return (new sPixel(
         (byte)((pixel1.Red + pixel2.Red + pixel3.Red) / 3),
         (byte)((pixel1.Green + pixel2.Green + pixel3.Green) / 3),
-        (byte)((pixel1.Blue + pixel2.Blue + pixel3.Blue) / 3)
+        (byte)((pixel1.Blue + pixel2.Blue + pixel3.Blue) / 3),
+        (byte)((pixel1.Alpha + pixel2.Alpha + pixel3.Alpha) / 3)
       ));
     }
     /// <summary>
@@ -633,7 +689,8 @@ namespace nImager {
       return (new sPixel(
         (byte)((pixel1.Red + pixel2.Red + pixel3.Red + pixel4.Red) >> 2),
         (byte)((pixel1.Green + pixel2.Green + pixel3.Green + pixel4.Green) >> 2),
-        (byte)((pixel1.Blue + pixel2.Blue + pixel3.Blue + pixel4.Blue) >> 2)
+        (byte)((pixel1.Blue + pixel2.Blue + pixel3.Blue + pixel4.Blue) >> 2),
+        (byte)((pixel1.Alpha + pixel2.Alpha + pixel3.Alpha + pixel4.Alpha) >> 2)
       ));
     }
     #endregion
@@ -651,7 +708,8 @@ namespace nImager {
       return (new sPixel(
         (byte)((pixel1.Red * quantifier1 + pixel2.Red * quantifier2) / total),
         (byte)((pixel1.Green * quantifier1 + pixel2.Green * quantifier2) / total),
-        (byte)((pixel1.Blue * quantifier1 + pixel2.Blue * quantifier2) / total)
+        (byte)((pixel1.Blue * quantifier1 + pixel2.Blue * quantifier2) / total),
+        (byte)((pixel1.Alpha * quantifier1 + pixel2.Alpha * quantifier2) / total)
       ));
     }
     /// <summary>
@@ -669,7 +727,8 @@ namespace nImager {
       return (new sPixel(
         (byte)((pixel1.Red * quantifier1 + pixel2.Red * quantifier2 + pixel3.Red * quantifier3) / total),
         (byte)((pixel1.Green * quantifier1 + pixel2.Green * quantifier2 + pixel3.Green * quantifier3) / total),
-        (byte)((pixel1.Blue * quantifier1 + pixel2.Blue * quantifier2 + pixel3.Blue * quantifier3) / total)
+        (byte)((pixel1.Blue * quantifier1 + pixel2.Blue * quantifier2 + pixel3.Blue * quantifier3) / total),
+        (byte)((pixel1.Alpha * quantifier1 + pixel2.Alpha * quantifier2 + pixel3.Alpha * quantifier3) / total)
       ));
     }
     /// <summary>
@@ -689,7 +748,8 @@ namespace nImager {
       return (new sPixel(
         (byte)((pixel1.Red * quantifier1 + pixel2.Red * quantifier2 + pixel3.Red * quantifier3 + pixel4.Red * quantifier4) / total),
         (byte)((pixel1.Green * quantifier1 + pixel2.Green * quantifier2 + pixel3.Green * quantifier3 + pixel4.Green * quantifier4) / total),
-        (byte)((pixel1.Blue * quantifier1 + pixel2.Blue * quantifier2 + pixel3.Blue * quantifier3 + pixel4.Blue * quantifier4) / total)
+        (byte)((pixel1.Blue * quantifier1 + pixel2.Blue * quantifier2 + pixel3.Blue * quantifier3 + pixel4.Blue * quantifier4) / total),
+        (byte)((pixel1.Alpha * quantifier1 + pixel2.Alpha * quantifier2 + pixel3.Alpha * quantifier3 + pixel4.Alpha * quantifier4) / total)
       ));
     }
     #endregion
@@ -711,7 +771,7 @@ namespace nImager {
     /// <param name="serializationInfo">The serialization info.</param>
     /// <param name="_">The streaming context.</param>
     public sPixel(SerializationInfo serializationInfo, StreamingContext _) {
-      this._rgbBytes = (UInt32)serializationInfo.GetValue("value", typeof(UInt32));
+      this._rgbBytes = (dword)serializationInfo.GetValue("value", typeof(dword));
     }
     /// <summary>
     /// Serializes this instance.
