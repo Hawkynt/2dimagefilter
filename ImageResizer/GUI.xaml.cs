@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Windows;
 using System.Windows.Media.Imaging;
-using nImager;
+using Imager;
 
 namespace ImageResizer {
 
@@ -12,57 +12,67 @@ namespace ImageResizer {
   /// Interaktionslogik für Window1.xaml
   /// </summary>
   public partial class Window1 {
+
+    private Bitmap _TargetImage {
+      set {
+        Contract.Requires(value != null);
+        var targetImage = value.AsBitmapSource();
+        this.imgTarget.Source = targetImage;
+        this.imgTarget.Visibility = Visibility.Visible;
+        this.lblTgtDim.Content = string.Format("{0} x {1}", targetImage.PixelWidth, targetImage.PixelHeight);
+        this.lblTgtDim.Visibility = Visibility.Visible;
+        this.miSave.IsEnabled = true;
+      }
+    }
+
     public Window1() {
       InitializeComponent();
       this.cbThresholds.IsChecked = sPixel.AllowThresholds;
       this.lbMethods.Items.Clear();
-      this.lbMethods.ItemsSource = ((App)Application.Current).arrImageResizers;
+      var app = ((App)Application.Current);
+      this.lbMethods.ItemsSource = app.ImageResizers;
       this.lbMethods.SelectedIndex = 0;
-      this.btResize.Click += (objSender, objEA) => this._voidResize_Click();
-      this.btSwitch.Click += (objSender, objEA) => this._voidSwitch_Click();
-      this.btRepeat.Click += (objSender, objEA) => this._voidRepeat_Click();
+      this.btResize.Click += (_, __) => this._voidResize_Click();
+      this.btSwitch.Click += (_, __) => this._voidSwitch_Click();
+      this.btRepeat.Click += (_, __) => this._voidRepeat_Click();
 
-      if (((App)Application.Current).objBitmapSource != null)
-        this.imgSource.Source = ((App)Application.Current).objBitmapSource;
+      var bitmap = app.CurrentImage;
+      if (bitmap != null)
+        this.imgSource.Source = bitmap.AsBitmapSource();
     }
 
     private void _voidRepeat_Click() {
-      sPixel.AllowThresholds = (bool)this.cbThresholds.IsChecked;
-      BitmapSource objSourceImage = (BitmapSource)this.imgTarget.Source;
+      sPixel.AllowThresholds = this.cbThresholds.IsChecked.GetValueOrDefault();
+      var sourceImage = (BitmapSource)this.imgTarget.Source;
       int intX, intY;
       int.TryParse(this.txtWidth.Text, out intX);
       int.TryParse(this.txtHeight.Text, out intY);
-      BitmapSource objTargetImage = App.objResizeImage(objSourceImage, (sImageResizer)this.lbMethods.SelectedValue, intX, intY);
-      this.imgTarget.Source = objTargetImage;
-      this.imgTarget.Visibility = Visibility.Visible;
-      this.lblTgtDim.Content = string.Format("{0} x {1}", objTargetImage.PixelWidth, objTargetImage.PixelHeight);
-      this.lblTgtDim.Visibility = Visibility.Visible;
-      this.miSave.IsEnabled = true;
+
+      using (var srcBitmap = sourceImage.AsBitmap())
+      using (var tgtBitmap = App.FilterAndResizeImage(srcBitmap, (ImageResizerToken)this.lbMethods.SelectedValue, intX, intY))
+        this._TargetImage = tgtBitmap;
     }
 
     private void _voidSwitch_Click() {
-      BitmapSource objSourceImage = (BitmapSource)this.imgTarget.Source;
-      this.imgSource.Source = objSourceImage;
-      this.lblSrcDim.Content = string.Format("{0} x {1}", objSourceImage.PixelWidth, objSourceImage.PixelHeight);
+      var targetImage = (BitmapSource)this.imgTarget.Source;
+      this.imgSource.Source = targetImage;
+      this.lblSrcDim.Content = string.Format("{0} x {1}", targetImage.PixelWidth, targetImage.PixelHeight);
     }
 
     private void _voidResize_Click() {
-      sPixel.AllowThresholds = (bool)this.cbThresholds.IsChecked;
-      BitmapSource objSourceImage = (BitmapSource)this.imgSource.Source;
+      sPixel.AllowThresholds = this.cbThresholds.IsChecked.GetValueOrDefault();
+      var sourceImage = (BitmapSource)this.imgSource.Source;
       int intX, intY;
       int.TryParse(this.txtWidth.Text, out intX);
       int.TryParse(this.txtHeight.Text, out intY);
-      BitmapSource objTargetImage = App.objResizeImage(objSourceImage, (sImageResizer)this.lbMethods.SelectedValue, intX, intY);
-      this.imgTarget.Source = objTargetImage;
-      this.imgTarget.Visibility = Visibility.Visible;
-      this.lblTgtDim.Content = string.Format("{0} x {1}", objTargetImage.PixelWidth, objTargetImage.PixelHeight);
-      this.lblTgtDim.Visibility = Visibility.Visible;
-      this.miSave.IsEnabled = true;
+      using (var srcBitmap = sourceImage.AsBitmap())
+      using (var tgtBitmap = App.FilterAndResizeImage(srcBitmap, (ImageResizerToken)this.lbMethods.SelectedValue, intX, intY))
+        this._TargetImage = tgtBitmap;
       this.btRepeat.IsEnabled = true;
     }
 
-    private void _voidOpen_Click(object sender, RoutedEventArgs e) {
-      System.Windows.Forms.OpenFileDialog objFileDialog = new System.Windows.Forms.OpenFileDialog {
+    private void _voidOpen_Click(object _, RoutedEventArgs __) {
+      var fileDialog = new System.Windows.Forms.OpenFileDialog {
         Filter = "Image Files|*.bmp;*.jpg;*.jpeg;*.png",
         Title = "Select Image to resize",
         InitialDirectory =
@@ -70,39 +80,40 @@ namespace ImageResizer {
             Environment.SpecialFolder.MyPictures) +
           System.IO.Path.DirectorySeparatorChar + "ScaleTest"
       };
-      if (objFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+
+      if (fileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
         return;
-      if (objFileDialog.FileName == null) {
-      } else {
-        try {
-          BitmapImage objBitmapImage = new BitmapImage(new Uri(objFileDialog.FileName));
-          this.imgSource.Source = objBitmapImage;
-          this.imgSource.Visibility = Visibility.Visible;
-          this.lblSrcDim.Visibility = Visibility.Visible;
-          this.lblSrcDim.Content = string.Format("{0} x {1}", objBitmapImage.PixelWidth, objBitmapImage.PixelHeight);
-          this.btResize.IsEnabled = true;
-          this.btRepeat.IsEnabled = false;
-          this.btSwitch.IsEnabled = true;
-        } catch (Exception excE) {
-          MessageBox.Show(string.Format("Could not load {0}\r\n\r\n{1}", objFileDialog.FileName, excE.Message));
-        }
+      if (fileDialog.FileName == null)
+        return;
+
+      try {
+        var bitmapImage = new BitmapImage(new Uri(fileDialog.FileName));
+        this.imgSource.Source = bitmapImage;
+        this.imgSource.Visibility = Visibility.Visible;
+        this.lblSrcDim.Visibility = Visibility.Visible;
+        this.lblSrcDim.Content = string.Format("{0} x {1}", bitmapImage.PixelWidth, bitmapImage.PixelHeight);
+        this.btResize.IsEnabled = true;
+        this.btRepeat.IsEnabled = false;
+        this.btSwitch.IsEnabled = true;
+      } catch (Exception exception) {
+        MessageBox.Show(string.Format("Could not load {0}\r\n\r\n{1}", fileDialog.FileName, exception.Message));
       }
     }
 
-    private void voidSave_Click(object sender, RoutedEventArgs e) {
-      if (!this.miSave.IsEnabled) {
-        // can not save without target image
-      } else {
-        // TODO: ask for filename
-        Bitmap objBitmap = ((BitmapSource)this.imgTarget.Source).AsBitmap();
-        string strPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) +
-                         System.IO.Path.DirectorySeparatorChar + "TMP.BMP";
-        objBitmap.Save(strPath, ImageFormat.Bmp);
-        System.Diagnostics.Process.Start(strPath);
-      }
+    private void voidSave_Click(object _, RoutedEventArgs __) {
+      // can not save without target image
+      if (!this.miSave.IsEnabled)
+        return;
+
+      // TODO: ask for filename
+      var filename = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + System.IO.Path.DirectorySeparatorChar + "TMP.BMP";
+      using (var bitmap = ((BitmapSource)this.imgTarget.Source).AsBitmap())
+        bitmap.Save(filename, ImageFormat.Bmp);
+
+      System.Diagnostics.Process.Start(filename);
     }
 
-    private void voidClose_Click(object sender, RoutedEventArgs e) {
+    private void voidClose_Click(object _, RoutedEventArgs __) {
       this.lblSrcDim.Visibility = Visibility.Hidden;
       this.imgSource.Visibility = Visibility.Hidden;
       this.lblTgtDim.Visibility = Visibility.Hidden;
@@ -111,7 +122,7 @@ namespace ImageResizer {
       this.miSave.IsEnabled = false;
     }
 
-    private void voidExit_Click(object sender, RoutedEventArgs e) {
+    private void voidExit_Click(object _, RoutedEventArgs __) {
       this.Close();
     }
   }

@@ -1,4 +1,4 @@
-﻿#region (c)2010-2011 Hawkynt
+﻿#region (c)2008-2014 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
@@ -37,11 +37,11 @@
  */
 #endregion
 
-namespace nImager.Filters {
+namespace Imager.Filters {
   static class libKreed {
     // used for 2xSaI, Super Eagle, Super 2xSaI
     // using thresholds when comparing (Hawkynt)
-    private static int _Conc2d(sPixel c00, sPixel c01, sPixel c10, sPixel c11) {
+    private static int _Conc2D(sPixel c00, sPixel c01, sPixel c10, sPixel c11) {
       var result = 0;
 
       var acAreAlike = c00.IsLike(c10);
@@ -63,7 +63,9 @@ namespace nImager.Filters {
     // TODO: to be really exact, the comparisons are not that right by comparing to already interpolated values
     // TODO: when interpolating 3 or more points I'm using already calculated interpolations and weight them further
     //       which is not the mathematically correct approach, but it's enough - at least for now
-    // Kreed's SuperEagle modified by Hawkynt to allow thresholds
+    /// <summary>
+    /// Kreed's SuperEagle modified by Hawkynt to allow thresholds
+    /// </summary>
     public static void SuperEagle(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var c1 = sourceImage[srcX, srcY - 1];
       var c2 = sourceImage[srcX + 1, srcY - 1];
@@ -85,10 +87,10 @@ namespace nImager.Filters {
         if (c7.IsLike(c5)) {
           var c57 = sPixel.Interpolate(c5, c7);
           var conc2D = 0;
-          conc2D += _Conc2d(c57, c48, c6, d1);
-          conc2D += _Conc2d(c57, c48, c3, c1);
-          conc2D += _Conc2d(c57, c48, d2, d5);
-          conc2D += _Conc2d(c57, c48, c2, d4);
+          conc2D += _Conc2D(c57, c48, c6, d1);
+          conc2D += _Conc2D(c57, c48, c3, c1);
+          conc2D += _Conc2D(c57, c48, d2, d5);
+          conc2D += _Conc2D(c57, c48, c2, d4);
 
           if (conc2D > 0) {
             e10 = c57;
@@ -160,7 +162,9 @@ namespace nImager.Filters {
       targetImage[tgtX + 1, tgtY + 1] = e11;
     }
 
-    // Derek Liauw Kie Fa's 2XSaI
+    /// <summary>
+    /// Derek Liauw Kie Fa's 2XSaI
+    /// </summary>
     public static void SaI2X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var c0 = sourceImage[srcX - 1, srcY - 1];
       var c1 = sourceImage[srcX, srcY - 1];
@@ -213,10 +217,10 @@ namespace nImager.Filters {
         var c57 = sPixel.Interpolate(c5, c7);
         if (c48.IsNotLike(c57)) {
           var conc2D = 0;
-          conc2D += _Conc2d(c48, c57, c3, c1);
-          conc2D -= _Conc2d(c57, c48, d4, c2);
-          conc2D -= _Conc2d(c57, c48, c6, d1);
-          conc2D += _Conc2d(c48, c57, d5, d2);
+          conc2D += _Conc2D(c48, c57, c3, c1);
+          conc2D -= _Conc2D(c57, c48, d4, c2);
+          conc2D -= _Conc2D(c57, c48, c6, d1);
+          conc2D += _Conc2D(c48, c57, d5, d2);
 
           if (conc2D < 0) {
             e11 = c57;
@@ -252,7 +256,9 @@ namespace nImager.Filters {
       targetImage[tgtX + 1, tgtY + 1] = e11;
     }
 
-    // Kreed's SuperSaI
+    /// <summary>
+    /// Kreed's SuperSaI
+    /// </summary>
     public static void SuperSaI(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var c0 = sourceImage[srcX - 1, srcY - 1];
       var c1 = sourceImage[srcX, srcY - 1];
@@ -284,10 +290,10 @@ namespace nImager.Filters {
         var c57 = sPixel.Interpolate(c7, c5);
         var c48 = sPixel.Interpolate(c4, c8);
         var conc2D = 0;
-        conc2D += _Conc2d(c57, c48, c6, d1);
-        conc2D += _Conc2d(c57, c48, c3, c1);
-        conc2D += _Conc2d(c57, c48, d2, d5);
-        conc2D += _Conc2d(c57, c48, c2, d4);
+        conc2D += _Conc2D(c57, c48, c6, d1);
+        conc2D += _Conc2D(c57, c48, c3, c1);
+        conc2D += _Conc2D(c57, c48, d2, d5);
+        conc2D += _Conc2D(c57, c48, c2, d4);
 
         if (conc2D > 0) {
           e11 = c57;

@@ -1,4 +1,4 @@
-﻿#region (c)2010-2011 Hawkynt
+﻿#region (c)2008-2014 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
@@ -37,9 +37,11 @@
  */
 #endregion
 
-namespace nImager.Filters {
+namespace Imager.Filters {
   static class libVBA {
-    // Bilinear Plus Original
+    /// <summary>
+    /// Bilinear Plus Original
+    /// </summary>
     public static void BilinearPlusOriginal(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var c00 = sourceImage[srcX + 0, srcY + 0];
       var c01 = sourceImage[srcX + 1, srcY + 0];
@@ -56,7 +58,10 @@ namespace nImager.Filters {
       targetImage[tgtX + 0, tgtY + 1] = e10;
       targetImage[tgtX + 1, tgtY + 1] = e11;
     }
-    // Bilinear Plus
+
+    /// <summary>
+    /// Bilinear Plus
+    /// </summary>
     public static void BilinearPlus(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var c00 = sourceImage[srcX + 0, srcY + 0];
       var c01 = sourceImage[srcX + 1, srcY + 0];

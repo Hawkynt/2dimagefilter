@@ -1,4 +1,4 @@
-﻿#region (c)2010-2011 Hawkynt
+﻿#region (c)2008-2014 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
@@ -38,10 +38,12 @@
 #endregion
 
 
-namespace nImager.Filters {
+namespace Imager.Filters {
   static class libHQ {
     #region Common
-    // body for HQ2x etc.
+    /// <summary>
+    /// body for HQ2x etc.
+    /// </summary>
     public static void ComplexFilter(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte scaleX, byte scaleY, object kernel) {
       var c0 = sourceImage[srcX - 1, srcY - 1];
       var c1 = sourceImage[srcX + 0, srcY - 1];
@@ -76,7 +78,9 @@ namespace nImager.Filters {
           targetImage[tgtX + x, tgtY + y] = result[offset++];
     } // end sub
 
-    // body for HQ2xBold etc. as seen in SNES9x
+    /// <summary>
+    /// body for HQ2xBold etc. as seen in SNES9x
+    /// </summary>
     public static void ComplexFilterBold(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte scaleX, byte scaleY, object kernel) {
       var c0 = sourceImage[srcX - 1, srcY - 1];
       var c1 = sourceImage[srcX + 0, srcY - 1];
@@ -134,7 +138,9 @@ namespace nImager.Filters {
           targetImage[tgtX + x, tgtY + y] = result[offset++];
     } // end sub
 
-    // body for HQ2xSmart etc. as seen in SNES9x
+    /// <summary>
+    /// body for HQ2xSmart etc. as seen in SNES9x
+    /// </summary>
     public static void ComplexFilterSmart(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte scaleX, byte scaleY, object kernel) {
       var c0 = sourceImage[srcX - 1, srcY - 1];
       var c2 = sourceImage[srcX + 1, srcY - 1];

@@ -1,4 +1,4 @@
-﻿#region (c)2010-2011 Hawkynt
+﻿#region (c)2008-2014 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
@@ -44,10 +44,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 #endif
+using Imager.Filters;
 
-using nImager.Filters;
-
-namespace nImager {
+namespace Imager {
   /// <summary>
   /// A bitmap image
   /// </summary>
@@ -135,6 +134,7 @@ namespace nImager {
       new sFilter("-50% VScanlines",2,1,libBasic.VerticalScanlines,-50f),
       new sFilter("+50% VScanlines",2,1,libBasic.VerticalScanlines,50f),
       new sFilter("+100% VScanlines",2,1,libBasic.VerticalScanlines,100f),
+
       new sFilter("MAME TV 2x",2,2,libMAME.Tv2x),
       new sFilter("MAME TV 3x",3,3,libMAME.Tv3x),
       new sFilter("MAME RGB 2x",2,2,libMAME.Rgb2x),
@@ -154,9 +154,14 @@ namespace nImager {
       new sFilter("AdvInterp 3x",3,3,libMAME.AdvInterp3x),
       new sFilter("Scale 2x",2,2,libMAME.Scale2x),
       new sFilter("Scale 3x",3,3,libMAME.Scale3x),
+      
       new sFilter("EPXB",2,2,libSNES9x.EpxB),
       new sFilter("EPXC",2,2,libSNES9x.EpxC),
       new sFilter("EPX3",3,3,libSNES9x.Epx3),
+      new sFilter("XBR 2x",2,2,libXBR.Xbr2X),
+      new sFilter("XBR 3x",3,3,libXBR.Xbr3X),
+      new sFilter("XBR 4x",4,4,libXBR.Xbr4X),
+      
       new sFilter("HQ 2x",2,2,libHQ.ComplexFilter,libHQ.Hq2xKernel),
       new sFilter("HQ 2x3",2,3,libHQ.ComplexFilter,libHQ.Hq2x3Kernel),
       new sFilter("HQ 2x4",2,4,libHQ.ComplexFilter,libHQ.Hq2x4Kernel),
@@ -172,6 +177,7 @@ namespace nImager {
       new sFilter("HQ 2x4 Smart",2,4,libHQ.ComplexFilterSmart,libHQ.Hq2x4Kernel),
       new sFilter("HQ 3x Smart",3,3,libHQ.ComplexFilterSmart,libHQ.Hq3xKernel),
       new sFilter("HQ 4x Smart",4,4,libHQ.ComplexFilterSmart,libHQ.Hq4xKernel),
+      
       new sFilter("LQ 2x",2,2,libHQ.ComplexFilter,libHQ.Lq2xKernel),
       new sFilter("LQ 2x3",2,3,libHQ.ComplexFilter,libHQ.Lq2x3Kernel),
       new sFilter("LQ 2x4",2,4,libHQ.ComplexFilter,libHQ.Lq2x4Kernel),
@@ -567,7 +573,7 @@ namespace nImager {
 #endif
     }
     /// <summary>
-    /// Gets or sets the <see cref="nImager.sPixel"/> with the specified X, Y coordinates.
+    /// Gets or sets the <see cref="sPixel"/> with the specified X, Y coordinates.
     /// </summary>
     /// <value>The pixel</value>
     public sPixel this[int x, int y] {

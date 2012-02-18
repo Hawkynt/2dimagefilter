@@ -8,9 +8,9 @@ using System.Windows;
 [assembly: AssemblyTitle("ImageResizer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("_")]
+[assembly: AssemblyCompany("»SynthelicZ«")]
 [assembly: AssemblyProduct("ImageResizer")]
-[assembly: AssemblyCopyright("Copyright © _ 2009")]
+[assembly: AssemblyCopyright("Copyright © 2008-2015 Hawkynt")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -49,5 +49,5 @@ using System.Windows;
 // Sie können alle Werte angeben oder die standardmäßigen Build- und Revisionsnummern 
 // übernehmen, indem Sie "*" eingeben:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]

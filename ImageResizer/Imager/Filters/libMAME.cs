@@ -1,4 +1,4 @@
-﻿#region (c)2010-2011 Hawkynt
+﻿#region (c)2008-2014 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
@@ -37,12 +37,14 @@
  */
 #endregion
 
-namespace nImager.Filters {
+namespace Imager.Filters {
   static class libMAME {
     private const float _gamma58 = 5f / 8f;
     private const float _gamma516 = 5f / 16f;
 
-    // MAME's TV effect in 2x
+    /// <summary>
+    /// MAME's TV effect in 2x
+    /// </summary>
     public static void Tv2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var pixel = sourceImage[srcX, srcY];
       var subPixel = pixel * _gamma58;
@@ -52,7 +54,9 @@ namespace nImager.Filters {
       targetImage[tgtX + 1, tgtY + 1] = subPixel;
     }
 
-    // MAME's TV effect 3x
+    /// <summary>
+    /// MAME's TV effect 3x
+    /// </summary>
     public static void Tv3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var pixel = sourceImage[srcX, srcY];
       var subPixel = pixel * _gamma58;
@@ -68,7 +72,9 @@ namespace nImager.Filters {
       targetImage[tgtX + 2, tgtY + 2] = subPixel2;
     }
 
-    // MAME's RGB 2x
+    /// <summary>
+    /// MAME's RGB 2x
+    /// </summary>
     public static void Rgb2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var pixel = sourceImage[srcX, srcY];
       targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);
@@ -77,7 +83,9 @@ namespace nImager.Filters {
       targetImage[tgtX + 1, tgtY + 1] = pixel;
     }
 
-    // MAME's RGB 3x
+    /// <summary>
+    /// MAME's RGB 3x
+    /// </summary>
     public static void Rgb3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var pixel = sourceImage[srcX, srcY];
       targetImage[tgtX + 0, tgtY + 0] = pixel;
@@ -91,7 +99,9 @@ namespace nImager.Filters {
       targetImage[tgtX + 2, tgtY + 2] = pixel;
     }
 
-    // MAME's AdvInterp2x, very similar to Scale2x but uses interpolation, modified by Hawkynt to support thresholds
+    /// <summary>
+    /// MAME's AdvInterp2x, very similar to Scale2x but uses interpolation, modified by Hawkynt to support thresholds
+    /// </summary>
     public static void AdvInterp2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var c1 = sourceImage[srcX + 0, srcY - 1];
       var c3 = sourceImage[srcX - 1, srcY + 0];
@@ -116,7 +126,9 @@ namespace nImager.Filters {
       targetImage[tgtX + 1, tgtY + 1] = e11;
     }
 
-    // MAME's AdvInterp3x, very similar to Scale3x but uses interpolation, modified by Hawkynt to support thresholds
+    /// <summary>
+    /// MAME's AdvInterp3x, very similar to Scale3x but uses interpolation, modified by Hawkynt to support thresholds
+    /// </summary>
     public static void AdvInterp3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var c0 = sourceImage[srcX - 1, srcY - 1];
       var c1 = sourceImage[srcX + 0, srcY - 1];
@@ -194,7 +206,9 @@ namespace nImager.Filters {
       targetImage[tgtX + 2, tgtY + 2] = e22;
     }
 
-    // Andrea Mazzoleni's Scale2X modified by Hawkynt to support thresholds
+    /// <summary>
+    /// Andrea Mazzoleni's Scale2X modified by Hawkynt to support thresholds
+    /// </summary>
     public static void Scale2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var c1 = sourceImage[srcX + 0, srcY - 1];
       var c3 = sourceImage[srcX - 1, srcY + 0];
@@ -223,7 +237,9 @@ namespace nImager.Filters {
       targetImage[tgtX + 1, tgtY + 1] = e11;
     }
 
-    // Andrea Mazzoleni's Scale3X modified by Hawkynt to support thresholds
+    /// <summary>
+    /// Andrea Mazzoleni's Scale3X modified by Hawkynt to support thresholds
+    /// </summary>
     public static void Scale3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var c0 = sourceImage[srcX - 1, srcY - 1];
       var c1 = sourceImage[srcX + 0, srcY - 1];
