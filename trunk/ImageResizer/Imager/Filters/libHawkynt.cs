@@ -1,4 +1,4 @@
-﻿#region (c)2010-2011 Hawkynt
+﻿#region (c)2008-2014 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
@@ -37,9 +37,11 @@
  */
 #endregion
 
-namespace nImager.Filters {
+namespace Imager.Filters {
   static class libHawkynt {
-    // just a bad TV effect
+    /// <summary>
+    /// just a bad old-school TV effect
+    /// </summary>
     public static void Tv2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var pixel = sourceImage[srcX, srcY];
       var luminance = pixel.Luminance;
@@ -48,21 +50,20 @@ namespace nImager.Filters {
       targetImage[tgtX + 0, tgtY + 1] = new sPixel(0, 0, pixel.Blue, pixel.Alpha);
       targetImage[tgtX + 1, tgtY + 1] = sPixel.FromGrey(luminance, pixel.Alpha);
     }
-    // another bad one
+
+    /// <summary>
+    /// another bad one a made for MS-Dos in 1998
+    /// </summary>
     public static void Tv3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var pixel = sourceImage[srcX, srcY];
       var ap = (sbyte)(1 - ((srcX & 1) << 1));
-      var black = sPixel.Black;
-      black.Alpha = pixel.Alpha;
       targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);
       targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0, pixel.Alpha);
       targetImage[tgtX + 2, tgtY + 0] = new sPixel(0, 0, pixel.Blue, pixel.Alpha);
-      targetImage[tgtX + 0, tgtY + 1] = black;
-      targetImage[tgtX + 1, tgtY + 1] = black;
-      targetImage[tgtX + 2, tgtY + 1] = black;
-      targetImage[tgtX + 0, tgtY - ap] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);
-      targetImage[tgtX + 1, tgtY + ap] = new sPixel(0, pixel.Green, 0, pixel.Alpha);
-      targetImage[tgtX + 2, tgtY - ap] = new sPixel(0, 0, pixel.Blue, pixel.Alpha);
+      targetImage[tgtX + 0, tgtY + ap] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);
+      targetImage[tgtX + 1, tgtY - ap] = new sPixel(0, pixel.Green, 0, pixel.Alpha);
+      targetImage[tgtX + 2, tgtY + ap] = new sPixel(0, 0, pixel.Blue, pixel.Alpha);
+
     }
 
   }

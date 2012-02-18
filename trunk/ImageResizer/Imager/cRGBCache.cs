@@ -1,4 +1,4 @@
-﻿#region (c)2010-2011 Hawkynt
+﻿#region (c)2008-2014 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
@@ -26,7 +26,7 @@
 #define PREFERARRAYCACHE
 using System;
 using dword = System.UInt32;
-namespace nImager {
+namespace Imager {
   /// <summary>
   /// A little cache that holds calculation results based on the three color components red, green and blue.
   /// </summary>

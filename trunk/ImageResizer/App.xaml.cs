@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Media.Imaging;
-using nImager;
+using Imager;
 
 namespace ImageResizer {
   /// <summary>
@@ -17,15 +17,15 @@ namespace ImageResizer {
     /// <summary>
     /// The delegate that generates anew image from an existing one.
     /// </summary>
-    public Func<Bitmap, Bitmap> PixelCalculator;
+    public readonly Func<Bitmap, Bitmap> PixelCalculator;
     /// <summary>
     /// Width is multiplied with this value.
     /// </summary>
-    public int ScaleX;
+    public readonly int ScaleX;
     /// <summary>
     /// Height is multiplied with this value.
     /// </summary>
-    public int ScaleY;
+    public readonly int ScaleY;
     /// <summary>
     /// Creates a new pixel blitter structure.
     /// </summary>
@@ -39,26 +39,25 @@ namespace ImageResizer {
     }
   }
 
-  public struct sImageResizer {
-    public string szName;
-    public InterpolationMode InterpolationMode;
-    public PixelBlitter structPixelBlitter;
-    public sImageResizer(string szName, PixelBlitter structPixelBlitter, InterpolationMode InterpolationMode) {
-      this.szName = szName;
-      this.structPixelBlitter = structPixelBlitter;
-      this.InterpolationMode = InterpolationMode;
+  /// <summary>
+  /// An image resizer
+  /// </summary>
+  public struct ImageResizerToken {
+    public readonly string Name;
+    public readonly InterpolationMode InterpolationMode;
+    public readonly PixelBlitter Blitter;
+    public ImageResizerToken(string name, PixelBlitter blitter, InterpolationMode interpolationMode = InterpolationMode.HighQualityBicubic) {
+      Contract.Requires(name != null);
+      this.Name = name;
+      this.Blitter = blitter;
+      this.InterpolationMode = interpolationMode;
     }
-    public sImageResizer(string szName)
-      : this(szName, new PixelBlitter(), InterpolationMode.HighQualityBicubic) {
-    }
-    public sImageResizer(string szName, PixelBlitter structPixelBlitter)
-      : this(szName, structPixelBlitter, InterpolationMode.HighQualityBicubic) {
-    }
-    public sImageResizer(string szName, InterpolationMode InterpolationMode)
-      : this(szName, new PixelBlitter(), InterpolationMode) {
+    public ImageResizerToken(string name, InterpolationMode interpolationMode = InterpolationMode.HighQualityBicubic)
+      : this(name, new PixelBlitter(), interpolationMode) {
     }
     public override string ToString() {
-      return this.szName;
+      Contract.Assume(this.Name != null);
+      return this.Name;
     }
   }
 
@@ -69,158 +68,149 @@ namespace ImageResizer {
     /// <summary>
     /// A list containing all available resize methods
     /// </summary>
-    public List<sImageResizer> arrImageResizers = new List<sImageResizer> {
-      new sImageResizer("Pixel", InterpolationMode.NearestNeighbor),
-      new sImageResizer("BiLinear", InterpolationMode.HighQualityBilinear),
-      new sImageResizer("BiCubic")
+    public readonly List<ImageResizerToken> ImageResizers = new List<ImageResizerToken> {
+      new ImageResizerToken("Pixel", InterpolationMode.NearestNeighbor),
+      new ImageResizerToken("BiLinear", InterpolationMode.HighQualityBilinear),
+      new ImageResizerToken("BiCubic",InterpolationMode.HighQualityBicubic)
     };
 
     /// <summary>
     /// An image loaded through the CLI
     /// </summary>
-    public BitmapSource objBitmapSource = null;
+    public Bitmap CurrentImage;
 
     public App() {
-      // TODO: tests here
       sPixel.AllowThresholds = true;
     }
 
-    private void Application_Startup(object sender, System.Windows.StartupEventArgs e) {
+    // ReSharper disable InconsistentNaming
+    private void Application_Startup(object sender, StartupEventArgs e) {
+      // ReSharper restore InconsistentNaming
+
       // add image filters from cImage
-      Array.ForEach(cImage.Filters, stFilter => {
-        if (!string.IsNullOrEmpty(stFilter.Name)) {
-          arrImageResizers.Add(new sImageResizer(stFilter.Name, new PixelBlitter(stFilter.ScaleX, stFilter.ScaleY,
-            objSource => new cImage(objSource).FilterImage(stFilter.Name).ToBitmap())));
-        } else {
-          // just skip null entries
-        }
+      Contract.Assume(cImage.Filters != null);
+      Array.ForEach(cImage.Filters, filter => {
+        if (!string.IsNullOrEmpty(filter.Name))
+          this.ImageResizers.Add(new ImageResizerToken(filter.Name, new PixelBlitter(filter.ScaleX, filter.ScaleY, source => new cImage(source).FilterImage(filter.Name).ToBitmap())));
       });
 
       // parse command line if needed
-      if (e != null && e.Args != null && e.Args.Length > 0) {
-        string[] arrArgs = e.Args;
-        int intI = 0;
-        int intLen = arrArgs.Length;
-        while (intI < intLen) {
-          string strCommand = arrArgs[intI++].ToUpperInvariant();
-          switch (strCommand) {
-            case "/LOAD": {
-              if (intLen - intI >= 1) {
-                string strFile = arrArgs[intI++];
-                this.objBitmapSource = new BitmapImage(new Uri(strFile));
-              } else {
-                this.voidShowHelp();
-                intI = intLen;
+      if (e == null || e.Args.Length <= 0) {
+        // no command line given
+        return;
+      }
+
+      var arguments = e.Args;
+      var i = 0;
+      var length = arguments.Length;
+      while (i < length) {
+        var command = arguments[i++].ToUpperInvariant();
+        switch (command) {
+          case "/LOAD": {
+            if (length - i < 1) {
+              this._ShowHelp();
+              return;
+            }
+            var filename = arguments[i++];
+            if (filename == null) {
+              this._ShowHelp();
+              return;
+            }
+            this.CurrentImage = (Bitmap)Image.FromFile(filename);
+            break;
+          }
+          case "/RESIZE": {
+            if (length - i < 2) {
+              this._ShowHelp();
+              return;
+            }
+            var dimensions = arguments[i++].Trim();
+            var filterName = arguments[i++].Trim();
+            var positionOfX = dimensions.IndexOf('x');
+            if (positionOfX <= 0) {
+              this._ShowHelp();
+              return;
+            }
+            int intX, intY;
+            if (!int.TryParse(dimensions.Substring(0, positionOfX), out intX) || !int.TryParse(dimensions.Substring(positionOfX + 1), out intY)) {
+              this._ShowHelp();
+              return;
+            }
+            int repeat;
+            positionOfX = filterName.IndexOf('(');
+            if (positionOfX > 0 && filterName.EndsWith(")")) {
+              if (!int.TryParse(filterName.Substring(positionOfX + 1, filterName.Length - positionOfX - 2), out repeat))
+                repeat = 1;
+
+              filterName = filterName.Substring(0, positionOfX);
+              if (repeat < 1)
+                repeat = 1;
+            } else
+              repeat = 1;
+            if (this.CurrentImage == null) {
+              MessageBox.Show("Unable to resize file: there is nothing to resize!", "Fatal Error");
+              return;
+            }
+            Console.WriteLine(@"{0} {1} {2} {3}", intX, intY, repeat, filterName);
+            Contract.Assume(this.ImageResizers != null);
+            var matches = this.ImageResizers.Where(resizer => string.Compare(resizer.Name, filterName, true) == 0).ToArray();
+            if (matches.Length <= 0) {
+              MessageBox.Show(
+                "Unable to resize file: there is no filter named '" + filterName + "'!", "Fatal Error");
+              return;
+            }
+            for (var j = 0; j < repeat; j++) {
+              var image = this.CurrentImage;
+              this.CurrentImage = FilterAndResizeImage(image, matches[0], intX, intY);
+              image.Dispose();
+            }
+            break;
+          }
+          case "/SAVE": {
+            if (length - i < 1) {
+              this._ShowHelp();
+              return;
+            }
+            var filename = arguments[i++];
+            if (filename == null) {
+              this._ShowHelp();
+              return;
+            }
+            var ext = Path.GetExtension(filename);
+            var extension = ext == null ? null : ext.ToUpperInvariant();
+            var image = this.CurrentImage;
+            if (image == null) {
+              MessageBox.Show("Unable to save file: there is nothing to save!", "Fatal Error");
+              return;
+            }
+            if (extension == ".JPG" || extension == ".JPEG") {
+              var codecs = ImageCodecInfo.GetImageEncoders();
+              codecs = codecs.Where(info => info != null && info.MimeType == "image/jpeg").ToArray();
+              if (codecs.Length <= 0) {
+                MessageBox.Show("System has no support to save as JPEG !", "Fatal Error");
+                return;
               }
-              break;
-            }
-            case "/RESIZE": {
-              if (intLen - intI >= 2) {
-                string strDim = arrArgs[intI++].Trim();
-                string strFilter = arrArgs[intI++].Trim();
-                int intPos = strDim.IndexOf('x');
-                if (intPos > 0) {
-                  int intX, intY;
-                  if (int.TryParse(strDim.Substring(0, intPos), out intX) && int.TryParse(strDim.Substring(intPos + 1), out intY)) {
-                    int intRepeat;
-                    intPos = strFilter.IndexOf('(');
-                    if (intPos > 0 && strFilter.EndsWith(")")) {
-                      if (!int.TryParse(strFilter.Substring(intPos + 1, strFilter.Length - intPos - 2), out intRepeat)) {
-                        intRepeat = 1;
-                      }
-                      strFilter = strFilter.Substring(0, intPos);
-                      if (intRepeat < 1)
-                        intRepeat = 1;
-                    } else {
-                      intRepeat = 1;
-                    }
-                    if (this.objBitmapSource != null) {
-                      Console.WriteLine(intX + " " + intY + " " + intRepeat + " " + strFilter);
-                      sImageResizer[] arrMatches = this.arrImageResizers.Where(stImageResize => string.Compare(stImageResize.szName, strFilter, true) == 0).ToArray();
-                      if (arrMatches.Length > 0) {
-                        for (int intJ = 0; intJ < intRepeat; intJ++)
-                          this.objBitmapSource = objResizeImage(this.objBitmapSource, arrMatches[0], intX, intY);
-                      } else {
-                        MessageBox.Show("Unable to resize file: there is no filter named '" + strFilter + "'!", "Fatal Error");
-                        intI = intLen;
-                      }
-                    } else {
-                      MessageBox.Show("Unable to resize file: there is nothing to resize!", "Fatal Error");
-                      intI = intLen;
-                    }
-                  } else {
-                    this.voidShowHelp();
-                    intI = intLen;
-                  }
-                } else {
-                  this.voidShowHelp();
-                  intI = intLen;
-                }
-              } else {
-                this.voidShowHelp();
-                intI = intLen;
-              }
-              break;
-            }
-            case "/SAVE": {
-              if (intLen - intI >= 1) {
-                string strFile = arrArgs[intI++];
-                string strExt = Path.GetExtension(strFile).ToUpperInvariant();
-                if (this.objBitmapSource != null) {
-                  if (strExt == ".JPG" || strExt == ".JPEG") {
-                    ImageCodecInfo[] arrCodecs = ImageCodecInfo.GetImageEncoders();
-                    if (arrCodecs != null) {
-                    arrCodecs = arrCodecs.Where(objInfo => objInfo.MimeType == "image/jpeg").ToArray();
-                    if (arrCodecs.Length > 0) {
-                      this.objBitmapSource.AsBitmap().Save(
-                        strFile,
-                        arrCodecs[0],
-                        new EncoderParameters {
-                          Param = new EncoderParameter[] { 
-                            new EncoderParameter(Encoder.Quality,(long)100),
-                          }
-                        }
-                        );
-                    } else {
-                      MessageBox.Show("System has no support to save as JPEG !", "Fatal Error");
-                      intI = intLen;
-                    }
-                  } else {
-                      MessageBox.Show("System seems to support no encoders !", "Fatal Error");
-                      intI = intLen;
-                    }
-                  } else {
-                    this.objBitmapSource.AsBitmap().Save(strFile);
-                  }
-                } else {
-                  MessageBox.Show("Unable to save file: there is nothing to save!", "Fatal Error");
-                  intI = intLen;
-                }
-              } else {
-                this.voidShowHelp();
-                intI = intLen;
-              }
-              break;
-            }
-            case "/EXIT": {
-              this.Shutdown(0);
-              break;
-            }
-            default: {
-              this.voidShowHelp();
-              intI = intLen;
-              break;
-            }
+              Contract.Assume(Encoder.Quality != null);
+              image.Save(filename, codecs[0], new EncoderParameters { Param = new[] { new EncoderParameter(Encoder.Quality, (long)100) } });
+            } else
+              image.Save(filename);
+            break;
+          }
+          case "/EXIT": {
+            this.Shutdown(0);
+            break;
+          }
+          default: {
+            this._ShowHelp();
+            return;
           }
         }
-      } else {
-        // no command line given
       }
     }
 
-    private void voidShowHelp() {
+    private void _ShowHelp() {
       System.Reflection.Assembly objAssembly = System.Reflection.Assembly.GetExecutingAssembly();
-      MessageBox.Show(string.Join("\r\n", new string[] { 
+      MessageBox.Show(string.Join("\r\n", new[] { 
         Path.GetFileName(objAssembly.Location)+" [/load <source>] [/resize <x>x<y> <method>[(<repeat>)]] [/save <target>] ... [/exit]",
         "  + /load    - loads a file into the source buffer",
         "    + <source> - the source file to resize",
@@ -241,33 +231,43 @@ namespace ImageResizer {
       }), "Command-Line Help");
     }
 
-    public static BitmapSource objResizeImage(BitmapSource objSource, sImageResizer structImageResizer, int intWidth, int intHeight) {
-      BitmapSource objRet;
-
-      Bitmap objBitmapSrc = objSource.AsBitmap();
-      if (structImageResizer.structPixelBlitter.PixelCalculator != null) {
-        Bitmap objBitmapTmp = structImageResizer.structPixelBlitter.PixelCalculator.Invoke(objBitmapSrc);
-        objBitmapSrc.Dispose();
-        objBitmapSrc = objBitmapTmp;
-      } else {
-        // no pixel resizer given
-      }
-
-      using (Bitmap objBitmapTgt = new Bitmap((intWidth == 0 ? objBitmapSrc.Width : intWidth), (intHeight == 0 ? objBitmapSrc.Height : intHeight))) {
-        using (Graphics objGraphics = Graphics.FromImage(objBitmapTgt)) {
-          //set the resize quality modes to high quality                
-          objGraphics.CompositingQuality = CompositingQuality.HighQuality;
-          objGraphics.InterpolationMode = structImageResizer.InterpolationMode;
-          objGraphics.SmoothingMode = SmoothingMode.HighQuality;
-          //draw the image into the target bitmap                
-          objGraphics.DrawImage(objBitmapSrc, 0, 0, objBitmapTgt.Width, objBitmapTgt.Height);
-        }
-        objBitmapSrc.Dispose();
-        objRet = objBitmapTgt.AsBitmapSource();
-      }
-      return (objRet);
+    /// <summary>
+    /// Filters a given bitmap and resizes it.
+    /// </summary>
+    /// <param name="source">The source image.</param>
+    /// <param name="imageResizerToken">The image resizer.</param>
+    /// <param name="width">The width.</param>
+    /// <param name="height">The height.</param>
+    /// <returns>A new bitmap filtered when requested and resized to the given target dimensions.</returns>
+    public static Bitmap FilterAndResizeImage(Bitmap source, ImageResizerToken imageResizerToken, int width, int height) {
+      var filter = imageResizerToken.Blitter.PixelCalculator;
+      if (filter == null)
+        return (_ResizeImage(source, width, height, imageResizerToken.InterpolationMode));
+      using (var temporaryImage = filter(source))
+        return (_ResizeImage(temporaryImage, width, height, imageResizerToken.InterpolationMode));
     }
 
+    /// <summary>
+    /// Resizes a given image.
+    /// </summary>
+    /// <param name="source">The source.</param>
+    /// <param name="width">The width; 0 means keep original.</param>
+    /// <param name="height">The height; 0 means keep original.</param>
+    /// <param name="mode">The mode.</param>
+    /// <returns>A new bitmap with the desired dimensions.</returns>
+    private static Bitmap _ResizeImage(Image source, int width, int height, InterpolationMode mode) {
+      Contract.Requires(source != null);
+      var result = new Bitmap((width == 0 ? source.Width : width), (height == 0 ? source.Height : height));
+      using (var graphics = Graphics.FromImage(result)) {
+        //set the resize quality modes to high quality                
+        graphics.CompositingQuality = CompositingQuality.HighQuality;
+        graphics.InterpolationMode = mode;
+        graphics.SmoothingMode = SmoothingMode.HighQuality;
+        //draw the image into the target bitmap                
+        graphics.DrawImage(source, 0, 0, result.Width, result.Height);
+      }
+      return (result);
+    }
 
   }
 }

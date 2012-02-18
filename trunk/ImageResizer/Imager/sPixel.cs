@@ -1,4 +1,4 @@
-﻿#region (c)2010-2011 Hawkynt
+﻿#region (c)2008-2014 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
@@ -43,20 +43,20 @@ using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Runtime.Serialization;
 using dword = System.UInt32;
-namespace nImager {
+namespace Imager {
   /// <summary>
   /// A pixel (dword) 32Bits wide, 8 Bits for red, green and blue values.
   /// The top 8-Bits of this dword are unused.
   /// </summary>
   public struct sPixel : ICloneable, ISerializable {
-    private const byte luminanceTrigger = 48;
-    private const byte chromaUTrigger = 7;
-    private const byte chromaVTrigger = 6;
+    private const byte _LUMINANCE_TRIGGER = 48;
+    private const byte _CHROMA_U_TRIGGER = 7;
+    private const byte _CHROMA_V_TRIGGER = 6;
 
     /// <summary>
     /// The value holding the red, green and blue component
     /// </summary>
-    private dword _rgbBytes;
+    private readonly dword _rgbBytes;
 
     #region caches
     private static readonly cRGBCache _cacheY = new cRGBCache();
@@ -158,7 +158,7 @@ namespace nImager {
         var blue = this.Blue;
         /*
         var max = r > g ? r > b ? r : b > g ? b : g : b > g ? b : g;
-        var add = (255 - max);
+        var add = (byte.MaxValue - max);
         float baseR = r;
         float baseG = g;
         float baseB = b;
@@ -167,9 +167,9 @@ namespace nImager {
         var baseR = red - min;
         var baseG = green - min;
         var baseB = blue - min;
-        var factorR = 255 / baseR;
-        var factorG = 255 / baseG;
-        var factorB = 255 / baseB;
+        var factorR = byte.MaxValue / baseR;
+        var factorG = byte.MaxValue / baseG;
+        var factorB = byte.MaxValue / baseB;
         var useFactor = Math.Min(factorR, Math.Min(factorG, factorB));
         baseR = (float)(Math.Floor((baseR * useFactor) / ColorExtractionFactor) * ColorExtractionFactor);
         baseG = (float)(Math.Floor((baseG * useFactor) / ColorExtractionFactor) * ColorExtractionFactor);
@@ -282,19 +282,6 @@ namespace nImager {
       get {
         return (Color.FromArgb(this.Alpha, this.Red, this.Green, this.Blue));
       }
-      set {
-        this.SetRGB(value.R, value.G, value.B, value.A);
-      }
-    }
-    /// <summary>
-    /// Sets the red, green and blue value for that pixel.
-    /// </summary>
-    /// <param name="red">The red-value.</param>
-    /// <param name="green">The green-value.</param>
-    /// <param name="blue">The blue-value.</param>
-    /// <param name="alpha">The alpha-value.</param>
-    public void SetRGB(byte red, byte green, byte blue, byte alpha = 255) {
-      this._rgbBytes = (uint)alpha << 24 | (uint)red << 16 | (uint)green << 8 | blue;
     }
     /// <summary>
     /// Gets or sets the alpha component.
@@ -304,10 +291,17 @@ namespace nImager {
       get {
         return (_getAlpha(this._rgbBytes));
       }
-      set {
-        this.SetRGB(this.Red, this.Green, this.Blue, value);
-      }
     }
+
+    /// <summary>
+    /// Returns a pixel with the new alpha set.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <returns>An instance of sPixel.</returns>
+    public sPixel SetAlpha(byte value) {
+      return new sPixel((this._rgbBytes & 0x00ffffff) | (dword)(value << 24));
+    }
+
     /// <summary>
     /// Gets or sets the red component.
     /// </summary>
@@ -316,10 +310,17 @@ namespace nImager {
       get {
         return (_getRed(this._rgbBytes));
       }
-      set {
-        this.SetRGB(value, this.Green, this.Blue, this.Alpha);
-      }
     }
+
+    /// <summary>
+    /// Returns a pixel with the new red set.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <returns>An instance of sPixel.</returns>
+    public sPixel SetRed(byte value) {
+      return new sPixel((this._rgbBytes & 0xff00ffff) | (dword)(value << 16));
+    }
+
     /// <summary>
     /// Gets or sets the green component.
     /// </summary>
@@ -328,10 +329,17 @@ namespace nImager {
       get {
         return (_getGreen(this._rgbBytes));
       }
-      set {
-        this.SetRGB(this.Red, value, this.Blue, this.Alpha);
-      }
     }
+
+    /// <summary>
+    /// Returns a pixel with the new green set.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <returns>An instance of sPixel.</returns>
+    public sPixel SetGreen(byte value) {
+      return new sPixel((this._rgbBytes & 0xffff00ff) | (dword)(value << 8));
+    }
+
     /// <summary>
     /// Gets or sets the blue component.
     /// </summary>
@@ -340,10 +348,17 @@ namespace nImager {
       get {
         return (_getBlue(this._rgbBytes));
       }
-      set {
-        this.SetRGB(this.Red, this.Green, value, this.Alpha);
-      }
     }
+
+    /// <summary>
+    /// Returns a pixel with the new blue set.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <returns>An instance of sPixel.</returns>
+    public sPixel SetBlue(byte value) {
+      return new sPixel((this._rgbBytes & 0xffffff00) | value);
+    }
+
     #endregion
     #region ctor
     /// <summary>
@@ -366,12 +381,20 @@ namespace nImager {
     public static sPixel FromGrey(byte grey, byte alpha = 255) {
       return (new sPixel(grey, alpha));
     }
+
+    /// <summary>
+    /// Prevents a default instance of the <see cref="sPixel"/> struct from being created.
+    /// </summary>
+    /// <param name="rgbData">The RGB data.</param>
+    private sPixel(dword rgbData) {
+      this._rgbBytes = rgbData;
+    }
     /// <summary>
     /// Initializes a new instance of the <see cref="sPixel"/> struct by using an existing one.
     /// </summary>
     /// <param name="pixel">The pixel instance to copy from.</param>
-    public sPixel(sPixel pixel) {
-      this._rgbBytes = pixel._rgbBytes;
+    public sPixel(sPixel pixel)
+      : this(pixel._rgbBytes) {
     }
     /// <summary>
     /// Initializes a new instance of the <see cref="sPixel"/> struct by using a grey value.
@@ -385,9 +408,8 @@ namespace nImager {
     /// Initializes a new instance of the <see cref="sPixel"/> struct by using an instance of a the <see cref="Color"/> class.
     /// </summary>
     /// <param name="color">The color.</param>
-    public sPixel(Color color) {
-      this._rgbBytes = 0;
-      this.Color = color;
+    public sPixel(Color color)
+      : this(color.R, color.G, color.B, color.A) {
     }
     /// <summary>
     /// Initializes a new instance of the <see cref="sPixel"/> struct by using red, green and blue component.
@@ -631,13 +653,13 @@ namespace nImager {
       if (!AllowThresholds)
         return (this == pixel);
       var delta = this.ChrominanceV - pixel.ChrominanceV;
-      if (delta > chromaVTrigger || delta < -chromaVTrigger)
+      if (delta > _CHROMA_V_TRIGGER || delta < -_CHROMA_V_TRIGGER)
         return false;
       delta = this.Luminance - pixel.Luminance;
-      if (delta > luminanceTrigger || delta < -luminanceTrigger)
+      if (delta > _LUMINANCE_TRIGGER || delta < -_LUMINANCE_TRIGGER)
         return false;
       delta = this.ChrominanceU - pixel.ChrominanceU;
-      return delta <= chromaUTrigger && delta >= -chromaUTrigger;
+      return delta <= _CHROMA_U_TRIGGER && delta >= -_CHROMA_U_TRIGGER;
     }
 
     /// <summary>

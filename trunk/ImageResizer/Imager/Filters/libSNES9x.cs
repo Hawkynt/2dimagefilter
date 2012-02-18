@@ -1,4 +1,4 @@
-﻿#region (c)2010-2011 Hawkynt
+﻿#region (c)2008-2014 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
@@ -37,9 +37,11 @@
  */
 #endregion
 
-namespace nImager.Filters {
+namespace Imager.Filters {
   static class libSNES9x {
-    // SNES9x's EPXB modified by Hawkynt to support thresholds
+    /// <summary>
+    /// SNES9x's EPXB modified by Hawkynt to support thresholds
+    /// </summary>
     public static void EpxB(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var c0 = sourceImage[srcX - 1, srcY - 1];
       var c1 = sourceImage[srcX + 0, srcY - 1];
@@ -121,7 +123,9 @@ namespace nImager.Filters {
       targetImage[tgtX + 1, tgtY + 1] = e11;
     }
 
-    // SNES9x's EPX3 modified by Hawkynt to support thresholds
+    /// <summary>
+    /// SNES9x's EPX3 modified by Hawkynt to support thresholds
+    /// </summary>
     public static void Epx3(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var c0 = sourceImage[srcX - 1, srcY - 1];
       var c1 = sourceImage[srcX + 0, srcY - 1];
@@ -219,7 +223,9 @@ namespace nImager.Filters {
       targetImage[tgtX + 2, tgtY + 2] = e22;
     }
 
-    // SNES9x's EPXC modified by Hawkynt to support thresholds
+    /// <summary>
+    /// SNES9x's EPXC modified by Hawkynt to support thresholds
+    /// </summary>
     public static void EpxC(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
       var c0 = sourceImage[srcX - 1, srcY - 1];
       var c1 = sourceImage[srcX + 0, srcY - 1];
