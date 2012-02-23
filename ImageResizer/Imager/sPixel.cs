@@ -663,6 +663,18 @@ namespace Imager {
     }
 
     /// <summary>
+    /// Calculates the absolute difference between to pixels.
+    /// </summary>
+    /// <param name="pixel">The pixel to differ to.</param>
+    /// <returns>The absolute difference.</returns>
+    public uint AbsDifference(sPixel pixel) {
+      return (uint)(
+        _LUMINANCE_TRIGGER * Math.Abs(this.Luminance - pixel.Luminance)
+        + _CHROMA_V_TRIGGER * Math.Abs(this.ChrominanceV - pixel.ChrominanceV)
+        + _CHROMA_U_TRIGGER * Math.Abs(this.ChrominanceU - pixel.ChrominanceU)
+      );
+    }
+    /// <summary>
     /// Determines whether this instance is not like the specified <see cref="sPixel"/> instance.
     /// </summary>
     /// <param name="pixel">The instance to compare to.</param>

@@ -36,7 +36,7 @@
       
  */
 #endregion
-using System;
+
 
 #if !NET35
 using System.Diagnostics.Contracts;
@@ -191,22 +191,12 @@ namespace Imager.Filters {
       targetImage[tgtX + 3, tgtY + 3] = EF;
     }
 
-    private static int RGBtoYUV(sPixel A) {
-      var r = A.Red;
-      var g = A.Green;
-      var b = A.Blue;
-      var y = ((r << 4) + (g << 5) + (b << 2));
-      var u = (-r - (g << 1) + (b << 2));
-      var v = ((r << 1) - (g << 1) - (b >> 1));
-      return (y + u + v);
-    }
-
-    private static int df(sPixel A, sPixel B) {
-      return (Math.Abs(RGBtoYUV(A) - RGBtoYUV(B)));
+    private static uint df(sPixel A, sPixel B) {
+      return (A.AbsDifference(B));
     }
 
     private static bool eq(sPixel A, sPixel B) {
-      return (df(A, B) < 155);
+      return (A.IsLike(B));
     }
 
 
