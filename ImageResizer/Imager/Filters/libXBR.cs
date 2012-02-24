@@ -47,340 +47,341 @@ namespace Imager.Filters {
     /// <summary>
     /// This is the XBR2x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
-    public static void Xbr2X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+    public static void Xbr2X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object allowAlphaBlending) {
 #if !NET35
       Contract.Assume(sourceImage != null);
+      Contract.Assume(targetImage != null);
+      Contract.Assume(allowAlphaBlending != null);
 #endif
-      var PA = sourceImage[srcX - 1, srcY - 1];
-      var PB = sourceImage[srcX + 0, srcY - 1];
-      var PC = sourceImage[srcX + 1, srcY - 1];
-      var PD = sourceImage[srcX - 1, srcY + 0];
-      var PE = sourceImage[srcX + 0, srcY + 0];
-      var PF = sourceImage[srcX + 1, srcY + 0];
-      var PG = sourceImage[srcX - 1, srcY + 1];
-      var PH = sourceImage[srcX + 0, srcY + 1];
-      var PI = sourceImage[srcX + 1, srcY + 1];
-      var A1 = sourceImage[srcX - 1, srcY - 2];
-      var B1 = sourceImage[srcX + 0, srcY - 2];
-      var C1 = sourceImage[srcX + 1, srcY - 2];
-      var A0 = sourceImage[srcX - 2, srcY - 1];
-      var D0 = sourceImage[srcX - 2, srcY + 0];
-      var G0 = sourceImage[srcX - 2, srcY + 1];
-      var C4 = sourceImage[srcX + 2, srcY - 1];
-      var F4 = sourceImage[srcX + 2, srcY + 0];
-      var I4 = sourceImage[srcX + 2, srcY - 1];
-      var G5 = sourceImage[srcX - 1, srcY + 2];
-      var H5 = sourceImage[srcX + 0, srcY + 2];
-      var I5 = sourceImage[srcX + 1, srcY + 2];
+      var pa = sourceImage[srcX - 1, srcY - 1];
+      var pb = sourceImage[srcX + 0, srcY - 1];
+      var pc = sourceImage[srcX + 1, srcY - 1];
+      var pd = sourceImage[srcX - 1, srcY + 0];
+      var pe = sourceImage[srcX + 0, srcY + 0];
+      var pf = sourceImage[srcX + 1, srcY + 0];
+      var pg = sourceImage[srcX - 1, srcY + 1];
+      var ph = sourceImage[srcX + 0, srcY + 1];
+      var pi = sourceImage[srcX + 1, srcY + 1];
+      var a1 = sourceImage[srcX - 1, srcY - 2];
+      var b1 = sourceImage[srcX + 0, srcY - 2];
+      var c1 = sourceImage[srcX + 1, srcY - 2];
+      var a0 = sourceImage[srcX - 2, srcY - 1];
+      var d0 = sourceImage[srcX - 2, srcY + 0];
+      var g0 = sourceImage[srcX - 2, srcY + 1];
+      var c4 = sourceImage[srcX + 2, srcY - 1];
+      var f4 = sourceImage[srcX + 2, srcY + 0];
+      var i4 = sourceImage[srcX + 2, srcY - 1];
+      var g5 = sourceImage[srcX - 1, srcY + 2];
+      var h5 = sourceImage[srcX + 0, srcY + 2];
+      var i5 = sourceImage[srcX + 1, srcY + 2];
 
-      sPixel E1, E2, E3;
-      var E0 = E1 = E2 = E3 = PE;
+      sPixel e1, e2, e3;
+      var e0 = e1 = e2 = e3 = pe;
 
-      FILTRO_2X(PE, PI, PH, PF, PG, PC, PD, PB, F4, I4, H5, I5, ref E1, ref E2, ref E3);
-      FILTRO_2X(PE, PC, PF, PB, PI, PA, PH, PD, B1, C1, F4, C4, ref E0, ref E3, ref E1);
-      FILTRO_2X(PE, PA, PB, PD, PC, PG, PF, PH, D0, A0, B1, A1, ref E2, ref E1, ref E0);
-      FILTRO_2X(PE, PG, PD, PH, PA, PI, PB, PF, H5, G5, D0, G0, ref E3, ref E0, ref E2);
+      _Kernel2X(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref e1, ref e2, ref e3, (bool)allowAlphaBlending);
+      _Kernel2X(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e0, ref e3, ref e1, (bool)allowAlphaBlending);
+      _Kernel2X(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e2, ref e1, ref e0, (bool)allowAlphaBlending);
+      _Kernel2X(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref e3, ref e0, ref e2, (bool)allowAlphaBlending);
 
-      targetImage[tgtX + 0, tgtY + 0] = E0;
-      targetImage[tgtX + 1, tgtY + 0] = E1;
-      targetImage[tgtX + 0, tgtY + 1] = E2;
-      targetImage[tgtX + 1, tgtY + 1] = E3;
+      targetImage[tgtX + 0, tgtY + 0] = e0;
+      targetImage[tgtX + 1, tgtY + 0] = e1;
+      targetImage[tgtX + 0, tgtY + 1] = e2;
+      targetImage[tgtX + 1, tgtY + 1] = e3;
     }
 
     /// <summary>
     /// This is the XBR3x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
-    public static void Xbr3X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+    public static void Xbr3X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object allowAlphaBlending) {
 #if !NET35
       Contract.Assume(sourceImage != null);
+      Contract.Assume(targetImage != null);
+      Contract.Assume(allowAlphaBlending != null);
 #endif
-      var PA = sourceImage[srcX - 1, srcY - 1];
-      var PB = sourceImage[srcX + 0, srcY - 1];
-      var PC = sourceImage[srcX + 1, srcY - 1];
-      var PD = sourceImage[srcX - 1, srcY + 0];
-      var PE = sourceImage[srcX + 0, srcY + 0];
-      var PF = sourceImage[srcX + 1, srcY + 0];
-      var PG = sourceImage[srcX - 1, srcY + 1];
-      var PH = sourceImage[srcX + 0, srcY + 1];
-      var PI = sourceImage[srcX + 1, srcY + 1];
-      var A1 = sourceImage[srcX - 1, srcY - 2];
-      var B1 = sourceImage[srcX + 0, srcY - 2];
-      var C1 = sourceImage[srcX + 1, srcY - 2];
-      var A0 = sourceImage[srcX - 2, srcY - 1];
-      var D0 = sourceImage[srcX - 2, srcY + 0];
-      var G0 = sourceImage[srcX - 2, srcY + 1];
-      var C4 = sourceImage[srcX + 2, srcY - 1];
-      var F4 = sourceImage[srcX + 2, srcY + 0];
-      var I4 = sourceImage[srcX + 2, srcY - 1];
-      var G5 = sourceImage[srcX - 1, srcY + 2];
-      var H5 = sourceImage[srcX + 0, srcY + 2];
-      var I5 = sourceImage[srcX + 1, srcY + 2];
+      var pa = sourceImage[srcX - 1, srcY - 1];
+      var pb = sourceImage[srcX + 0, srcY - 1];
+      var pc = sourceImage[srcX + 1, srcY - 1];
+      var pd = sourceImage[srcX - 1, srcY + 0];
+      var pe = sourceImage[srcX + 0, srcY + 0];
+      var pf = sourceImage[srcX + 1, srcY + 0];
+      var pg = sourceImage[srcX - 1, srcY + 1];
+      var ph = sourceImage[srcX + 0, srcY + 1];
+      var pi = sourceImage[srcX + 1, srcY + 1];
+      var a1 = sourceImage[srcX - 1, srcY - 2];
+      var b1 = sourceImage[srcX + 0, srcY - 2];
+      var c1 = sourceImage[srcX + 1, srcY - 2];
+      var a0 = sourceImage[srcX - 2, srcY - 1];
+      var d0 = sourceImage[srcX - 2, srcY + 0];
+      var g0 = sourceImage[srcX - 2, srcY + 1];
+      var c4 = sourceImage[srcX + 2, srcY - 1];
+      var f4 = sourceImage[srcX + 2, srcY + 0];
+      var i4 = sourceImage[srcX + 2, srcY - 1];
+      var g5 = sourceImage[srcX - 1, srcY + 2];
+      var h5 = sourceImage[srcX + 0, srcY + 2];
+      var i5 = sourceImage[srcX + 1, srcY + 2];
 
-      sPixel E1, E2, E3, E4, E5, E6, E7, E8;
-      var E0 = E1 = E2 = E3 = E4 = E5 = E6 = E7 = E8 = PE;
+      sPixel e1, e2, e3, e4, e5, e6, e7, e8;
+      var e0 = e1 = e2 = e3 = e4 = e5 = e6 = e7 = e8 = pe;
 
-      FILTRO_3X(PE, PI, PH, PF, PG, PC, PD, PB, F4, I4, H5, I5, ref E2, ref E5, ref E6, ref E7, ref E8);
-      FILTRO_3X(PE, PC, PF, PB, PI, PA, PH, PD, B1, C1, F4, C4, ref E0, ref E1, ref E8, ref E5, ref E2);
-      FILTRO_3X(PE, PA, PB, PD, PC, PG, PF, PH, D0, A0, B1, A1, ref E6, ref E3, ref E2, ref E1, ref E0);
-      FILTRO_3X(PE, PG, PD, PH, PA, PI, PB, PF, H5, G5, D0, G0, ref E8, ref E7, ref E0, ref E3, ref E6);
+      _Kernel3X(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref e2, ref e5, ref e6, ref e7, ref e8, (bool)allowAlphaBlending);
+      _Kernel3X(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e0, ref e1, ref e8, ref e5, ref e2, (bool)allowAlphaBlending);
+      _Kernel3X(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e6, ref e3, ref e2, ref e1, ref e0, (bool)allowAlphaBlending);
+      _Kernel3X(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref e8, ref e7, ref e0, ref e3, ref e6, (bool)allowAlphaBlending);
 
-      targetImage[tgtX + 0, tgtY + 0] = E0;
-      targetImage[tgtX + 1, tgtY + 0] = E1;
-      targetImage[tgtX + 2, tgtY + 0] = E2;
-      targetImage[tgtX + 0, tgtY + 1] = E3;
-      targetImage[tgtX + 1, tgtY + 1] = E4;
-      targetImage[tgtX + 2, tgtY + 1] = E5;
-      targetImage[tgtX + 0, tgtY + 2] = E6;
-      targetImage[tgtX + 1, tgtY + 2] = E7;
-      targetImage[tgtX + 2, tgtY + 2] = E8;
-
+      targetImage[tgtX + 0, tgtY + 0] = e0;
+      targetImage[tgtX + 1, tgtY + 0] = e1;
+      targetImage[tgtX + 2, tgtY + 0] = e2;
+      targetImage[tgtX + 0, tgtY + 1] = e3;
+      targetImage[tgtX + 1, tgtY + 1] = e4;
+      targetImage[tgtX + 2, tgtY + 1] = e5;
+      targetImage[tgtX + 0, tgtY + 2] = e6;
+      targetImage[tgtX + 1, tgtY + 2] = e7;
+      targetImage[tgtX + 2, tgtY + 2] = e8;
     }
 
     /// <summary>
     /// This is the XBR4x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
-    public static void Xbr4X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+    public static void Xbr4X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object allowAlphaBlending) {
 #if !NET35
       Contract.Assume(sourceImage != null);
+      Contract.Assume(targetImage != null);
+      Contract.Assume(allowAlphaBlending != null);
 #endif
-      var PA = sourceImage[srcX - 1, srcY - 1];
-      var PB = sourceImage[srcX + 0, srcY - 1];
-      var PC = sourceImage[srcX + 1, srcY - 1];
-      var PD = sourceImage[srcX - 1, srcY + 0];
-      var PE = sourceImage[srcX + 0, srcY + 0];
-      var PF = sourceImage[srcX + 1, srcY + 0];
-      var PG = sourceImage[srcX - 1, srcY + 1];
-      var PH = sourceImage[srcX + 0, srcY + 1];
-      var PI = sourceImage[srcX + 1, srcY + 1];
-      var A1 = sourceImage[srcX - 1, srcY - 2];
-      var B1 = sourceImage[srcX + 0, srcY - 2];
-      var C1 = sourceImage[srcX + 1, srcY - 2];
-      var A0 = sourceImage[srcX - 2, srcY - 1];
-      var D0 = sourceImage[srcX - 2, srcY + 0];
-      var G0 = sourceImage[srcX - 2, srcY + 1];
-      var C4 = sourceImage[srcX + 2, srcY - 1];
-      var F4 = sourceImage[srcX + 2, srcY + 0];
-      var I4 = sourceImage[srcX + 2, srcY - 1];
-      var G5 = sourceImage[srcX - 1, srcY + 2];
-      var H5 = sourceImage[srcX + 0, srcY + 2];
-      var I5 = sourceImage[srcX + 1, srcY + 2];
+      var pa = sourceImage[srcX - 1, srcY - 1];
+      var pb = sourceImage[srcX + 0, srcY - 1];
+      var pc = sourceImage[srcX + 1, srcY - 1];
+      var pd = sourceImage[srcX - 1, srcY + 0];
+      var pe = sourceImage[srcX + 0, srcY + 0];
+      var pf = sourceImage[srcX + 1, srcY + 0];
+      var pg = sourceImage[srcX - 1, srcY + 1];
+      var ph = sourceImage[srcX + 0, srcY + 1];
+      var pi = sourceImage[srcX + 1, srcY + 1];
+      var a1 = sourceImage[srcX - 1, srcY - 2];
+      var b1 = sourceImage[srcX + 0, srcY - 2];
+      var c1 = sourceImage[srcX + 1, srcY - 2];
+      var a0 = sourceImage[srcX - 2, srcY - 1];
+      var d0 = sourceImage[srcX - 2, srcY + 0];
+      var g0 = sourceImage[srcX - 2, srcY + 1];
+      var c4 = sourceImage[srcX + 2, srcY - 1];
+      var f4 = sourceImage[srcX + 2, srcY + 0];
+      var i4 = sourceImage[srcX + 2, srcY - 1];
+      var g5 = sourceImage[srcX - 1, srcY + 2];
+      var h5 = sourceImage[srcX + 0, srcY + 2];
+      var i5 = sourceImage[srcX + 1, srcY + 2];
 
-      sPixel E1, E2, E3, E4, E5, E6, E7, E8, E9, EA, EB, EC, ED, EE, EF;
-      var E0 = E1 = E2 = E3 = E4 = E5 = E6 = E7 = E8 = E9 = EA = EB = EC = ED = EE = EF = PE;
+      sPixel e1, e2, e3, e4, e5, e6, e7, e8, e9, ea, eb, ec, ed, ee, ef;
+      var e0 = e1 = e2 = e3 = e4 = e5 = e6 = e7 = e8 = e9 = ea = eb = ec = ed = ee = ef = pe;
 
-      FILTRO_4X(PE, PI, PH, PF, PG, PC, PD, PB, F4, I4, H5, I5, ref EF, ref EE, ref EB, ref E3, ref E7, ref EA, ref ED, ref EC);
-      FILTRO_4X(PE, PC, PF, PB, PI, PA, PH, PD, B1, C1, F4, C4, ref E3, ref E7, ref E2, ref E0, ref E1, ref E6, ref EB, ref EF);
-      FILTRO_4X(PE, PA, PB, PD, PC, PG, PF, PH, D0, A0, B1, A1, ref E0, ref E1, ref E4, ref EC, ref E8, ref E5, ref E2, ref E3);
-      FILTRO_4X(PE, PG, PD, PH, PA, PI, PB, PF, H5, G5, D0, G0, ref EC, ref E8, ref ED, ref EF, ref EE, ref E9, ref E4, ref E0);
+      _Kernel4X(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref ef, ref ee, ref eb, ref e3, ref e7, ref ea, ref ed, ref ec, (bool)allowAlphaBlending);
+      _Kernel4X(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e3, ref e7, ref e2, ref e0, ref e1, ref e6, ref eb, ref ef, (bool)allowAlphaBlending);
+      _Kernel4X(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e0, ref e1, ref e4, ref ec, ref e8, ref e5, ref e2, ref e3, (bool)allowAlphaBlending);
+      _Kernel4X(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref ec, ref e8, ref ed, ref ef, ref ee, ref e9, ref e4, ref e0, (bool)allowAlphaBlending);
 
-      targetImage[tgtX + 0, tgtY + 0] = E0;
-      targetImage[tgtX + 1, tgtY + 0] = E1;
-      targetImage[tgtX + 2, tgtY + 0] = E2;
-      targetImage[tgtX + 3, tgtY + 0] = E3;
-      targetImage[tgtX + 0, tgtY + 1] = E4;
-      targetImage[tgtX + 1, tgtY + 1] = E5;
-      targetImage[tgtX + 2, tgtY + 1] = E6;
-      targetImage[tgtX + 3, tgtY + 1] = E7;
-      targetImage[tgtX + 0, tgtY + 2] = E8;
-      targetImage[tgtX + 1, tgtY + 2] = E9;
-      targetImage[tgtX + 2, tgtY + 2] = EA;
-      targetImage[tgtX + 3, tgtY + 2] = EB;
-      targetImage[tgtX + 0, tgtY + 3] = EC;
-      targetImage[tgtX + 1, tgtY + 3] = ED;
-      targetImage[tgtX + 2, tgtY + 3] = EE;
-      targetImage[tgtX + 3, tgtY + 3] = EF;
+      targetImage[tgtX + 0, tgtY + 0] = e0;
+      targetImage[tgtX + 1, tgtY + 0] = e1;
+      targetImage[tgtX + 2, tgtY + 0] = e2;
+      targetImage[tgtX + 3, tgtY + 0] = e3;
+      targetImage[tgtX + 0, tgtY + 1] = e4;
+      targetImage[tgtX + 1, tgtY + 1] = e5;
+      targetImage[tgtX + 2, tgtY + 1] = e6;
+      targetImage[tgtX + 3, tgtY + 1] = e7;
+      targetImage[tgtX + 0, tgtY + 2] = e8;
+      targetImage[tgtX + 1, tgtY + 2] = e9;
+      targetImage[tgtX + 2, tgtY + 2] = ea;
+      targetImage[tgtX + 3, tgtY + 2] = eb;
+      targetImage[tgtX + 0, tgtY + 3] = ec;
+      targetImage[tgtX + 1, tgtY + 3] = ed;
+      targetImage[tgtX + 2, tgtY + 3] = ee;
+      targetImage[tgtX + 3, tgtY + 3] = ef;
     }
 
-    private static uint df(sPixel A, sPixel B) {
-      return (A.AbsDifference(B));
+    private static uint _YuvDifference(sPixel a, sPixel b) {
+      return (a.AbsDifference(b));
     }
 
-    private static bool eq(sPixel A, sPixel B) {
-      return (A.IsLike(B));
+    private static void _AlphaBlend32W(ref sPixel dst, sPixel src, bool blend) {
+      if (blend)
+        dst = sPixel.Interpolate(dst, src, 7, 1);
     }
 
-
-    private static void ALPHA_BLEND_32_W(ref sPixel dst, sPixel src) {
-      dst = sPixel.Interpolate(dst, src, 7, 1);
+    private static void _AlphaBlend64W(ref sPixel dst, sPixel src, bool blend) {
+      if (blend)
+        dst = sPixel.Interpolate(dst, src, 3, 1);
     }
 
-    private static void ALPHA_BLEND_64_W(ref sPixel dst, sPixel src) {
-      dst = sPixel.Interpolate(dst, src, 3, 1);
+    private static void _AlphaBlend128W(ref sPixel dst, sPixel src, bool blend) {
+      if (blend)
+        dst = sPixel.Interpolate(dst, src);
     }
 
-    private static void ALPHA_BLEND_128_W(ref sPixel dst, sPixel src) {
-      dst = sPixel.Interpolate(dst, src);
+    private static void _AlphaBlend192W(ref sPixel dst, sPixel src, bool blend) {
+      dst = blend ? sPixel.Interpolate(dst, src, 1, 3) : src;
     }
 
-    private static void ALPHA_BLEND_192_W(ref sPixel dst, sPixel src) {
-      dst = sPixel.Interpolate(dst, src, 1, 3);
-    }
-
-    private static void ALPHA_BLEND_224_W(ref sPixel dst, sPixel src) {
-      dst = sPixel.Interpolate(dst, src, 1, 7);
+    private static void _AlphaBlend224W(ref sPixel dst, sPixel src, bool blend) {
+      dst = blend ? sPixel.Interpolate(dst, src, 1, 7) : src;
     }
 
     #region 2x
-    private static void LEFT_UP_2_2X(ref sPixel N3, ref sPixel N2, ref sPixel N1, sPixel PIXEL) {
-      ALPHA_BLEND_224_W(ref N3, PIXEL);
-      ALPHA_BLEND_64_W(ref N2, PIXEL);
-      N1 = N2;
+    private static void _LeftUp2_2X(ref sPixel n3, ref sPixel n2, out sPixel n1, sPixel pixel, bool blend) {
+      _AlphaBlend224W(ref n3, pixel, blend);
+      _AlphaBlend64W(ref n2, pixel, blend);
+      n1 = n2;
     }
 
-    private static void LEFT_2_2X(ref sPixel N3, ref sPixel N2, sPixel PIXEL) {
-      ALPHA_BLEND_192_W(ref N3, PIXEL);
-      ALPHA_BLEND_64_W(ref N2, PIXEL);
+    private static void _Left2_2X(ref sPixel n3, ref sPixel n2, sPixel pixel, bool blend) {
+      _AlphaBlend192W(ref n3, pixel, blend);
+      _AlphaBlend64W(ref n2, pixel, blend);
     }
-    private static void UP_2_2X(ref sPixel N3, ref sPixel N1, sPixel PIXEL) {
-      ALPHA_BLEND_192_W(ref N3, PIXEL);
-      ALPHA_BLEND_64_W(ref N1, PIXEL);
-    }
-
-    private static void DIA_2X(ref sPixel N3, sPixel PIXEL) {
-      ALPHA_BLEND_128_W(ref N3, PIXEL);
+    private static void _Up2_2X(ref sPixel n3, ref sPixel n1, sPixel pixel, bool blend) {
+      _AlphaBlend192W(ref n3, pixel, blend);
+      _AlphaBlend64W(ref n1, pixel, blend);
     }
 
-    private static void FILTRO_2X(sPixel PE, sPixel PI, sPixel PH, sPixel PF, sPixel PG, sPixel PC, sPixel PD, sPixel PB, sPixel F4, sPixel I4, sPixel H5, sPixel I5, ref sPixel N1, ref sPixel N2, ref sPixel N3) {
-      var ex = (PE != PH && PE != PF);
-      if (ex) {
-        var e = (df(PE, PC) + df(PE, PG) + df(PI, H5) + df(PI, F4)) + (df(PH, PF) << 2);
-        var i = (df(PH, PD) + df(PH, I5) + df(PF, I4) + df(PF, PB)) + (df(PE, PI) << 2);
-        if ((e < i)
-          && (!eq(PF, PB) && !eq(PH, PD) || eq(PE, PI) && (!eq(PF, I4) && !eq(PH, I5)) || eq(PE, PG) || eq(PE, PC))) {
-          var ke = df(PF, PG);
-          var ki = df(PH, PC);
-          var ex2 = (PE != PC && PB != PC);
-          var ex3 = (PE != PG && PD != PG);
-          var px = (df(PE, PF) <= df(PE, PH)) ? PF : PH;
-          if (((ke << 1) <= ki) && ex3 && (ke >= (ki << 1)) && ex2) {
-            LEFT_UP_2_2X(ref N3, ref N2, ref N1, px);
-          } else if (((ke << 1) <= ki) && ex3) {
-            LEFT_2_2X(ref N3, ref N2, px);
-          } else if ((ke >= (ki << 1)) && ex2) {
-            UP_2_2X(ref N3, ref N1, px);
-          } else {
-            DIA_2X(ref N3, px);
-          }
-        } else if (e <= i) {
-          ALPHA_BLEND_128_W(ref N3, ((df(PE, PF) <= df(PE, PH)) ? PF : PH));
-        }
+    private static void _Dia_2X(ref sPixel n3, sPixel pixel, bool blend) {
+      _AlphaBlend128W(ref n3, pixel, blend);
+    }
+
+    private static void _Kernel2X(sPixel pe, sPixel pi, sPixel ph, sPixel pf, sPixel pg, sPixel pc, sPixel pd, sPixel pb, sPixel f4, sPixel i4, sPixel h5, sPixel i5, ref sPixel n1, ref sPixel n2, ref sPixel n3, bool blend) {
+      var ex = (pe != ph && pe != pf);
+      if (!ex)
+        return;
+      var e = (_YuvDifference(pe, pc) + _YuvDifference(pe, pg) + _YuvDifference(pi, h5) + _YuvDifference(pi, f4)) + (_YuvDifference(ph, pf) << 2);
+      var i = (_YuvDifference(ph, pd) + _YuvDifference(ph, i5) + _YuvDifference(pf, i4) + _YuvDifference(pf, pb)) + (_YuvDifference(pe, pi) << 2);
+      if ((e < i)
+        && (pf.IsNotLike(pb) && ph.IsNotLike(pd) || pe.IsLike(pi) && (pf.IsNotLike(i4) && ph.IsNotLike(i5)) || pe.IsLike(pg) || pe.IsLike(pc))) {
+        var ke = _YuvDifference(pf, pg);
+        var ki = _YuvDifference(ph, pc);
+        var ex2 = (pe != pc && pb != pc);
+        var ex3 = (pe != pg && pd != pg);
+        var px = (_YuvDifference(pe, pf) <= _YuvDifference(pe, ph)) ? pf : ph;
+        if (((ke << 1) <= ki) && ex3 && (ke >= (ki << 1)) && ex2)
+          _LeftUp2_2X(ref n3, ref n2, out n1, px, blend);
+        else if (((ke << 1) <= ki) && ex3)
+          _Left2_2X(ref n3, ref n2, px, blend);
+        else if ((ke >= (ki << 1)) && ex2)
+          _Up2_2X(ref n3, ref n1, px, blend);
+        else
+          _Dia_2X(ref n3, px, blend);
+
+      } else if (e <= i) {
+        _AlphaBlend128W(ref n3, ((_YuvDifference(pe, pf) <= _YuvDifference(pe, ph)) ? pf : ph), blend);
       }
     }
     #endregion
     #region 3x
-    private static void LEFT_UP_2_3X(ref sPixel N7, ref sPixel N5, ref sPixel N6, ref sPixel N2, ref sPixel N8, sPixel PIXEL) {
-      ALPHA_BLEND_192_W(ref N7, PIXEL);
-      ALPHA_BLEND_64_W(ref N6, PIXEL);
-      N5 = N7;
-      N2 = N6;
-      N8 = PIXEL;
+    private static void _LeftUp2_3X(ref sPixel n7, out sPixel n5, ref sPixel n6, out sPixel n2, out sPixel n8, sPixel pixel, bool blend) {
+      _AlphaBlend192W(ref n7, pixel, blend);
+      _AlphaBlend64W(ref n6, pixel, blend);
+      n5 = n7;
+      n2 = n6;
+      n8 = pixel;
     }
 
-    private static void LEFT_2_3X(ref sPixel N7, ref sPixel N5, ref sPixel N6, ref sPixel N8, sPixel PIXEL) {
-      ALPHA_BLEND_192_W(ref N7, PIXEL);
-      ALPHA_BLEND_64_W(ref N5, PIXEL);
-      ALPHA_BLEND_64_W(ref N6, PIXEL);
-      N8 = PIXEL;
+    private static void _Left2_3X(ref sPixel n7, ref sPixel n5, ref sPixel n6, out sPixel n8, sPixel pixel, bool blend) {
+      _AlphaBlend192W(ref n7, pixel, blend);
+      _AlphaBlend64W(ref n5, pixel, blend);
+      _AlphaBlend64W(ref n6, pixel, blend);
+      n8 = pixel;
     }
 
-    private static void UP_2_3X(ref sPixel N5, ref sPixel N7, ref sPixel N2, ref sPixel N8, sPixel PIXEL) {
-      ALPHA_BLEND_192_W(ref N5, PIXEL);
-      ALPHA_BLEND_64_W(ref N7, PIXEL);
-      ALPHA_BLEND_64_W(ref N2, PIXEL);
-      N8 = PIXEL;
+    private static void _Up2_3X(ref sPixel n5, ref sPixel n7, ref sPixel n2, out sPixel n8, sPixel pixel, bool blend) {
+      _AlphaBlend192W(ref n5, pixel, blend);
+      _AlphaBlend64W(ref n7, pixel, blend);
+      _AlphaBlend64W(ref n2, pixel, blend);
+      n8 = pixel;
     }
 
-    private static void DIA_3X(ref sPixel N8, ref sPixel N5, ref sPixel N7, sPixel PIXEL) {
-      ALPHA_BLEND_224_W(ref N8, PIXEL);
-      ALPHA_BLEND_32_W(ref N5, PIXEL);
-      ALPHA_BLEND_32_W(ref N7, PIXEL);
+    private static void _Dia_3X(ref sPixel n8, ref sPixel n5, ref sPixel n7, sPixel pixel, bool blend) {
+      _AlphaBlend224W(ref n8, pixel, blend);
+      _AlphaBlend32W(ref n5, pixel, blend);
+      _AlphaBlend32W(ref n7, pixel, blend);
     }
 
-    private static void FILTRO_3X(sPixel PE, sPixel PI, sPixel PH, sPixel PF, sPixel PG, sPixel PC, sPixel PD, sPixel PB, sPixel F4, sPixel I4, sPixel H5, sPixel I5, ref sPixel N2, ref sPixel N5, ref sPixel N6, ref sPixel N7, ref sPixel N8) {
-      var ex = (PE != PH && PE != PF);
-      if (ex) {
-        var e = (df(PE, PC) + df(PE, PG) + df(PI, H5) + df(PI, F4)) + (df(PH, PF) << 2);
-        var i = (df(PH, PD) + df(PH, I5) + df(PF, I4) + df(PF, PB)) + (df(PE, PI) << 2);
-        if ((e < i)
-          &&
-          (!eq(PF, PB) && !eq(PF, PC) || !eq(PH, PD) && !eq(PH, PG)
-            || eq(PE, PI) && (!eq(PF, F4) && !eq(PF, I4) || !eq(PH, H5) && !eq(PH, I5)) || eq(PE, PG) || eq(PE, PC))) {
-          var ke = df(PF, PG);
-          var ki = df(PH, PC);
-          var ex2 = (PE != PC && PB != PC);
-          var ex3 = (PE != PG && PD != PG);
-          var px = (df(PE, PF) <= df(PE, PH)) ? PF : PH;
-          if (((ke << 1) <= ki) && ex3 && (ke >= (ki << 1)) && ex2) {
-            LEFT_UP_2_3X(ref N7, ref N5, ref N6, ref N2, ref N8, px);
-          } else if (((ke << 1) <= ki) && ex3) {
-            LEFT_2_3X(ref N7, ref  N5, ref N6, ref N8, px);
-          } else if ((ke >= (ki << 1)) && ex2) {
-            UP_2_3X(ref N5, ref N7, ref N2, ref N8, px);
-          } else {
-            DIA_3X(ref N8, ref  N5, ref N7, px);
-          }
-        } else if (e <= i) {
-          ALPHA_BLEND_128_W(ref N8, ((df(PE, PF) <= df(PE, PH)) ? PF : PH));
-        }
+    private static void _Kernel3X(sPixel pe, sPixel pi, sPixel ph, sPixel pf, sPixel pg, sPixel pc, sPixel pd, sPixel pb, sPixel f4, sPixel i4, sPixel h5, sPixel i5, ref sPixel n2, ref sPixel n5, ref sPixel n6, ref sPixel n7, ref sPixel n8, bool blend) {
+      var ex = (pe != ph && pe != pf);
+      if (!ex)
+        return;
+      var e = (_YuvDifference(pe, pc) + _YuvDifference(pe, pg) + _YuvDifference(pi, h5) + _YuvDifference(pi, f4)) + (_YuvDifference(ph, pf) << 2);
+      var i = (_YuvDifference(ph, pd) + _YuvDifference(ph, i5) + _YuvDifference(pf, i4) + _YuvDifference(pf, pb)) + (_YuvDifference(pe, pi) << 2);
+      if ((e < i)
+        && (pf.IsNotLike(pb) && pf.IsNotLike(pc) || ph.IsNotLike(pd) && ph.IsNotLike(pg) || pe.IsLike(pi) && (pf.IsNotLike(f4) && pf.IsNotLike(i4) || ph.IsNotLike(h5) && ph.IsNotLike(i5)) || pe.IsLike(pg) || pe.IsLike(pc))) {
+        var ke = _YuvDifference(pf, pg);
+        var ki = _YuvDifference(ph, pc);
+        var ex2 = (pe != pc && pb != pc);
+        var ex3 = (pe != pg && pd != pg);
+        var px = (_YuvDifference(pe, pf) <= _YuvDifference(pe, ph)) ? pf : ph;
+        if (((ke << 1) <= ki) && ex3 && (ke >= (ki << 1)) && ex2)
+          _LeftUp2_3X(ref n7, out n5, ref n6, out n2, out n8, px, blend);
+        else if (((ke << 1) <= ki) && ex3)
+          _Left2_3X(ref n7, ref  n5, ref n6, out n8, px, blend);
+        else if ((ke >= (ki << 1)) && ex2)
+          _Up2_3X(ref n5, ref n7, ref n2, out n8, px, blend);
+        else
+          _Dia_3X(ref n8, ref  n5, ref n7, px, blend);
+
+      } else if (e <= i) {
+        _AlphaBlend128W(ref n8, ((_YuvDifference(pe, pf) <= _YuvDifference(pe, ph)) ? pf : ph), blend);
       }
     }
     #endregion
     #region 4x
-    private static void LEFT_UP_2(ref sPixel N15, ref sPixel N14, ref sPixel N11, ref sPixel N13, ref sPixel N12, ref sPixel N10, ref sPixel N7, ref sPixel N3, sPixel PIXEL) {
-      ALPHA_BLEND_192_W(ref N13, PIXEL);
-      ALPHA_BLEND_64_W(ref N12, PIXEL);
-      N15 = N14 = N11 = PIXEL;
-      N10 = N3 = N12;
-      N7 = N13;
+    private static void _LeftUp2(out sPixel n15, out sPixel n14, out sPixel n11, ref sPixel n13, ref sPixel n12, out sPixel n10, out sPixel n7, out sPixel n3, sPixel pixel, bool blend) {
+      _AlphaBlend192W(ref n13, pixel, blend);
+      _AlphaBlend64W(ref n12, pixel, blend);
+      n15 = n14 = n11 = pixel;
+      n10 = n3 = n12;
+      n7 = n13;
     }
 
-    private static void LEFT_2(ref sPixel N15, ref sPixel N14, ref sPixel N11, ref sPixel N13, ref sPixel N12, ref sPixel N10, sPixel PIXEL) {
-      ALPHA_BLEND_192_W(ref N11, PIXEL);
-      ALPHA_BLEND_192_W(ref N13, PIXEL);
-      ALPHA_BLEND_64_W(ref N10, PIXEL);
-      ALPHA_BLEND_64_W(ref N12, PIXEL);
-      N14 = PIXEL;
-      N15 = PIXEL;
+    private static void _Left2(out sPixel n15, out sPixel n14, ref sPixel n11, ref sPixel n13, ref sPixel n12, ref sPixel n10, sPixel pixel, bool blend) {
+      _AlphaBlend192W(ref n11, pixel, blend);
+      _AlphaBlend192W(ref n13, pixel, blend);
+      _AlphaBlend64W(ref n10, pixel, blend);
+      _AlphaBlend64W(ref n12, pixel, blend);
+      n14 = pixel;
+      n15 = pixel;
     }
 
-    private static void UP_2(ref sPixel N15, ref sPixel N14, ref sPixel N11, ref sPixel N3, ref sPixel N7, ref sPixel N10, sPixel PIXEL) {
-      ALPHA_BLEND_192_W(ref N14, PIXEL);
-      ALPHA_BLEND_192_W(ref N7, PIXEL);
-      ALPHA_BLEND_64_W(ref N10, PIXEL);
-      ALPHA_BLEND_64_W(ref N3, PIXEL);
-      N11 = PIXEL;
-      N15 = PIXEL;
+    private static void _Up2(out sPixel n15, ref sPixel n14, out sPixel n11, ref sPixel n3, ref sPixel n7, ref sPixel n10, sPixel pixel, bool blend) {
+      _AlphaBlend192W(ref n14, pixel, blend);
+      _AlphaBlend192W(ref n7, pixel, blend);
+      _AlphaBlend64W(ref n10, pixel, blend);
+      _AlphaBlend64W(ref n3, pixel, blend);
+      n11 = pixel;
+      n15 = pixel;
     }
 
-    private static void DIA(ref sPixel N15, ref sPixel N14, ref sPixel N11, sPixel PIXEL) {
-      ALPHA_BLEND_128_W(ref N11, PIXEL);
-      ALPHA_BLEND_128_W(ref N14, PIXEL);
-      N15 = PIXEL;
+    private static void _Dia(out sPixel n15, ref sPixel n14, ref sPixel n11, sPixel pixel, bool blend) {
+      _AlphaBlend128W(ref n11, pixel, blend);
+      _AlphaBlend128W(ref n14, pixel, blend);
+      n15 = pixel;
     }
 
-    private static void FILTRO_4X(sPixel PE, sPixel PI, sPixel PH, sPixel PF, sPixel PG, sPixel PC, sPixel PD, sPixel PB, sPixel F4, sPixel I4, sPixel H5, sPixel I5, ref sPixel N15, ref sPixel N14, ref sPixel N11, ref sPixel N3, ref sPixel N7, ref sPixel N10, ref sPixel N13, ref sPixel N12) {
-      var ex = (PE != PH && PE != PF);
-      if (ex) {
-        var e = (df(PE, PC) + df(PE, PG) + df(PI, H5) + df(PI, F4)) + (df(PH, PF) << 2);
-        var i = (df(PH, PD) + df(PH, I5) + df(PF, I4) + df(PF, PB)) + (df(PE, PI) << 2);
-        if ((e < i) && (!eq(PF, PB) && !eq(PH, PD) || eq(PE, PI) && (!eq(PF, I4) && !eq(PH, I5)) || eq(PE, PG) || eq(PE, PC))) {
-          var ke = df(PF, PG);
-          var ki = df(PH, PC);
-          var ex2 = (PE != PC && PB != PC);
-          var ex3 = (PE != PG && PD != PG);
-          var px = (df(PE, PF) <= df(PE, PH)) ? PF : PH;
-          if (((ke << 1) <= ki) && ex3 && (ke >= (ki << 1)) && ex2) {
-            LEFT_UP_2(ref N15, ref  N14, ref N11, ref N13, ref N12, ref N10, ref N7, ref N3, px);
-          } else if (((ke << 1) <= ki) && ex3) {
-            LEFT_2(ref N15, ref N14, ref N11, ref N13, ref N12, ref N10, px);
-          } else if ((ke >= (ki << 1)) && ex2) {
-            UP_2(ref N15, ref N14, ref N11, ref N3, ref N7, ref N10, px);
-          } else {
-            DIA(ref N15, ref N14, ref N11, px);
-          }
-        } else if (e <= i) {
-          ALPHA_BLEND_128_W(ref N15, ((df(PE, PF) <= df(PE, PH)) ? PF : PH));
-        }
+    private static void _Kernel4X(sPixel pe, sPixel pi, sPixel ph, sPixel pf, sPixel pg, sPixel pc, sPixel pd, sPixel pb, sPixel f4, sPixel i4, sPixel h5, sPixel i5, ref sPixel n15, ref sPixel n14, ref sPixel n11, ref sPixel n3, ref sPixel n7, ref sPixel n10, ref sPixel n13, ref sPixel n12, bool blend) {
+      var ex = (pe != ph && pe != pf);
+      if (!ex)
+        return;
+      var e = (_YuvDifference(pe, pc) + _YuvDifference(pe, pg) + _YuvDifference(pi, h5) + _YuvDifference(pi, f4)) + (_YuvDifference(ph, pf) << 2);
+      var i = (_YuvDifference(ph, pd) + _YuvDifference(ph, i5) + _YuvDifference(pf, i4) + _YuvDifference(pf, pb)) + (_YuvDifference(pe, pi) << 2);
+      if ((e < i) && (pf.IsNotLike(pb) && ph.IsNotLike(pd) || pe.IsLike(pi) && (pf.IsNotLike(i4) && ph.IsNotLike(i5)) || pe.IsLike(pg) || pe.IsLike(pc))) {
+        var ke = _YuvDifference(pf, pg);
+        var ki = _YuvDifference(ph, pc);
+        var ex2 = (pe != pc && pb != pc);
+        var ex3 = (pe != pg && pd != pg);
+        var px = (_YuvDifference(pe, pf) <= _YuvDifference(pe, ph)) ? pf : ph;
+        if (((ke << 1) <= ki) && ex3 && (ke >= (ki << 1)) && ex2)
+          _LeftUp2(out n15, out  n14, out n11, ref n13, ref n12, out n10, out n7, out n3, px, blend);
+        else if (((ke << 1) <= ki) && ex3)
+          _Left2(out n15, out n14, ref n11, ref n13, ref n12, ref n10, px, blend);
+        else if ((ke >= (ki << 1)) && ex2)
+          _Up2(out n15, ref n14, out n11, ref n3, ref n7, ref n10, px, blend);
+        else
+          _Dia(out n15, ref n14, ref n11, px, blend);
+
+      } else if (e <= i) {
+        _AlphaBlend128W(ref n15, ((_YuvDifference(pe, pf) <= _YuvDifference(pe, ph)) ? pf : ph), blend);
       }
     }
     #endregion
