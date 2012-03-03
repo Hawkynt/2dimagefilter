@@ -122,6 +122,10 @@ namespace Imager {
     /// </summary>
     public static readonly sPixel White = FromGrey(255);
     /// <summary>
+    /// Purple
+    /// </summary>
+    public static readonly sPixel Purple = FromRGB(255, 0, 255);
+    /// <summary>
     /// <c>true</c> when IsLike and IsNotLike should allow little differencies in comparison; otherwise, <c>false</c>.
     /// </summary>
     public static bool AllowThresholds = true;
@@ -663,6 +667,17 @@ namespace Imager {
     }
 
     /// <summary>
+    /// Determines whether this instance is not like the specified <see cref="sPixel"/> instance.
+    /// </summary>
+    /// <param name="pixel">The instance to compare to.</param>
+    /// <returns>
+    /// 	<c>true</c> if the specified instance is not alike; otherwise, <c>false</c>.
+    /// </returns>
+    public bool IsNotLike(sPixel pixel) {
+      return (!this.IsLike(pixel));
+    }
+
+    /// <summary>
     /// Calculates the absolute difference between to pixels.
     /// </summary>
     /// <param name="pixel">The pixel to differ to.</param>
@@ -673,16 +688,6 @@ namespace Imager {
         + _CHROMA_V_TRIGGER * Math.Abs(this.ChrominanceV - pixel.ChrominanceV)
         + _CHROMA_U_TRIGGER * Math.Abs(this.ChrominanceU - pixel.ChrominanceU)
       );
-    }
-    /// <summary>
-    /// Determines whether this instance is not like the specified <see cref="sPixel"/> instance.
-    /// </summary>
-    /// <param name="pixel">The instance to compare to.</param>
-    /// <returns>
-    /// 	<c>true</c> if the specified instance is not alike; otherwise, <c>false</c>.
-    /// </returns>
-    public bool IsNotLike(sPixel pixel) {
-      return (!this.IsLike(pixel));
     }
     #endregion
     #region optimized interpolators
