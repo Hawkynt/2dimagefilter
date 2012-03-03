@@ -1,4 +1,5 @@
-﻿#region (c)2008-2014 Hawkynt
+﻿#define ORIGINAL_IMPL
+#region (c)2008-2014 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
@@ -37,7 +38,9 @@
  */
 #endregion
 
+#if ORIGINAL_IMPL
 
+#endif
 #if !NET35
 using System.Diagnostics.Contracts;
 #endif
@@ -56,21 +59,27 @@ namespace Imager.Filters {
       var pa = sourceImage[srcX - 1, srcY - 1];
       var pb = sourceImage[srcX + 0, srcY - 1];
       var pc = sourceImage[srcX + 1, srcY - 1];
+
       var pd = sourceImage[srcX - 1, srcY + 0];
       var pe = sourceImage[srcX + 0, srcY + 0];
       var pf = sourceImage[srcX + 1, srcY + 0];
+
       var pg = sourceImage[srcX - 1, srcY + 1];
       var ph = sourceImage[srcX + 0, srcY + 1];
       var pi = sourceImage[srcX + 1, srcY + 1];
+
       var a1 = sourceImage[srcX - 1, srcY - 2];
       var b1 = sourceImage[srcX + 0, srcY - 2];
       var c1 = sourceImage[srcX + 1, srcY - 2];
+
       var a0 = sourceImage[srcX - 2, srcY - 1];
       var d0 = sourceImage[srcX - 2, srcY + 0];
       var g0 = sourceImage[srcX - 2, srcY + 1];
+
       var c4 = sourceImage[srcX + 2, srcY - 1];
       var f4 = sourceImage[srcX + 2, srcY + 0];
-      var i4 = sourceImage[srcX + 2, srcY - 1];
+      var i4 = sourceImage[srcX + 2, srcY + 1];
+
       var g5 = sourceImage[srcX - 1, srcY + 2];
       var h5 = sourceImage[srcX + 0, srcY + 2];
       var i5 = sourceImage[srcX + 1, srcY + 2];
@@ -78,10 +87,10 @@ namespace Imager.Filters {
       sPixel e1, e2, e3;
       var e0 = e1 = e2 = e3 = pe;
 
-      _Kernel2X(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref e1, ref e2, ref e3, (bool)allowAlphaBlending);
-      _Kernel2X(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e0, ref e3, ref e1, (bool)allowAlphaBlending);
-      _Kernel2X(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e2, ref e1, ref e0, (bool)allowAlphaBlending);
-      _Kernel2X(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref e3, ref e0, ref e2, (bool)allowAlphaBlending);
+      _Kernel2Xv5(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref e1, ref e2, ref e3, (bool)allowAlphaBlending);
+      _Kernel2Xv5(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e0, ref e3, ref e1, (bool)allowAlphaBlending);
+      _Kernel2Xv5(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e2, ref e1, ref e0, (bool)allowAlphaBlending);
+      _Kernel2Xv5(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref e3, ref e0, ref e2, (bool)allowAlphaBlending);
 
       targetImage[tgtX + 0, tgtY + 0] = e0;
       targetImage[tgtX + 1, tgtY + 0] = e1;
@@ -101,21 +110,27 @@ namespace Imager.Filters {
       var pa = sourceImage[srcX - 1, srcY - 1];
       var pb = sourceImage[srcX + 0, srcY - 1];
       var pc = sourceImage[srcX + 1, srcY - 1];
+
       var pd = sourceImage[srcX - 1, srcY + 0];
       var pe = sourceImage[srcX + 0, srcY + 0];
       var pf = sourceImage[srcX + 1, srcY + 0];
+
       var pg = sourceImage[srcX - 1, srcY + 1];
       var ph = sourceImage[srcX + 0, srcY + 1];
       var pi = sourceImage[srcX + 1, srcY + 1];
+
       var a1 = sourceImage[srcX - 1, srcY - 2];
       var b1 = sourceImage[srcX + 0, srcY - 2];
       var c1 = sourceImage[srcX + 1, srcY - 2];
+
       var a0 = sourceImage[srcX - 2, srcY - 1];
       var d0 = sourceImage[srcX - 2, srcY + 0];
       var g0 = sourceImage[srcX - 2, srcY + 1];
+
       var c4 = sourceImage[srcX + 2, srcY - 1];
       var f4 = sourceImage[srcX + 2, srcY + 0];
-      var i4 = sourceImage[srcX + 2, srcY - 1];
+      var i4 = sourceImage[srcX + 2, srcY + 1];
+
       var g5 = sourceImage[srcX - 1, srcY + 2];
       var h5 = sourceImage[srcX + 0, srcY + 2];
       var i5 = sourceImage[srcX + 1, srcY + 2];
@@ -151,21 +166,27 @@ namespace Imager.Filters {
       var pa = sourceImage[srcX - 1, srcY - 1];
       var pb = sourceImage[srcX + 0, srcY - 1];
       var pc = sourceImage[srcX + 1, srcY - 1];
+
       var pd = sourceImage[srcX - 1, srcY + 0];
       var pe = sourceImage[srcX + 0, srcY + 0];
       var pf = sourceImage[srcX + 1, srcY + 0];
+
       var pg = sourceImage[srcX - 1, srcY + 1];
       var ph = sourceImage[srcX + 0, srcY + 1];
       var pi = sourceImage[srcX + 1, srcY + 1];
+
       var a1 = sourceImage[srcX - 1, srcY - 2];
       var b1 = sourceImage[srcX + 0, srcY - 2];
       var c1 = sourceImage[srcX + 1, srcY - 2];
+
       var a0 = sourceImage[srcX - 2, srcY - 1];
       var d0 = sourceImage[srcX - 2, srcY + 0];
       var g0 = sourceImage[srcX - 2, srcY + 1];
+
       var c4 = sourceImage[srcX + 2, srcY - 1];
       var f4 = sourceImage[srcX + 2, srcY + 0];
-      var i4 = sourceImage[srcX + 2, srcY - 1];
+      var i4 = sourceImage[srcX + 2, srcY + 1];
+
       var g5 = sourceImage[srcX - 1, srcY + 2];
       var h5 = sourceImage[srcX + 0, srcY + 2];
       var i5 = sourceImage[srcX + 1, srcY + 2];
@@ -173,10 +194,10 @@ namespace Imager.Filters {
       sPixel e1, e2, e3, e4, e5, e6, e7, e8, e9, ea, eb, ec, ed, ee, ef;
       var e0 = e1 = e2 = e3 = e4 = e5 = e6 = e7 = e8 = e9 = ea = eb = ec = ed = ee = ef = pe;
 
-      _Kernel4X(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref ef, ref ee, ref eb, ref e3, ref e7, ref ea, ref ed, ref ec, (bool)allowAlphaBlending);
-      _Kernel4X(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e3, ref e7, ref e2, ref e0, ref e1, ref e6, ref eb, ref ef, (bool)allowAlphaBlending);
-      _Kernel4X(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e0, ref e1, ref e4, ref ec, ref e8, ref e5, ref e2, ref e3, (bool)allowAlphaBlending);
-      _Kernel4X(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref ec, ref e8, ref ed, ref ef, ref ee, ref e9, ref e4, ref e0, (bool)allowAlphaBlending);
+      _Kernel4Xv2(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref ef, ref ee, ref eb, ref e3, ref e7, ref ea, ref ed, ref ec, (bool)allowAlphaBlending);
+      _Kernel4Xv2(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e3, ref e7, ref e2, ref e0, ref e1, ref e6, ref eb, ref ef, (bool)allowAlphaBlending);
+      _Kernel4Xv2(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e0, ref e1, ref e4, ref ec, ref e8, ref e5, ref e2, ref e3, (bool)allowAlphaBlending);
+      _Kernel4Xv2(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref ec, ref e8, ref ed, ref ef, ref ee, ref e9, ref e4, ref e0, (bool)allowAlphaBlending);
 
       targetImage[tgtX + 0, tgtY + 0] = e0;
       targetImage[tgtX + 1, tgtY + 0] = e1;
@@ -198,6 +219,10 @@ namespace Imager.Filters {
 
     private static uint _YuvDifference(sPixel a, sPixel b) {
       return (a.AbsDifference(b));
+    }
+
+    private static bool _IsEqual(sPixel a, sPixel b) {
+      return (a.IsLike(b));
     }
 
     private static void _AlphaBlend32W(ref sPixel dst, sPixel src, bool blend) {
@@ -243,35 +268,33 @@ namespace Imager.Filters {
       _AlphaBlend128W(ref n3, pixel, blend);
     }
 
-    private static void _Kernel2X(sPixel pe, sPixel pi, sPixel ph, sPixel pf, sPixel pg, sPixel pc, sPixel pd, sPixel pb, sPixel f4, sPixel i4, sPixel h5, sPixel i5, ref sPixel n1, ref sPixel n2, ref sPixel n3, bool blend) {
+    private static void _Kernel2Xv5(sPixel pe, sPixel pi, sPixel ph, sPixel pf, sPixel pg, sPixel pc, sPixel pd, sPixel pb, sPixel f4, sPixel i4, sPixel h5, sPixel i5, ref sPixel n1, ref sPixel n2, ref sPixel n3, bool blend) {
       var ex = (pe != ph && pe != pf);
       if (!ex)
         return;
       var e = (_YuvDifference(pe, pc) + _YuvDifference(pe, pg) + _YuvDifference(pi, h5) + _YuvDifference(pi, f4)) + (_YuvDifference(ph, pf) << 2);
       var i = (_YuvDifference(ph, pd) + _YuvDifference(ph, i5) + _YuvDifference(pf, i4) + _YuvDifference(pf, pb)) + (_YuvDifference(pe, pi) << 2);
-      if ((e < i)
-        && (pf.IsNotLike(pb) && ph.IsNotLike(pd) || pe.IsLike(pi) && (pf.IsNotLike(i4) && ph.IsNotLike(i5)) || pe.IsLike(pg) || pe.IsLike(pc))) {
+      var px = (_YuvDifference(pe, pf) <= _YuvDifference(pe, ph)) ? pf : ph;
+      if ((e < i) && (!_IsEqual(pf, pb) && !_IsEqual(ph, pd) || _IsEqual(pe, pi) && (!_IsEqual(pf, i4) && !_IsEqual(ph, i5)) || _IsEqual(pe, pg) || _IsEqual(pe, pc))) {
         var ke = _YuvDifference(pf, pg);
         var ki = _YuvDifference(ph, pc);
         var ex2 = (pe != pc && pb != pc);
         var ex3 = (pe != pg && pd != pg);
-        var px = (_YuvDifference(pe, pf) <= _YuvDifference(pe, ph)) ? pf : ph;
-        if (((ke << 1) <= ki) && ex3 && (ke >= (ki << 1)) && ex2)
-          _LeftUp2_2X(ref n3, ref n2, out n1, px, blend);
-        else if (((ke << 1) <= ki) && ex3)
-          _Left2_2X(ref n3, ref n2, px, blend);
-        else if ((ke >= (ki << 1)) && ex2)
-          _Up2_2X(ref n3, ref n1, px, blend);
-        else
+        if (((ke << 1) <= ki) && ex3 || (ke >= (ki << 1)) && ex2) {
+          if (((ke << 1) <= ki) && ex3)
+            _Left2_2X(ref n3, ref n2, px, blend);
+          if ((ke >= (ki << 1)) && ex2)
+            _Up2_2X(ref n3, ref n1, px, blend);
+        } else
           _Dia_2X(ref n3, px, blend);
 
       } else if (e <= i) {
-        _AlphaBlend128W(ref n3, ((_YuvDifference(pe, pf) <= _YuvDifference(pe, ph)) ? pf : ph), blend);
+        _AlphaBlend64W(ref n3, px, blend);
       }
     }
     #endregion
     #region 3x
-    private static void _LeftUp2_3X(ref sPixel n7, out sPixel n5, ref sPixel n6, out sPixel n2, out sPixel n8, sPixel pixel, bool blend) {
+    private static void _LeftUp2_3X(ref sPixel n7, out sPixel n5, ref sPixel n6, ref sPixel n2, out sPixel n8, sPixel pixel, bool blend) {
       _AlphaBlend192W(ref n7, pixel, blend);
       _AlphaBlend64W(ref n6, pixel, blend);
       n5 = n7;
@@ -303,24 +326,28 @@ namespace Imager.Filters {
       var ex = (pe != ph && pe != pf);
       if (!ex)
         return;
+
       var e = (_YuvDifference(pe, pc) + _YuvDifference(pe, pg) + _YuvDifference(pi, h5) + _YuvDifference(pi, f4)) + (_YuvDifference(ph, pf) << 2);
       var i = (_YuvDifference(ph, pd) + _YuvDifference(ph, i5) + _YuvDifference(pf, i4) + _YuvDifference(pf, pb)) + (_YuvDifference(pe, pi) << 2);
-      if ((e < i)
-        && (pf.IsNotLike(pb) && pf.IsNotLike(pc) || ph.IsNotLike(pd) && ph.IsNotLike(pg) || pe.IsLike(pi) && (pf.IsNotLike(f4) && pf.IsNotLike(i4) || ph.IsNotLike(h5) && ph.IsNotLike(i5)) || pe.IsLike(pg) || pe.IsLike(pc))) {
+#if ORIGINAL_IMPL
+      if ((e < i) && (!_IsEqual(pf, pb) && !_IsEqual(ph, pd) || _IsEqual(pe, pi) && (!_IsEqual(pf, i4) && !_IsEqual(ph, i5)) || _IsEqual(pe, pg) || _IsEqual(pe, pc))) {
+#else
+      if ((e < i) && (!_IsEqual(pf, pb) && !_IsEqual(pf, pc) || !_IsEqual(ph, pd) && !_IsEqual(ph, pg) || _IsEqual(pe, pi) && (!_IsEqual(pf, f4) && !_IsEqual(pf, i4) || !_IsEqual(ph, h5) && !_IsEqual(ph, i5)) || _IsEqual(pe, pg) || _IsEqual(pe, pc))) {
+#endif
         var ke = _YuvDifference(pf, pg);
         var ki = _YuvDifference(ph, pc);
         var ex2 = (pe != pc && pb != pc);
         var ex3 = (pe != pg && pd != pg);
         var px = (_YuvDifference(pe, pf) <= _YuvDifference(pe, ph)) ? pf : ph;
-        if (((ke << 1) <= ki) && ex3 && (ke >= (ki << 1)) && ex2)
-          _LeftUp2_3X(ref n7, out n5, ref n6, out n2, out n8, px, blend);
-        else if (((ke << 1) <= ki) && ex3)
-          _Left2_3X(ref n7, ref  n5, ref n6, out n8, px, blend);
-        else if ((ke >= (ki << 1)) && ex2)
-          _Up2_3X(ref n5, ref n7, ref n2, out n8, px, blend);
-        else
-          _Dia_3X(ref n8, ref  n5, ref n7, px, blend);
-
+        if (((ke << 1) <= ki) && ex3 && (ke >= (ki << 1)) && ex2) {
+          _LeftUp2_3X(ref n7, out n5, ref n6, ref n2, out n8, px, blend);
+        } else if (((ke << 1) <= ki) && ex3) {
+          _Left2_3X(ref n7, ref n5, ref n6, out  n8, px, blend);
+        } else if ((ke >= (ki << 1)) && ex2) {
+          _Up2_3X(ref n5, ref n7, ref  n2, out n8, px, blend);
+        } else {
+          _Dia_3X(ref n8, ref n5, ref n7, px, blend);
+        }
       } else if (e <= i) {
         _AlphaBlend128W(ref n8, ((_YuvDifference(pe, pf) <= _YuvDifference(pe, ph)) ? pf : ph), blend);
       }
@@ -359,29 +386,28 @@ namespace Imager.Filters {
       n15 = pixel;
     }
 
-    private static void _Kernel4X(sPixel pe, sPixel pi, sPixel ph, sPixel pf, sPixel pg, sPixel pc, sPixel pd, sPixel pb, sPixel f4, sPixel i4, sPixel h5, sPixel i5, ref sPixel n15, ref sPixel n14, ref sPixel n11, ref sPixel n3, ref sPixel n7, ref sPixel n10, ref sPixel n13, ref sPixel n12, bool blend) {
+    private static void _Kernel4Xv2(sPixel pe, sPixel pi, sPixel ph, sPixel pf, sPixel pg, sPixel pc, sPixel pd, sPixel pb, sPixel f4, sPixel i4, sPixel h5, sPixel i5, ref sPixel n15, ref sPixel n14, ref sPixel n11, ref sPixel n3, ref sPixel n7, ref sPixel n10, ref sPixel n13, ref sPixel n12, bool blend) {
       var ex = (pe != ph && pe != pf);
       if (!ex)
         return;
       var e = (_YuvDifference(pe, pc) + _YuvDifference(pe, pg) + _YuvDifference(pi, h5) + _YuvDifference(pi, f4)) + (_YuvDifference(ph, pf) << 2);
       var i = (_YuvDifference(ph, pd) + _YuvDifference(ph, i5) + _YuvDifference(pf, i4) + _YuvDifference(pf, pb)) + (_YuvDifference(pe, pi) << 2);
-      if ((e < i) && (pf.IsNotLike(pb) && ph.IsNotLike(pd) || pe.IsLike(pi) && (pf.IsNotLike(i4) && ph.IsNotLike(i5)) || pe.IsLike(pg) || pe.IsLike(pc))) {
+      var px = (_YuvDifference(pe, pf) <= _YuvDifference(pe, ph)) ? pf : ph;
+      if ((e < i) && (!_IsEqual(pf, pb) && !_IsEqual(ph, pd) || _IsEqual(pe, pi) && (!_IsEqual(pf, i4) && !_IsEqual(ph, i5)) || _IsEqual(pe, pg) || _IsEqual(pe, pc))) {
         var ke = _YuvDifference(pf, pg);
         var ki = _YuvDifference(ph, pc);
         var ex2 = (pe != pc && pb != pc);
         var ex3 = (pe != pg && pd != pg);
-        var px = (_YuvDifference(pe, pf) <= _YuvDifference(pe, ph)) ? pf : ph;
-        if (((ke << 1) <= ki) && ex3 && (ke >= (ki << 1)) && ex2)
-          _LeftUp2(out n15, out  n14, out n11, ref n13, ref n12, out n10, out n7, out n3, px, blend);
-        else if (((ke << 1) <= ki) && ex3)
-          _Left2(out n15, out n14, ref n11, ref n13, ref n12, ref n10, px, blend);
-        else if ((ke >= (ki << 1)) && ex2)
-          _Up2(out n15, ref n14, out n11, ref n3, ref n7, ref n10, px, blend);
-        else
+        if (((ke << 1) <= ki) && ex3 || (ke >= (ki << 1)) && ex2) {
+          if (((ke << 1) <= ki) && ex3)
+            _Left2(out n15, out n14, ref n11, ref n13, ref n12, ref n10, px, blend);
+          if ((ke >= (ki << 1)) && ex2)
+            _Up2(out n15, ref n14, out n11, ref n3, ref n7, ref n10, px, blend);
+        } else
           _Dia(out n15, ref n14, ref n11, px, blend);
 
       } else if (e <= i) {
-        _AlphaBlend128W(ref n15, ((_YuvDifference(pe, pf) <= _YuvDifference(pe, ph)) ? pf : ph), blend);
+        _AlphaBlend128W(ref n15, px, blend);
       }
     }
     #endregion
