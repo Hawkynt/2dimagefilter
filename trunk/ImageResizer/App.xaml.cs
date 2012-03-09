@@ -210,25 +210,30 @@ namespace ImageResizer {
 
     private void _ShowHelp() {
       System.Reflection.Assembly objAssembly = System.Reflection.Assembly.GetExecutingAssembly();
-      MessageBox.Show(string.Join("\r\n", new[] { 
-        Path.GetFileName(objAssembly.Location)+" [/load <source>] [/resize <x>x<y> <method>[(<repeat>)]] [/save <target>] ... [/exit]",
-        "  + /load    - loads a file into the source buffer",
-        "    + <source> - the source file to resize",
-        "  + /save    - saves the image in the source buffer to a file",
-        "    + <target> - the target file to write",
-        "  + /resize  - resizes the image in the source buffer and stores the result back to the source buffer",
-        "    + <x>      - the final width in pixels for the target, 0 for auto",
-        "    + <y>      - the final height in pixels for the target, 0 for auto",
-        "    + <method> - the method to use",
-        "    + <repeat> - the number of repetitions using this method",
-        "  + /exit      - quits the program without showing the gui",
-        "You can load and process multiple files at once by loading after saving again.",
-        "  + ie. /load 1.bmp /resize 10x10 Pixel /save 1.jpg /load 2.bmp /resize 10x10 Pixel /save 2.jpg",
-        "You can also save to multiple files by adding another save parameter.",
-        "  + ie. /load 1.bmp /resize 10x10 Pixel /save 1.jpg /save 2.jpg",
-        "Even preprocessing using multiple filters is possible by adding another resize parameter.",
-        "  + ie. /load 1.bmp /resize 10x10 Pixel /resize 0x0 Scale2x /save 1.jpg"
-      }), "Command-Line Help");
+      var lines = string.Join(
+        Environment.NewLine,
+        new[] {
+          Path.GetFileName(objAssembly.Location)
+            + " [/load <source>] [/resize <x>x<y> <method>[(<repeat>)]] [/save <target>] ... [/exit]",
+          "  + /load    - loads a file into the source buffer",
+          "    + <source> - the source file to resize",
+          "  + /save    - saves the image in the source buffer to a file",
+          "    + <target> - the target file to write",
+          "  + /resize  - resizes the image in the source buffer and stores the result back to the source buffer",
+          "    + <x>      - the final width in pixels for the target, 0 for auto",
+          "    + <y>      - the final height in pixels for the target, 0 for auto",
+          "    + <method> - the method to use",
+          "    + <repeat> - the number of repetitions using this method",
+          "  + /exit      - quits the program without showing the gui",
+          "You can load and process multiple files at once by loading after saving again.",
+          "  + ie. /load 1.bmp /resize 10x10 Pixel /save 1.jpg /load 2.bmp /resize 10x10 Pixel /save 2.jpg",
+          "You can also save to multiple files by adding another save parameter.",
+          "  + ie. /load 1.bmp /resize 10x10 Pixel /save 1.jpg /save 2.jpg",
+          "Even preprocessing using multiple filters is possible by adding another resize parameter.",
+          "  + ie. /load 1.bmp /resize 10x10 Pixel /resize 0x0 Scale2x /save 1.jpg"
+        });
+      MessageBox.Show(lines, "Command-Line Help");
+      Console.WriteLine(lines);
     }
 
     /// <summary>
