@@ -73,7 +73,7 @@ namespace ImageResizer {
 
     private void _voidOpen_Click(object _, RoutedEventArgs __) {
       var fileDialog = new System.Windows.Forms.OpenFileDialog {
-        Filter = "Image Files|*.bmp;*.jpg;*.jpeg;*.png",
+        Filter = "Image Files|*.bmp;*.jpg;*.jpeg;*.png;*.gif",
         Title = "Select Image to resize",
         InitialDirectory =
           Environment.GetFolderPath(
