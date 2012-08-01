@@ -269,7 +269,9 @@ namespace ImageResizer {
         graphics.InterpolationMode = mode;
         graphics.SmoothingMode = SmoothingMode.HighQuality;
         //draw the image into the target bitmap                
-        graphics.DrawImage(source, 0, 0, result.Width, result.Height);
+        //graphics.DrawImage(source, 0, 0, result.Width, result.Height);
+        // FIXME: this is a hack to prevent the microsoft bug from creating a white pixel on top and left border (see http://forums.asp.net/t/1031961.aspx/1)
+        graphics.DrawImage(source, -1, -1, result.Width + 1, result.Height + 1);
       }
       return (result);
     }
