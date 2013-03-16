@@ -6,7 +6,7 @@
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{D22BAAAE-F358-438F-BFB3-880DAC29B4D4}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ImageResizer</RootNamespace>
     <AssemblyName>ImageResizer</AssemblyName>
@@ -14,7 +14,8 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
-    <StartupObject>ImageResizer.App</StartupObject>
+    <StartupObject>
+    </StartupObject>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -108,28 +109,21 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
-    <Page Include="GUI.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
+    <Compile Include="Classes\ImageResizerToken.cs" />
+    <Compile Include="Classes\PixelBlitter.cs">
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CLI.cs" />
+    <Compile Include="Framework\System.Windows.Forms.ControlExtensions.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="UserControls\ImageWithDetails.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ImageWithDetails.Designer.cs">
+      <DependentUpon>ImageWithDetails.cs</DependentUpon>
     </Compile>
     <Compile Include="Framework\System.Drawing.BitmapExtensions.cs" />
     <Compile Include="Framework\System.Windows.Media.Imaging.BitmapSourceExtensions.cs" />
-    <Compile Include="GUI.xaml.cs">
-      <DependentUpon>GUI.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Imager\cImage.cs" />
@@ -143,7 +137,14 @@
     <Compile Include="Imager\Filters\libMAME.cs" />
     <Compile Include="Imager\Filters\libBasic.cs" />
     <Compile Include="Imager\Filters\libXBR.cs" />
+    <Compile Include="Interface\OutOfBoundsMode.cs" />
     <Compile Include="Imager\sPixel.cs" />
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -157,9 +158,15 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ImageWithDetails.resx">
+      <DependentUpon>ImageWithDetails.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config">
       <SubType>Designer</SubType>
@@ -204,6 +211,30 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="App.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ProgressCircularBlue.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Width.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Height.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Horizontal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Vertical.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Resize.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Repeat.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Switch.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -117,59 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Height" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Height.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Horizontal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Horizontal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ProgressCircularBlue" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ProgressCircularBlue.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ttCouldNotLoadImage" xml:space="preserve">
-    <value>Failed to load</value>
-  </data>
-  <data name="ttNoJpegSupport" xml:space="preserve">
-    <value>JPEG Encoder missing</value>
-  </data>
-  <data name="ttNothingToResize" xml:space="preserve">
-    <value>No image</value>
-  </data>
-  <data name="ttNothingToSave" xml:space="preserve">
-    <value>No image</value>
-  </data>
-  <data name="ttUnknownFilter" xml:space="preserve">
-    <value />
-  </data>
-  <data name="txCouldNotLoadImage" xml:space="preserve">
-    <value>Could not load {0}\r\n\r\n{1}</value>
-  </data>
-  <data name="txNoJpegSupport" xml:space="preserve">
-    <value>System has no support to save as JPEG !</value>
-  </data>
-  <data name="txNothingToResize" xml:space="preserve">
-    <value>Unable to resize file: there is nothing to resize!</value>
-  </data>
-  <data name="txNothingToSave" xml:space="preserve">
-    <value>There is nothing to save.</value>
-  </data>
-  <data name="txUnknownFilter" xml:space="preserve">
-    <value>Unable to resize file: there is no filter named '{0}'</value>
-  </data>
-  <data name="Vertical" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Vertical.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Width" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Width.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Repeat" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Repeat.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Resize" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Resize.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Switch" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Switch.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
+  <metadata name="tlpLayout.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>False</value>
+  </metadata>
 </root>

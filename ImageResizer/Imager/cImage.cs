@@ -43,8 +43,10 @@ using System.Linq;
 #if !NET35
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using System.Diagnostics.Contracts;
 #endif
 using Imager.Filters;
+using Imager.Interface;
 
 namespace Imager {
   /// <summary>
@@ -460,6 +462,22 @@ namespace Imager {
         }));
       }
     }
+
+    /// <summary>
+    /// Gets or sets the horizontal out of bounds mode.
+    /// </summary>
+    /// <value>
+    /// The horizontal out of bounds mode.
+    /// </value>
+    public OutOfBoundsMode HorizontalOutOfBoundsMode { get; set; }
+    /// <summary>
+    /// Gets or sets the vertical out of bounds mode.
+    /// </summary>
+    /// <value>
+    /// The vertical out of bounds mode.
+    /// </value>
+    public OutOfBoundsMode VerticalOutOfBoundsMode { get; set; }
+
     #endregion
     #region ctor dtor idx
     // NOTE: Bitmap objects does not support parallel read-outs blame Microsoft
@@ -575,21 +593,100 @@ namespace Imager {
       }
 #endif
     }
+
+    /// <summary>
+    /// Checks coordinates for over-/underflow and does the correction based on the given OutOfBoundsMode.
+    /// </summary>
+    /// <param name="index">The coordinate index.</param>
+    /// <param name="count">The sample count.</param>
+    /// <param name="mode">The mode.</param>
+    /// <returns>A coordinate index that is surely between the bounds.</returns>
+    private static int _GetBoundsCheckedCoordinate(int index, int count, OutOfBoundsMode mode) {
+#if !NET35
+      Contract.Requires(count > 0, "Number of samples must be above 0");
+#endif
+
+      // check lower bound
+      var underflow = index < 0;
+      var overflow = index >= count;
+      if (!(overflow || underflow))
+        return (index);
+
+      switch (mode) {
+        case OutOfBoundsMode.ConstantExtension: {
+          return (overflow ? count - 1 : 0);
+        }
+        case OutOfBoundsMode.WrapAround: {
+          /*
+        c:2
+          -3 -2 -1  0 +1 +2 +3
+           1  0  1  0  1  0  1
+
+        c:3
+          -3 -2 -1  0 +1 +2 +3
+           0  1  2  0  1  2  0
+          */
+
+          if (overflow)
+            return (index % count);
+          /*
+          // Loop-version
+          if (overflow)
+            while(true)
+              if(index>=count)
+                index-=count;
+              else
+                return(index);
+          */
+
+          return (count - ((-index) % count)) % count;
+
+          /*
+          // Loop-Version
+          while (index < 0)
+            index += count;
+          return (index);
+          */
+        }
+        case OutOfBoundsMode.HalfSampleSymmetric: {
+
+          // FIXME: calculate this without a loop
+          while (true) {
+            if (index < 0)
+              index = -1 - index;
+            else if (index >= count)
+              index = (2 * count - 1) - index;
+            else
+              return (index);
+          }
+        }
+        case OutOfBoundsMode.WholeSampleSymmetric: {
+
+          // FIXME: calculate this without a loop
+          while (true) {
+            if (index < 0)
+              index = -index;
+            else if (index >= count)
+              index = (2 * count - 2) - index;
+            else
+              return (index);
+          }
+        }
+        default: {
+          throw new NotSupportedException("The OutOfBoundsMode " + mode + " is not supported");
+        }
+      }
+
+    }
+
     /// <summary>
     /// Gets or sets the <see cref="sPixel"/> with the specified X, Y coordinates.
     /// </summary>
     /// <value>The pixel</value>
     public sPixel this[int x, int y] {
       get {
-        if (x < 0)
-          x = 0;
-        if (y < 0)
-          y = 0;
-        if (x >= this._width)
-          x = this._width - 1;
-        if (y >= this._height)
-          y = this._height - 1;
-
+        x = _GetBoundsCheckedCoordinate(x, this._width, this.HorizontalOutOfBoundsMode);
+        y = _GetBoundsCheckedCoordinate(y, this._height, this.VerticalOutOfBoundsMode);
         return (this._imageData[y * this._width + x]);
       }
       set {
