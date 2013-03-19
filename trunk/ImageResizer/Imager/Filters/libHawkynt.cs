@@ -42,7 +42,7 @@ namespace Imager.Filters {
     /// <summary>
     /// just a bad old-school TV effect
     /// </summary>
-    public static void Tv2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+    public static void Tv2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
       var pixel = sourceImage[srcX, srcY];
       var luminance = pixel.Luminance;
       targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);
@@ -54,7 +54,7 @@ namespace Imager.Filters {
     /// <summary>
     /// another bad one a made for MS-Dos in 1998
     /// </summary>
-    public static void Tv3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+    public static void Tv3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
       var pixel = sourceImage[srcX, srcY];
       var ap = (sbyte)(1 - ((srcX & 1) << 1));
       targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);

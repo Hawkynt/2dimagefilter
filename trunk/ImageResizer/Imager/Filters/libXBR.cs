@@ -50,11 +50,10 @@ namespace Imager.Filters {
     /// <summary>
     /// This is the XBR2x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
-    public static void Xbr2X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object allowAlphaBlending) {
+    public static void Xbr2X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, bool allowAlphaBlending) {
 #if !NET35
       Contract.Assume(sourceImage != null);
       Contract.Assume(targetImage != null);
-      Contract.Assume(allowAlphaBlending != null);
 #endif
       var pa = sourceImage[srcX - 1, srcY - 1];
       var pb = sourceImage[srcX + 0, srcY - 1];
@@ -87,10 +86,10 @@ namespace Imager.Filters {
       sPixel e1, e2, e3;
       var e0 = e1 = e2 = e3 = pe;
 
-      _Kernel2Xv5(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref e1, ref e2, ref e3, (bool)allowAlphaBlending);
-      _Kernel2Xv5(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e0, ref e3, ref e1, (bool)allowAlphaBlending);
-      _Kernel2Xv5(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e2, ref e1, ref e0, (bool)allowAlphaBlending);
-      _Kernel2Xv5(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref e3, ref e0, ref e2, (bool)allowAlphaBlending);
+      _Kernel2Xv5(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref e1, ref e2, ref e3, allowAlphaBlending);
+      _Kernel2Xv5(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e0, ref e3, ref e1, allowAlphaBlending);
+      _Kernel2Xv5(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e2, ref e1, ref e0, allowAlphaBlending);
+      _Kernel2Xv5(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref e3, ref e0, ref e2, allowAlphaBlending);
 
       targetImage[tgtX + 0, tgtY + 0] = e0;
       targetImage[tgtX + 1, tgtY + 0] = e1;
@@ -101,11 +100,10 @@ namespace Imager.Filters {
     /// <summary>
     /// This is the XBR3x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
-    public static void Xbr3X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object allowAlphaBlending) {
+    public static void Xbr3X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, bool allowAlphaBlending) {
 #if !NET35
       Contract.Assume(sourceImage != null);
       Contract.Assume(targetImage != null);
-      Contract.Assume(allowAlphaBlending != null);
 #endif
       var pa = sourceImage[srcX - 1, srcY - 1];
       var pb = sourceImage[srcX + 0, srcY - 1];
@@ -138,10 +136,10 @@ namespace Imager.Filters {
       sPixel e1, e2, e3, e4, e5, e6, e7, e8;
       var e0 = e1 = e2 = e3 = e4 = e5 = e6 = e7 = e8 = pe;
 
-      _Kernel3X(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref e2, ref e5, ref e6, ref e7, ref e8, (bool)allowAlphaBlending);
-      _Kernel3X(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e0, ref e1, ref e8, ref e5, ref e2, (bool)allowAlphaBlending);
-      _Kernel3X(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e6, ref e3, ref e2, ref e1, ref e0, (bool)allowAlphaBlending);
-      _Kernel3X(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref e8, ref e7, ref e0, ref e3, ref e6, (bool)allowAlphaBlending);
+      _Kernel3X(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref e2, ref e5, ref e6, ref e7, ref e8, allowAlphaBlending);
+      _Kernel3X(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e0, ref e1, ref e8, ref e5, ref e2, allowAlphaBlending);
+      _Kernel3X(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e6, ref e3, ref e2, ref e1, ref e0, allowAlphaBlending);
+      _Kernel3X(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref e8, ref e7, ref e0, ref e3, ref e6, allowAlphaBlending);
 
       targetImage[tgtX + 0, tgtY + 0] = e0;
       targetImage[tgtX + 1, tgtY + 0] = e1;
@@ -157,11 +155,10 @@ namespace Imager.Filters {
     /// <summary>
     /// This is the XBR4x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
-    public static void Xbr4X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object allowAlphaBlending) {
+    public static void Xbr4X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, bool allowAlphaBlending) {
 #if !NET35
       Contract.Assume(sourceImage != null);
       Contract.Assume(targetImage != null);
-      Contract.Assume(allowAlphaBlending != null);
 #endif
       var pa = sourceImage[srcX - 1, srcY - 1];
       var pb = sourceImage[srcX + 0, srcY - 1];
@@ -194,10 +191,10 @@ namespace Imager.Filters {
       sPixel e1, e2, e3, e4, e5, e6, e7, e8, e9, ea, eb, ec, ed, ee, ef;
       var e0 = e1 = e2 = e3 = e4 = e5 = e6 = e7 = e8 = e9 = ea = eb = ec = ed = ee = ef = pe;
 
-      _Kernel4Xv2(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref ef, ref ee, ref eb, ref e3, ref e7, ref ea, ref ed, ref ec, (bool)allowAlphaBlending);
-      _Kernel4Xv2(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e3, ref e7, ref e2, ref e0, ref e1, ref e6, ref eb, ref ef, (bool)allowAlphaBlending);
-      _Kernel4Xv2(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e0, ref e1, ref e4, ref ec, ref e8, ref e5, ref e2, ref e3, (bool)allowAlphaBlending);
-      _Kernel4Xv2(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref ec, ref e8, ref ed, ref ef, ref ee, ref e9, ref e4, ref e0, (bool)allowAlphaBlending);
+      _Kernel4Xv2(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref ef, ref ee, ref eb, ref e3, ref e7, ref ea, ref ed, ref ec, allowAlphaBlending);
+      _Kernel4Xv2(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e3, ref e7, ref e2, ref e0, ref e1, ref e6, ref eb, ref ef, allowAlphaBlending);
+      _Kernel4Xv2(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e0, ref e1, ref e4, ref ec, ref e8, ref e5, ref e2, ref e3, allowAlphaBlending);
+      _Kernel4Xv2(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref ec, ref e8, ref ed, ref ef, ref ee, ref e9, ref e4, ref e0, allowAlphaBlending);
 
       targetImage[tgtX + 0, tgtY + 0] = e0;
       targetImage[tgtX + 1, tgtY + 0] = e1;

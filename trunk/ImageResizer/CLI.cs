@@ -5,11 +5,10 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-
+using Classes;
 using ImageResizer.Properties;
-
-using Imager;
 using Imager.Interface;
+using word = System.UInt16;
 
 namespace ImageResizer {
   internal static class CLI {
@@ -60,8 +59,8 @@ namespace ImageResizer {
               _ShowHelp();
               return (2);
             }
-            int intX, intY;
-            if (!int.TryParse(dimensions.Substring(0, positionOfX), out intX) || !int.TryParse(dimensions.Substring(positionOfX + 1), out intY)) {
+            word intX, intY;
+            if (!word.TryParse(dimensions.Substring(0, positionOfX), out intX) || !word.TryParse(dimensions.Substring(positionOfX + 1), out intY)) {
               _ShowHelp();
               return (2);
             }
@@ -81,16 +80,16 @@ namespace ImageResizer {
               return (2);
             }
             Console.WriteLine(@"{0} {1} {2} {3}", intX, intY, repeat, filterName);
-            var imageResizerTokens = Program.IMAGE_RESIZERS;
+            var imageResizerTokens = SupportedManipulators.MANIPULATORS;
             Contract.Assume(imageResizerTokens != null);
-            var matches = imageResizerTokens.Where(resizer => string.Compare(resizer.Name, filterName, true) == 0).ToArray();
-            if (matches.Length <= 0) {
+            var match = imageResizerTokens.Where(resizer => string.Compare(resizer.Key, filterName, true) == 0).Select(kvp => kvp.Value).FirstOrDefault();
+            if (match == null) {
               MessageBox.Show(string.Format(Resources.txUnknownFilter, filterName), Resources.ttUnknownFilter, MessageBoxButtons.OK, MessageBoxIcon.Error);
               return (2);
             }
             for (var j = 0; j < repeat; j++) {
               var image = _currentImage;
-              _currentImage = Program.FilterAndResizeImage(image, matches[0], intX, intY, OutOfBoundsMode.ConstantExtension, OutOfBoundsMode.ConstantExtension);
+              _currentImage = MainForm.FilterImage(image, match, intX, intY, OutOfBoundsMode.ConstantExtension, OutOfBoundsMode.ConstantExtension, true, true);
               image.Dispose();
             }
             break;
@@ -201,7 +200,7 @@ namespace ImageResizer {
           "ie. /load 1.bmp /resize 10x10 Pixel /resize 0x0 Scale2x /save 1.jpg",
           string.Empty,
           "Supported filter methods:"
-        }.Concat(cImage.Filters.Select(f => "  " + f.Name)));
+        }.Concat(SupportedManipulators.MANIPULATORS.Select(f => "  " + f.Key)));
 
       Console.WriteLine(lines);
     }

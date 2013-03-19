@@ -42,20 +42,20 @@ namespace Imager.Filters {
     /// <summary>
     /// Horizontal scanlines
     /// </summary>
-    public static void HorizontalScanlines(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object grayFactor) {
+    public static void HorizontalScanlines(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, float grayFactor) {
       var pixel = sourceImage[srcX, srcY];
       targetImage[tgtX, tgtY] = pixel;
-      var factor = (float)grayFactor / 100f + 1f;
+      var factor = grayFactor / 100f + 1f;
       targetImage[tgtX, tgtY + 1] = pixel * factor;
     }
 
     /// <summary>
     /// Vertical scanlines
     /// </summary>
-    public static void VerticalScanlines(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object grayFactor) {
+    public static void VerticalScanlines(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, float grayFactor) {
       var pixel = sourceImage[srcX, srcY];
       targetImage[tgtX, tgtY] = pixel;
-      var factor = (float)grayFactor / 100f + 1f;
+      var factor = grayFactor / 100f + 1f;
       targetImage[tgtX + 1, tgtY] = pixel * factor;
     }
 

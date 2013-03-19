@@ -112,6 +112,15 @@ namespace ImageResizer.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Value too small.
+        /// </summary>
+        internal static string ttNeedWidthAndHeightAboveZero {
+            get {
+                return ResourceManager.GetString("ttNeedWidthAndHeightAboveZero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to JPEG Encoder missing.
         /// </summary>
         internal static string ttNoJpegSupport {
@@ -153,6 +162,15 @@ namespace ImageResizer.Properties {
         internal static string txCouldNotLoadImage {
             get {
                 return ResourceManager.GetString("txCouldNotLoadImage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Need a width and height &gt; 0 to apply interpolation..
+        /// </summary>
+        internal static string txNeedWidthAndHeightAboveZero {
+            get {
+                return ResourceManager.GetString("txNeedWidthAndHeightAboveZero", resourceCulture);
             }
         }
         

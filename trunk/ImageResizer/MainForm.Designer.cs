@@ -37,22 +37,22 @@
       System.Windows.Forms.GroupBox gbTargetResolution;
       System.Windows.Forms.Label label9;
       System.Windows.Forms.Label label8;
-      System.Windows.Forms.Label label3;
       System.Windows.Forms.Label label2;
       System.Windows.Forms.Label label1;
       System.Windows.Forms.GroupBox gbMethod;
       this.tssBusy = new System.Windows.Forms.ToolStripStatusLabel();
       this.iwhSourceImage = new ImageResizer.UserControls.ImageWithDetails();
       this.iwhTargetImage = new ImageResizer.UserControls.ImageWithDetails();
-      this.btResize = new System.Windows.Forms.Button();
-      this.btSwitch = new System.Windows.Forms.Button();
-      this.btRepeat = new System.Windows.Forms.Button();
-      this.cUseThresholds = new System.Windows.Forms.CheckBox();
-      this.cbVerticalBPH = new System.Windows.Forms.ComboBox();
-      this.cbHorizontalBPH = new System.Windows.Forms.ComboBox();
+      this.butResize = new System.Windows.Forms.Button();
+      this.butSwitch = new System.Windows.Forms.Button();
+      this.butRepeat = new System.Windows.Forms.Button();
+      this.chkUseCenteredGrid = new System.Windows.Forms.CheckBox();
+      this.chkUseThresholds = new System.Windows.Forms.CheckBox();
+      this.cmbVerticalBPH = new System.Windows.Forms.ComboBox();
+      this.cmbHorizontalBPH = new System.Windows.Forms.ComboBox();
       this.nudWidth = new System.Windows.Forms.NumericUpDown();
       this.nudHeight = new System.Windows.Forms.NumericUpDown();
-      this.cbResizeMethod = new System.Windows.Forms.ComboBox();
+      this.cmbResizeMethod = new System.Windows.Forms.ComboBox();
       this.msMain = new System.Windows.Forms.MenuStrip();
       this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -66,6 +66,7 @@
       this.gbActions = new System.Windows.Forms.GroupBox();
       this.ofdOpenFile = new System.Windows.Forms.OpenFileDialog();
       this.sfdSave = new System.Windows.Forms.SaveFileDialog();
+      this.tssBenchmark = new System.Windows.Forms.ToolStripStatusLabel();
       ssBottom = new System.Windows.Forms.StatusStrip();
       gbSourceImage = new System.Windows.Forms.GroupBox();
       gbTargetImage = new System.Windows.Forms.GroupBox();
@@ -79,7 +80,6 @@
       gbTargetResolution = new System.Windows.Forms.GroupBox();
       label9 = new System.Windows.Forms.Label();
       label8 = new System.Windows.Forms.Label();
-      label3 = new System.Windows.Forms.Label();
       label2 = new System.Windows.Forms.Label();
       label1 = new System.Windows.Forms.Label();
       gbMethod = new System.Windows.Forms.GroupBox();
@@ -102,7 +102,8 @@
       // ssBottom
       // 
       ssBottom.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tssBusy});
+            this.tssBusy,
+            this.tssBenchmark});
       ssBottom.Location = new System.Drawing.Point(0, 565);
       ssBottom.Name = "ssBottom";
       ssBottom.Size = new System.Drawing.Size(889, 22);
@@ -163,73 +164,84 @@
       // 
       flpActions.AutoSize = true;
       flpActions.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-      flpActions.Controls.Add(this.btResize);
-      flpActions.Controls.Add(this.btSwitch);
-      flpActions.Controls.Add(this.btRepeat);
+      flpActions.Controls.Add(this.butResize);
+      flpActions.Controls.Add(this.butSwitch);
+      flpActions.Controls.Add(this.butRepeat);
       flpActions.Dock = System.Windows.Forms.DockStyle.Top;
       flpActions.Location = new System.Drawing.Point(3, 16);
       flpActions.Name = "flpActions";
       flpActions.Size = new System.Drawing.Size(288, 29);
       flpActions.TabIndex = 0;
       // 
-      // btResize
+      // butResize
       // 
-      this.btResize.Image = global::ImageResizer.Properties.Resources.Resize;
-      this.btResize.Location = new System.Drawing.Point(3, 3);
-      this.btResize.Name = "btResize";
-      this.btResize.Size = new System.Drawing.Size(75, 23);
-      this.btResize.TabIndex = 0;
-      this.btResize.Text = "Resize";
-      this.btResize.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-      this.btResize.UseVisualStyleBackColor = true;
-      this.btResize.Click += new System.EventHandler(this.btResize_Click);
+      this.butResize.Image = global::ImageResizer.Properties.Resources.Resize;
+      this.butResize.Location = new System.Drawing.Point(3, 3);
+      this.butResize.Name = "butResize";
+      this.butResize.Size = new System.Drawing.Size(75, 23);
+      this.butResize.TabIndex = 0;
+      this.butResize.Text = "Resize";
+      this.butResize.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+      this.butResize.UseVisualStyleBackColor = true;
+      this.butResize.Click += new System.EventHandler(this.btResize_Click);
       // 
-      // btSwitch
+      // butSwitch
       // 
-      this.btSwitch.Image = global::ImageResizer.Properties.Resources.Switch;
-      this.btSwitch.Location = new System.Drawing.Point(84, 3);
-      this.btSwitch.Name = "btSwitch";
-      this.btSwitch.Size = new System.Drawing.Size(75, 23);
-      this.btSwitch.TabIndex = 0;
-      this.btSwitch.Text = "Switch";
-      this.btSwitch.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-      this.btSwitch.UseVisualStyleBackColor = true;
-      this.btSwitch.Click += new System.EventHandler(this.btSwitch_Click);
+      this.butSwitch.Image = global::ImageResizer.Properties.Resources.Switch;
+      this.butSwitch.Location = new System.Drawing.Point(84, 3);
+      this.butSwitch.Name = "butSwitch";
+      this.butSwitch.Size = new System.Drawing.Size(75, 23);
+      this.butSwitch.TabIndex = 0;
+      this.butSwitch.Text = "Switch";
+      this.butSwitch.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+      this.butSwitch.UseVisualStyleBackColor = true;
+      this.butSwitch.Click += new System.EventHandler(this.btSwitch_Click);
       // 
-      // btRepeat
+      // butRepeat
       // 
-      this.btRepeat.Image = global::ImageResizer.Properties.Resources.Repeat;
-      this.btRepeat.Location = new System.Drawing.Point(165, 3);
-      this.btRepeat.Name = "btRepeat";
-      this.btRepeat.Size = new System.Drawing.Size(75, 23);
-      this.btRepeat.TabIndex = 0;
-      this.btRepeat.Text = "Repeat";
-      this.btRepeat.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-      this.btRepeat.UseVisualStyleBackColor = true;
-      this.btRepeat.Click += new System.EventHandler(this.btRepeat_Click);
+      this.butRepeat.Image = global::ImageResizer.Properties.Resources.Repeat;
+      this.butRepeat.Location = new System.Drawing.Point(165, 3);
+      this.butRepeat.Name = "butRepeat";
+      this.butRepeat.Size = new System.Drawing.Size(75, 23);
+      this.butRepeat.TabIndex = 0;
+      this.butRepeat.Text = "Repeat";
+      this.butRepeat.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+      this.butRepeat.UseVisualStyleBackColor = true;
+      this.butRepeat.Click += new System.EventHandler(this.btRepeat_Click);
       // 
       // gbAdvanced
       // 
       gbAdvanced.AutoSize = true;
       gbAdvanced.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-      gbAdvanced.Controls.Add(this.cUseThresholds);
+      gbAdvanced.Controls.Add(this.chkUseCenteredGrid);
+      gbAdvanced.Controls.Add(this.chkUseThresholds);
       gbAdvanced.Dock = System.Windows.Forms.DockStyle.Top;
       gbAdvanced.Location = new System.Drawing.Point(0, 215);
       gbAdvanced.Name = "gbAdvanced";
-      gbAdvanced.Size = new System.Drawing.Size(294, 55);
+      gbAdvanced.Size = new System.Drawing.Size(294, 78);
       gbAdvanced.TabIndex = 3;
       gbAdvanced.TabStop = false;
       gbAdvanced.Text = "Advanced";
       // 
-      // cUseThresholds
+      // chkUseCenteredGrid
       // 
-      this.cUseThresholds.AutoSize = true;
-      this.cUseThresholds.Location = new System.Drawing.Point(6, 19);
-      this.cUseThresholds.Name = "cUseThresholds";
-      this.cUseThresholds.Size = new System.Drawing.Size(100, 17);
-      this.cUseThresholds.TabIndex = 0;
-      this.cUseThresholds.Text = "Use Thresholds";
-      this.cUseThresholds.UseVisualStyleBackColor = true;
+      this.chkUseCenteredGrid.AutoSize = true;
+      this.chkUseCenteredGrid.Location = new System.Drawing.Point(6, 42);
+      this.chkUseCenteredGrid.Name = "chkUseCenteredGrid";
+      this.chkUseCenteredGrid.Size = new System.Drawing.Size(113, 17);
+      this.chkUseCenteredGrid.TabIndex = 0;
+      this.chkUseCenteredGrid.Text = "Use Centered Grid";
+      this.chkUseCenteredGrid.UseVisualStyleBackColor = true;
+      // 
+      // chkUseThresholds
+      // 
+      this.chkUseThresholds.AutoSize = true;
+      this.chkUseThresholds.Location = new System.Drawing.Point(6, 19);
+      this.chkUseThresholds.Name = "chkUseThresholds";
+      this.chkUseThresholds.Size = new System.Drawing.Size(100, 17);
+      this.chkUseThresholds.TabIndex = 0;
+      this.chkUseThresholds.Text = "Use Thresholds";
+      this.chkUseThresholds.UseVisualStyleBackColor = true;
       // 
       // gbBorderPixelHandling
       // 
@@ -237,8 +249,8 @@
       gbBorderPixelHandling.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
       gbBorderPixelHandling.Controls.Add(label7);
       gbBorderPixelHandling.Controls.Add(label6);
-      gbBorderPixelHandling.Controls.Add(this.cbVerticalBPH);
-      gbBorderPixelHandling.Controls.Add(this.cbHorizontalBPH);
+      gbBorderPixelHandling.Controls.Add(this.cmbVerticalBPH);
+      gbBorderPixelHandling.Controls.Add(this.cmbHorizontalBPH);
       gbBorderPixelHandling.Controls.Add(label5);
       gbBorderPixelHandling.Controls.Add(label4);
       gbBorderPixelHandling.Dock = System.Windows.Forms.DockStyle.Top;
@@ -265,23 +277,23 @@
       label6.Size = new System.Drawing.Size(16, 16);
       label6.TabIndex = 2;
       // 
-      // cbVerticalBPH
+      // cmbVerticalBPH
       // 
-      this.cbVerticalBPH.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.cbVerticalBPH.FormattingEnabled = true;
-      this.cbVerticalBPH.Location = new System.Drawing.Point(90, 46);
-      this.cbVerticalBPH.Name = "cbVerticalBPH";
-      this.cbVerticalBPH.Size = new System.Drawing.Size(161, 21);
-      this.cbVerticalBPH.TabIndex = 1;
+      this.cmbVerticalBPH.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cmbVerticalBPH.FormattingEnabled = true;
+      this.cmbVerticalBPH.Location = new System.Drawing.Point(90, 46);
+      this.cmbVerticalBPH.Name = "cmbVerticalBPH";
+      this.cmbVerticalBPH.Size = new System.Drawing.Size(161, 21);
+      this.cmbVerticalBPH.TabIndex = 1;
       // 
-      // cbHorizontalBPH
+      // cmbHorizontalBPH
       // 
-      this.cbHorizontalBPH.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.cbHorizontalBPH.FormattingEnabled = true;
-      this.cbHorizontalBPH.Location = new System.Drawing.Point(90, 19);
-      this.cbHorizontalBPH.Name = "cbHorizontalBPH";
-      this.cbHorizontalBPH.Size = new System.Drawing.Size(161, 21);
-      this.cbHorizontalBPH.TabIndex = 1;
+      this.cmbHorizontalBPH.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cmbHorizontalBPH.FormattingEnabled = true;
+      this.cmbHorizontalBPH.Location = new System.Drawing.Point(90, 19);
+      this.cmbHorizontalBPH.Name = "cmbHorizontalBPH";
+      this.cmbHorizontalBPH.Size = new System.Drawing.Size(161, 21);
+      this.cmbHorizontalBPH.TabIndex = 1;
       // 
       // label5
       // 
@@ -309,7 +321,6 @@
       gbTargetResolution.Controls.Add(label8);
       gbTargetResolution.Controls.Add(this.nudWidth);
       gbTargetResolution.Controls.Add(this.nudHeight);
-      gbTargetResolution.Controls.Add(label3);
       gbTargetResolution.Controls.Add(label2);
       gbTargetResolution.Controls.Add(label1);
       gbTargetResolution.Dock = System.Windows.Forms.DockStyle.Top;
@@ -370,15 +381,6 @@
       this.nudHeight.Size = new System.Drawing.Size(68, 20);
       this.nudHeight.TabIndex = 1;
       // 
-      // label3
-      // 
-      label3.AutoSize = true;
-      label3.Location = new System.Drawing.Point(154, 35);
-      label3.Name = "label3";
-      label3.Size = new System.Drawing.Size(121, 13);
-      label3.TabIndex = 0;
-      label3.Text = "0 means Auto-determine";
-      // 
       // label2
       // 
       label2.AutoSize = true;
@@ -401,7 +403,7 @@
       // 
       gbMethod.AutoSize = true;
       gbMethod.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-      gbMethod.Controls.Add(this.cbResizeMethod);
+      gbMethod.Controls.Add(this.cmbResizeMethod);
       gbMethod.Dock = System.Windows.Forms.DockStyle.Top;
       gbMethod.Location = new System.Drawing.Point(0, 0);
       gbMethod.Name = "gbMethod";
@@ -410,14 +412,15 @@
       gbMethod.TabStop = false;
       gbMethod.Text = "Method";
       // 
-      // cbResizeMethod
+      // cmbResizeMethod
       // 
-      this.cbResizeMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.cbResizeMethod.FormattingEnabled = true;
-      this.cbResizeMethod.Location = new System.Drawing.Point(6, 19);
-      this.cbResizeMethod.Name = "cbResizeMethod";
-      this.cbResizeMethod.Size = new System.Drawing.Size(282, 21);
-      this.cbResizeMethod.TabIndex = 0;
+      this.cmbResizeMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cmbResizeMethod.FormattingEnabled = true;
+      this.cmbResizeMethod.Location = new System.Drawing.Point(6, 19);
+      this.cmbResizeMethod.Name = "cmbResizeMethod";
+      this.cmbResizeMethod.Size = new System.Drawing.Size(282, 21);
+      this.cmbResizeMethod.TabIndex = 0;
+      this.cmbResizeMethod.SelectedValueChanged += new System.EventHandler(this.cbResizeMethod_SelectedValueChanged);
       // 
       // msMain
       // 
@@ -517,7 +520,7 @@
       this.gbActions.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
       this.gbActions.Controls.Add(flpActions);
       this.gbActions.Dock = System.Windows.Forms.DockStyle.Top;
-      this.gbActions.Location = new System.Drawing.Point(0, 270);
+      this.gbActions.Location = new System.Drawing.Point(0, 293);
       this.gbActions.Name = "gbActions";
       this.gbActions.Size = new System.Drawing.Size(294, 48);
       this.gbActions.TabIndex = 4;
@@ -537,6 +540,11 @@
       this.sfdSave.Filter = "Portable Network Graphics|*.png|Image Files|*.bmp;*.jpg;*.jpeg;*.png;*.gif";
       this.sfdSave.RestoreDirectory = true;
       this.sfdSave.Title = "Enter filename";
+      // 
+      // tssBenchmark
+      // 
+      this.tssBenchmark.Name = "tssBenchmark";
+      this.tssBenchmark.Size = new System.Drawing.Size(0, 17);
       // 
       // MainForm
       // 
@@ -586,16 +594,16 @@
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
     private System.Windows.Forms.Panel panel1;
-    private System.Windows.Forms.ComboBox cbResizeMethod;
+    private System.Windows.Forms.ComboBox cmbResizeMethod;
     private System.Windows.Forms.NumericUpDown nudWidth;
     private System.Windows.Forms.NumericUpDown nudHeight;
-    private System.Windows.Forms.ComboBox cbVerticalBPH;
-    private System.Windows.Forms.ComboBox cbHorizontalBPH;
-    private System.Windows.Forms.Button btResize;
-    private System.Windows.Forms.Button btSwitch;
-    private System.Windows.Forms.Button btRepeat;
+    private System.Windows.Forms.ComboBox cmbVerticalBPH;
+    private System.Windows.Forms.ComboBox cmbHorizontalBPH;
+    private System.Windows.Forms.Button butResize;
+    private System.Windows.Forms.Button butSwitch;
+    private System.Windows.Forms.Button butRepeat;
     private System.Windows.Forms.GroupBox gbActions;
-    private System.Windows.Forms.CheckBox cUseThresholds;
+    private System.Windows.Forms.CheckBox chkUseThresholds;
     private UserControls.ImageWithDetails iwhTargetImage;
     private UserControls.ImageWithDetails iwhSourceImage;
     private System.Windows.Forms.ToolStripStatusLabel tssBusy;
@@ -603,6 +611,8 @@
     private System.Windows.Forms.TableLayoutPanel tlpMainLayout;
     private System.Windows.Forms.OpenFileDialog ofdOpenFile;
     private System.Windows.Forms.SaveFileDialog sfdSave;
+    private System.Windows.Forms.CheckBox chkUseCenteredGrid;
+    private System.Windows.Forms.ToolStripStatusLabel tssBenchmark;
 
   }
 }

@@ -42,7 +42,7 @@ namespace Imager.Filters {
     /// <summary>
     /// Bilinear Plus Original
     /// </summary>
-    public static void BilinearPlusOriginal(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+    public static void BilinearPlusOriginal(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
       var c00 = sourceImage[srcX + 0, srcY + 0];
       var c01 = sourceImage[srcX + 1, srcY + 0];
       var c10 = sourceImage[srcX + 0, srcY + 1];
@@ -62,7 +62,7 @@ namespace Imager.Filters {
     /// <summary>
     /// Bilinear Plus
     /// </summary>
-    public static void BilinearPlus(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+    public static void BilinearPlus(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
       var c00 = sourceImage[srcX + 0, srcY + 0];
       var c01 = sourceImage[srcX + 1, srcY + 0];
       var c10 = sourceImage[srcX + 0, srcY + 1];

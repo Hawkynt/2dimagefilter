@@ -45,31 +45,47 @@ using System.Runtime.Serialization;
 using dword = System.UInt32;
 namespace Imager {
   /// <summary>
-  /// A pixel (dword) 32Bits wide, 8 Bits for red, green and blue values.
-  /// The top 8-Bits of this dword are unused.
+  /// A pixel (dword) 32Bits wide, 8 Bits for red, green, blue and alpha values.
   /// </summary>
   public struct sPixel : ICloneable, ISerializable {
     private const byte _LUMINANCE_TRIGGER = 48;
     private const byte _CHROMA_U_TRIGGER = 7;
     private const byte _CHROMA_V_TRIGGER = 6;
+    private const int _RGB_MASK = 0xffffff;
 
     /// <summary>
-    /// The value holding the red, green and blue component
+    /// The value holding the red, green, blue and alpha component
     /// </summary>
     private readonly dword _rgbBytes;
 
     #region caches
-    private static readonly cRGBCache _cacheY = new cRGBCache();
-    private static readonly cRGBCache _cacheU = new cRGBCache();
-    private static readonly cRGBCache _cacheV = new cRGBCache();
+    private static readonly cRGBCache _CACHE_Y = new cRGBCache();
+    private static readonly cRGBCache _CACHE_U = new cRGBCache();
+    private static readonly cRGBCache _CACHE_V = new cRGBCache();
 
-    private static readonly cRGBCache _cacheAlternateU = new cRGBCache();
-    private static readonly cRGBCache _cacheAlternateV = new cRGBCache();
+    private static readonly cRGBCache _CACHE_ALTERNATE_U = new cRGBCache();
+    private static readonly cRGBCache _CACHE_ALTERNATE_V = new cRGBCache();
 
-    private static readonly cRGBCache _cacheBrightness = new cRGBCache();
-    private static readonly cRGBCache _cacheHue = new cRGBCache();
+    private static readonly cRGBCache _CACHE_BRIGHTNESS = new cRGBCache();
+    private static readonly cRGBCache _CACHE_HUE = new cRGBCache();
     #endregion
     #region private methods
+    /// <summary>
+    /// Converts a byte color component to single floating point.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <returns></returns>
+    private static float _Byte2Single(byte value) {
+      return (value / 255f);
+    }
+    /// <summary>
+    /// Converts a byte color component to double floating point.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <returns></returns>
+    private static double _Byte2Double(byte value) {
+      return (value / 255d);
+    }
     /// <summary>
     /// Clips a float value within 0-255 range and returns it.
     /// </summary>
@@ -83,7 +99,7 @@ namespace Imager {
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The alpha component</returns>
-    private static byte _getAlpha(uint rgbBytes) {
+    private static byte _GetAlpha(uint rgbBytes) {
       return ((byte)(rgbBytes >> 24));
     }
     /// <summary>
@@ -91,7 +107,7 @@ namespace Imager {
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The red component</returns>
-    private static byte _getRed(uint rgbBytes) {
+    private static byte _GetRed(uint rgbBytes) {
       return ((byte)(rgbBytes >> 16));
     }
     /// <summary>
@@ -99,7 +115,7 @@ namespace Imager {
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The green component</returns>
-    private static byte _getGreen(uint rgbBytes) {
+    private static byte _GetGreen(uint rgbBytes) {
       return ((byte)(rgbBytes >> 8));
     }
     /// <summary>
@@ -107,7 +123,7 @@ namespace Imager {
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The blue component</returns>
-    private static byte _getBlue(uint rgbBytes) {
+    private static byte _GetBlue(uint rgbBytes) {
       return ((byte)(rgbBytes));
     }
     #endregion
@@ -133,7 +149,7 @@ namespace Imager {
     /// Gets the minimum value of Red, Green and Blue.
     /// </summary>
     /// <value>The minimum.</value>
-    public byte Min {
+    public byte Minimum {
       get {
         return ((this.Red < this.Green) && (this.Red < this.Blue) ? this.Red : this.Green < this.Blue ? this.Green : this.Blue);
       }
@@ -142,7 +158,7 @@ namespace Imager {
     /// Gets the maximum value of Red, Green and Blue.
     /// </summary>
     /// <value>The maximum.</value>
-    public byte Max {
+    public byte Maximum {
       get {
         return ((this.Red > this.Green) && (this.Red > this.Blue) ? this.Red : this.Green > this.Blue ? this.Green : this.Blue);
       }
@@ -196,7 +212,7 @@ namespace Imager {
     /// <value>The Y-value.</value>
     public byte Luminance {
       get {
-        return (_cacheY.GetOrAdd(this._rgbBytes & 0xFFFFFF, rgbBytes => _Float2Byte(_getRed(rgbBytes) * 0.299f + _getGreen(rgbBytes) * 0.587f + _getBlue(rgbBytes) * 0.114f)));
+        return (_CACHE_Y.GetOrAdd(this._rgbBytes & _RGB_MASK, rgbBytes => _Float2Byte(_GetRed(rgbBytes) * 0.299f + _GetGreen(rgbBytes) * 0.587f + _GetBlue(rgbBytes) * 0.114f)));
       }
     }
     /// <summary>
@@ -205,7 +221,7 @@ namespace Imager {
     /// <value>The U-value.</value>
     public byte ChrominanceU {
       get {
-        return (_cacheU.GetOrAdd(this._rgbBytes & 0xFFFFFF, rgbBytes => _Float2Byte(127.5f + _getRed(rgbBytes) * 0.5f - _getGreen(rgbBytes) * 0.418688f - _getBlue(rgbBytes) * 0.081312f)));
+        return (_CACHE_U.GetOrAdd(this._rgbBytes & _RGB_MASK, rgbBytes => _Float2Byte(127.5f + _GetRed(rgbBytes) * 0.5f - _GetGreen(rgbBytes) * 0.418688f - _GetBlue(rgbBytes) * 0.081312f)));
       }
     }
     /// <summary>
@@ -214,7 +230,7 @@ namespace Imager {
     /// <value>The V-value.</value>
     public byte ChrominanceV {
       get {
-        return (_cacheV.GetOrAdd(this._rgbBytes & 0xFFFFFF, rgbBytes => _Float2Byte(127.5f - _getRed(rgbBytes) * 0.168736f - _getGreen(rgbBytes) * 0.331264f + _getBlue(rgbBytes) * 0.5f)));
+        return (_CACHE_V.GetOrAdd(this._rgbBytes & _RGB_MASK, rgbBytes => _Float2Byte(127.5f - _GetRed(rgbBytes) * 0.168736f - _GetGreen(rgbBytes) * 0.331264f + _GetBlue(rgbBytes) * 0.5f)));
       }
     }
     /// <summary>
@@ -223,7 +239,7 @@ namespace Imager {
     /// <value>The u-value.</value>
     public byte u {
       get {
-        return (_cacheAlternateU.GetOrAdd(this._rgbBytes & 0xFFFFFF, rgbBytes => _Float2Byte(_getRed(rgbBytes) * 0.5f + _getGreen(rgbBytes) * 0.418688f + _getBlue(rgbBytes) * 0.081312f)));
+        return (_CACHE_ALTERNATE_U.GetOrAdd(this._rgbBytes & _RGB_MASK, rgbBytes => _Float2Byte(_GetRed(rgbBytes) * 0.5f + _GetGreen(rgbBytes) * 0.418688f + _GetBlue(rgbBytes) * 0.081312f)));
       }
     }
     /// <summary>
@@ -232,7 +248,7 @@ namespace Imager {
     /// <value>The v-value.</value>
     public byte v {
       get {
-        return (_cacheAlternateV.GetOrAdd(this._rgbBytes & 0xFFFFFF, rgbBytes => _Float2Byte(_getRed(rgbBytes) * 0.168736f + _getGreen(rgbBytes) * 0.331264f + _getBlue(rgbBytes) * 0.5f)));
+        return (_CACHE_ALTERNATE_V.GetOrAdd(this._rgbBytes & _RGB_MASK, rgbBytes => _Float2Byte(_GetRed(rgbBytes) * 0.168736f + _GetGreen(rgbBytes) * 0.331264f + _GetBlue(rgbBytes) * 0.5f)));
       }
     }
     /// <summary>
@@ -241,7 +257,7 @@ namespace Imager {
     /// <value>The brightness.</value>
     public byte Brightness {
       get {
-        return (_cacheBrightness.GetOrAdd(this._rgbBytes & 0xFFFFFF, dwordC => (byte)((_getRed(dwordC) * 3 + _getGreen(dwordC) * 3 + _getBlue(dwordC) * 2) >> 3)));
+        return (_CACHE_BRIGHTNESS.GetOrAdd(this._rgbBytes & _RGB_MASK, dwordC => (byte)((_GetRed(dwordC) * 3 + _GetGreen(dwordC) * 3 + _GetBlue(dwordC) * 2) >> 3)));
         //byteRet = (byte)((this.Red << 1 + this.Green << 1 + this.Blue << 1 + this.Red + this.Green) >> 3);
       }
     }
@@ -251,11 +267,11 @@ namespace Imager {
     /// <value>The hue.</value>
     public byte Hue {
       get {
-        return (_cacheHue.GetOrAdd(this._rgbBytes & 0xFFFFFF, rgbBytes => {
+        return (_CACHE_HUE.GetOrAdd(this._rgbBytes & _RGB_MASK, rgbBytes => {
           float hue;
-          var red = _getRed(rgbBytes);
-          var green = _getGreen(rgbBytes);
-          var blue = _getBlue(rgbBytes);
+          var red = _GetRed(rgbBytes);
+          var green = _GetGreen(rgbBytes);
+          var blue = _GetBlue(rgbBytes);
           var min = Math.Min(Math.Min(red, green), blue);
           var max = Math.Max(Math.Max(red, green), blue);
           float delta = max - min;
@@ -287,23 +303,16 @@ namespace Imager {
         return (Color.FromArgb(this.Alpha, this.Red, this.Green, this.Blue));
       }
     }
+
+    #region byte values
     /// <summary>
     /// Gets or sets the alpha component.
     /// </summary>
     /// <value>The alpha-value.</value>
     public byte Alpha {
       get {
-        return (_getAlpha(this._rgbBytes));
+        return (_GetAlpha(this._rgbBytes));
       }
-    }
-
-    /// <summary>
-    /// Returns a pixel with the new alpha set.
-    /// </summary>
-    /// <param name="value">The value.</param>
-    /// <returns>An instance of sPixel.</returns>
-    public sPixel SetAlpha(byte value) {
-      return new sPixel((this._rgbBytes & 0x00ffffff) | (dword)(value << 24));
     }
 
     /// <summary>
@@ -312,17 +321,8 @@ namespace Imager {
     /// <value>The red-value.</value>
     public byte Red {
       get {
-        return (_getRed(this._rgbBytes));
+        return (_GetRed(this._rgbBytes));
       }
-    }
-
-    /// <summary>
-    /// Returns a pixel with the new red set.
-    /// </summary>
-    /// <param name="value">The value.</param>
-    /// <returns>An instance of sPixel.</returns>
-    public sPixel SetRed(byte value) {
-      return new sPixel((this._rgbBytes & 0xff00ffff) | (dword)(value << 16));
     }
 
     /// <summary>
@@ -331,17 +331,8 @@ namespace Imager {
     /// <value>The green-value.</value>
     public byte Green {
       get {
-        return (_getGreen(this._rgbBytes));
+        return (_GetGreen(this._rgbBytes));
       }
-    }
-
-    /// <summary>
-    /// Returns a pixel with the new green set.
-    /// </summary>
-    /// <param name="value">The value.</param>
-    /// <returns>An instance of sPixel.</returns>
-    public sPixel SetGreen(byte value) {
-      return new sPixel((this._rgbBytes & 0xffff00ff) | (dword)(value << 8));
     }
 
     /// <summary>
@@ -350,21 +341,48 @@ namespace Imager {
     /// <value>The blue-value.</value>
     public byte Blue {
       get {
-        return (_getBlue(this._rgbBytes));
+        return (_GetBlue(this._rgbBytes));
       }
     }
+    #endregion
 
-    /// <summary>
-    /// Returns a pixel with the new blue set.
-    /// </summary>
-    /// <param name="value">The value.</param>
-    /// <returns>An instance of sPixel.</returns>
-    public sPixel SetBlue(byte value) {
-      return new sPixel((this._rgbBytes & 0xffffff00) | value);
+    #region float values
+    public double DoubleRed {
+      get { return (_Byte2Double(this.Red)); }
     }
+    public float SingleRed {
+      get { return (_Byte2Single(this.Red)); }
+    }
+    public double DoubleGreen {
+      get { return (_Byte2Double(this.Green)); }
+    }
+    public float SingleGreen {
+      get { return (_Byte2Single(this.Green)); }
+    }
+    public double DoubleBlue {
+      get { return (_Byte2Double(this.Blue)); }
+    }
+    public float SingleBlue {
+      get { return (_Byte2Single(this.Blue)); }
+    }
+    public double DoubleAlpha {
+      get { return (_Byte2Double(this.Alpha)); }
+    }
+    public float SingleAlpha {
+      get { return (_Byte2Single(this.Alpha)); }
+    }
+    #endregion
 
     #endregion
     #region ctor
+    public static sPixel FromFloat(float red, float green, float blue, float alpha = 1f) {
+      return (new sPixel(
+        _Float2Byte(red * 255 + .5f),
+        _Float2Byte(green * 255 + .5f),
+        _Float2Byte(blue * 255 + .5f),
+        _Float2Byte(alpha * 255 + .5f)
+      ));
+    }
     /// <summary>
     /// Factory to create a <see cref="sPixel"/> instance from red, green and blue value.
     /// </summary>
@@ -431,6 +449,7 @@ namespace Imager {
     /// <param name="red">The red-value.</param>
     /// <param name="green">The green-value.</param>
     /// <param name="blue">The blue-value.</param>
+    /// <param name="alpha">The alpha.</param>
     public sPixel(double red, double green, double blue, double alpha = 1)
       : this((byte)(red * 255), (byte)(green * 255), (byte)(blue * 255), (byte)(alpha * 255)) {
 #if !NET35

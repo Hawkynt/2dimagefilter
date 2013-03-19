@@ -39,186 +39,18 @@
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
 #if !NET35
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
-using System.Diagnostics.Contracts;
 #endif
-using Imager.Filters;
 using Imager.Interface;
 
 namespace Imager {
   /// <summary>
   /// A bitmap image
   /// </summary>
-  public class cImage : ICloneable {
-    #region helper structs
-    /// <summary>
-    /// A filter structure containing necessary fields used in filtering.
-    /// </summary>
-    public struct sFilter {
-      public delegate void FilterAction(cImage src, int srcX, int srcY, cImage tgt, int tgtX, int tgtY, byte scaleX, byte scaleY, object token);
-
-      public delegate sPixel[] HqFilterKernel(byte pattern, sPixel c00, sPixel c01, sPixel c02, sPixel c10, sPixel c11, sPixel c12, sPixel c20, sPixel c21, sPixel c22);
-      /// <summary>
-      /// The scale factor in X-direction.
-      /// </summary>
-      public readonly byte ScaleX;
-      /// <summary>
-      /// The scale factor in Y-direction.
-      /// </summary>
-      public readonly byte ScaleY;
-      /// <summary>
-      /// The name of the filter.
-      /// </summary>
-      public readonly string Name;
-      /// <summary>
-      /// Additional parameters.
-      /// </summary>
-      public readonly object Parameter;
-      /// <summary>
-      /// An action that filters a specified pixel from the source image into a destination area.
-      /// </summary>
-      public readonly FilterAction FilterFunctionFunction;
-      /// <summary>
-      /// A function that takes an image and creates a new one based on that one.
-      /// </summary>
-      public readonly Func<cImage, cImage> CreationFunction;
-      /// <summary>
-      /// Initializes a new instance of the <see cref="sFilter"/> struct.
-      /// </summary>
-      /// <param name="name">Name of the filter.</param>
-      /// <param name="creatorFunction">The function that creates the new image with the same dimensions.</param>
-      public sFilter(string name, Func<cImage, cImage> creatorFunction)
-        : this(name) {
-        this.CreationFunction = creatorFunction;
-      }
-      /// <summary>
-      /// Initializes a new instance of the <see cref="sFilter"/> struct.
-      /// </summary>
-      /// <param name="name">Name of the filter.</param>
-      /// <param name="scaleX">The X-scale factor, defaults to <c>1</c>.</param>
-      /// <param name="scaleY">The Y-scale factor, defaults to <c>1</c>.</param>
-      /// <param name="filterFunction">The filter function, defaults to <c>null</c>.</param>
-      /// <param name="parameter">The additional parameters, default to <c>null</c>.</param>
-      public sFilter(string name, byte scaleX = 1, byte scaleY = 1, FilterAction filterFunction = null, object parameter = null) {
-        this.Name = name;
-        this.Parameter = parameter;
-        this.ScaleX = scaleX;
-        this.ScaleY = scaleY;
-        this.FilterFunctionFunction = filterFunction;
-        this.CreationFunction = source => new cImage(source.Width * scaleX, source.Height * scaleY);
-      }
-      /// <summary>
-      /// Initializes a new instance of the <see cref="sFilter"/> struct.
-      /// </summary>
-      /// <param name="name">Name of the filter.</param>
-      /// <param name="scaleX">The X-scale factor.</param>
-      /// <param name="scaleY">The Y-scale factor.</param>
-      /// <param name="filterFunction">The filter function.</param>
-      /// <param name="hqFilter">The hq filter kernel.</param>
-      public sFilter(string name, byte scaleX, byte scaleY, FilterAction filterFunction, HqFilterKernel hqFilter)
-        : this(name, scaleX, scaleY, filterFunction, (object)hqFilter) {
-      }
-
-    }
-    #endregion
-
-    #region class fields
-    /// <summary>
-    /// available image filters
-    /// </summary>
-    private static readonly sFilter[] _IMAGE_FILTERS = new[]{
-      new sFilter("-50% Scanlines",1,2,libBasic.HorizontalScanlines,-50f),
-      new sFilter("+50% Scanlines",1,2,libBasic.HorizontalScanlines,50f),
-      new sFilter("+100% Scanlines",1,2,libBasic.HorizontalScanlines,100f),
-      new sFilter("-50% VScanlines",2,1,libBasic.VerticalScanlines,-50f),
-      new sFilter("+50% VScanlines",2,1,libBasic.VerticalScanlines,50f),
-      new sFilter("+100% VScanlines",2,1,libBasic.VerticalScanlines,100f),
-
-      new sFilter("MAME TV 2x",2,2,libMAME.Tv2x),
-      new sFilter("MAME TV 3x",3,3,libMAME.Tv3x),
-      new sFilter("MAME RGB 2x",2,2,libMAME.Rgb2x),
-      new sFilter("MAME RGB 3x",3,3,libMAME.Rgb3x),
-      new sFilter("Hawkynt TV 2x",2,2,libHawkynt.Tv2x),
-      new sFilter("Hawkynt TV 3x",3,2,libHawkynt.Tv3x),
-      
-      new sFilter("Bilinear Plus Original",2,2,libVBA.BilinearPlusOriginal),
-      new sFilter("Bilinear Plus",2,2,libVBA.BilinearPlus),
-      new sFilter("Eagle 2x",2,2,libEagle.Eagle2x),
-      new sFilter("Eagle 3x",3,3,libEagle.Eagle3x),
-      new sFilter("Eagle 3xB",3,3,libEagle.Eagle3xB),
-      new sFilter("Super Eagle",2,2,libKreed.SuperEagle),
-      new sFilter("SaI 2x",2,2,libKreed.SaI2X),
-      new sFilter("Super SaI",2,2,libKreed.SuperSaI),
-      new sFilter("AdvInterp 2x",2,2,libMAME.AdvInterp2x),
-      new sFilter("AdvInterp 3x",3,3,libMAME.AdvInterp3x),
-      new sFilter("Scale 2x",2,2,libMAME.Scale2x),
-      new sFilter("Scale 3x",3,3,libMAME.Scale3x),
-      
-      new sFilter("EPXB",2,2,libSNES9x.EpxB),
-      new sFilter("EPXC",2,2,libSNES9x.EpxC),
-      new sFilter("EPX3",3,3,libSNES9x.Epx3),
-      new sFilter("XBR 2x",2,2,libXBR.Xbr2X,true),
-      new sFilter("XBR 3x",3,3,libXBR.Xbr3X,true),
-      new sFilter("XBR 4x",4,4,libXBR.Xbr4X,true),
-      new sFilter("XBR 2x <NoBlend>",2,2,libXBR.Xbr2X,false),
-      new sFilter("XBR 3x <NoBlend>",3,3,libXBR.Xbr3X,false),
-      new sFilter("XBR 4x <NoBlend>",4,4,libXBR.Xbr4X,false),
-      
-      new sFilter("HQ 2x",2,2,libHQ.ComplexFilter,libHQ.Hq2xKernel),
-      new sFilter("HQ 2x3",2,3,libHQ.ComplexFilter,libHQ.Hq2x3Kernel),
-      new sFilter("HQ 2x4",2,4,libHQ.ComplexFilter,libHQ.Hq2x4Kernel),
-      new sFilter("HQ 3x",3,3,libHQ.ComplexFilter,libHQ.Hq3xKernel),
-      new sFilter("HQ 4x",4,4,libHQ.ComplexFilter,libHQ.Hq4xKernel),
-      new sFilter("HQ 2x Bold",2,2,libHQ.ComplexFilterBold,libHQ.Hq2xKernel),
-      new sFilter("HQ 2x3 Bold",2,3,libHQ.ComplexFilterBold,libHQ.Hq2x3Kernel),
-      new sFilter("HQ 2x4 Bold",2,4,libHQ.ComplexFilterBold,libHQ.Hq2x4Kernel),
-      new sFilter("HQ 3x Bold",3,3,libHQ.ComplexFilterBold,libHQ.Hq3xKernel),
-      new sFilter("HQ 4x Bold",4,4,libHQ.ComplexFilterBold,libHQ.Hq4xKernel),
-      new sFilter("HQ 2x Smart",2,2,libHQ.ComplexFilterSmart,libHQ.Hq2xKernel),
-      new sFilter("HQ 2x3 Smart",2,3,libHQ.ComplexFilterSmart,libHQ.Hq2x3Kernel),
-      new sFilter("HQ 2x4 Smart",2,4,libHQ.ComplexFilterSmart,libHQ.Hq2x4Kernel),
-      new sFilter("HQ 3x Smart",3,3,libHQ.ComplexFilterSmart,libHQ.Hq3xKernel),
-      new sFilter("HQ 4x Smart",4,4,libHQ.ComplexFilterSmart,libHQ.Hq4xKernel),
-      
-      new sFilter("LQ 2x",2,2,libHQ.ComplexFilter,libHQ.Lq2xKernel),
-      new sFilter("LQ 2x3",2,3,libHQ.ComplexFilter,libHQ.Lq2x3Kernel),
-      new sFilter("LQ 2x4",2,4,libHQ.ComplexFilter,libHQ.Lq2x4Kernel),
-      new sFilter("LQ 3x",3,3,libHQ.ComplexFilter,libHQ.Lq3xKernel),
-      new sFilter("LQ 4x",4,4,libHQ.ComplexFilter,libHQ.Lq4xKernel),
-      new sFilter("LQ 2x Bold",2,2,libHQ.ComplexFilterBold,libHQ.Lq2xKernel),
-      new sFilter("LQ 2x3 Bold",2,3,libHQ.ComplexFilterBold,libHQ.Lq2x3Kernel),
-      new sFilter("LQ 2x4 Bold",2,4,libHQ.ComplexFilterBold,libHQ.Lq2x4Kernel),
-      new sFilter("LQ 3x Bold",3,3,libHQ.ComplexFilterBold,libHQ.Lq3xKernel),
-      new sFilter("LQ 4x Bold",4,4,libHQ.ComplexFilterBold,libHQ.Lq4xKernel),
-      new sFilter("LQ 2x Smart",2,2,libHQ.ComplexFilterSmart,libHQ.Lq2xKernel),
-      new sFilter("LQ 2x3 Smart",2,3,libHQ.ComplexFilterSmart,libHQ.Lq2x3Kernel),
-      new sFilter("LQ 2x4 Smart",2,4,libHQ.ComplexFilterSmart,libHQ.Lq2x4Kernel),
-      new sFilter("LQ 3x Smart",3,3,libHQ.ComplexFilterSmart,libHQ.Lq3xKernel),
-      new sFilter("LQ 4x Smart",4,4,libHQ.ComplexFilterSmart,libHQ.Lq4xKernel),
-      
-      new sFilter("Red",image=>image.Red),
-      new sFilter("Green",image=>image.Green),
-      new sFilter("Blue",image=>image.Blue),
-      new sFilter("Alpha",image=>image.Alpha),
-      new sFilter("Luminance",image=>image.Luminance),
-      new sFilter("ChrominanceU",image=>image.ChrominanceU),
-      new sFilter("ChrominanceV",image=>image.ChrominanceV),
-      new sFilter("u",image=>image.u),
-      new sFilter("v",image=>image.v),
-      new sFilter("Hue",image=>image.Hue),
-      new sFilter("Hue Colored",image=>image.HueColored),
-      new sFilter("Brightness",image=>image.Brightness),
-      new sFilter("Min",image=>image.Min),
-      new sFilter("Max",image=>image.Max),
-
-      new sFilter("ExtractColors",image=>image.ExtractColors),
-      new sFilter("ExtractDeltas",image=>image.ExtractDeltas)
-    };
-    #endregion
-
+  public partial class cImage : ICloneable {
+    #region fields
     // image data
     /// <summary>
     /// An array containing the images' pixel data
@@ -233,16 +65,13 @@ namespace Imager {
     /// </summary>
     private readonly int _height;
 
+    private OutOfBoundsMode _horizontalOutOfBoundsMode;
+    private OutOfBoundsUtils.OutOfBoundsHandler _horizontalOutOfBoundsHandler;
+    private OutOfBoundsMode _verticalOutOfBoundsMode;
+    private OutOfBoundsUtils.OutOfBoundsHandler _verticalOutOfBoundsHandler;
+    #endregion
+
     #region properties
-    /// <summary>
-    /// Gets the available image filters.
-    /// </summary>
-    /// <value>The filters.</value>
-    public static sFilter[] Filters {
-      get {
-        return (_IMAGE_FILTERS);
-      }
-    }
     /// <summary>
     /// Gets the width of the image.
     /// </summary>
@@ -357,7 +186,7 @@ namespace Imager {
     /// <value>The greyscale image from the minimum of all components.</value>
     public cImage Min {
       get {
-        return (new cImage(this, pixel => pixel.Min));
+        return (new cImage(this, pixel => pixel.Minimum));
       }
     }
     /// <summary>
@@ -366,7 +195,7 @@ namespace Imager {
     /// <value>The greyscale image from the maximum of all components.</value>
     public cImage Max {
       get {
-        return (new cImage(this, pixel => pixel.Max));
+        return (new cImage(this, pixel => pixel.Maximum));
       }
     }
     /// <summary>
@@ -469,47 +298,34 @@ namespace Imager {
     /// <value>
     /// The horizontal out of bounds mode.
     /// </value>
-    public OutOfBoundsMode HorizontalOutOfBoundsMode { get; set; }
+    public OutOfBoundsMode HorizontalOutOfBoundsMode {
+      get {
+        return this._horizontalOutOfBoundsMode;
+      }
+      set {
+        this._horizontalOutOfBoundsMode = value;
+        this._horizontalOutOfBoundsHandler = OutOfBoundsUtils.GetHandlerOrCrash(value);
+      }
+    }
+
+
     /// <summary>
     /// Gets or sets the vertical out of bounds mode.
     /// </summary>
     /// <value>
     /// The vertical out of bounds mode.
     /// </value>
-    public OutOfBoundsMode VerticalOutOfBoundsMode { get; set; }
-
+    public OutOfBoundsMode VerticalOutOfBoundsMode {
+      get {
+        return this._verticalOutOfBoundsMode;
+      }
+      set {
+        this._verticalOutOfBoundsMode = value;
+        this._verticalOutOfBoundsHandler = OutOfBoundsUtils.GetHandlerOrCrash(value);
+      }
+    }
     #endregion
     #region ctor dtor idx
-    // NOTE: Bitmap objects does not support parallel read-outs blame Microsoft
-    /// <summary>
-    /// Initializes a new instance of the <see cref="cImage"/> class from a <see cref="Bitmap"/> instance.
-    /// </summary>
-    /// <param name="bitmap">The bitmap.</param>
-    public cImage(Bitmap bitmap)
-      : this(bitmap != null ? bitmap.Width : 0, bitmap != null ? bitmap.Height : 0) {
-      if (bitmap == null)
-        return;
-      var height = this._height;
-      var width = this._width;
-
-      var bitmapData = bitmap.LockBits(
-        new Rectangle(0, 0, width, height),
-        ImageLockMode.ReadOnly,
-        PixelFormat.Format32bppArgb
-      );
-      var intFillX = bitmapData.Stride - bitmapData.Width * 4;
-      unsafe {
-        var ptrOffset = (byte*)bitmapData.Scan0.ToPointer();
-        for (var y = 0; y < height; y++) {
-          for (var x = 0; x < width; x++) {
-            this[x, y] = new sPixel(*(ptrOffset + 2), *(ptrOffset + 1), *(ptrOffset + 0), *(ptrOffset + 3));
-            ptrOffset += 4;
-          }
-          ptrOffset += intFillX;
-        }
-      }
-      bitmap.UnlockBits(bitmapData);
-    }
     /// <summary>
     /// Initializes a new instance of the <see cref="cImage"/> class.
     /// </summary>
@@ -519,26 +335,34 @@ namespace Imager {
       this._width = width;
       this._height = height;
       this._imageData = new sPixel[width * height];
+      this.HorizontalOutOfBoundsMode = OutOfBoundsMode.ConstantExtension;
+      this.VerticalOutOfBoundsMode = OutOfBoundsMode.ConstantExtension;
     }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="cImage"/> class from a given one.
     /// </summary>
     /// <param name="sourceImage">The source image.</param>
     public cImage(cImage sourceImage)
-      : this(sourceImage._width, sourceImage._height) {
+      : this(sourceImage == null ? 0 : sourceImage._width, sourceImage == null ? 0 : sourceImage._height) {
+      if (sourceImage == null)
+        return;
+
       for (long index = 0; index < sourceImage._imageData.LongLength; index++)
         this._imageData[index] = sourceImage._imageData[index];
     }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="cImage"/> class by filtering a given one.
     /// </summary>
     /// <param name="sourceImage">The source image.</param>
     /// <param name="filterFunction">The filter.</param>
-    public cImage(cImage sourceImage, Func<sPixel, sPixel> filterFunction) {
+    public cImage(cImage sourceImage, Func<sPixel, sPixel> filterFunction)
+      : this(sourceImage == null ? 0 : sourceImage._width, sourceImage == null ? 0 : sourceImage._height) {
+      if (sourceImage == null)
+        return;
+
       var width = sourceImage._width;
-      this._width = width;
-      this._height = sourceImage._height;
-      this._imageData = new sPixel[sourceImage._imageData.LongLength];
 #if !NET35
       Parallel.ForEach(Partitioner.Create(0, this._height), () => 0, (range, _, threadStorage) => {
         for (var y = range.Item2; y > range.Item1; ) {
@@ -561,16 +385,18 @@ namespace Imager {
       }
 #endif
     }
+
     /// <summary>
     /// Initializes a new greyscale instance of the <see cref="cImage"/> class by filtering a given one.
     /// </summary>
     /// <param name="sourceImage">The source image.</param>
     /// <param name="colorFilter">The greyscale filter.</param>
-    public cImage(cImage sourceImage, Func<sPixel, byte> colorFilter) {
+    public cImage(cImage sourceImage, Func<sPixel, byte> colorFilter)
+      : this(sourceImage == null ? 0 : sourceImage._width, sourceImage == null ? 0 : sourceImage._height) {
+      if (sourceImage == null)
+        return;
+
       var width = sourceImage._width;
-      this._width = width;
-      this._height = sourceImage._height;
-      this._imageData = new sPixel[sourceImage._imageData.LongLength];
 #if !NET35
       Parallel.ForEach(Partitioner.Create(0, this._height), () => 0, (range, _, threadStorage) => {
         for (var y = range.Item2; y > range.Item1; ) {
@@ -595,98 +421,13 @@ namespace Imager {
     }
 
     /// <summary>
-    /// Checks coordinates for over-/underflow and does the correction based on the given OutOfBoundsMode.
-    /// </summary>
-    /// <param name="index">The coordinate index.</param>
-    /// <param name="count">The sample count.</param>
-    /// <param name="mode">The mode.</param>
-    /// <returns>A coordinate index that is surely between the bounds.</returns>
-    private static int _GetBoundsCheckedCoordinate(int index, int count, OutOfBoundsMode mode) {
-#if !NET35
-      Contract.Requires(count > 0, "Number of samples must be above 0");
-#endif
-
-      // check lower bound
-      var underflow = index < 0;
-      var overflow = index >= count;
-      if (!(overflow || underflow))
-        return (index);
-
-      switch (mode) {
-        case OutOfBoundsMode.ConstantExtension: {
-          return (overflow ? count - 1 : 0);
-        }
-        case OutOfBoundsMode.WrapAround: {
-          /*
-        c:2
-          -3 -2 -1  0 +1 +2 +3
-           1  0  1  0  1  0  1
-
-        c:3
-          -3 -2 -1  0 +1 +2 +3
-           0  1  2  0  1  2  0
-          */
-
-          if (overflow)
-            return (index % count);
-          /*
-          // Loop-version
-          if (overflow)
-            while(true)
-              if(index>=count)
-                index-=count;
-              else
-                return(index);
-          */
-
-          return (count - ((-index) % count)) % count;
-
-          /*
-          // Loop-Version
-          while (index < 0)
-            index += count;
-          return (index);
-          */
-        }
-        case OutOfBoundsMode.HalfSampleSymmetric: {
-
-          // FIXME: calculate this without a loop
-          while (true) {
-            if (index < 0)
-              index = -1 - index;
-            else if (index >= count)
-              index = (2 * count - 1) - index;
-            else
-              return (index);
-          }
-        }
-        case OutOfBoundsMode.WholeSampleSymmetric: {
-
-          // FIXME: calculate this without a loop
-          while (true) {
-            if (index < 0)
-              index = -index;
-            else if (index >= count)
-              index = (2 * count - 2) - index;
-            else
-              return (index);
-          }
-        }
-        default: {
-          throw new NotSupportedException("The OutOfBoundsMode " + mode + " is not supported");
-        }
-      }
-
-    }
-
-    /// <summary>
     /// Gets or sets the <see cref="sPixel"/> with the specified X, Y coordinates.
     /// </summary>
     /// <value>The pixel</value>
     public sPixel this[int x, int y] {
       get {
-        x = _GetBoundsCheckedCoordinate(x, this._width, this.HorizontalOutOfBoundsMode);
-        y = _GetBoundsCheckedCoordinate(y, this._height, this.VerticalOutOfBoundsMode);
+        x = OutOfBoundsUtils.GetBoundsCheckedCoordinate(x, this._width, this._horizontalOutOfBoundsHandler);
+        y = OutOfBoundsUtils.GetBoundsCheckedCoordinate(y, this._height, this._verticalOutOfBoundsHandler);
         return (this._imageData[y * this._width + x]);
       }
       set {
@@ -695,124 +436,7 @@ namespace Imager {
       }
     }
     #endregion
-    #region generic image filter
-    /// <summary>
-    /// Filters this image by using a given filter structure.
-    /// </summary>
-    /// <param name="filter">The filter.</param>
-    /// <param name="filterRegion">The filter region, defaults to <c>null</c>, which means filtering the whole image.</param>
-    /// <returns>
-    /// A new instance containing the filtered image.
-    /// </returns>
-    private cImage _FilterImage(sFilter filter, Rectangle? filterRegion = null) {
-      var result = filter.CreationFunction(this);
-      if (filter.FilterFunctionFunction != null) {
-        var startX = filterRegion == null ? 0 : filterRegion.Value.Left;
-        var startY = filterRegion == null ? 0 : filterRegion.Value.Top;
-        var endX = filterRegion == null ? this._width : filterRegion.Value.Right;
-        var endY = filterRegion == null ? this._height : filterRegion.Value.Bottom;
-#if !NET35
-        Parallel.ForEach(
-          Partitioner.Create(startY, endY),
-          () => 0,
-          (range, _, threadStorage) => {
 
-            for (var y = range.Item2; y > range.Item1; ) {
-              --y;
-              for (var x = endX; x > startX; ) {
-                --x;
-                filter.FilterFunctionFunction(
-                  this,
-                  x,
-                  y,
-                  result,
-                  x * filter.ScaleX,
-                  y * filter.ScaleY,
-                  filter.ScaleX,
-                  filter.ScaleY,
-                  filter.Parameter
-                  );
-              }
-            }
-            return (threadStorage);
-          },
-          _ => {
-          }
-          );
-#else
-        for (var y = endY; y > startY; ) {
-          --y;
-          for (var x = endX; x > startX; ) {
-            --x;
-            filter.FilterFunctionFunction(
-              this,
-              x,
-              y,
-              result,
-              x * filter.ScaleX,
-              y * filter.ScaleY,
-              filter.ScaleX,
-              filter.ScaleY,
-              filter.Parameter
-              );
-          }
-        }
-#endif
-      }
-      return (result);
-    }
-    /// <summary>
-    /// Filters the current image using a named filter.
-    /// </summary>
-    /// <param name="filterName">The name of the filter.</param>
-    /// <param name="filterRegion">The filter region; defaults to <c>null</c>, which means whole image is filtered.</param>
-    /// <returns>
-    /// A new instance containing the filtered image or <c>null</c>, if the specified filter could not be found.
-    /// </returns>
-    public cImage FilterImage(string filterName, Rectangle? filterRegion = null) {
-      var filter =
-        _IMAGE_FILTERS.FirstOrDefault(
-          f => string.Equals(f.Name, filterName, StringComparison.InvariantCultureIgnoreCase));
-
-      return (
-        (filter.FilterFunctionFunction != null || filter.CreationFunction != null)
-        ? this._FilterImage(filter, filterRegion)
-        : null
-      );
-    }
-
-    #endregion
-    /// <summary>
-    /// Converts this image to a <see cref="Bitmap"/> instance.
-    /// </summary>
-    /// <returns>The <see cref="Bitmap"/> instance</returns>
-    public Bitmap ToBitmap() {
-      var width = this._width;
-      var height = this._height;
-      var result = new Bitmap(width, height);
-      // NOTE: fucking bitmap does not allow parallel writes
-      var bitmapData = result.LockBits(
-        new Rectangle(0, 0, result.Width, result.Height),
-        ImageLockMode.WriteOnly,
-        PixelFormat.Format32bppArgb
-      );
-      var fillBytes = bitmapData.Stride - bitmapData.Width * 4;
-      unsafe {
-        var offset = (byte*)bitmapData.Scan0.ToPointer();
-        for (var y = 0; y < height; y++) {
-          for (var x = 0; x < width; x++) {
-            *(offset + 3) = this[x, y].Alpha;
-            *(offset + 2) = this[x, y].Red;
-            *(offset + 1) = this[x, y].Green;
-            *(offset + 0) = this[x, y].Blue;
-            offset += 4;
-          }
-          offset += fillBytes;
-        }
-      }
-      result.UnlockBits(bitmapData);
-      return (result);
-    }
     /// <summary>
     /// Fills the image with the specified color.
     /// </summary>

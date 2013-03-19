@@ -109,12 +109,29 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\ImageResizerToken.cs" />
-    <Compile Include="Classes\PixelBlitter.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Classes\IImageManipulator.cs" />
+    <Compile Include="Classes\ImageManipulators\Resampler.cs" />
+    <Compile Include="Classes\ImageManipulators\Interpolator.cs" />
+    <Compile Include="Classes\ImageManipulators\AScaler.cs" />
+    <Compile Include="Classes\ImageManipulators\Scalers\XbrScaler.cs" />
+    <Compile Include="Classes\ImageManipulators\Scalers\NqScaler.cs" />
+    <Compile Include="Classes\ImageManipulators\Scalers\PixelScaler.cs" />
+    <Compile Include="Classes\ImageManipulators\PlaneExtractor.cs" />
+    <Compile Include="Classes\SupportedManipulators.cs" />
     <Compile Include="CLI.cs" />
     <Compile Include="Framework\System.Windows.Forms.ControlExtensions.cs" />
+    <Compile Include="Imager\Classes\FloatImage.cs" />
+    <Compile Include="Imager\Classes\Kernels.cs" />
+    <Compile Include="Imager\Image.Resizer.Resample.cs" />
+    <Compile Include="Imager\Image.Bitmaps.cs" />
+    <Compile Include="Imager\Image.Resizer.Interpolation.cs" />
+    <Compile Include="Imager\Image.Resizer.Xbr.cs" />
+    <Compile Include="Imager\Image.Resizer.Nx.cs" />
+    <Compile Include="Imager\Image.Resizer.Parameterless.cs" />
+    <Compile Include="Imager\Interface\NqMode.cs" />
+    <Compile Include="Imager\Interface\NqScalerType.cs" />
+    <Compile Include="Imager\Interface\PixelScalerType.cs" />
+    <Compile Include="Imager\Interface\XbrScalerType.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="UserControls\ImageWithDetails.cs">
       <SubType>UserControl</SubType>
@@ -137,7 +154,7 @@
     <Compile Include="Imager\Filters\libMAME.cs" />
     <Compile Include="Imager\Filters\libBasic.cs" />
     <Compile Include="Imager\Filters\libXBR.cs" />
-    <Compile Include="Interface\OutOfBoundsMode.cs" />
+    <Compile Include="Imager\Interface\OutOfBoundsMode.cs" />
     <Compile Include="Imager\sPixel.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
