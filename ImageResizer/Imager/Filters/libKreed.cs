@@ -66,7 +66,7 @@ namespace Imager.Filters {
     /// <summary>
     /// Kreed's SuperEagle modified by Hawkynt to allow thresholds
     /// </summary>
-    public static void SuperEagle(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+    public static void SuperEagle(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
       var c1 = sourceImage[srcX, srcY - 1];
       var c2 = sourceImage[srcX + 1, srcY - 1];
       var c3 = sourceImage[srcX - 1, srcY];
@@ -165,7 +165,7 @@ namespace Imager.Filters {
     /// <summary>
     /// Derek Liauw Kie Fa's 2XSaI
     /// </summary>
-    public static void SaI2X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+    public static void SaI2X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
       var c0 = sourceImage[srcX - 1, srcY - 1];
       var c1 = sourceImage[srcX, srcY - 1];
       var c2 = sourceImage[srcX + 1, srcY - 1];
@@ -259,7 +259,7 @@ namespace Imager.Filters {
     /// <summary>
     /// Kreed's SuperSaI
     /// </summary>
-    public static void SuperSaI(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte _, byte __, object ___) {
+    public static void SuperSaI(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
       var c0 = sourceImage[srcX - 1, srcY - 1];
       var c1 = sourceImage[srcX, srcY - 1];
       var c2 = sourceImage[srcX + 1, srcY - 1];
