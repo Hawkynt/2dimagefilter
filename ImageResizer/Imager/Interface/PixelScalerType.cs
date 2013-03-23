@@ -1,81 +1,101 @@
-﻿using System.ComponentModel;
+﻿#region (c)2008-2013 Hawkynt
+/*
+ *  cImage 
+ *  Image filtering library 
+    Copyright (C) 2010-2013 Hawkynt
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#endregion
+using Imager.Classes;
 
 namespace Imager.Interface {
   public enum PixelScalerType {
 
     #region scanline effects
-    [Description("-50% Scanlines")]
+    [EnumDisplayName("-50% Scanlines")]
     HorizontalHalfDarkScanlines,
-    [Description("+50% Scanlines")]
+    [EnumDisplayName("+50% Scanlines")]
     HorizontalHalfLightScanlines,
-    [Description("+100% Scanlines")]
+    [EnumDisplayName("+100% Scanlines")]
     HorizontalFullLightScanlines,
 
-    [Description("-50% VScanlines")]
+    [EnumDisplayName("-50% VScanlines")]
     VerticalHalfDarkScanlines,
-    [Description("+50% VScanlines")]
+    [EnumDisplayName("+50% VScanlines")]
     VerticalHalfLightScanlines,
-    [Description("+100% VScanlines")]
+    [EnumDisplayName("+100% VScanlines")]
     VerticalFullLightScanlines,
     #endregion
 
     #region CRT effects
-    [Description("MAME TV 2x")]
+    [EnumDisplayName("MAME TV 2x")]
     MameTv,
-    [Description("MAME TV 3x")]
+    [EnumDisplayName("MAME TV 3x")]
     MameTv3,
-    [Description("MAME RGB 2x")]
+    [EnumDisplayName("MAME RGB 2x")]
     MameRgb,
-    [Description("MAME RGB 3x")]
+    [EnumDisplayName("MAME RGB 3x")]
     MameRgb3,
-    [Description("Hawkynt TV 2x")]
+    [EnumDisplayName("Hawkynt TV 2x")]
     HawkyntTv,
-    [Description("Hawkynt TV 3x")]
+    [EnumDisplayName("Hawkynt TV 3x")]
     HawkyntTv3,
     #endregion
 
     #region VBA special
-    [Description("Bilinear Plus Original")]
+    [EnumDisplayName("Bilinear Plus Original")]
     BilinearPlusOriginal,
-    [Description("Bilinear Plus")]
+    [EnumDisplayName("Bilinear Plus")]
     BilinearPlus,
     #endregion
 
     #region eagle group
-    [Description("Eagle 2x")]
+    [EnumDisplayName("Eagle 2x")]
     Eagle,
-    [Description("Eagle 3x")]
+    [EnumDisplayName("Eagle 3x")]
     Eagle3,
-    [Description("Eagle 3xB")]
+    [EnumDisplayName("Eagle 3xB")]
     Eagle3B,
-    [Description("SuperEagle")]
+    [EnumDisplayName("SuperEagle")]
     SuperEagle,
     #endregion
 
     #region sai group
-    [Description("SaI 2x")]
+    [EnumDisplayName("SaI 2x")]
     SaI,
-    [Description("Super SaI")]
+    [EnumDisplayName("Super SaI")]
     SuperSaI,
     #endregion
 
     #region scale nx group
-    [Description("AdvInterp 2x")]
+    [EnumDisplayName("AdvInterp 2x")]
     AdvInterp2,
-    [Description("AdvInterp 3x")]
+    [EnumDisplayName("AdvInterp 3x")]
     AdvInterp3,
-    [Description("Scale 2x")]
+    [EnumDisplayName("Scale 2x")]
     Scale2,
-    [Description("Scale 3x")]
+    [EnumDisplayName("Scale 3x")]
     Scale3,
     #endregion
 
     #region epx group
-    [Description("EPXB")]
+    [EnumDisplayName("EPXB")]
     EpxB,
-    [Description("EPXC")]
+    [EnumDisplayName("EPXC")]
     EpxC,
-    [Description("EPX3")]
+    [EnumDisplayName("EPX3")]
     Epx3,
     #endregion
   }

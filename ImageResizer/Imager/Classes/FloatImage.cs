@@ -1,4 +1,24 @@
-﻿using System;
+﻿#region (c)2008-2013 Hawkynt
+/*
+ *  cImage 
+ *  Image filtering library 
+    Copyright (C) 2010-2013 Hawkynt
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#endregion
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
 using System.Drawing;
@@ -152,9 +172,6 @@ namespace Imager.Classes {
     #endregion
 
     #region magic stuff
-    /*
-     * This region is a C++ -> C# conversion from the original sources of Pascal Getreuer <getreuer@gmail.com>
-     */
     /// <summary>
     /// Resizes the image to the specified dimensions using the given kernel type.
     /// </summary>
@@ -164,7 +181,35 @@ namespace Imager.Classes {
     /// <param name="centeredGrid">if set to <c>true</c> using a centered grid; otherwise, using top-left aligned.</param>
     /// <returns>The resized image</returns>
     public FloatImage Resize(int destWidth, int destHeight, KernelType method, bool centeredGrid) {
-      var interpolationMethod = Kernels.KERNELS[method];
+      return (this._Resize(destWidth, destHeight, Kernels.KERNELS[method], centeredGrid));
+    }
+
+    /// <summary>
+    /// Resizes the image to the specified dimensions using the given kernel type.
+    /// </summary>
+    /// <param name="destWidth">Width of the destination.</param>
+    /// <param name="destHeight">Height of the destination.</param>
+    /// <param name="method">The kernel method.</param>
+    /// <param name="centeredGrid">if set to <c>true</c> using a centered grid; otherwise, using top-left aligned.</param>
+    /// <returns>The resized image</returns>
+    public FloatImage Resize(int destWidth, int destHeight, WindowType method, float radius, bool centeredGrid) {
+      return (this._Resize(destWidth, destHeight, Windows.WINDOWS[method].WithRadius(radius), centeredGrid));
+    }
+
+    /*
+     * This region is a C++ -> C# conversion from the original sources of Pascal Getreuer <getreuer@gmail.com>
+     */
+    /// <summary>
+    /// Resizes the image to the specified dimensions using the given kernel type.
+    /// </summary>
+    /// <param name="destWidth">Width of the destination.</param>
+    /// <param name="destHeight">Height of the destination.</param>
+    /// <param name="interpolationInfo">The interpolation method info.</param>
+    /// <param name="centeredGrid">if set to <c>true</c> using a centered grid; otherwise, using top-left aligned.</param>
+    /// <returns>
+    /// The resized image
+    /// </returns>
+    private FloatImage _Resize(int destWidth, int destHeight, Kernels.FixedRadiusKernelInfo interpolationInfo, bool centeredGrid) {
       var xScale = (float)destWidth / this.Width;
       var yScale = (float)destHeight / this.Height;
       var xStep = 1 / xScale;
@@ -179,8 +224,8 @@ namespace Imager.Classes {
       var result = new FloatImage(destWidth, destHeight, this._horizontalOutOfBoundsMode, this._verticalOutOfBoundsMode);
 
       // prefilter image if necessary
-      if (interpolationMethod.PrefilterAlpha != null && interpolationMethod.PrefilterAlpha.Length > 0)
-        this._PrefilterImage(interpolationMethod.PrefilterAlpha, interpolationMethod.PrefilterScale);
+      if (interpolationInfo.PrefilterAlpha != null && interpolationInfo.PrefilterAlpha.Length > 0)
+        this._PrefilterImage(interpolationInfo.PrefilterAlpha, interpolationInfo.PrefilterScale);
 
       // resample
       this._LinScale2D(
@@ -189,9 +234,9 @@ namespace Imager.Classes {
         xStep,
         yStart,
         yStep,
-        interpolationMethod.Kernel,
-        interpolationMethod.KernelRadius,
-        interpolationMethod.KernelNormalize,
+        interpolationInfo.Kernel,
+        interpolationInfo.KernelRadius,
+        interpolationInfo.KernelNormalize,
         OutOfBoundsUtils.GetHandlerOrCrash(this.HorizontalOutOfBoundsMode),
         OutOfBoundsUtils.GetHandlerOrCrash(this.VerticalOutOfBoundsMode)
       );
@@ -350,7 +395,7 @@ namespace Imager.Classes {
     /// <returns></returns>
     /// 
     /// 
-    private static ScaleScanFilter _MakeScaleScanFilter(int destWidth, float xstart, float xstep, int srcWidth, Kernels.KernelDelegate kernel, float kernelRadius, bool kernelNormalize, OutOfBoundsUtils.OutOfBoundsHandler boundary) {
+    private static ScaleScanFilter _MakeScaleScanFilter(int destWidth, float xstart, float xstep, int srcWidth, Kernels.FixedRadiusKernelMethod kernel, float kernelRadius, bool kernelNormalize, OutOfBoundsUtils.OutOfBoundsHandler boundary) {
       Contract.Requires(kernel != null);
 
       var kernelWidth = (int)Math.Ceiling(2 * kernelRadius);
@@ -379,12 +424,12 @@ namespace Imager.Classes {
 
           for (var n = 0; n < kernelWidth; n++)
             filterCoeff[coeffIndex + OutOfBoundsUtils.GetBoundsCheckedCoordinate(pos + n, srcWidth, boundary) - filterPos[destX]]
-                += kernel(srcX - (pos + n));
+                += (float)kernel(srcX - (pos + n));
         } else {
           filterPos[destX] = (short)pos;
 
           for (var n = 0; n < filterWidth; n++)
-            filterCoeff[coeffIndex + n] = kernel(srcX - (pos + n));
+            filterCoeff[coeffIndex + n] = (float)kernel(srcX - (pos + n));
         }
 
         if (kernelNormalize)	/* Normalize */ {
@@ -433,7 +478,7 @@ namespace Imager.Classes {
     /// <param name="kernelNormalize">if set to <c>true</c> filter rows are normalized to sum to 1</param>
     /// <param name="horizontalOutOfBoundsHandler">The horizontal out of bounds handler.</param>
     /// <param name="verticalOutOfBoundsHandler">The vertical out of bounds handler.</param>
-    private void _LinScale2D(FloatImage destination, float xStart, float xStep, float yStart, float yStep, Kernels.KernelDelegate kernel, float kernelRadius, bool kernelNormalize, OutOfBoundsUtils.OutOfBoundsHandler horizontalOutOfBoundsHandler, OutOfBoundsUtils.OutOfBoundsHandler verticalOutOfBoundsHandler) {
+    private void _LinScale2D(FloatImage destination, float xStart, float xStep, float yStart, float yStep, Kernels.FixedRadiusKernelMethod kernel, float kernelRadius, bool kernelNormalize, OutOfBoundsUtils.OutOfBoundsHandler horizontalOutOfBoundsHandler, OutOfBoundsUtils.OutOfBoundsHandler verticalOutOfBoundsHandler) {
       Contract.Requires(destination != null);
       Contract.Requires(kernel != null);
       Contract.Requires(!(kernelRadius < 0));
