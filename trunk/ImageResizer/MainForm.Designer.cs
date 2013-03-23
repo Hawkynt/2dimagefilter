@@ -40,12 +40,20 @@
       System.Windows.Forms.Label label2;
       System.Windows.Forms.Label label1;
       System.Windows.Forms.GroupBox gbMethod;
+      System.Windows.Forms.GroupBox gbDescription;
+      System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+      System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
       this.tssBusy = new System.Windows.Forms.ToolStripStatusLabel();
+      this.tssBenchmark = new System.Windows.Forms.ToolStripStatusLabel();
       this.iwhSourceImage = new ImageResizer.UserControls.ImageWithDetails();
       this.iwhTargetImage = new ImageResizer.UserControls.ImageWithDetails();
       this.butResize = new System.Windows.Forms.Button();
       this.butSwitch = new System.Windows.Forms.Button();
       this.butRepeat = new System.Windows.Forms.Button();
+      this.nudRadius = new System.Windows.Forms.NumericUpDown();
+      this.lblRadius = new System.Windows.Forms.Label();
+      this.lblRepititionCount = new System.Windows.Forms.Label();
+      this.nudRepetitionCount = new System.Windows.Forms.NumericUpDown();
       this.chkUseCenteredGrid = new System.Windows.Forms.CheckBox();
       this.chkUseThresholds = new System.Windows.Forms.CheckBox();
       this.cmbVerticalBPH = new System.Windows.Forms.ComboBox();
@@ -53,6 +61,7 @@
       this.nudWidth = new System.Windows.Forms.NumericUpDown();
       this.nudHeight = new System.Windows.Forms.NumericUpDown();
       this.cmbResizeMethod = new System.Windows.Forms.ComboBox();
+      this.txtDescription = new System.Windows.Forms.TextBox();
       this.msMain = new System.Windows.Forms.MenuStrip();
       this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -61,12 +70,22 @@
       this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
       this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.sourceImageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.stretchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.centerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.zoomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.targetImageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.stretchToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+      this.centerToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+      this.zoomToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
       this.tlpMainLayout = new System.Windows.Forms.TableLayoutPanel();
-      this.panel1 = new System.Windows.Forms.Panel();
+      this.pnMiddle = new System.Windows.Forms.Panel();
+      this.gbKernelFunction = new System.Windows.Forms.GroupBox();
+      this.chtKernel = new System.Windows.Forms.DataVisualization.Charting.Chart();
       this.gbActions = new System.Windows.Forms.GroupBox();
       this.ofdOpenFile = new System.Windows.Forms.OpenFileDialog();
       this.sfdSave = new System.Windows.Forms.SaveFileDialog();
-      this.tssBenchmark = new System.Windows.Forms.ToolStripStatusLabel();
       ssBottom = new System.Windows.Forms.StatusStrip();
       gbSourceImage = new System.Windows.Forms.GroupBox();
       gbTargetImage = new System.Windows.Forms.GroupBox();
@@ -83,19 +102,25 @@
       label2 = new System.Windows.Forms.Label();
       label1 = new System.Windows.Forms.Label();
       gbMethod = new System.Windows.Forms.GroupBox();
+      gbDescription = new System.Windows.Forms.GroupBox();
       ssBottom.SuspendLayout();
       gbSourceImage.SuspendLayout();
       gbTargetImage.SuspendLayout();
       flpActions.SuspendLayout();
       gbAdvanced.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.nudRadius)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.nudRepetitionCount)).BeginInit();
       gbBorderPixelHandling.SuspendLayout();
       gbTargetResolution.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.nudWidth)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.nudHeight)).BeginInit();
       gbMethod.SuspendLayout();
+      gbDescription.SuspendLayout();
       this.msMain.SuspendLayout();
       this.tlpMainLayout.SuspendLayout();
-      this.panel1.SuspendLayout();
+      this.pnMiddle.SuspendLayout();
+      this.gbKernelFunction.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.chtKernel)).BeginInit();
       this.gbActions.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -118,6 +143,11 @@
       this.tssBusy.Text = "Resizing...";
       this.tssBusy.Visible = false;
       // 
+      // tssBenchmark
+      // 
+      this.tssBenchmark.Name = "tssBenchmark";
+      this.tssBenchmark.Size = new System.Drawing.Size(0, 17);
+      // 
       // gbSourceImage
       // 
       gbSourceImage.Controls.Add(this.iwhSourceImage);
@@ -135,7 +165,7 @@
       this.iwhSourceImage.Location = new System.Drawing.Point(3, 16);
       this.iwhSourceImage.Name = "iwhSourceImage";
       this.iwhSourceImage.Size = new System.Drawing.Size(282, 516);
-      this.iwhSourceImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+      this.iwhSourceImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
       this.iwhSourceImage.TabIndex = 0;
       this.iwhSourceImage.Click += new System.EventHandler(this.iwhSourceImage_Click);
       // 
@@ -156,7 +186,7 @@
       this.iwhTargetImage.Location = new System.Drawing.Point(3, 16);
       this.iwhTargetImage.Name = "iwhTargetImage";
       this.iwhTargetImage.Size = new System.Drawing.Size(283, 516);
-      this.iwhTargetImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+      this.iwhTargetImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
       this.iwhTargetImage.TabIndex = 0;
       this.iwhTargetImage.Click += new System.EventHandler(this.iwhTargetImage_Click);
       // 
@@ -213,20 +243,88 @@
       // 
       gbAdvanced.AutoSize = true;
       gbAdvanced.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+      gbAdvanced.Controls.Add(this.nudRadius);
+      gbAdvanced.Controls.Add(this.lblRadius);
+      gbAdvanced.Controls.Add(this.lblRepititionCount);
+      gbAdvanced.Controls.Add(this.nudRepetitionCount);
       gbAdvanced.Controls.Add(this.chkUseCenteredGrid);
       gbAdvanced.Controls.Add(this.chkUseThresholds);
       gbAdvanced.Dock = System.Windows.Forms.DockStyle.Top;
-      gbAdvanced.Location = new System.Drawing.Point(0, 215);
+      gbAdvanced.Location = new System.Drawing.Point(0, 271);
       gbAdvanced.Name = "gbAdvanced";
-      gbAdvanced.Size = new System.Drawing.Size(294, 78);
+      gbAdvanced.Size = new System.Drawing.Size(294, 130);
       gbAdvanced.TabIndex = 3;
       gbAdvanced.TabStop = false;
       gbAdvanced.Text = "Advanced";
       // 
+      // nudRadius
+      // 
+      this.nudRadius.DecimalPlaces = 2;
+      this.nudRadius.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+      this.nudRadius.Location = new System.Drawing.Point(57, 91);
+      this.nudRadius.Minimum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            65536});
+      this.nudRadius.Name = "nudRadius";
+      this.nudRadius.Size = new System.Drawing.Size(49, 20);
+      this.nudRadius.TabIndex = 3;
+      this.nudRadius.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+      this.nudRadius.ValueChanged += new System.EventHandler(this.nudRadius_ValueChanged);
+      // 
+      // lblRadius
+      // 
+      this.lblRadius.AutoSize = true;
+      this.lblRadius.Location = new System.Drawing.Point(6, 93);
+      this.lblRadius.Name = "lblRadius";
+      this.lblRadius.Size = new System.Drawing.Size(40, 13);
+      this.lblRadius.TabIndex = 2;
+      this.lblRadius.Text = "Radius";
+      // 
+      // lblRepititionCount
+      // 
+      this.lblRepititionCount.AutoSize = true;
+      this.lblRepititionCount.Location = new System.Drawing.Point(6, 44);
+      this.lblRepititionCount.Name = "lblRepititionCount";
+      this.lblRepititionCount.Size = new System.Drawing.Size(42, 13);
+      this.lblRepititionCount.TabIndex = 2;
+      this.lblRepititionCount.Text = "Repeat";
+      // 
+      // nudRepetitionCount
+      // 
+      this.nudRepetitionCount.Location = new System.Drawing.Point(57, 42);
+      this.nudRepetitionCount.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+      this.nudRepetitionCount.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+      this.nudRepetitionCount.Name = "nudRepetitionCount";
+      this.nudRepetitionCount.Size = new System.Drawing.Size(49, 20);
+      this.nudRepetitionCount.TabIndex = 1;
+      this.nudRepetitionCount.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+      // 
       // chkUseCenteredGrid
       // 
       this.chkUseCenteredGrid.AutoSize = true;
-      this.chkUseCenteredGrid.Location = new System.Drawing.Point(6, 42);
+      this.chkUseCenteredGrid.Location = new System.Drawing.Point(6, 68);
       this.chkUseCenteredGrid.Name = "chkUseCenteredGrid";
       this.chkUseCenteredGrid.Size = new System.Drawing.Size(113, 17);
       this.chkUseCenteredGrid.TabIndex = 0;
@@ -254,7 +352,7 @@
       gbBorderPixelHandling.Controls.Add(label5);
       gbBorderPixelHandling.Controls.Add(label4);
       gbBorderPixelHandling.Dock = System.Windows.Forms.DockStyle.Top;
-      gbBorderPixelHandling.Location = new System.Drawing.Point(0, 129);
+      gbBorderPixelHandling.Location = new System.Drawing.Point(0, 185);
       gbBorderPixelHandling.Name = "gbBorderPixelHandling";
       gbBorderPixelHandling.Size = new System.Drawing.Size(294, 86);
       gbBorderPixelHandling.TabIndex = 3;
@@ -324,7 +422,7 @@
       gbTargetResolution.Controls.Add(label2);
       gbTargetResolution.Controls.Add(label1);
       gbTargetResolution.Dock = System.Windows.Forms.DockStyle.Top;
-      gbTargetResolution.Location = new System.Drawing.Point(0, 45);
+      gbTargetResolution.Location = new System.Drawing.Point(0, 101);
       gbTargetResolution.Name = "gbTargetResolution";
       gbTargetResolution.Size = new System.Drawing.Size(294, 84);
       gbTargetResolution.TabIndex = 3;
@@ -422,10 +520,34 @@
       this.cmbResizeMethod.TabIndex = 0;
       this.cmbResizeMethod.SelectedValueChanged += new System.EventHandler(this.cbResizeMethod_SelectedValueChanged);
       // 
+      // gbDescription
+      // 
+      gbDescription.AutoSize = true;
+      gbDescription.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+      gbDescription.Controls.Add(this.txtDescription);
+      gbDescription.Dock = System.Windows.Forms.DockStyle.Top;
+      gbDescription.Location = new System.Drawing.Point(0, 45);
+      gbDescription.Name = "gbDescription";
+      gbDescription.Size = new System.Drawing.Size(294, 56);
+      gbDescription.TabIndex = 5;
+      gbDescription.TabStop = false;
+      gbDescription.Text = "Description";
+      // 
+      // txtDescription
+      // 
+      this.txtDescription.Dock = System.Windows.Forms.DockStyle.Top;
+      this.txtDescription.Location = new System.Drawing.Point(3, 16);
+      this.txtDescription.Multiline = true;
+      this.txtDescription.Name = "txtDescription";
+      this.txtDescription.ReadOnly = true;
+      this.txtDescription.Size = new System.Drawing.Size(288, 37);
+      this.txtDescription.TabIndex = 0;
+      // 
       // msMain
       // 
       this.msMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.viewToolStripMenuItem});
       this.msMain.Location = new System.Drawing.Point(0, 0);
       this.msMain.Name = "msMain";
       this.msMain.Size = new System.Drawing.Size(889, 24);
@@ -485,6 +607,77 @@
       this.exitToolStripMenuItem.Text = "Exit";
       this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
       // 
+      // viewToolStripMenuItem
+      // 
+      this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.sourceImageToolStripMenuItem,
+            this.targetImageToolStripMenuItem});
+      this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+      this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+      this.viewToolStripMenuItem.Text = "View";
+      // 
+      // sourceImageToolStripMenuItem
+      // 
+      this.sourceImageToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.stretchToolStripMenuItem,
+            this.centerToolStripMenuItem,
+            this.zoomToolStripMenuItem});
+      this.sourceImageToolStripMenuItem.Name = "sourceImageToolStripMenuItem";
+      this.sourceImageToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+      this.sourceImageToolStripMenuItem.Text = "Source Image";
+      // 
+      // stretchToolStripMenuItem
+      // 
+      this.stretchToolStripMenuItem.Name = "stretchToolStripMenuItem";
+      this.stretchToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
+      this.stretchToolStripMenuItem.Text = "Stretch";
+      this.stretchToolStripMenuItem.Click += new System.EventHandler(this.stretchToolStripMenuItem_Click);
+      // 
+      // centerToolStripMenuItem
+      // 
+      this.centerToolStripMenuItem.Name = "centerToolStripMenuItem";
+      this.centerToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
+      this.centerToolStripMenuItem.Text = "Center";
+      this.centerToolStripMenuItem.Click += new System.EventHandler(this.centerToolStripMenuItem_Click);
+      // 
+      // zoomToolStripMenuItem
+      // 
+      this.zoomToolStripMenuItem.Name = "zoomToolStripMenuItem";
+      this.zoomToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
+      this.zoomToolStripMenuItem.Text = "Zoom";
+      this.zoomToolStripMenuItem.Click += new System.EventHandler(this.zoomToolStripMenuItem_Click);
+      // 
+      // targetImageToolStripMenuItem
+      // 
+      this.targetImageToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.stretchToolStripMenuItem1,
+            this.centerToolStripMenuItem1,
+            this.zoomToolStripMenuItem1});
+      this.targetImageToolStripMenuItem.Name = "targetImageToolStripMenuItem";
+      this.targetImageToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+      this.targetImageToolStripMenuItem.Text = "Target Image";
+      // 
+      // stretchToolStripMenuItem1
+      // 
+      this.stretchToolStripMenuItem1.Name = "stretchToolStripMenuItem1";
+      this.stretchToolStripMenuItem1.Size = new System.Drawing.Size(111, 22);
+      this.stretchToolStripMenuItem1.Text = "Stretch";
+      this.stretchToolStripMenuItem1.Click += new System.EventHandler(this.stretchToolStripMenuItem1_Click);
+      // 
+      // centerToolStripMenuItem1
+      // 
+      this.centerToolStripMenuItem1.Name = "centerToolStripMenuItem1";
+      this.centerToolStripMenuItem1.Size = new System.Drawing.Size(111, 22);
+      this.centerToolStripMenuItem1.Text = "Center";
+      this.centerToolStripMenuItem1.Click += new System.EventHandler(this.centerToolStripMenuItem1_Click);
+      // 
+      // zoomToolStripMenuItem1
+      // 
+      this.zoomToolStripMenuItem1.Name = "zoomToolStripMenuItem1";
+      this.zoomToolStripMenuItem1.Size = new System.Drawing.Size(111, 22);
+      this.zoomToolStripMenuItem1.Text = "Zoom";
+      this.zoomToolStripMenuItem1.Click += new System.EventHandler(this.zoomToolStripMenuItem1_Click);
+      // 
       // tlpMainLayout
       // 
       this.tlpMainLayout.ColumnCount = 3;
@@ -493,7 +686,7 @@
       this.tlpMainLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tlpMainLayout.Controls.Add(gbSourceImage, 0, 0);
       this.tlpMainLayout.Controls.Add(gbTargetImage, 2, 0);
-      this.tlpMainLayout.Controls.Add(this.panel1, 1, 0);
+      this.tlpMainLayout.Controls.Add(this.pnMiddle, 1, 0);
       this.tlpMainLayout.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tlpMainLayout.Location = new System.Drawing.Point(0, 24);
       this.tlpMainLayout.Name = "tlpMainLayout";
@@ -502,17 +695,48 @@
       this.tlpMainLayout.Size = new System.Drawing.Size(889, 541);
       this.tlpMainLayout.TabIndex = 2;
       // 
-      // panel1
+      // pnMiddle
       // 
-      this.panel1.Controls.Add(this.gbActions);
-      this.panel1.Controls.Add(gbAdvanced);
-      this.panel1.Controls.Add(gbBorderPixelHandling);
-      this.panel1.Controls.Add(gbTargetResolution);
-      this.panel1.Controls.Add(gbMethod);
-      this.panel1.Location = new System.Drawing.Point(297, 3);
-      this.panel1.Name = "panel1";
-      this.panel1.Size = new System.Drawing.Size(294, 376);
-      this.panel1.TabIndex = 2;
+      this.pnMiddle.Controls.Add(this.gbKernelFunction);
+      this.pnMiddle.Controls.Add(this.gbActions);
+      this.pnMiddle.Controls.Add(gbAdvanced);
+      this.pnMiddle.Controls.Add(gbBorderPixelHandling);
+      this.pnMiddle.Controls.Add(gbTargetResolution);
+      this.pnMiddle.Controls.Add(gbDescription);
+      this.pnMiddle.Controls.Add(gbMethod);
+      this.pnMiddle.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.pnMiddle.Location = new System.Drawing.Point(297, 3);
+      this.pnMiddle.Name = "pnMiddle";
+      this.pnMiddle.Size = new System.Drawing.Size(294, 535);
+      this.pnMiddle.TabIndex = 2;
+      // 
+      // gbKernelFunction
+      // 
+      this.gbKernelFunction.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+      this.gbKernelFunction.Controls.Add(this.chtKernel);
+      this.gbKernelFunction.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.gbKernelFunction.Location = new System.Drawing.Point(0, 449);
+      this.gbKernelFunction.Name = "gbKernelFunction";
+      this.gbKernelFunction.Size = new System.Drawing.Size(294, 86);
+      this.gbKernelFunction.TabIndex = 6;
+      this.gbKernelFunction.TabStop = false;
+      this.gbKernelFunction.Text = "Kernel";
+      // 
+      // chtKernel
+      // 
+      this.chtKernel.BackColor = System.Drawing.SystemColors.Control;
+      chartArea1.Name = "chaChart";
+      this.chtKernel.ChartAreas.Add(chartArea1);
+      this.chtKernel.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.chtKernel.Location = new System.Drawing.Point(3, 16);
+      this.chtKernel.Name = "chtKernel";
+      series1.ChartArea = "chaChart";
+      series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
+      series1.Name = "dsKernelData";
+      this.chtKernel.Series.Add(series1);
+      this.chtKernel.Size = new System.Drawing.Size(288, 67);
+      this.chtKernel.TabIndex = 0;
+      this.chtKernel.Text = "chart1";
       // 
       // gbActions
       // 
@@ -520,7 +744,7 @@
       this.gbActions.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
       this.gbActions.Controls.Add(flpActions);
       this.gbActions.Dock = System.Windows.Forms.DockStyle.Top;
-      this.gbActions.Location = new System.Drawing.Point(0, 293);
+      this.gbActions.Location = new System.Drawing.Point(0, 401);
       this.gbActions.Name = "gbActions";
       this.gbActions.Size = new System.Drawing.Size(294, 48);
       this.gbActions.TabIndex = 4;
@@ -541,11 +765,6 @@
       this.sfdSave.RestoreDirectory = true;
       this.sfdSave.Title = "Enter filename";
       // 
-      // tssBenchmark
-      // 
-      this.tssBenchmark.Name = "tssBenchmark";
-      this.tssBenchmark.Size = new System.Drawing.Size(0, 17);
-      // 
       // MainForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -565,6 +784,8 @@
       flpActions.ResumeLayout(false);
       gbAdvanced.ResumeLayout(false);
       gbAdvanced.PerformLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.nudRadius)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.nudRepetitionCount)).EndInit();
       gbBorderPixelHandling.ResumeLayout(false);
       gbBorderPixelHandling.PerformLayout();
       gbTargetResolution.ResumeLayout(false);
@@ -572,11 +793,15 @@
       ((System.ComponentModel.ISupportInitialize)(this.nudWidth)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.nudHeight)).EndInit();
       gbMethod.ResumeLayout(false);
+      gbDescription.ResumeLayout(false);
+      gbDescription.PerformLayout();
       this.msMain.ResumeLayout(false);
       this.msMain.PerformLayout();
       this.tlpMainLayout.ResumeLayout(false);
-      this.panel1.ResumeLayout(false);
-      this.panel1.PerformLayout();
+      this.pnMiddle.ResumeLayout(false);
+      this.pnMiddle.PerformLayout();
+      this.gbKernelFunction.ResumeLayout(false);
+      ((System.ComponentModel.ISupportInitialize)(this.chtKernel)).EndInit();
       this.gbActions.ResumeLayout(false);
       this.gbActions.PerformLayout();
       this.ResumeLayout(false);
@@ -593,7 +818,7 @@
     private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
-    private System.Windows.Forms.Panel panel1;
+    private System.Windows.Forms.Panel pnMiddle;
     private System.Windows.Forms.ComboBox cmbResizeMethod;
     private System.Windows.Forms.NumericUpDown nudWidth;
     private System.Windows.Forms.NumericUpDown nudHeight;
@@ -613,6 +838,22 @@
     private System.Windows.Forms.SaveFileDialog sfdSave;
     private System.Windows.Forms.CheckBox chkUseCenteredGrid;
     private System.Windows.Forms.ToolStripStatusLabel tssBenchmark;
+    private System.Windows.Forms.TextBox txtDescription;
+    private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem sourceImageToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem stretchToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem centerToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem zoomToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem targetImageToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem stretchToolStripMenuItem1;
+    private System.Windows.Forms.ToolStripMenuItem centerToolStripMenuItem1;
+    private System.Windows.Forms.ToolStripMenuItem zoomToolStripMenuItem1;
+    private System.Windows.Forms.GroupBox gbKernelFunction;
+    private System.Windows.Forms.DataVisualization.Charting.Chart chtKernel;
+    private System.Windows.Forms.Label lblRepititionCount;
+    private System.Windows.Forms.NumericUpDown nudRepetitionCount;
+    private System.Windows.Forms.NumericUpDown nudRadius;
+    private System.Windows.Forms.Label lblRadius;
 
   }
 }

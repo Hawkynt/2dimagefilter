@@ -19,32 +19,35 @@
  */
 #endregion
 using System.Diagnostics.Contracts;
-using System.Drawing.Drawing2D;
-
 using Imager;
+using Imager.Classes;
 
 namespace Classes.ImageManipulators {
-  internal class Interpolator : IImageManipulator {
-    private readonly InterpolationMode _type;
+  internal class RadiusResampler : IImageManipulator {
+    private readonly WindowType _type;
 
     #region Implementation of IImageManipulator
     public bool SupportsWidth { get { return (true); } }
     public bool SupportsHeight { get { return (true); } }
     public bool SupportsRepetitionCount { get { return (false); } }
-    public bool SupportsGridCentering { get { return (false); } }
-    public bool SupportsRadius { get { return (false); } }
-    public bool ChangesResolution { get { return (true); } }
+    public bool SupportsGridCentering { get { return (true); } }
     public bool SupportsThresholds { get { return (false); } }
+    public bool SupportsRadius { get { return (true); } }
+    public bool ChangesResolution { get { return (true); } }
     public string Description { get { return (ReflectionUtils.GetDescriptionForEnumValue(this._type)); } }
     #endregion
 
-    public cImage Apply(cImage source, int width, int height) {
+    public cImage Apply(cImage source, int width, int height, float radius, bool useCenteredGrid) {
       Contract.Requires(source != null);
-      return (source.ApplyScaler(this._type, width, height));
+      return (source.ApplyScaler(this._type, width, height, radius, useCenteredGrid));
     }
 
-    public Interpolator(InterpolationMode type) {
+    public RadiusResampler(WindowType type) {
       this._type = type;
+    }
+
+    public Kernels.FixedRadiusKernelInfo GetKernelMethodInfo(float radius) {
+      return (Windows.WINDOWS[this._type].WithRadius(radius));
     }
   }
 }

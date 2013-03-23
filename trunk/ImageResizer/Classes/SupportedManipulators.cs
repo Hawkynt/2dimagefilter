@@ -1,7 +1,24 @@
-﻿using System;
+﻿#region (c)2008-2013 Hawkynt
+/*
+ *  cImage 
+ *  Image filtering library 
+    Copyright (C) 2010-2013 Hawkynt
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#endregion
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 using Classes.ImageManipulators;
@@ -18,94 +35,71 @@ namespace Classes {
     #region add interpolators
 .Concat(
     from p in cImage.INTERPOLATORS
-    select new KeyValuePair<string, IImageManipulator>(_GetDescriptionForEnumValue(p) + " <GDI+>", new Interpolator(p))
+    select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p) + " <GDI+>", new Interpolator(p))
     )
     #endregion
 
     #region add resampler
 .Concat(
-    from p in _GetEnumValues<KernelType>()
-    select new KeyValuePair<string, IImageManipulator>(_GetDescriptionForEnumValue(p), new Resampler(p))
+    from p in ReflectionUtils.GetEnumValues<KernelType>()
+    select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p), new Resampler(p))
     )
+.Concat(
+    from p in ReflectionUtils.GetEnumValues<WindowType>()
+    select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p), new RadiusResampler(p))
+    )
+
     #endregion
 
     #region add pixel resizer
 .Concat(
-      from p in _GetEnumValues<PixelScalerType>()
-      select new KeyValuePair<string, IImageManipulator>(_GetDescriptionForEnumValue(p), new PixelScaler(p))
+      from p in ReflectionUtils.GetEnumValues<PixelScalerType>()
+      select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p), new PixelScaler(p))
     )
     #endregion
 
     #region add xbr resizer
 .Concat(
-      from p in _GetEnumValues<XbrScalerType>()
-      select new KeyValuePair<string, IImageManipulator>(_GetDescriptionForEnumValue(p) + " <NoBlend>", new XbrScaler(p, false))
+      from p in ReflectionUtils.GetEnumValues<XbrScalerType>()
+      select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p) + " <NoBlend>", new XbrScaler(p, false))
 )
 .Concat(
-      from p in _GetEnumValues<XbrScalerType>()
-      select new KeyValuePair<string, IImageManipulator>(_GetDescriptionForEnumValue(p), new XbrScaler(p, true))
+      from p in ReflectionUtils.GetEnumValues<XbrScalerType>()
+      select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p), new XbrScaler(p, true))
 )
     #endregion
 
     #region add nq resizer
 .Concat(
-      from p in _GetEnumValues<NqScalerType>()
-      from m in _GetEnumValues<NqMode>()
-      select new KeyValuePair<string, IImageManipulator>(_GetDescriptionForEnumValue(p) + (m == NqMode.Normal ? string.Empty : " " + _GetDescriptionForEnumValue(m)), new NqScaler(p, m))
+      from p in ReflectionUtils.GetEnumValues<NqScalerType>()
+      from m in ReflectionUtils.GetEnumValues<NqMode>()
+      select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p) + (m == NqMode.Normal ? string.Empty : " " + ReflectionUtils.GetDisplayNameForEnumValue(m)), new NqScaler(p, m))
     )
     #endregion
 
     #region plane extractors
 .Concat(
     new[] {
-      new KeyValuePair<string, IImageManipulator>("Red",new PlaneExtractor(c=>c.Red)),
-      new KeyValuePair<string, IImageManipulator>("Green",new PlaneExtractor(c=>c.Green)),
-      new KeyValuePair<string, IImageManipulator>("Blue",new PlaneExtractor(c=>c.Blue)),
-      new KeyValuePair<string, IImageManipulator>("Alpha",new PlaneExtractor(c=>c.Alpha)),
-      new KeyValuePair<string, IImageManipulator>("Luminance",new PlaneExtractor(c=>c.Luminance)),
-      new KeyValuePair<string, IImageManipulator>("ChrominanceU",new PlaneExtractor(c=>c.ChrominanceU)),
-      new KeyValuePair<string, IImageManipulator>("ChrominanceV",new PlaneExtractor(c=>c.ChrominanceV)),
-      new KeyValuePair<string, IImageManipulator>("u",new PlaneExtractor(c=>c.u)),
-      new KeyValuePair<string, IImageManipulator>("v",new PlaneExtractor(c=>c.v)),
-      new KeyValuePair<string, IImageManipulator>("Hue",new PlaneExtractor(c=>c.Hue)),
-      new KeyValuePair<string, IImageManipulator>("Hue Colored",new PlaneExtractor(c=>c.HueColored)),
-      new KeyValuePair<string, IImageManipulator>("Brightness",new PlaneExtractor(c=>c.Brightness)),
-      new KeyValuePair<string, IImageManipulator>("Min",new PlaneExtractor(c=>c.Min)),
-      new KeyValuePair<string, IImageManipulator>("Max",new PlaneExtractor(c=>c.Max)),
-      new KeyValuePair<string, IImageManipulator>("ExtractColors",new PlaneExtractor(c=>c.ExtractColors)),
-      new KeyValuePair<string, IImageManipulator>("ExtractDeltas",new PlaneExtractor(c=>c.ExtractDeltas)),
+      new KeyValuePair<string, IImageManipulator>("Red",new PlaneExtractor(c=>c.Red,"Returns only the red channel of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("Green",new PlaneExtractor(c=>c.Green,"Returns only the green channel of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("Blue",new PlaneExtractor(c=>c.Blue,"Returns only the blue channel of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("Alpha",new PlaneExtractor(c=>c.Alpha,"Returns only the alpha channel of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("Luminance",new PlaneExtractor(c=>c.Luminance,"Returns only the luminance channel of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("ChrominanceU",new PlaneExtractor(c=>c.ChrominanceU,"Returns only the chroma-U channel of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("ChrominanceV",new PlaneExtractor(c=>c.ChrominanceV,"Returns only the chroma-V channel of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("u",new PlaneExtractor(c=>c.u,"Returns only the alternate chroma-U of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("v",new PlaneExtractor(c=>c.v,"Returns only the alternate chroma-V channel of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("Hue",new PlaneExtractor(c=>c.Hue,"Returns only the hue channel of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("Hue Colored",new PlaneExtractor(c=>c.HueColored,"Returns the colorized hue channel of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("Brightness",new PlaneExtractor(c=>c.Brightness,"Returns only the brightness channel of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("Min",new PlaneExtractor(c=>c.Min,"Returns only the minimum component of the RGB channels of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("Max",new PlaneExtractor(c=>c.Max,"Returns only the maximum component of the RGB channels of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("ExtractColors",new PlaneExtractor(c=>c.ExtractColors,"Tries to extract the full saturated colors of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("ExtractDeltas",new PlaneExtractor(c=>c.ExtractDeltas,"The difference between the original source image and the hue-colored result.")),
     }
     )
     #endregion
 
 .ToArray();
-
-    #region enum utils
-    /// <summary>
-    /// Gets a typed enumeration of all values of a given enumeration.
-    /// </summary>
-    /// <typeparam name="T">The type of enumeration.</typeparam>
-    /// <returns>All values.</returns>
-    private static IEnumerable<T> _GetEnumValues<T>() where T : struct {
-      Contract.Requires(typeof(T).IsEnum, "Only enums supported");
-      return (from T i in Enum.GetValues(typeof(T))
-              select i);
-    }
-
-    /// <summary>
-    /// Gets a descriptive name for a given enum value by trying to find a description attribute first or using the name for the given value.
-    /// </summary>
-    /// <typeparam name="T">The type of the enumeration.</typeparam>
-    /// <param name="value">The value.</param>
-    /// <returns>A descriptive text.</returns>
-    private static string _GetDescriptionForEnumValue<T>(T value) where T : struct {
-      Contract.Requires(typeof(T).IsEnum, "Only enum supported");
-      var valueName = Enum.GetName(typeof(T), value);
-      var fieldInfo = typeof(T).GetMember(valueName)[0];
-      var descriptionAttribute = (DescriptionAttribute)fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault();
-      return (descriptionAttribute == null ? valueName : descriptionAttribute.Description);
-    }
-    #endregion
-
   }
 }

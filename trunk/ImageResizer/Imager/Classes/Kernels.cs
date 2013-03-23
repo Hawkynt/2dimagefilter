@@ -1,8 +1,28 @@
-﻿using System;
+﻿#region (c)2008-2013 Hawkynt
+/*
+ *  cImage 
+ *  Image filtering library 
+    Copyright (C) 2010-2013 Hawkynt
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#endregion
 using System.Collections.Generic;
+using System.ComponentModel;
 
 /*
- * Thanks to Pascal Getreuer who wrote these interpolation kernels in C++
+ * Thanks to Pascal Getreuer who wrote some of these interpolation kernels in C++
  * See http://www.ipol.im/pub/art/2011/g_lmii/
  * I copied the comments over from the original sources and made changes to the code as I progressed.
  * 
@@ -10,113 +30,112 @@ using System.Collections.Generic;
 
 namespace Imager.Classes {
   public enum KernelType {
-    NearestNeighbor,
-    Bilinear,
+    [Description("Resizes the source image using a rectangular window function.")]
+    Rectangular,
+    [Description("Resizes the source image using a bicubic kernel function.")]
     Bicubic,
-    Lanczos2,
-    Lanczos3,
-    Lanczos4,
+    [Description("Resizes the source image using the schaum 2nd-order kernel function with radius 1.5.")]
     Schaum2,
+    [Description("Resizes the source image using the schaum 3rd-order kernel function with radius 2.")]
     Schaum3,
+    [Description("Resizes the source image using the β-Spline 2nd-order kernel function.")]
     BSpline2,
+    [Description("Resizes the source image using the β-Spline 3rd-order kernel function.")]
     BSpline3,
+    [Description("Resizes the source image using the β-Spline 5th-order kernel function.")]
     BSpline5,
+    [Description("Resizes the source image using the β-Spline 7th-order kernel function.")]
     BSpline7,
+    [Description("Resizes the source image using the β-Spline 9th-order kernel function.")]
     BSpline9,
+    [Description("Resizes the source image using the β-Spline 11th-order kernel function.")]
     BSpline11,
+    [Description("Resizes the source image using the o-Moms 3rd-order kernel function.")]
     OMoms3,
+    [Description("Resizes the source image using the o-Moms 5th-order kernel function.")]
     OMoms5,
+    [Description("Resizes the source image using the o-Moms 7th-order kernel function.")]
     OMoms7
   }
 
+  /// <summary>
+  /// Contains all fixed-radius interpolation kernels.
+  /// </summary>
   internal static class Kernels {
-    public delegate float KernelDelegate(float n);
+    public delegate double FixedRadiusKernelMethod(float n);
 
-    public struct InterpMethod {
-      public KernelDelegate Kernel;
+    public struct FixedRadiusKernelInfo {
+      public FixedRadiusKernelMethod Kernel;
       public float KernelRadius;
       public bool KernelNormalize;
       public float[] PrefilterAlpha;
       public float PrefilterScale;
     }
 
-    internal static readonly Dictionary<KernelType, InterpMethod> KERNELS = new Dictionary<KernelType, InterpMethod> {
-      {KernelType.NearestNeighbor,new InterpMethod{Kernel= NearestNeighborKernel,KernelRadius = 0.51f,PrefilterScale = 1}},
-      {KernelType.Bilinear,new InterpMethod{Kernel= BilinearKernel,KernelRadius = 1,PrefilterScale = 1}},
-      {KernelType.Bicubic,new InterpMethod{Kernel= BicubicKernel,KernelRadius = 2,PrefilterScale = 1}},
-      {KernelType.Lanczos2,new InterpMethod{Kernel=f=>LanczosKernel(f,2),KernelRadius = 2,KernelNormalize = true,PrefilterScale = 1}},
-      {KernelType.Lanczos3,new InterpMethod{Kernel=f=>LanczosKernel(f,3),KernelRadius = 3,KernelNormalize = true,PrefilterScale = 1}},
-      {KernelType.Lanczos4,new InterpMethod{Kernel=f=>LanczosKernel(f,4),KernelRadius = 4,KernelNormalize = true,PrefilterScale = 1}},
-      {KernelType.Schaum2,new InterpMethod{Kernel=Schaum2Kernel,KernelRadius = 1.51f,PrefilterScale = 1}},
-      {KernelType.Schaum3,new InterpMethod{Kernel=Schaum3Kernel,KernelRadius = 2,PrefilterScale = 1}},
-      {KernelType.BSpline2,new InterpMethod{Kernel=BSpline2Kernel,KernelRadius = 1.5f,PrefilterAlpha = new[] {
+    /// <summary>
+    /// Lookup table for interpolation kernels
+    /// </summary>
+    internal static readonly Dictionary<KernelType, FixedRadiusKernelInfo> KERNELS = new Dictionary<KernelType, FixedRadiusKernelInfo> {
+      {KernelType.Rectangular,new FixedRadiusKernelInfo{Kernel= _RectangularKernel,KernelRadius = 0.51f}},
+      {KernelType.Bicubic,new FixedRadiusKernelInfo{Kernel= _BicubicKernel,KernelRadius = 2}},
+      {KernelType.Schaum2,new FixedRadiusKernelInfo{Kernel=_Schaum2Kernel,KernelRadius = 1.51f}},
+      {KernelType.Schaum3,new FixedRadiusKernelInfo{Kernel=_Schaum3Kernel,KernelRadius = 2}},
+      {KernelType.BSpline2,new FixedRadiusKernelInfo{Kernel=_BSpline2Kernel,KernelRadius = 1.5f,PrefilterAlpha = new[] {
         -1.715728752538099e-1f /* exact value: -3 + sqrt(8) */
       } ,PrefilterScale = 8}},
-      {KernelType.BSpline3,new InterpMethod{Kernel=BSpline3Kernel,KernelRadius = 2f,PrefilterAlpha = new[]{
+      {KernelType.BSpline3,new FixedRadiusKernelInfo{Kernel=_BSpline3Kernel,KernelRadius = 2f,PrefilterAlpha = new[]{
         -2.679491924311227e-1f /* exact value: -2 + sqrt(3) */
       } ,PrefilterScale = 6}},
-      {KernelType.BSpline5,new InterpMethod{Kernel=BSpline5Kernel,KernelRadius = 3f,PrefilterAlpha = new[]{
+      {KernelType.BSpline5,new FixedRadiusKernelInfo{Kernel=_BSpline5Kernel,KernelRadius = 3f,PrefilterAlpha = new[]{
         -4.309628820326465e-2f, /* exact: sqrt(13*sqrt(105)+135)/sqrt(2)-sqrt(105)/2-13/2.0 */
         -4.305753470999738e-1f  /* exact: sqrt(105)/2+sqrt(135-13*sqrt(105))/sqrt(2)-13/2.0 */
       } ,PrefilterScale = 120}},
-      {KernelType.BSpline7,new InterpMethod{Kernel=BSpline7Kernel,KernelRadius = 4f,PrefilterAlpha = new[] {
+      {KernelType.BSpline7,new FixedRadiusKernelInfo{Kernel=_BSpline7Kernel,KernelRadius = 4f,PrefilterAlpha = new[] {
         -9.148694809608277e-3f, 
         -1.225546151923267e-1f, 
         -5.352804307964382e-1f
       },PrefilterScale = 5040}},
-      {KernelType.BSpline9,new InterpMethod{Kernel=BSpline9Kernel,KernelRadius = 5f,PrefilterAlpha = new[] {
+      {KernelType.BSpline9,new FixedRadiusKernelInfo{Kernel=_BSpline9Kernel,KernelRadius = 5f,PrefilterAlpha = new[] {
         -2.121306903180818e-3f,
         -4.322260854048175e-2f,
         -2.017505201931532e-1f, 
         -6.079973891686259e-1f
       },PrefilterScale = 362880}},
-      {KernelType.BSpline11,new InterpMethod{Kernel=BSpline11Kernel,KernelRadius = 6f,PrefilterAlpha = new[] {
+      {KernelType.BSpline11,new FixedRadiusKernelInfo{Kernel=_BSpline11Kernel,KernelRadius = 6f,PrefilterAlpha = new[] {
         -5.105575344465021e-4f, 
         -1.666962736623466e-2f, 
         -8.975959979371331e-2f,
         -2.721803492947859e-1f, 
         -6.612660689007345e-1f
       },PrefilterScale = 39916800}},
-      {KernelType.OMoms3,new InterpMethod{Kernel=OMoms3Kernel,KernelRadius = 2,PrefilterAlpha = new[] {
+      {KernelType.OMoms3,new FixedRadiusKernelInfo{Kernel=_OMoms3Kernel,KernelRadius = 2,PrefilterAlpha = new[] {
         -3.441311542550502e-1f /* exact: (sqrt(105) - 13)/8 */
       },PrefilterScale = 21/4f}},
-      {KernelType.OMoms5,new InterpMethod{Kernel=OMoms5Kernel,KernelRadius = 3,PrefilterAlpha = new[] {
+      {KernelType.OMoms5,new FixedRadiusKernelInfo{Kernel=_OMoms5Kernel,KernelRadius = 3,PrefilterAlpha = new[] {
         -7.092571896868541e-2f, 
         -4.758127100084396e-1f
       },PrefilterScale = 7920/107f}},
-      {KernelType.OMoms7,new InterpMethod{Kernel=OMoms7Kernel,KernelRadius = 4,PrefilterAlpha = new[] {
+      {KernelType.OMoms7,new FixedRadiusKernelInfo{Kernel=_OMoms7Kernel,KernelRadius = 4,PrefilterAlpha = new[] {
         -1.976842538386140e-2f,
         -1.557007746773578e-1f,
         -5.685376180022930e-1f
       },PrefilterScale = 675675/346f}},
     };
 
-    private const float M_PI = (float)Math.PI;
-
-    private static float Sin(float x) {
-      return ((float)Math.Sin(x));
+    #region math lib wrappers
+    private static float _Abs(float x) {
+      return (x < 0 ? -x : x);
     }
+    #endregion
 
     /// <summary>
     /// Nearest Neighbor interpolation kernel (KernelRadius = 0.5)
     /// </summary>
     /// <param name="x">The x.</param>
     /// <returns></returns>
-    private static float NearestNeighborKernel(float x) {
+    private static double _RectangularKernel(float x) {
       if (-0.5f <= x && x < 0.5f)
         return 1;
-      return 0;
-    }
-
-    /// <summary>
-    /// Bilinear interpolation kernel (KernelRadius = 1)
-    /// </summary>
-    /// <param name="x">The x.</param>
-    /// <returns></returns>
-    private static float BilinearKernel(float x) {
-      x = Math.Abs(x);
-      if (x < 1)
-        return 1 - x;
       return 0;
     }
 
@@ -125,10 +144,10 @@ namespace Imager.Classes {
     /// </summary>
     /// <param name="x">The x.</param>
     /// <returns></returns>
-    private static float BicubicKernel(float x) {
+    private static double _BicubicKernel(float x) {
       const float alpha = -0.5f;
 
-      x = Math.Abs(x);
+      x = _Abs(x);
 
       if (x < 2) {
         if (x <= 1)
@@ -138,28 +157,15 @@ namespace Imager.Classes {
       return 0;
     }
 
-    /// <summary>
-    /// Lanczos-n interpolation kernel (KernelRadius = n)
-    /// </summary>
-    /// <param name="x">The x.</param>
-    /// <param name="radius">The radius.</param>
-    /// <returns></returns>
-    private static float LanczosKernel(float x, float radius) {
-      if (-radius < x && x < radius) {
-        if (x != 0)
-          return Sin(M_PI * x) * Sin((M_PI / radius) * x) / ((M_PI * M_PI / radius) * x * x);
-        return 1;
-      }
-      return 0;
-    }
+    // TODO: quadratic
 
     /// <summary>
     /// Quadratic Schaum kernel (KernelRadius = 1.5)
     /// </summary>
     /// <param name="x">The x.</param>
     /// <returns></returns>
-    private static float Schaum2Kernel(float x) {
-      x = Math.Abs(x);
+    private static double _Schaum2Kernel(float x) {
+      x = _Abs(x);
 
       /* This kernel is discontinuous.  At discontinuous points, it takes the
       average value of the left and right limits. */
@@ -174,14 +180,13 @@ namespace Imager.Classes {
       return 0;
     }
 
-
     /// <summary>
     /// Cubic Schaum kernel (KernelRadius = 2)
     /// </summary>
     /// <param name="x">The x.</param>
     /// <returns></returns>
-    private static float Schaum3Kernel(float x) {
-      x = Math.Abs(x);
+    private static double _Schaum3Kernel(float x) {
+      x = _Abs(x);
       if (x <= 1)
         return ((x - 2) * x - 1) * x / 2 + 1;
       if (x < 2)
@@ -189,13 +194,17 @@ namespace Imager.Classes {
       return 0;
     }
 
+    // TODO: general b-spline
+    // TODO: p-spline
+    // TODO: hermite-spline
+
     /// <summary>
     /// Quadratic B-spline kernel (KernelRadius = 1.5)
     /// </summary>
     /// <param name="x">The x.</param>
     /// <returns></returns>
-    private static float BSpline2Kernel(float x) {
-      x = Math.Abs(x);
+    private static double _BSpline2Kernel(float x) {
+      x = _Abs(x);
       if (x <= 0.5f)
         return 0.75f - x * x;
       if (x < 1.5f) {
@@ -210,8 +219,8 @@ namespace Imager.Classes {
     /// </summary>
     /// <param name="x">The x.</param>
     /// <returns></returns>
-    private static float BSpline3Kernel(float x) {
-      x = Math.Abs(x);
+    private static double _BSpline3Kernel(float x) {
+      x = _Abs(x);
       if (x < 1)
         return (x / 2 - 1) * x * x + 0.66666666666666667f;
       if (x < 2) {
@@ -226,8 +235,8 @@ namespace Imager.Classes {
     /// </summary>
     /// <param name="x">The x.</param>
     /// <returns></returns>
-    private static float BSpline5Kernel(float x) {
-      x = Math.Abs(x);
+    private static double _BSpline5Kernel(float x) {
+      x = _Abs(x);
       if (x <= 1) {
         var xSqr = x * x;
         return (((-10 * x + 30) * xSqr - 60) * xSqr + 66) / 120;
@@ -249,8 +258,8 @@ namespace Imager.Classes {
     /// </summary>
     /// <param name="x">The x.</param>
     /// <returns></returns>
-    private static float BSpline7Kernel(float x) {
-      x = Math.Abs(x);
+    private static double _BSpline7Kernel(float x) {
+      x = _Abs(x);
       if (x <= 1) {
         var xSqr = x * x;
         return ((((35 * x - 140) * xSqr + 560) * xSqr - 1680) * xSqr + 2416) / 5040;
@@ -276,8 +285,8 @@ namespace Imager.Classes {
     /// </summary>
     /// <param name="x">The x.</param>
     /// <returns></returns>
-    private static float BSpline9Kernel(float x) {
-      x = Math.Abs(x);
+    private static double _BSpline9Kernel(float x) {
+      x = _Abs(x);
 
       if (x <= 1) {
         var xSqr = x * x;
@@ -308,8 +317,8 @@ namespace Imager.Classes {
     /// </summary>
     /// <param name="x">The x.</param>
     /// <returns></returns>
-    private static float BSpline11Kernel(float x) {
-      x = Math.Abs(x);
+    private static double _BSpline11Kernel(float x) {
+      x = _Abs(x);
 
       if (x <= 1) {
         var xSqr = x * x;
@@ -352,8 +361,8 @@ namespace Imager.Classes {
     /// </summary>
     /// <param name="x">The x.</param>
     /// <returns></returns>
-    private static float OMoms3Kernel(float x) {
-      x = Math.Abs(x);
+    private static double _OMoms3Kernel(float x) {
+      x = _Abs(x);
       if (x < 1)
         return ((x / 2 - 1) * x + 1 / 14.0f) * x + 13 / 21.0f;
       if (x < 2)
@@ -366,8 +375,8 @@ namespace Imager.Classes {
     /// </summary>
     /// <param name="x">The x.</param>
     /// <returns></returns>
-    private static float OMoms5Kernel(float x) {
-      x = Math.Abs(x);
+    private static double _OMoms5Kernel(float x) {
+      x = _Abs(x);
 
       if (x <= 1)
         return (((((-10 * x + 30) * x - (200 / 33.0f)) * x - (540 / 11.0f)) * x - (5 / 33.0f)) * x + (687 / 11.0f)) / 120;
@@ -387,8 +396,8 @@ namespace Imager.Classes {
     /// </summary>
     /// <param name="x">The x.</param>
     /// <returns></returns>
-    private static float OMoms7Kernel(float x) {
-      x = Math.Abs(x);
+    private static double _OMoms7Kernel(float x) {
+      x = _Abs(x);
 
       if (x <= 1)
         return (((((((15015 * x - 60060) * x + 21021) * x + 180180) * x + 2695) * x - 629244) * x + 21) * x + 989636) / 2162160;

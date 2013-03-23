@@ -18,10 +18,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
-namespace Imager.Interface {
-  public enum NqMode {
-    Normal,
-    Bold,
-    Smart
+using System;
+
+namespace Imager.Classes {
+  public class EnumDisplayNameAttribute : Attribute {
+    private readonly string _name;
+
+    public string Name { get { return (this._name); } }
+
+    public EnumDisplayNameAttribute(string name) {
+      _name = name;
+    }
   }
 }

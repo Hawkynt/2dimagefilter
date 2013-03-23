@@ -1,8 +1,8 @@
-﻿#region (c)2008-2014 Hawkynt
+﻿#region (c)2008-2013 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010-2011 Hawkynt
+    Copyright (C) 2010-2013 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,27 +16,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * This is a C# port of my former classImage perl library.
- * You can use and modify my code as long as you give me a credit and 
- * inform me about updates, changes new features and modification. 
- * Distribution and selling is allowed. Would be nice if you give some 
- * payback.
- * 
- * Mapping usually is implemented as
- *
- * 2x:
- * C0 C1 C2     00  01
- * C3 C4 C5 =>
- * C6 C7 C8     10  11
- * 
- * 3x:
- * C0 C1 C2    00 01 02
- * C3 C4 C5 => 10 11 12
- * C6 C7 C8    20 21 22
-      
  */
 #endregion
-
 
 namespace Imager.Filters {
   static class libHQ {

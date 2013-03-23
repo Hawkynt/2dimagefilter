@@ -95,6 +95,7 @@
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -110,6 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\IImageManipulator.cs" />
+    <Compile Include="Classes\ImageManipulators\RadiusResampler.cs" />
     <Compile Include="Classes\ImageManipulators\Resampler.cs" />
     <Compile Include="Classes\ImageManipulators\Interpolator.cs" />
     <Compile Include="Classes\ImageManipulators\AScaler.cs" />
@@ -117,11 +119,14 @@
     <Compile Include="Classes\ImageManipulators\Scalers\NqScaler.cs" />
     <Compile Include="Classes\ImageManipulators\Scalers\PixelScaler.cs" />
     <Compile Include="Classes\ImageManipulators\PlaneExtractor.cs" />
+    <Compile Include="Classes\ReflectionUtils.cs" />
     <Compile Include="Classes\SupportedManipulators.cs" />
     <Compile Include="CLI.cs" />
     <Compile Include="Framework\System.Windows.Forms.ControlExtensions.cs" />
+    <Compile Include="Imager\Classes\EnumDisplayNameAttribute.cs" />
     <Compile Include="Imager\Classes\FloatImage.cs" />
     <Compile Include="Imager\Classes\Kernels.cs" />
+    <Compile Include="Imager\Classes\Windows.cs" />
     <Compile Include="Imager\Image.Resizer.Resample.cs" />
     <Compile Include="Imager\Image.Bitmaps.cs" />
     <Compile Include="Imager\Image.Resizer.Interpolation.cs" />

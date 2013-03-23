@@ -1,8 +1,29 @@
-﻿using System;
+﻿#region (c)2008-2013 Hawkynt
+/*
+ *  cImage 
+ *  Image filtering library 
+    Copyright (C) 2010-2013 Hawkynt
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#endregion
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+
 using Classes;
 using Classes.ImageManipulators;
 using ImageResizer.Properties;
@@ -187,17 +208,52 @@ namespace ImageResizer {
 
     private void cbResizeMethod_SelectedValueChanged(object sender, EventArgs e) {
       var method = this.cmbResizeMethod.SelectedValue as IImageManipulator;
-      if (method == null)
-        return;
 
-      if (!(this.nudWidth.Enabled = method.SupportsWidth))
+      this.txtDescription.Text = method == null ? null : method.Description;
+
+      this._RefreshKernelChart();
+
+      if (!(this.nudWidth.Enabled = method != null && method.SupportsWidth))
         this.nudWidth.Value = 0;
 
-      if (!(this.nudHeight.Enabled = method.SupportsHeight))
+      if (!(this.nudHeight.Enabled = method != null && method.SupportsHeight))
         this.nudHeight.Value = 0;
 
-      this.chkUseCenteredGrid.Enabled = method.SupportsGridCentering;
-      this.chkUseThresholds.Enabled = method.SupportsThresholds;
+      this.chkUseCenteredGrid.Enabled = method != null && method.SupportsGridCentering;
+      this.chkUseThresholds.Enabled = method != null && method.SupportsThresholds;
+
+      if (!(this.nudRepetitionCount.Enabled = method != null && method.SupportsRepetitionCount))
+        this.nudRepetitionCount.Value = 1;
+
+      this.nudRadius.Enabled = method != null && method.SupportsRadius;
+    }
+
+    private void nudRadius_ValueChanged(object sender, EventArgs e) {
+      this._RefreshKernelChart();
+    }
+
+    private void stretchToolStripMenuItem_Click(object sender, EventArgs e) {
+      this.iwhSourceImage.SizeMode = PictureBoxSizeMode.StretchImage;
+    }
+
+    private void centerToolStripMenuItem_Click(object sender, EventArgs e) {
+      this.iwhSourceImage.SizeMode = PictureBoxSizeMode.CenterImage;
+    }
+
+    private void zoomToolStripMenuItem_Click(object sender, EventArgs e) {
+      this.iwhSourceImage.SizeMode = PictureBoxSizeMode.Zoom;
+    }
+
+    private void stretchToolStripMenuItem1_Click(object sender, EventArgs e) {
+      this.iwhTargetImage.SizeMode = PictureBoxSizeMode.StretchImage;
+    }
+
+    private void centerToolStripMenuItem1_Click(object sender, EventArgs e) {
+      this.iwhTargetImage.SizeMode = PictureBoxSizeMode.CenterImage;
+    }
+
+    private void zoomToolStripMenuItem1_Click(object sender, EventArgs e) {
+      this.iwhTargetImage.SizeMode = PictureBoxSizeMode.Zoom;
     }
     #endregion
 
@@ -211,8 +267,10 @@ namespace ImageResizer {
       var targetHeight = (word)this.nudHeight.Value;
       var useThresholds = this.chkUseThresholds.Checked;
       var useCenteredGrid = this.chkUseCenteredGrid.Checked;
+      var repetitionCount = (byte)this.nudRepetitionCount.Value;
       var horizontalBph = (OutOfBoundsMode)this.cmbHorizontalBPH.SelectedItem;
       var verticalBph = (OutOfBoundsMode)this.cmbVerticalBPH.SelectedItem;
+      var radius = (float)this.nudRadius.Value;
 
       // tell the user that we're busy
       this.msMain.Enabled =
@@ -223,7 +281,7 @@ namespace ImageResizer {
         // filter image
         var stopwatch = new Stopwatch();
         stopwatch.Restart();
-        var result = FilterImage(sourceImage, method, targetWidth, targetHeight, horizontalBph, verticalBph, useThresholds, useCenteredGrid);
+        var result = FilterImage(sourceImage, method, targetWidth, targetHeight, horizontalBph, verticalBph, useThresholds, useCenteredGrid, repetitionCount, radius);
         stopwatch.Stop();
 
         this.SafelyInvoke(() => {
@@ -243,6 +301,30 @@ namespace ImageResizer {
     }
 
     /// <summary>
+    /// Refreshes the kernel chart if necessary or hides it when not applicable.
+    /// </summary>
+    private void _RefreshKernelChart() {
+      var method = this.cmbResizeMethod.SelectedValue as IImageManipulator;
+
+      var chart = this.chtKernel;
+      var dataPointCollection = chart.Series[0].Points;
+      dataPointCollection.Clear();
+      chart.Visible = false;
+
+      var kernelBasedResampler = method as Resampler;
+      var kernelBasedRadiusResampler = method as RadiusResampler;
+      if (kernelBasedResampler == null && kernelBasedRadiusResampler == null)
+        return;
+
+      var info = kernelBasedRadiusResampler == null ? kernelBasedResampler.GetKernelMethodInfo() : kernelBasedRadiusResampler.GetKernelMethodInfo((float)this.nudRadius.Value);
+      for (var x = -info.KernelRadius; x <= info.KernelRadius; x += 0.001f)
+        dataPointCollection.AddXY(Math.Round(x, 3), Math.Round(info.Kernel(x), 3));
+      chart.ChartAreas[0].AxisX.Minimum = -Math.Round(info.KernelRadius, 1);
+      chart.ChartAreas[0].AxisX.Maximum = Math.Round(info.KernelRadius, 1);
+      chart.Visible = true;
+    }
+
+    /// <summary>
     /// Filters the image.
     /// </summary>
     /// <param name="sourceImage">The source image.</param>
@@ -253,8 +335,9 @@ namespace ImageResizer {
     /// <param name="verticalBph">The vertical BPH.</param>
     /// <param name="useThresholds">if set to <c>true</c> [use thresholds].</param>
     /// <param name="useCenteredGrid">if set to <c>true</c> [use centered grid].</param>
+    /// <param name="repetitionCount">The repetition count.</param>
     /// <returns></returns>
-    internal static Bitmap FilterImage(Image sourceImage, IImageManipulator method, ushort targetWidth, ushort targetHeight, OutOfBoundsMode horizontalBph, OutOfBoundsMode verticalBph, bool useThresholds, bool useCenteredGrid) {
+    internal static Bitmap FilterImage(Image sourceImage, IImageManipulator method, ushort targetWidth, ushort targetHeight, OutOfBoundsMode horizontalBph, OutOfBoundsMode verticalBph, bool useThresholds, bool useCenteredGrid, byte repetitionCount, float radius) {
       sPixel.AllowThresholds = useThresholds;
       var source = cImage.FromBitmap((Bitmap)sourceImage);
       source.HorizontalOutOfBoundsMode = horizontalBph;
@@ -265,10 +348,13 @@ namespace ImageResizer {
       var interpolator = method as Interpolator;
       var planeExtractor = method as PlaneExtractor;
       var resampler = method as Resampler;
+      var radiusResampler = method as RadiusResampler;
 
-      if (scaler != null)
-        target = scaler.Apply(source);
-      else if (interpolator != null)
+      if (scaler != null) {
+        target = source;
+        for (var i = 0; i < repetitionCount; i++)
+          target = scaler.Apply(target);
+      } else if (interpolator != null)
         if (targetWidth <= 0 || targetHeight <= 0)
           MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
         else
@@ -280,6 +366,11 @@ namespace ImageResizer {
           MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
         else
           target = resampler.Apply(source, targetWidth, targetHeight, useCenteredGrid);
+      else if (radiusResampler != null)
+        if (targetWidth <= 0 || targetHeight <= 0)
+          MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
+        else
+          target = radiusResampler.Apply(source, targetWidth, targetHeight, radius, useCenteredGrid);
 
       var result = target == null ? null : target.ToBitmap();
       return result;
