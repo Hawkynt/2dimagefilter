@@ -18,6 +18,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+// TODO: support for processing a script file
+// TODO: allow specifying aspect ratio resize like "w400" or "h400" to automatically resize to 400pixels width/height and auto-sizing the other dimension
+// TODO: allow specifying a percentage for resizing like "250%"
+// TODO: some options lacking that the gui can
 using System;
 using System.Diagnostics.Contracts;
 using System.Drawing;
@@ -25,12 +29,13 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using Classes;
+
+using ImageResizer;
 using ImageResizer.Properties;
 using Imager.Interface;
 using word = System.UInt16;
 
-namespace ImageResizer {
+namespace Classes {
   internal static class CLI {
 
     /// <summary>
@@ -161,9 +166,7 @@ namespace ImageResizer {
       if (extension != null)
         extension = extension.ToUpperInvariant();
 
-      if (extension != ".JPG" && extension != ".JPEG")
-        image.Save(filename);
-      else {
+      if (extension == ".JPG" || extension == ".JPEG") {
         var codecs = ImageCodecInfo.GetImageEncoders();
         codecs = codecs.Where(info => info != null && info.MimeType == "image/jpeg").ToArray();
         if (codecs.Length <= 0) {
@@ -176,7 +179,15 @@ namespace ImageResizer {
             new EncoderParameter(Encoder.Quality, (long)100)
           }
         });
-      }
+      } else if (extension == ".BMP")
+        image.Save(filename, ImageFormat.Bmp);
+      else if (extension == ".GIF")
+        image.Save(filename, ImageFormat.Gif);
+      else if (extension == ".TIF")
+        image.Save(filename, ImageFormat.Tiff);
+      else
+        image.Save(filename, ImageFormat.Png);
+
       return true;
     }
 

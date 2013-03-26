@@ -41,8 +41,8 @@
       System.Windows.Forms.Label label1;
       System.Windows.Forms.GroupBox gbMethod;
       System.Windows.Forms.GroupBox gbDescription;
-      System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-      System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+      System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+      System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
       this.tssBusy = new System.Windows.Forms.ToolStripStatusLabel();
       this.tssBenchmark = new System.Windows.Forms.ToolStripStatusLabel();
       this.iwhSourceImage = new ImageResizer.UserControls.ImageWithDetails();
@@ -58,6 +58,7 @@
       this.chkUseThresholds = new System.Windows.Forms.CheckBox();
       this.cmbVerticalBPH = new System.Windows.Forms.ComboBox();
       this.cmbHorizontalBPH = new System.Windows.Forms.ComboBox();
+      this.chkKeepAspect = new System.Windows.Forms.CheckBox();
       this.nudWidth = new System.Windows.Forms.NumericUpDown();
       this.nudHeight = new System.Windows.Forms.NumericUpDown();
       this.cmbResizeMethod = new System.Windows.Forms.ComboBox();
@@ -129,7 +130,7 @@
       ssBottom.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tssBusy,
             this.tssBenchmark});
-      ssBottom.Location = new System.Drawing.Point(0, 565);
+      ssBottom.Location = new System.Drawing.Point(0, 580);
       ssBottom.Name = "ssBottom";
       ssBottom.Size = new System.Drawing.Size(889, 22);
       ssBottom.TabIndex = 1;
@@ -154,20 +155,23 @@
       gbSourceImage.Dock = System.Windows.Forms.DockStyle.Fill;
       gbSourceImage.Location = new System.Drawing.Point(3, 3);
       gbSourceImage.Name = "gbSourceImage";
-      gbSourceImage.Size = new System.Drawing.Size(288, 535);
+      gbSourceImage.Size = new System.Drawing.Size(288, 550);
       gbSourceImage.TabIndex = 0;
       gbSourceImage.TabStop = false;
       gbSourceImage.Text = "Source Image";
       // 
       // iwhSourceImage
       // 
+      this.iwhSourceImage.AllowDrop = true;
       this.iwhSourceImage.Dock = System.Windows.Forms.DockStyle.Fill;
       this.iwhSourceImage.Location = new System.Drawing.Point(3, 16);
       this.iwhSourceImage.Name = "iwhSourceImage";
-      this.iwhSourceImage.Size = new System.Drawing.Size(282, 516);
-      this.iwhSourceImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+      this.iwhSourceImage.Size = new System.Drawing.Size(282, 531);
+      this.iwhSourceImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
       this.iwhSourceImage.TabIndex = 0;
       this.iwhSourceImage.Click += new System.EventHandler(this.iwhSourceImage_Click);
+      this.iwhSourceImage.DragDrop += new System.Windows.Forms.DragEventHandler(this.iwhSourceImage_DragDrop);
+      this.iwhSourceImage.DragEnter += new System.Windows.Forms.DragEventHandler(this.iwhSourceImage_DragEnter);
       // 
       // gbTargetImage
       // 
@@ -175,7 +179,7 @@
       gbTargetImage.Dock = System.Windows.Forms.DockStyle.Fill;
       gbTargetImage.Location = new System.Drawing.Point(597, 3);
       gbTargetImage.Name = "gbTargetImage";
-      gbTargetImage.Size = new System.Drawing.Size(289, 535);
+      gbTargetImage.Size = new System.Drawing.Size(289, 550);
       gbTargetImage.TabIndex = 1;
       gbTargetImage.TabStop = false;
       gbTargetImage.Text = "Target Image";
@@ -185,8 +189,8 @@
       this.iwhTargetImage.Dock = System.Windows.Forms.DockStyle.Fill;
       this.iwhTargetImage.Location = new System.Drawing.Point(3, 16);
       this.iwhTargetImage.Name = "iwhTargetImage";
-      this.iwhTargetImage.Size = new System.Drawing.Size(283, 516);
-      this.iwhTargetImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+      this.iwhTargetImage.Size = new System.Drawing.Size(283, 531);
+      this.iwhTargetImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
       this.iwhTargetImage.TabIndex = 0;
       this.iwhTargetImage.Click += new System.EventHandler(this.iwhTargetImage_Click);
       // 
@@ -415,6 +419,7 @@
       // 
       gbTargetResolution.AutoSize = true;
       gbTargetResolution.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+      gbTargetResolution.Controls.Add(this.chkKeepAspect);
       gbTargetResolution.Controls.Add(label9);
       gbTargetResolution.Controls.Add(label8);
       gbTargetResolution.Controls.Add(this.nudWidth);
@@ -428,6 +433,17 @@
       gbTargetResolution.TabIndex = 3;
       gbTargetResolution.TabStop = false;
       gbTargetResolution.Text = "Target Resolution";
+      // 
+      // chkKeepAspect
+      // 
+      this.chkKeepAspect.AutoSize = true;
+      this.chkKeepAspect.Location = new System.Drawing.Point(201, 32);
+      this.chkKeepAspect.Name = "chkKeepAspect";
+      this.chkKeepAspect.Size = new System.Drawing.Size(87, 17);
+      this.chkKeepAspect.TabIndex = 3;
+      this.chkKeepAspect.Text = "Keep Aspect";
+      this.chkKeepAspect.UseVisualStyleBackColor = true;
+      this.chkKeepAspect.CheckedChanged += new System.EventHandler(this.chkKeepAspect_CheckedChanged);
       // 
       // label9
       // 
@@ -461,6 +477,7 @@
       this.nudWidth.Name = "nudWidth";
       this.nudWidth.Size = new System.Drawing.Size(68, 20);
       this.nudWidth.TabIndex = 1;
+      this.nudWidth.ValueChanged += new System.EventHandler(this.nudWidth_ValueChanged);
       // 
       // nudHeight
       // 
@@ -478,6 +495,7 @@
       this.nudHeight.Name = "nudHeight";
       this.nudHeight.Size = new System.Drawing.Size(68, 20);
       this.nudHeight.TabIndex = 1;
+      this.nudHeight.ValueChanged += new System.EventHandler(this.nudHeight_ValueChanged);
       // 
       // label2
       // 
@@ -637,14 +655,14 @@
       // 
       this.centerToolStripMenuItem.Name = "centerToolStripMenuItem";
       this.centerToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
-      this.centerToolStripMenuItem.Text = "Center";
+      this.centerToolStripMenuItem.Text = "Actual";
       this.centerToolStripMenuItem.Click += new System.EventHandler(this.centerToolStripMenuItem_Click);
       // 
       // zoomToolStripMenuItem
       // 
       this.zoomToolStripMenuItem.Name = "zoomToolStripMenuItem";
       this.zoomToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
-      this.zoomToolStripMenuItem.Text = "Zoom";
+      this.zoomToolStripMenuItem.Text = "Fit";
       this.zoomToolStripMenuItem.Click += new System.EventHandler(this.zoomToolStripMenuItem_Click);
       // 
       // targetImageToolStripMenuItem
@@ -668,14 +686,14 @@
       // 
       this.centerToolStripMenuItem1.Name = "centerToolStripMenuItem1";
       this.centerToolStripMenuItem1.Size = new System.Drawing.Size(111, 22);
-      this.centerToolStripMenuItem1.Text = "Center";
+      this.centerToolStripMenuItem1.Text = "Actual";
       this.centerToolStripMenuItem1.Click += new System.EventHandler(this.centerToolStripMenuItem1_Click);
       // 
       // zoomToolStripMenuItem1
       // 
       this.zoomToolStripMenuItem1.Name = "zoomToolStripMenuItem1";
       this.zoomToolStripMenuItem1.Size = new System.Drawing.Size(111, 22);
-      this.zoomToolStripMenuItem1.Text = "Zoom";
+      this.zoomToolStripMenuItem1.Text = "Fit";
       this.zoomToolStripMenuItem1.Click += new System.EventHandler(this.zoomToolStripMenuItem1_Click);
       // 
       // tlpMainLayout
@@ -692,7 +710,7 @@
       this.tlpMainLayout.Name = "tlpMainLayout";
       this.tlpMainLayout.RowCount = 1;
       this.tlpMainLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-      this.tlpMainLayout.Size = new System.Drawing.Size(889, 541);
+      this.tlpMainLayout.Size = new System.Drawing.Size(889, 556);
       this.tlpMainLayout.TabIndex = 2;
       // 
       // pnMiddle
@@ -707,7 +725,7 @@
       this.pnMiddle.Dock = System.Windows.Forms.DockStyle.Fill;
       this.pnMiddle.Location = new System.Drawing.Point(297, 3);
       this.pnMiddle.Name = "pnMiddle";
-      this.pnMiddle.Size = new System.Drawing.Size(294, 535);
+      this.pnMiddle.Size = new System.Drawing.Size(294, 550);
       this.pnMiddle.TabIndex = 2;
       // 
       // gbKernelFunction
@@ -717,7 +735,7 @@
       this.gbKernelFunction.Dock = System.Windows.Forms.DockStyle.Fill;
       this.gbKernelFunction.Location = new System.Drawing.Point(0, 449);
       this.gbKernelFunction.Name = "gbKernelFunction";
-      this.gbKernelFunction.Size = new System.Drawing.Size(294, 86);
+      this.gbKernelFunction.Size = new System.Drawing.Size(294, 101);
       this.gbKernelFunction.TabIndex = 6;
       this.gbKernelFunction.TabStop = false;
       this.gbKernelFunction.Text = "Kernel";
@@ -725,16 +743,16 @@
       // chtKernel
       // 
       this.chtKernel.BackColor = System.Drawing.SystemColors.Control;
-      chartArea1.Name = "chaChart";
-      this.chtKernel.ChartAreas.Add(chartArea1);
+      chartArea2.Name = "chaChart";
+      this.chtKernel.ChartAreas.Add(chartArea2);
       this.chtKernel.Dock = System.Windows.Forms.DockStyle.Fill;
       this.chtKernel.Location = new System.Drawing.Point(3, 16);
       this.chtKernel.Name = "chtKernel";
-      series1.ChartArea = "chaChart";
-      series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
-      series1.Name = "dsKernelData";
-      this.chtKernel.Series.Add(series1);
-      this.chtKernel.Size = new System.Drawing.Size(288, 67);
+      series2.ChartArea = "chaChart";
+      series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
+      series2.Name = "dsKernelData";
+      this.chtKernel.Series.Add(series2);
+      this.chtKernel.Size = new System.Drawing.Size(288, 82);
       this.chtKernel.TabIndex = 0;
       this.chtKernel.Text = "chart1";
       // 
@@ -761,7 +779,8 @@
       // sfdSave
       // 
       this.sfdSave.DefaultExt = "png";
-      this.sfdSave.Filter = "Portable Network Graphics|*.png|Image Files|*.bmp;*.jpg;*.jpeg;*.png;*.gif";
+      this.sfdSave.Filter = "Portable Network Graphics|*.png|JPEG Files|*.jpg;*.jpeg|Windows Bitmap|*.bmp|Grap" +
+    "hics Interchange Format|*.gif|Image Files|*.bmp;*.jpg;*.jpeg;*.png;*.gif";
       this.sfdSave.RestoreDirectory = true;
       this.sfdSave.Title = "Enter filename";
       // 
@@ -769,12 +788,13 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(889, 587);
+      this.ClientSize = new System.Drawing.Size(889, 602);
       this.Controls.Add(this.tlpMainLayout);
       this.Controls.Add(ssBottom);
       this.Controls.Add(this.msMain);
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MainMenuStrip = this.msMain;
+      this.MinimumSize = new System.Drawing.Size(640, 640);
       this.Name = "MainForm";
       this.Text = "ImageResizer";
       ssBottom.ResumeLayout(false);
@@ -854,6 +874,7 @@
     private System.Windows.Forms.NumericUpDown nudRepetitionCount;
     private System.Windows.Forms.NumericUpDown nudRadius;
     private System.Windows.Forms.Label lblRadius;
+    private System.Windows.Forms.CheckBox chkKeepAspect;
 
   }
 }

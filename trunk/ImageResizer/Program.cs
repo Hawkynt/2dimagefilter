@@ -20,20 +20,39 @@
 #endregion
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
+using Classes;
+
 
 namespace ImageResizer {
   class Program {
+    #region consts
+
     /// <summary>
     /// This is the command line parameter that force the app to run in GUI mode
     /// </summary>
     private const string _FORCE_GUI_CLP_NAME = "/FORCEGUI";
 
+    /// <summary>
+    /// The name and full path to the currently running executable.
+    /// </summary>
+    private static readonly string _THIS_EXECUTABLES_FILE_NAME = Assembly.GetEntryAssembly().Location;
+
+    /// <summary>
+    /// This is the name of the configuration file.
+    /// </summary>
+    private static readonly string _CONFIGURATION_FILE_NAME = Path.Combine(Path.GetDirectoryName(_THIS_EXECUTABLES_FILE_NAME), "config.xml");
+
+    #endregion
+
+    #region imports
     [DllImport("kernel32.dll", EntryPoint = "GetConsoleWindow")]
     private static extern IntPtr _GetConsoleWindow();
+    #endregion
 
     /// <summary>
     /// The main entry point for the application.
@@ -61,12 +80,13 @@ namespace ImageResizer {
           // we either have no console window or we're started from within visual studio or we are forced into GUI mode
           Application.EnableVisualStyles();
           Application.SetCompatibleTextRenderingDefault(false);
-
+          Config.Load(_CONFIGURATION_FILE_NAME);
           Application.Run(new MainForm());
+          Config.Save(_CONFIGURATION_FILE_NAME);
         } else {
 
           // we found a console attached to us, so restart ourselves without one
-          Process.Start(new ProcessStartInfo(Assembly.GetEntryAssembly().Location, _FORCE_GUI_CLP_NAME) {
+          Process.Start(new ProcessStartInfo(_THIS_EXECUTABLES_FILE_NAME, _FORCE_GUI_CLP_NAME) {
             CreateNoWindow = true,
             UseShellExecute = false
           });
