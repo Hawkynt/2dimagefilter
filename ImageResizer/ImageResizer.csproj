@@ -121,7 +121,8 @@
     <Compile Include="Classes\ImageManipulators\PlaneExtractor.cs" />
     <Compile Include="Classes\ReflectionUtils.cs" />
     <Compile Include="Classes\SupportedManipulators.cs" />
-    <Compile Include="CLI.cs" />
+    <Compile Include="Classes\CLI.cs" />
+    <Compile Include="Classes\Config.cs" />
     <Compile Include="Framework\System.Windows.Forms.ControlExtensions.cs" />
     <Compile Include="Imager\Classes\EnumDisplayNameAttribute.cs" />
     <Compile Include="Imager\Classes\FloatImage.cs" />

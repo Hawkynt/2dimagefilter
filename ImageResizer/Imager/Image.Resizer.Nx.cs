@@ -18,6 +18,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
+// TODO: consider a second alpha handling mode like in https://code.google.com/p/hqx-sharp/
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

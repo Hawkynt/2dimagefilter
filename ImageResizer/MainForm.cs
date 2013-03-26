@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+// TODO: script recorder/player
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -70,6 +71,7 @@ namespace ImageResizer {
           value != null;
         this._TargetImage = null;
         this.iwhSourceImage.Image = value;
+        this._CorrectAspectRatioIfNeeded(false);
       }
     }
 
@@ -117,7 +119,10 @@ namespace ImageResizer {
           Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
 
       this.chkUseThresholds.Checked = sPixel.AllowThresholds;
+
+      this._LoadConfigurationSettings();
     }
+
     #endregion
 
     #region event handlers
@@ -137,21 +142,18 @@ namespace ImageResizer {
 
       // ask for filename
       var fileDialog = this.ofdOpenFile;
+      fileDialog.InitialDirectory = string.IsNullOrWhiteSpace(Config.LastLoadDirectory) ? Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) : Config.LastLoadDirectory;
 
       if (fileDialog.ShowDialog() != DialogResult.OK)
         return;
 
       var fileName = fileDialog.FileName;
+      Config.LastLoadDirectory = Path.GetDirectoryName(fileName);
 
       if (fileName == null)
         return;
 
-      try {
-        this._SourceImage = Image.FromFile(fileName);
-        this._lastSaveFileName = null;
-      } catch (Exception exception) {
-        MessageBox.Show(string.Format(Resources.txCouldNotLoadImage, fileName, exception.Message), Resources.ttCouldNotLoadImage, MessageBoxButtons.OK, MessageBoxIcon.Error);
-      }
+      this._LoadImageFromFileName(fileName);
     }
 
     private void saveToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -172,6 +174,8 @@ namespace ImageResizer {
 
       // ask for filename
       var dialog = this.sfdSave;
+      dialog.InitialDirectory = string.IsNullOrWhiteSpace(Config.LastSaveDirectory) ? Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) : Config.LastSaveDirectory;
+
       if (dialog.ShowDialog() != DialogResult.OK)
         return;
 
@@ -180,6 +184,7 @@ namespace ImageResizer {
         return;
 
       // store the name to use later on
+      Config.LastSaveDirectory = Path.GetDirectoryName(fileName);
       this._lastSaveFileName = fileName;
 
       this.saveToolStripMenuItem_Click(sender, e);
@@ -233,29 +238,93 @@ namespace ImageResizer {
     }
 
     private void stretchToolStripMenuItem_Click(object sender, EventArgs e) {
-      this.iwhSourceImage.SizeMode = PictureBoxSizeMode.StretchImage;
+      Config.SourceSizeMode = (this.iwhSourceImage.SizeMode = PictureBoxSizeMode.StretchImage);
     }
 
     private void centerToolStripMenuItem_Click(object sender, EventArgs e) {
-      this.iwhSourceImage.SizeMode = PictureBoxSizeMode.CenterImage;
+      Config.SourceSizeMode = (this.iwhSourceImage.SizeMode = PictureBoxSizeMode.CenterImage);
     }
 
     private void zoomToolStripMenuItem_Click(object sender, EventArgs e) {
-      this.iwhSourceImage.SizeMode = PictureBoxSizeMode.Zoom;
+      Config.SourceSizeMode = (this.iwhSourceImage.SizeMode = PictureBoxSizeMode.Zoom);
     }
 
     private void stretchToolStripMenuItem1_Click(object sender, EventArgs e) {
-      this.iwhTargetImage.SizeMode = PictureBoxSizeMode.StretchImage;
+      Config.TargetSizeMode = (this.iwhTargetImage.SizeMode = PictureBoxSizeMode.StretchImage);
     }
 
     private void centerToolStripMenuItem1_Click(object sender, EventArgs e) {
-      this.iwhTargetImage.SizeMode = PictureBoxSizeMode.CenterImage;
+      Config.TargetSizeMode = (this.iwhTargetImage.SizeMode = PictureBoxSizeMode.CenterImage);
     }
 
     private void zoomToolStripMenuItem1_Click(object sender, EventArgs e) {
-      this.iwhTargetImage.SizeMode = PictureBoxSizeMode.Zoom;
+      Config.TargetSizeMode = (this.iwhTargetImage.SizeMode = PictureBoxSizeMode.Zoom);
     }
+
+    private void iwhSourceImage_DragEnter(object sender, DragEventArgs e) {
+      if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
+        var files = (Array)e.Data.GetData(DataFormats.FileDrop);
+        if (files != null && files.Length > 0 && _IsSupportedFileExtension(Path.GetExtension((string)files.GetValue(0)))) {
+          e.Effect = DragDropEffects.Copy;
+          return;
+        }
+      }
+      if (e.Data.GetDataPresent(DataFormats.Bitmap)) {
+        e.Effect = DragDropEffects.Copy;
+        return;
+      }
+      e.Effect = DragDropEffects.None;
+    }
+
+    private void iwhSourceImage_DragDrop(object sender, DragEventArgs e) {
+      if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
+        var files = (Array)e.Data.GetData(DataFormats.FileDrop);
+        if (files == null || files.Length <= 0 || !_IsSupportedFileExtension(Path.GetExtension((string)files.GetValue(0))))
+          return;
+        this._LoadImageFromFileName((string)files.GetValue(0));
+        return;
+      }
+      if (e.Data.GetDataPresent(DataFormats.Bitmap)) {
+        var data = e.Data.GetData(DataFormats.Bitmap) as Image;
+        if (data == null)
+          return;
+        this._SourceImage = data;
+        this._lastSaveFileName = null;
+        return;
+      }
+    }
+
+    private void chkKeepAspect_CheckedChanged(object sender, EventArgs e) {
+      var value = this.chkKeepAspect.Checked;
+      if (value) {
+        var sourceImage = this._SourceImage;
+        if (sourceImage == null)
+          return;
+
+        this._CorrectAspectRatioIfNeeded(false);
+      }
+    }
+
+    private void nudWidth_ValueChanged(object sender, EventArgs e) {
+      this._CorrectAspectRatioIfNeeded(false);
+    }
+
+    private void nudHeight_ValueChanged(object sender, EventArgs e) {
+      this._CorrectAspectRatioIfNeeded(true);
+    }
+
     #endregion
+
+    /// <summary>
+    /// Loads and applies the configuration settings.
+    /// </summary>
+    private void _LoadConfigurationSettings() {
+      if (Config.SourceSizeMode != null)
+        this.iwhSourceImage.SizeMode = Config.SourceSizeMode.Value;
+
+      if (Config.TargetSizeMode != null)
+        this.iwhTargetImage.SizeMode = Config.TargetSizeMode.Value;
+    }
 
     /// <summary>
     /// Resizes the given image with the currently set parameters from the GUI.
@@ -325,6 +394,46 @@ namespace ImageResizer {
     }
 
     /// <summary>
+    /// Loads the image from the given filename into the GUI.
+    /// </summary>
+    /// <param name="fileName">Name of the file.</param>
+    private void _LoadImageFromFileName(string fileName) {
+      try {
+        this._SourceImage = Image.FromFile(fileName);
+        this._lastSaveFileName = null;
+      } catch (Exception exception) {
+        MessageBox.Show(string.Format(Resources.txCouldNotLoadImage, fileName, exception.Message), Resources.ttCouldNotLoadImage, MessageBoxButtons.OK, MessageBoxIcon.Error);
+      }
+    }
+
+    /// <summary>
+    /// Corrects target width/height if forced to keep aspect ratio.
+    /// </summary>
+    /// <param name="useHeight">if set to <c>true</c> we calculate target width from height; otherwise, we calculate target height from width.</param>
+    private void _CorrectAspectRatioIfNeeded(bool useHeight) {
+      if (!this.chkKeepAspect.Checked)
+        return;
+
+      var image = this._SourceImage;
+      if (image == null)
+        return;
+
+      var width = this.nudWidth.Value;
+      var height = this.nudHeight.Value;
+      if (useHeight) {
+        width = Math.Round(height * image.Width / image.Height);
+      } else {
+        height = Math.Round(width * image.Height / image.Width);
+      }
+
+      if (width != this.nudWidth.Value)
+        this.nudWidth.Value = width;
+
+      if (height != this.nudHeight.Value)
+        this.nudHeight.Value = height;
+    }
+
+    /// <summary>
     /// Filters the image.
     /// </summary>
     /// <param name="sourceImage">The source image.</param>
@@ -375,5 +484,28 @@ namespace ImageResizer {
       var result = target == null ? null : target.ToBitmap();
       return result;
     }
+
+    /// <summary>
+    /// Determines whether or not the given file extension is usable for the program.
+    /// </summary>
+    /// <param name="extension">The extension.</param>
+    /// <returns><c>true</c> if we accept this file extensions; otherwise, <c>false</c>.</returns>
+    private static bool _IsSupportedFileExtension(string extension) {
+      if (string.IsNullOrWhiteSpace(extension))
+        return (false);
+      extension = extension.Trim().ToUpper();
+      if (extension == ".JPEG" || extension == ".JPG")
+        return (true);
+      if (extension == ".BMP")
+        return (true);
+      if (extension == ".PNG")
+        return (true);
+      if (extension == ".GIF")
+        return (true);
+      if (extension == ".TIF" || extension == ".TIFF")
+        return (true);
+      return (false);
+    }
+
   }
 }
