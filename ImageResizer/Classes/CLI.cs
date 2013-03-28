@@ -28,6 +28,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 using ImageResizer;
@@ -124,11 +125,6 @@ namespace Classes {
               return (result);
 
             break;
-          }
-          #endregion
-          #region /EXIT
-          case "/EXIT": {
-            return (CLIExitCode.OK);
           }
           #endregion
           default: {
@@ -327,7 +323,17 @@ namespace Classes {
         _DisplayErrorMessage(Resources.txNothingToResize, Resources.ttNothingToResize);
         return (Tuple.Create(CLIExitCode.NothingToResize, (cImage)null));
       }
-      Console.WriteLine(@"{0} {1} {2} {3}", width, height, repeat, filterName);
+
+      Console.WriteLine("Applying filter  : {0}", filterName);
+      Console.WriteLine("  Target width   : {0}", (width == 0 ? "auto" : width.ToString()));
+      Console.WriteLine("  Target height  : {0}", (height == 0 ? "auto" : height.ToString()));
+      Console.WriteLine("  Hori. BPH      : {0}", horizontalBph);
+      Console.WriteLine("  Vert. BPH      : {0}", verticalBph);
+      Console.WriteLine("  Use Thresholds : {0}", useThresholds);
+      Console.WriteLine("  Centered Grid  : {0}", useCenteredGrid);
+      Console.WriteLine("  Radius         : {0}", radius);
+      Console.WriteLine("  Repeat         : {0} times", repeat);
+
       var imageResizerTokens = SupportedManipulators.MANIPULATORS;
       Contract.Assume(imageResizerTokens != null);
       var match = imageResizerTokens.Where(resizer => string.Compare(resizer.Key, filterName, true) == 0).Select(kvp => kvp.Value).FirstOrDefault();
@@ -339,7 +345,7 @@ namespace Classes {
 
       // resize target image if width/height were specified and differ from current result image's size
       if (width != 0 && height != 0 && (width != image.Width || height != image.Height))
-        image = image.ApplyScaler(InterpolationMode.Bicubic, width, height);
+        image = image.ApplyScaler(InterpolationMode.HighQualityBicubic, width, height);
 
       return (Tuple.Create(CLIExitCode.OK, image));
     }
@@ -398,12 +404,37 @@ namespace Classes {
     /// Shows the CLI help.
     /// </summary>
     private static void _ShowHelp() {
-      System.Reflection.Assembly objAssembly = System.Reflection.Assembly.GetExecutingAssembly();
       var lines = string.Join(
         Environment.NewLine,
         new[] {
-          Path.GetFileName(objAssembly.Location)
-            + " [/load <source>] [/resize <dimensions> <method>[(<repeat>|<paramlist>)]] [/save <target>] ... [/exit]",
+          "========================================================================",
+          string.Format("** {0} v{1}, {2}",ReflectionUtils.GetEntryAssemblyAttribute<AssemblyProductAttribute>(p=>p.Product),ReflectionUtils.GetEntryAssemblyAttribute<AssemblyFileVersionAttribute>(v=>v.Version),ReflectionUtils.GetEntryAssemblyAttribute<AssemblyCopyrightAttribute>(c=>c.Copyright)),
+          "   Version for Windows NT/9x/2000/XP/Vista/7  (All rights reserved)",
+          "------------------------------------------------------------------------",
+          "   This program is free software: you can redistribute it and/or modify",
+          "   it under the terms of the GNU General Public License as published by",
+          "   the Free Software Foundation, either version 3 of the License, or",
+          "   (at your option) any later version.",
+          string.Empty,
+          "   This program is distributed in the hope that it will be useful,",
+          "   but WITHOUT ANY WARRANTY; without even the implied warranty of",
+          "   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the",
+          "   GNU General Public License for more details.",
+          string.Empty,
+          "   You should have received a copy of the GNU General Public License",
+          "   along with this program.  If not, see <http://www.gnu.org/licenses/>.",
+          string.Empty,
+          "========================================================================",
+          string.Empty,
+          "------------",
+          "How to use :",
+          "------------",
+          string.Empty,
+          Path.GetFileName(Assembly.GetEntryAssembly().Location) + " [/load <source>] [/resize <dimensions> <method>[(<repeat>|<paramlist>)]] [/save <target>] ...",
+          string.Empty,
+          "------------",
+          "Explanation:",
+          "------------",
           string.Empty,
           "  /load          - Loads a file into the buffer.",
           "    <source>     - the source file to resize",
@@ -412,7 +443,7 @@ namespace Classes {
           "    <target>     - the target file to write",
           string.Empty,
           "  /resize        - Resizes the image in the buffer and stores the result back to the buffer.",
-          "    <dimensions> - auto | <x>w | <y>h | <x>x<y> | <p>%",
+          "    <dimensions> - auto | w<x> | h<y> | <x>x<y> | <p>%",
           "                   If only width or height is specified, the other dimension is auto-detected by aspect ratio",
           "      auto       - determine target dimensions from used resizing filter",
           "      <x>        - the final width in pixels for the target",
@@ -428,8 +459,6 @@ namespace Classes {
           "      vbounds    - vertical out of bounds handling: const, half, whole, wrap",
           "      hbounds    - horizontal out of bounds handling: const, half, whole, wrap",
           string.Empty,
-          "  /exit          - Quits the program without showing the GUI.",
-          string.Empty,
           string.Empty,
           "You can load and process multiple files at once by loading after saving again.",
           "ie. /load 1.bmp /resize 10x10 Pixel /save 1.jpg /load 2.bmp /resize 10x10 Pixel /save 2.jpg",
@@ -440,8 +469,20 @@ namespace Classes {
           "Even preprocessing using multiple filters is possible by adding another resize parameter.",
           "ie. /load 1.bmp /resize 10x10 Pixel /resize auto Scale2x /save 1.jpg",
           string.Empty,
-          "Supported filter methods:"
-        }.Concat(SupportedManipulators.MANIPULATORS.Select(f => "  " + f.Key)));
+          "-------------------------",
+          "Supported filter methods:",
+          "-------------------------",
+          string.Empty
+        }.Concat(
+        from i in SupportedManipulators.MANIPULATORS
+        let d = ReflectionUtils.GetDescriptionForClass(i.Value.GetType())
+        group i by d into g
+        select g.Key + ":" + Environment.NewLine + string.Join(
+          Environment.NewLine,
+          g.Select(j => "  " + j.Key)
+        ) + Environment.NewLine
+       )
+      );
 
       Console.WriteLine(lines);
     }
@@ -501,8 +542,6 @@ namespace Classes {
 
       return (CLIExitCode.OK);
     }
-
-
 
   }
 }

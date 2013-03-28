@@ -32,6 +32,8 @@ namespace Imager {
       InterpolationMode.NearestNeighbor,
       InterpolationMode.Bilinear,
       InterpolationMode.Bicubic,
+      InterpolationMode.HighQualityBilinear,
+      InterpolationMode.HighQualityBicubic,
     };
 
     /// <summary>

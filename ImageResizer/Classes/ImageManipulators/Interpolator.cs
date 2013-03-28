@@ -18,12 +18,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Drawing.Drawing2D;
 
 using Imager;
 
 namespace Classes.ImageManipulators {
+  [Description("GDI+ .NET internal filters")]
   internal class Interpolator : IImageManipulator {
     private readonly InterpolationMode _type;
 
@@ -35,7 +38,30 @@ namespace Classes.ImageManipulators {
     public bool SupportsRadius { get { return (false); } }
     public bool ChangesResolution { get { return (true); } }
     public bool SupportsThresholds { get { return (false); } }
-    public string Description { get { return (ReflectionUtils.GetDescriptionForEnumValue(this._type)); } }
+    public string Description {
+      get {
+        switch (this._type) {
+          case InterpolationMode.NearestNeighbor: {
+            return ("Nearest neighbor interpolation using the Microsoft GDI+ API.");
+          }
+          case InterpolationMode.Bilinear: {
+            return ("Bilinear interpolation using the Microsoft GDI+ API. No prefiltering is done. This mode is not suitable for shrinking an image below 50 percent of its original size.");
+          }
+          case InterpolationMode.Bicubic: {
+            return ("Bicubic interpolation using the Microsoft GDI+ API. No prefiltering is done. This mode is not suitable for shrinking an image below 25 percent of its original size.");
+          }
+          case InterpolationMode.HighQualityBilinear: {
+            return ("Bilinear interpolation using the Microsoft GDI+ API. Prefiltering is performed to ensure high-quality shrinking.");
+          }
+          case InterpolationMode.HighQualityBicubic: {
+            return ("Bicubic interpolation using the Microsoft GDI+ API. Prefiltering is performed to ensure high-quality shrinking.");
+          }
+          default: {
+            return (null);
+          }
+        }
+      }
+    }
     #endregion
 
     public cImage Apply(cImage source, int width, int height) {

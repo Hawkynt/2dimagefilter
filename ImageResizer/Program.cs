@@ -62,7 +62,6 @@ namespace ImageResizer {
 
       // test code: args = new[] { "/LOAD", @"C:\Users\main\Pictures\Logo 64x64.jpg", "/RESIZE", "w200", "Scale 3x(vbounds=half,hbounds=wrap,repeat=1,thresholds=0)", "/SAVE", "test.png" };
 
-
       /*
        * This works as following:
        * First we look for command line parameters and if there are any of them present, we run the CLI version.
