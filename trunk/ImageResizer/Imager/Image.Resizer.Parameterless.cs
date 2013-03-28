@@ -56,7 +56,7 @@ namespace Imager {
       {PixelScalerType.MameRgb,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libMAME.Rgb2x)},
       {PixelScalerType.MameRgb3,Tuple.Create<byte, byte, ParameterlessPixelScaler>(3,3,libMAME.Rgb3x)},
       {PixelScalerType.HawkyntTv,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libHawkynt.Tv2x)},
-      {PixelScalerType.HawkyntTv3,Tuple.Create<byte, byte, ParameterlessPixelScaler>(3,3,libHawkynt.Tv3x)},
+      {PixelScalerType.HawkyntTv3,Tuple.Create<byte, byte, ParameterlessPixelScaler>(3,2,libHawkynt.Tv3x)},
 
       {PixelScalerType.BilinearPlusOriginal,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libVBA.BilinearPlusOriginal)},
       {PixelScalerType.BilinearPlus,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libVBA.BilinearPlus)},

@@ -23,32 +23,33 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection;
 
 using Imager.Classes;
 
 namespace Classes {
-  static class ReflectionUtils {
+  internal static class ReflectionUtils {
     /// <summary>
     /// Gets a typed enumeration of all values of a given enumeration.
     /// </summary>
-    /// <typeparam name="T">The type of enumeration.</typeparam>
+    /// <typeparam name="TEnumeration">The type of enumeration.</typeparam>
     /// <returns>All values.</returns>
-    public static IEnumerable<T> GetEnumValues<T>() where T : struct {
-      Contract.Requires(typeof(T).IsEnum, "Only enums supported");
-      return (from T i in Enum.GetValues(typeof(T))
+    public static IEnumerable<TEnumeration> GetEnumValues<TEnumeration>() where TEnumeration : struct {
+      Contract.Requires(typeof(TEnumeration).IsEnum, "Only enums supported");
+      return (from TEnumeration i in Enum.GetValues(typeof(TEnumeration))
               select i);
     }
 
     /// <summary>
     /// Gets a descriptive name for a given enum value by trying to find a description attribute first or using the name for the given value.
     /// </summary>
-    /// <typeparam name="T">The type of the enumeration.</typeparam>
+    /// <typeparam name="TEnumeration">The type of the enumeration.</typeparam>
     /// <param name="value">The value.</param>
     /// <returns>A descriptive text.</returns>
-    public static string GetDisplayNameForEnumValue<T>(T value) where T : struct {
-      Contract.Requires(typeof(T).IsEnum, "Only enum supported");
-      var valueName = Enum.GetName(typeof(T), value);
-      var fieldInfo = typeof(T).GetMember(valueName)[0];
+    public static string GetDisplayNameForEnumValue<TEnumeration>(TEnumeration value) where TEnumeration : struct {
+      Contract.Requires(typeof(TEnumeration).IsEnum, "Only enum supported");
+      var valueName = Enum.GetName(typeof(TEnumeration), value);
+      var fieldInfo = typeof(TEnumeration).GetMember(valueName)[0];
       var descriptionAttribute = (EnumDisplayNameAttribute)fieldInfo.GetCustomAttributes(typeof(EnumDisplayNameAttribute), false).FirstOrDefault();
       return (descriptionAttribute == null ? valueName : descriptionAttribute.Name);
     }
@@ -56,16 +57,55 @@ namespace Classes {
     /// <summary>
     /// Gets a descriptive name for a given enum value by trying to find a description attribute first or using the name for the given value.
     /// </summary>
-    /// <typeparam name="T">The type of the enumeration.</typeparam>
+    /// <typeparam name="TEnumeration">The type of the enumeration.</typeparam>
     /// <param name="value">The value.</param>
     /// <returns>A descriptive text.</returns>
-    public static string GetDescriptionForEnumValue<T>(T value) where T : struct {
-      Contract.Requires(typeof(T).IsEnum, "Only enum supported");
-      var valueName = Enum.GetName(typeof(T), value);
-      var fieldInfo = typeof(T).GetMember(valueName)[0];
+    public static string GetDescriptionForEnumValue<TEnumeration>(TEnumeration value) where TEnumeration : struct {
+      Contract.Requires(typeof(TEnumeration).IsEnum, "Only enum supported");
+      var valueName = Enum.GetName(typeof(TEnumeration), value);
+      var fieldInfo = typeof(TEnumeration).GetMember(valueName)[0];
       var descriptionAttribute = (DescriptionAttribute)fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault();
       return (descriptionAttribute == null ? null : descriptionAttribute.Description);
     }
 
+    /// <summary>
+    /// Gets an attribute from the entry assembly.
+    /// </summary>
+    /// <typeparam name="TAttribute">The type of the attribute.</typeparam>
+    /// <param name="getter">The getter.</param>
+    /// <returns>The attribute value.</returns>
+    public static object GetEntryAssemblyAttribute<TAttribute>(Func<TAttribute, object> getter) where TAttribute : Attribute {
+      Contract.Requires(getter != null);
+      var assembly = Assembly.GetEntryAssembly();
+      var attribute = assembly.GetCustomAttributes(typeof(TAttribute), true).First();
+      return (getter((TAttribute)attribute));
+    }
+
+    /// <summary>
+    /// Gets the description for a class.
+    /// </summary>
+    /// <param name="classType">Type of the class.</param>
+    /// <returns>
+    /// A descriptive text
+    /// </returns>
+    public static string GetDescriptionForClass(Type classType) {
+      Contract.Requires(classType != null);
+      var attribute = (DescriptionAttribute)classType.GetCustomAttributes(typeof(DescriptionAttribute), true).FirstOrDefault();
+      if (attribute == null) {
+
+        // when no description attribute was found
+        var name = classType.FullName;
+        var lastDot = name == null ? -1 : name.LastIndexOf('.');
+
+        // when there is no dot in the type name, just return the name
+        if (lastDot < 0)
+          return (name);
+
+        // otherwise return the last part of the name
+        return (name.Substring(lastDot + 1));
+      }
+
+      return (attribute.Description);
+    }
   }
 }

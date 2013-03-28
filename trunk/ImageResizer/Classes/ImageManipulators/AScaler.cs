@@ -18,9 +18,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
+using System.ComponentModel;
+
 using Imager;
 
 namespace Classes.ImageManipulators {
+  [Description("Pixel art filters")]
   internal abstract class AScaler : IImageManipulator {
     #region Implementation of IImageManipulator
     public bool SupportsWidth { get { return (false); } }

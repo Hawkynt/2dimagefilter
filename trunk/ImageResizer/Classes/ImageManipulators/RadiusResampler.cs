@@ -18,11 +18,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using Imager;
 using Imager.Classes;
 
 namespace Classes.ImageManipulators {
+  [Description("Radius-based filters")]
   internal class RadiusResampler : IImageManipulator {
     private readonly WindowType _type;
 

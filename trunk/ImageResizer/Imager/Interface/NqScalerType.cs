@@ -18,6 +18,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
+using System.ComponentModel;
+
 using Imager.Classes;
 
 namespace Imager.Interface {
@@ -25,14 +28,17 @@ namespace Imager.Interface {
 
     #region hq group
     [EnumDisplayName("HQ 2x")]
+    [Description("Maxim Stepin's HQ 2x")]
     Hq2,
     [EnumDisplayName("HQ 2x3")]
     Hq2X3,
     [EnumDisplayName("HQ 2x4")]
     Hq2X4,
     [EnumDisplayName("HQ 3x")]
+    [Description("Maxim Stepin's HQ 3x")]
     Hq3,
     [EnumDisplayName("HQ 4x")]
+    [Description("Maxim Stepin's HQ 4x")]
     Hq4,
     #endregion
 
