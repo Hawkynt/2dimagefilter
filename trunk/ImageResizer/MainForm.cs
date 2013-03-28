@@ -21,6 +21,7 @@
 // TODO: script recorder/player
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -167,7 +168,11 @@ namespace ImageResizer {
         return;
       }
 
-      CLI.SaveHelper(fileName, image);
+      var result = CLI.SaveHelper(fileName, image);
+      if (result == CLIExitCode.JpegNotSupportedOnThisPlatform)
+        MessageBox.Show(Resources.txNoJpegSupport, Resources.ttNoJpegSupport);
+      else if (result == CLIExitCode.NothingToSave)
+        MessageBox.Show(Resources.txNothingToSave, Resources.ttNothingToSave);
     }
 
     private void saveAsToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -350,7 +355,8 @@ namespace ImageResizer {
         // filter image
         var stopwatch = new Stopwatch();
         stopwatch.Restart();
-        var result = FilterImage(sourceImage, method, targetWidth, targetHeight, horizontalBph, verticalBph, useThresholds, useCenteredGrid, repetitionCount, radius);
+        var target = FilterImage(cImage.FromBitmap((Bitmap)sourceImage), method, targetWidth, targetHeight, horizontalBph, verticalBph, useThresholds, useCenteredGrid, repetitionCount, radius);
+        var result = target == null ? null : target.ToBitmap();
         stopwatch.Stop();
 
         this.SafelyInvoke(() => {
@@ -436,23 +442,24 @@ namespace ImageResizer {
     /// <summary>
     /// Filters the image.
     /// </summary>
-    /// <param name="sourceImage">The source image.</param>
+    /// <param name="source">The source.</param>
     /// <param name="method">The method.</param>
     /// <param name="targetWidth">Width of the target.</param>
     /// <param name="targetHeight">Height of the target.</param>
-    /// <param name="horizontalBph">The horizontal BPH.</param>
-    /// <param name="verticalBph">The vertical BPH.</param>
+    /// <param name="horizontalBh">The horizontal bounds handling.</param>
+    /// <param name="verticalBh">The vertical bounds handling.</param>
     /// <param name="useThresholds">if set to <c>true</c> [use thresholds].</param>
     /// <param name="useCenteredGrid">if set to <c>true</c> [use centered grid].</param>
     /// <param name="repetitionCount">The repetition count.</param>
+    /// <param name="radius">The radius.</param>
     /// <returns></returns>
-    internal static Bitmap FilterImage(Image sourceImage, IImageManipulator method, ushort targetWidth, ushort targetHeight, OutOfBoundsMode horizontalBph, OutOfBoundsMode verticalBph, bool useThresholds, bool useCenteredGrid, byte repetitionCount, float radius) {
+    internal static cImage FilterImage(cImage source, IImageManipulator method, ushort targetWidth, ushort targetHeight, OutOfBoundsMode horizontalBh, OutOfBoundsMode verticalBh, bool useThresholds, bool useCenteredGrid, byte repetitionCount, float radius) {
+      Contract.Requires(source != null);
       sPixel.AllowThresholds = useThresholds;
-      var source = cImage.FromBitmap((Bitmap)sourceImage);
-      source.HorizontalOutOfBoundsMode = horizontalBph;
-      source.VerticalOutOfBoundsMode = verticalBph;
+      source.HorizontalOutOfBoundsMode = horizontalBh;
+      source.VerticalOutOfBoundsMode = verticalBh;
 
-      cImage target = null;
+      cImage result = null;
       var scaler = method as AScaler;
       var interpolator = method as Interpolator;
       var planeExtractor = method as PlaneExtractor;
@@ -460,29 +467,28 @@ namespace ImageResizer {
       var radiusResampler = method as RadiusResampler;
 
       if (scaler != null) {
-        target = source;
+        result = source;
         for (var i = 0; i < repetitionCount; i++)
-          target = scaler.Apply(target);
+          result = scaler.Apply(result);
       } else if (interpolator != null)
         if (targetWidth <= 0 || targetHeight <= 0)
           MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
         else
-          target = interpolator.Apply(source, targetWidth, targetHeight);
+          result = interpolator.Apply(source, targetWidth, targetHeight);
       else if (planeExtractor != null)
-        target = planeExtractor.Apply(source);
+        result = planeExtractor.Apply(source);
       else if (resampler != null)
         if (targetWidth <= 0 || targetHeight <= 0)
           MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
         else
-          target = resampler.Apply(source, targetWidth, targetHeight, useCenteredGrid);
+          result = resampler.Apply(source, targetWidth, targetHeight, useCenteredGrid);
       else if (radiusResampler != null)
         if (targetWidth <= 0 || targetHeight <= 0)
           MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
         else
-          target = radiusResampler.Apply(source, targetWidth, targetHeight, radius, useCenteredGrid);
+          result = radiusResampler.Apply(source, targetWidth, targetHeight, radius, useCenteredGrid);
 
-      var result = target == null ? null : target.ToBitmap();
-      return result;
+      return (result);
     }
 
     /// <summary>

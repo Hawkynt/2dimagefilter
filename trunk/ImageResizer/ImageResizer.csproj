@@ -110,6 +110,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\CLIExitCode.cs" />
     <Compile Include="Classes\IImageManipulator.cs" />
     <Compile Include="Classes\ImageManipulators\RadiusResampler.cs" />
     <Compile Include="Classes\ImageManipulators\Resampler.cs" />

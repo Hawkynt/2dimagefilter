@@ -148,7 +148,7 @@ namespace ImageResizer.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Unknown filter.
         /// </summary>
         internal static string ttUnknownFilter {
             get {
