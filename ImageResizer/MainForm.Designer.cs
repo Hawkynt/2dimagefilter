@@ -41,8 +41,8 @@
       System.Windows.Forms.Label label1;
       System.Windows.Forms.GroupBox gbMethod;
       System.Windows.Forms.GroupBox gbDescription;
-      System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-      System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+      System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+      System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
       this.tssBusy = new System.Windows.Forms.ToolStripStatusLabel();
       this.tssBenchmark = new System.Windows.Forms.ToolStripStatusLabel();
       this.iwhSourceImage = new ImageResizer.UserControls.ImageWithDetails();
@@ -743,15 +743,15 @@
       // chtKernel
       // 
       this.chtKernel.BackColor = System.Drawing.SystemColors.Control;
-      chartArea2.Name = "chaChart";
-      this.chtKernel.ChartAreas.Add(chartArea2);
+      chartArea1.Name = "chaChart";
+      this.chtKernel.ChartAreas.Add(chartArea1);
       this.chtKernel.Dock = System.Windows.Forms.DockStyle.Fill;
       this.chtKernel.Location = new System.Drawing.Point(3, 16);
       this.chtKernel.Name = "chtKernel";
-      series2.ChartArea = "chaChart";
-      series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
-      series2.Name = "dsKernelData";
-      this.chtKernel.Series.Add(series2);
+      series1.ChartArea = "chaChart";
+      series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
+      series1.Name = "dsKernelData";
+      this.chtKernel.Series.Add(series1);
       this.chtKernel.Size = new System.Drawing.Size(288, 82);
       this.chtKernel.TabIndex = 0;
       this.chtKernel.Text = "chart1";
@@ -794,7 +794,7 @@
       this.Controls.Add(this.msMain);
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MainMenuStrip = this.msMain;
-      this.MinimumSize = new System.Drawing.Size(640, 640);
+      this.MinimumSize = new System.Drawing.Size(600, 600);
       this.Name = "MainForm";
       this.Text = "ImageResizer";
       ssBottom.ResumeLayout(false);

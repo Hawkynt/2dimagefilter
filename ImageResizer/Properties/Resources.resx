@@ -140,7 +140,7 @@
     <value>No image</value>
   </data>
   <data name="ttUnknownFilter" xml:space="preserve">
-    <value />
+    <value>Unknown filter</value>
   </data>
   <data name="txCouldNotLoadImage" xml:space="preserve">
     <value>Could not load {0}\r\n\r\n{1}</value>

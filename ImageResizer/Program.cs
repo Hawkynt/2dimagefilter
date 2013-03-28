@@ -59,6 +59,10 @@ namespace ImageResizer {
     /// </summary>
     [STAThread]
     static void Main(string[] args) {
+
+      // test code: args = new[] { "/LOAD", @"C:\Users\main\Pictures\Logo 64x64.jpg", "/RESIZE", "w200", "Scale 3x(vbounds=half,hbounds=wrap,repeat=1,thresholds=0)", "/SAVE", "test.png" };
+
+
       /*
        * This works as following:
        * First we look for command line parameters and if there are any of them present, we run the CLI version.
@@ -69,8 +73,8 @@ namespace ImageResizer {
       if (args != null && args.Length > 0 && args[0] != _FORCE_GUI_CLP_NAME) {
 
         // execute CLI
-        Environment.Exit(CLI.ParseCommandLineArguments(args));
-
+        var result = CLI.ParseCommandLineArguments(args);
+        Environment.Exit((int)result);
       } else {
         var consoleHandle = _GetConsoleWindow();
 
@@ -83,6 +87,7 @@ namespace ImageResizer {
           Config.Load(_CONFIGURATION_FILE_NAME);
           Application.Run(new MainForm());
           Config.Save(_CONFIGURATION_FILE_NAME);
+          Environment.Exit((int)CLIExitCode.OK);
         } else {
 
           // we found a console attached to us, so restart ourselves without one
@@ -90,6 +95,7 @@ namespace ImageResizer {
             CreateNoWindow = true,
             UseShellExecute = false
           });
+          Environment.Exit((int)CLIExitCode.RestartingInGuiMode);
         }
       }
 
