@@ -1,7 +1,7 @@
 #labels Featured
 <h1>2D Computer Graphics</h1>
 
-<p>2D computer graphics is the computer-based generation of digital images&mdash;mostly from two-dimensional models (such as 2D geometric models, text, and digital images) and by techniques specific to them. The word may stand for the branch of computer science that comprises such techniques, or for the models themselves.</p>
+<p>2D computer graphics is the computer-based generation of digital images-mostly from two-dimensional models (such as 2D geometric models, text, and digital images) and by techniques specific to them. The word may stand for the branch of computer science that comprises such techniques, or for the models themselves.</p>
 
 <p>2D computer graphics are mainly used in applications that were originally developed upon traditional printing and drawing technologies, such as typography, cartography, technical drawing, advertising, etc. In those applications, the two-dimensional image is not just a representation of a real-world object, but an independent artifact with added semantic value; two-dimensional models are therefore preferred, because they give more direct control of the image than 3D computer graphics (whose approach is more akin to photography than to typography).</p>
 
