@@ -1,5 +1,4 @@
-#labels Featured,Phase-Deploy,User-Manual
-
+#labels Featured,Introduction,User-Manual
 =Image Resizer=
 
 https://lh3.googleusercontent.com/-tht7lZDifps/UVOYkmRZBvI/AAAAAAAAAfE/U4ZSlIUojoc/s640/Image%2520Resizer.png
