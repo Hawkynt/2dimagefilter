@@ -11,6 +11,7 @@ https://lh3.googleusercontent.com/-tht7lZDifps/UVOYkmRZBvI/AAAAAAAAAfE/U4ZSlIUoj
 ==Usage==
 
 ===GUI===
+
 The user interface is very straightforward, you just:
   * Choose an image that you want to upscale;
   * Choose scaling method that you desire (I recommended use xBR 4x, but another method is also worth to be tried);
