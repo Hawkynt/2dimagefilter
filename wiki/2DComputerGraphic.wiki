@@ -1,7 +1,5 @@
 #labels Featured
-#sidebar TableOfContents
-* [2DComputerGraphic#Raster_Graphic Raster Graphic]
-* [2DComputerGraphic#Vector_Graphic Vector Graphic]
+<wiki:toc max_depth="2" />
 
 =2D Computer Graphics=
 
