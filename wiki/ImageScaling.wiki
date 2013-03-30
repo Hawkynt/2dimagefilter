@@ -82,7 +82,7 @@ first:        |Then
 
 ===2×SaI===
 
-2×SaI, short for 2× Scale and Interpolation engine, was inspired by Eagle. It was designed by Derek Liauw Kie Fa, also known as Kreed, primarily for use in console and computer emulators, and it has remained fairly popular in this niche. Many of the most popular emulators, including ZSNES and escape:'VisualBoyAdvance', offer this scaling algorithm as a feature.
+2×SaI, short for 2× Scale and Interpolation engine, was inspired by Eagle. It was designed by Derek Liauw Kie Fa, also known as Kreed, primarily for use in console and computer emulators, and it has remained fairly popular in this niche. Many of the most popular emulators, including ZSNES and 'VisualBoyAdvance', offer this scaling algorithm as a feature.
 
 Since Kreed released the source code under the GNU General Public License, it is freely available to anyone wishing to utilize it in a project released under that license. Developers wishing to use it in a non-GPL project would be required to rewrite the algorithm without using any of Kreed's existing code.
 
