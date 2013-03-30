@@ -65,7 +65,7 @@ G H I --/  7 8 9
 
 ===Eagle===
 
-Eagle works as follows: for every in pixel we will generate 4 out pixels. First, set all 4 to the colour of the in pixel we are currently scaling (as nearest-neighbor). Next look at the pixels up and to the left; if they are the same colour as each other, set the top left pixel to that colour. Continue doing the same for all four pixels, and then move to the next one.
+*Eagle* works as follows: for every in pixel we will generate 4 out pixels. First, set all 4 to the colour of the in pixel we are currently scaling (as nearest-neighbor). Next look at the pixels up and to the left; if they are the same colour as each other, set the top left pixel to that colour. Continue doing the same for all four pixels, and then move to the next one.
 
 Assume an input matrix of 3×3 pixels where the center most pixel is the pixel to be scaled, and an output matrix of 2×2 pixels (i.e., the scaled pixel)
 
@@ -79,3 +79,25 @@ first:        |Then
               | IF V==X==Y => 3=X
               | IF W==Z==Y => 4=Z
 }}}
+
+===2×SaI===
+
+2×SaI, short for 2× Scale and Interpolation engine, was inspired by Eagle. It was designed by Derek Liauw Kie Fa, also known as Kreed, primarily for use in console and computer emulators, and it has remained fairly popular in this niche. Many of the most popular emulators, including ZSNES and VisualBoyAdvance, offer this scaling algorithm as a feature.
+
+Since Kreed released the source code under the GNU General Public License, it is freely available to anyone wishing to utilize it in a project released under that license. Developers wishing to use it in a non-GPL project would be required to rewrite the algorithm without using any of Kreed's existing code.
+
+===Super 2×SaI and Super Eagle===
+
+Several slightly different versions of the scaling algorithm are available, and these are often referred to as Super 2×SaI and Super Eagle. Super Eagle, which is also written by Kreed, is similar to the 2×SaI engine, but does more blending. Super 2×SaI, which is also written by Kreed, is a filter that smooths the graphics, but it blends more than the Super Eagle engine.
+
+===Hqx family===
+
+Maxim Stepin's hq2x, hq3x, and hq4x are for scale factors of 2:1, 3:1, and 4:1 respectively. Each works by comparing the colour value of each pixel to those of its eight immediate neighbours, marking the neighbours as close or distant, and using a pregenerated lookup table to find the proper proportion of input pixels' values for each of the 4, 9 or 16 corresponding output pixels. The hq3x family will perfectly smooth any diagonal line whose slope is ±0.5, ±1, or ±2 and which is not anti-aliased in the input; one with any other slope will alternate between two slopes in the output. It will also smooth very tight curves. Unlike 2xSaI, it anti-aliases the output.
+
+hqnx was initially created for the Super Nintendo emulator ZSNES. The author of bsnes has released a space-efficient implementation of hq2x to the public domain.
+
+===xBR===
+
+*xBR* is a pixel art scaling algorithm that scales by rules. It was developed by Hyllian in 2011 mainly as scaling filters for video game emulators. He introduce his algorithm for the first time in a forum at byuu.org, a Nintendo emulator project.
+
+This algorithm works by detecting edges and interpolating pixels along those edges. It assumpted edges as pixel regions in the image where pixels are very distinct among them along some direction (high color frequency) and very similar perpendicular to that direction (low color frequency).
