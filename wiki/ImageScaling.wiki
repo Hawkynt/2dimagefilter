@@ -1,4 +1,4 @@
-#labels Featured
+#labels Featured,Supplement
 =Image Scaling=
 
 ||     Table of Contents:   ||
