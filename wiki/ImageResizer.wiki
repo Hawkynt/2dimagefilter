@@ -30,7 +30,7 @@ ImageResizer-r34.exe [/load <source>] [/resize <dimensions> <method>[(<repeat>|<
     {{{<target>}}}     - the target file to write
 
   {{{/resize}}}        - Resizes the image in the buffer and stores the result back to the buffer.
-    {{{<dimensions>}}} - {auto} | {w<x>} | {h<y>} | {<x>x<y>} | {<p>%}
+    {{{<dimensions>}}} - {{{auto | w<x>} | <h<y>} | <x>x<y> | <p>%}}}
                    If only width or height is specified, the other dimension is auto-detected by aspect ratio
       {{{auto}}}       - determine target dimensions from used resizing filter
       {{{<x>}}}        - the final width in pixels for the target
