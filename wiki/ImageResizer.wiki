@@ -6,10 +6,10 @@
 ==Usage==
 
 The user interface is very straightforward, you just:
-* Choose an image that you want to upscale;
-* Choose scaling method that you desire (I recommended use xBR 4x, but another method is also worth to be tried);
-* Set another parameter if necessary;
-* Save as your image.
+  * Choose an image that you want to upscale;
+  * Choose scaling method that you desire (I recommended use xBR 4x, but another method is also worth to be tried);
+  * Set another parameter if necessary;
+  * Save as your image.
 
 ==Limitations==
 The limitation of pixel art algorithms are they only capable for upscaling picture in predefined size, such as 2x, 3x, or 4x and cannot be used to shrink images. The solution when you want to resize your picture with custom size is to upscale the picture with the pixel art scaling algorithms first, then shrink it with Lanczos or another general purpose algorithm until the desired size. 
