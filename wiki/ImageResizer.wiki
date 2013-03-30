@@ -1,4 +1,4 @@
-#labels Featured,Introduction,User-Manual
+#labels Introduction,User-Manual,Featured
 =Image Resizer=
 
 https://lh3.googleusercontent.com/-tht7lZDifps/UVOYkmRZBvI/AAAAAAAAAfE/U4ZSlIUojoc/s640/Image%2520Resizer.png
