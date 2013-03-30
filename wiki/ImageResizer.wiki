@@ -23,14 +23,14 @@ The user interface is very straightforward, you just:
 ImageResizer-r34.exe [/load <source>] [/resize <dimensions> <method>[(<repeat>|<paramlist>)]] [/save <target>] ...
 }}}
 
-||  {{{/load}}}          || Loads a file into the buffer.
-||    {{{<source>}}}     || the source file to resize
+||  {{{/load}}}          || Loads a file into the buffer.||
+||    {{{<source>}}}     || the source file to resize||
 
 ||  {{{/save}}}}         || Saves the image in the buffer to a file.||
 ||    {{{<target>}}}     || the target file to write||
 ||  {{{/resize}}}        || Resizes the image in the buffer and stores the result back to the buffer.||
 ||    {{{<dimensions>}}} || {{{auto | w<x>} | <h<y>} | <x>x<y> | <p>%}}}||
-||                   If only width or height is specified, the other dimension is auto-detected by aspect ratio||
+|| ||                   If only width or height is specified, the other dimension is auto-detected by aspect ratio||
 ||      {{{auto}}}       || determine target dimensions from used resizing filter||
 ||      {{{<x>}}}        || the final width in pixels for the target||
 ||      {{{<y>}}}        || the final height in pixels for the target||
