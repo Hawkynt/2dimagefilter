@@ -24,27 +24,27 @@ ImageResizer-r34.exe [/load <source>] [/resize <dimensions> <method>[(<repeat>|<
 }}}
 
   {{{/load}}}          - Loads a file into the buffer.
-    {<source>     - the source file to resize
+    {{{<source>}}}     - the source file to resize
 
-  {/save}          - Saves the image in the buffer to a file.
-    {<target>     - the target file to write
+  {{{/save}}}}          - Saves the image in the buffer to a file.
+    {{{<target>}}}     - the target file to write
 
-  {/resize}        - Resizes the image in the buffer and stores the result back to the buffer.
-    {<dimensions>} - {auto} | {w<x>} | {h<y>} | {<x>x<y>} | {<p>%}
+  {{{/resize}}}        - Resizes the image in the buffer and stores the result back to the buffer.
+    {{{<dimensions>}}} - {auto} | {w<x>} | {h<y>} | {<x>x<y>} | {<p>%}
                    If only width or height is specified, the other dimension is auto-detected by aspect ratio
-      {auto}       - determine target dimensions from used resizing filter
-      {<x>}        - the final width in pixels for the target
-      {<y>}        - the final height in pixels for the target
-      {<p>}        - the percentage to resize eg 400% for 4-times resizing
-    {<method>}     - the method to use
-    {<repeat>}     - the number of repetitions using this method
-    {<paramlist>}  - a list of parameters to apply, separated using ',' and assigned using '='; eg. radius=4, centeredGrid=0
-      {radius}     - a floating point value setting the radius of the filter
-      {centered}   - 1 - use centered grid, 0 - do not use centered grid
-      {thresholds} - 1 - use thresholds, 0 - do not use thresholds
-      {repeat}     - a value 1-255 setting the number of repetitions to apply
-      {vbounds}    - vertical out of bounds handling: const, half, whole, wrap
-      {hbounds}    - horizontal out of bounds handling: const, half, whole, wrap
+      {{{auto}}}       - determine target dimensions from used resizing filter
+      {{{<x>}}}        - the final width in pixels for the target
+      {{{<y>}}}        - the final height in pixels for the target
+      {{{<p>}}}        - the percentage to resize eg 400% for 4-times resizing
+    {{{<method>}}}     - the method to use
+    {{{<repeat>}}}     - the number of repetitions using this method
+    {{{<paramlist>}}}  - a list of parameters to apply, separated using ',' and assigned using '='; eg. radius=4, centeredGrid=0
+      {{{radius}}}     - a floating point value setting the radius of the filter
+      {{{centered}}}   - 1 - use centered grid, 0 - do not use centered grid
+      {{{thresholds}}} - 1 - use thresholds, 0 - do not use thresholds
+      {{{repeat}}}     - a value 1-255 setting the number of repetitions to apply
+      {{{vbounds}}}    - vertical out of bounds handling: const, half, whole, wrap
+      {{{hbounds}}}    - horizontal out of bounds handling: const, half, whole, wrap
 
 ==Limitations==
 The limitation of pixel art algorithms are they only capable for upscaling picture in predefined size, such as 2x, 3x, or 4x and cannot be used to shrink images. The solution when you want to resize your picture with custom size is to upscale the picture with the pixel art scaling algorithms first, then shrink it with Lanczos or another general purpose algorithm until the desired size. 
