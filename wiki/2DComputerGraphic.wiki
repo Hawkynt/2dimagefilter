@@ -1,6 +1,6 @@
 #labels Featured
 #sidebar TableOfContents
-*[2DComputerGraphic#Raster_Graphic]
+*2DComputerGraphic#Raster_Graphic
 
 =2D Computer Graphics=
 
