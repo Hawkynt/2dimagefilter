@@ -1,5 +1,5 @@
 #labels Featured
-=_2D Computer Graphics_=
+=*2D Computer Graphics*=
 
 ||     Table of Contents:   ||
 ||<wiki:toc max_depth="2" />||
