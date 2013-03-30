@@ -92,12 +92,14 @@ Several slightly different versions of the scaling algorithm are available, and 
 
 ===Hqx===
 
-*Hqx* is an algorithm developed by Maxim Stepin. The hqx variants consist of hq2x, hq3x, and hq4x for scale factors of 2:1, 3:1, and 4:1 respectively. Each algorithm works by comparing the colour value of each pixel to those of its eight immediate neighbours, marking the neighbours as close or distant, and using a pregenerated lookup table to find the proper proportion of input pixels' values for each of the 4, 9 or 16 corresponding output pixels. The hq3x family will perfectly smooth any diagonal line whose slope is ±0.5, ±1, or ±2 and which is not anti-aliased in the input; one with any other slope will alternate between two slopes in the output. It will also smooth very tight curves. Unlike 2xSaI, it anti-aliases the output.
+*Hqx* is an algorithm developed by Maxim Stepin. The hqx family consist of hq2x, hq3x, and hq4x for scale factors of 2:1, 3:1, and 4:1 respectively. Each algorithm works by comparing the colour value of each pixel to those of its eight immediate neighbours, marking the neighbours as close or distant, and using a pregenerated lookup table to find the proper proportion of input pixels' values for each of the 4, 9 or 16 corresponding output pixels. The hq3x family will perfectly smooth any diagonal line whose slope is ±0.5, ±1, or ±2 and which is not anti-aliased in the input; one with any other slope will alternate between two slopes in the output. It will also smooth very tight curves. Unlike 2xSaI, it anti-aliases the output.
 
 hqnx was initially created for the Super Nintendo emulator ZSNES. The author of bsnes has released a space-efficient implementation of hq2x to the public domain.
 
 ===xBR===
 
-*xBR* is a pixel art scaling algorithm that scales by rules. It was developed by Hyllian in 2011 mainly as scaling filters for video game emulators. He introduce his algorithm for the first time in a forum at byuu.org, a Nintendo emulator project.
+*xBR* is a pixel art scaling algorithm that scales by rules. It was developed by Hyllian in 2011 mainly as scaling filters for video game emulators. He introduce his algorithm for the first time in a forum at byuu.org, a Nintendo emulator project. Like Hqx, xBR algorithm family also consist of 2xBR, 3xBR, and 4xBR for scale factors of 2:1, 3:1, and 4:1 respectively.
 
 This algorithm works by detecting edges and interpolating pixels along those edges. It assumpted edges as pixel regions in the image where pixels are very distinct among them along some direction (high color frequency) and very similar perpendicular to that direction (low color frequency).
+
+xBR comes with two variants, one which blending image colors for smoothing results and other which not blending image colors (xBR <NoBlend>) so the results looks a bit jaggies. Howefer The advantages of xBR <NoBlend> are it mantain image sharpness, because it doesn't produce additional colors, so that the number of unique colors between the original and the results remain same. Thus the xBR <noBlend> can be used recursively for scaling image multiple times without loss of sharpness although only 3xBR <NoBlend> that can gives optimal results while 2xBR <NoBlend> and 4xBR <NoBlend> will produce stair effect for 45 degree lines.
