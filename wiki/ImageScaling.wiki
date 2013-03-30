@@ -14,7 +14,7 @@ Pixel art scaling algorithm is one kind of image scaling algorithm that was desi
 
 ===EPX/Scale2×/AdvMAME2×===
 
-Eric's Pixel Expansion (EPX) is an algorithm developed by Eric Johnston at LucasArts around 1992, when porting the SCUMM engine games from the IBM PC (which ran at 320×200×256 colors) to the early color Macintosh computers, which ran at more or less double that resolution. The algorithm works as follows:
+Eric's Pixel Expansion (EPX) is an algorithm developed by Eric Johnston at Lucas Arts around 1992, when porting the SCUMM engine games from the IBM PC (which ran at 320×200×256 colors) to the early color Macintosh computers, which ran at more or less double that resolution. The algorithm works as follows:
 {{{
 def fib(n):
   A    --\ 1 2
