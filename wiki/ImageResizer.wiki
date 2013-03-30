@@ -25,7 +25,6 @@ ImageResizer-r34.exe [/load <source>] [/resize <dimensions> <method>[(<repeat>|<
 
 ||  {{{/load}}}          || Loads a file into the buffer.||
 ||    {{{<source>}}}     || the source file to resize||
-
 ||  {{{/save}}}}         || Saves the image in the buffer to a file.||
 ||    {{{<target>}}}     || the target file to write||
 ||  {{{/resize}}}        || Resizes the image in the buffer and stores the result back to the buffer.||
