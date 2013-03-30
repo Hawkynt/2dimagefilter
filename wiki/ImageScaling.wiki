@@ -9,4 +9,20 @@ In computer graphics, image scaling is the process of resizing a digital image. 
 Apart from fitting a smaller display area, image size is most commonly decreased (or subsampled or downsampled) in order to produce thumbnails. Enlarging an image (upsampling or interpolating) is generally common for making smaller imagery fit a bigger screen in fullscreen mode, for example. In “zooming” a bitmap image, it is not possible to discover any more information in the image than already exists, and image quality inevitably suffers. However, there are several methods of increasing the number of pixels that an image contains, which evens out the appearance of the original pixels.
 
 ==Pixel Art Scaling Algorithm==
+
 Pixel art scaling algorithm is one kind of image scaling algorithm that was designed specially for upscaling low res image multiple times. Since a typical application of this technology is improving the appearance of fourth-generation and earlier video games on arcade and console emulators, many are designed to run in real time for sufficiently small input images at 60 frames per second. Many work only on specific scale factors: 2× is the most common, with 3× and 4× also present.
+
+===EPX/Scale2×/AdvMAME2×===
+
+Eric's Pixel Expansion (EPX) is an algorithm developed by Eric Johnston at LucasArts around 1992, when porting the SCUMM engine games from the IBM PC (which ran at 320×200×256 colors) to the early color Macintosh computers, which ran at more or less double that resolution. The algorithm works as follows:
+{{{
+def fib(n):
+  A    --\ 1 2
+C P B  --/ 3 4
+  D 
+ IF C==A => 1=A
+ IF A==B => 2=B
+ IF B==D => 4=D
+ IF D==C => 3=C
+ IF of A, B, C, D, 3 or more are identical: 1=2=3=4=P
+}}}
