@@ -26,7 +26,7 @@ ImageResizer [/load <source>] [/resize <dimensions> <method>[(<repeat>|<paramlis
 
 Example:
 
-{{{ImageResizer /load image_in.bmp /resize w72xh92 "XBR 3x(2,thresholds=0,vbounds=wrap)" /save imageout.png}}}
+{{{ImageResizer /load image_in.bmp /resize 72x92 "XBR 3x(2,thresholds=0,vbounds=wrap)" /save imageout.png}}}
 
 Notes:
 
