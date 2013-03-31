@@ -178,4 +178,13 @@
   <data name="txNeedWidthAndHeightAboveZero" xml:space="preserve">
     <value>Need a width and height &gt; 0 to apply interpolation.</value>
   </data>
+  <data name="CLIHelpText" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CLIHelpText.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="ttNoScriptToSave" xml:space="preserve">
+    <value>No script</value>
+  </data>
+  <data name="txNoScriptToSave" xml:space="preserve">
+    <value>There is no script to save.</value>
+  </data>
 </root>

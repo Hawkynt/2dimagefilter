@@ -18,26 +18,29 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
-namespace Classes {
-  internal enum CLIExitCode {
-    RestartingInGuiMode = -1,
-    OK = 0,
-    UnknownParameter,
-    TooLessArguments,
-    JpegNotSupportedOnThisPlatform,
-    NothingToSave,
-    FilenameMustNotBeNull,
-    InvalidTargetDimensions,
-    CouldNotParseDimensionsAsWord,
-    NothingToResize,
-    UnknownFilter,
-    ExceptionDuringImageLoad,
-    ExceptionDuringImageWrite,
-    InvalidFilterDescription,
-    CouldNotParseParameterAsFloat,
-    CouldNotParseParameterAsByte,
-    InvalidOutOfBoundsMode,
 
-    RuntimeError,
+using System.Drawing;
+
+using Imager;
+
+namespace Classes.ScriptActions {
+  internal class TargetToSourceCommand : IScriptAction {
+    #region Implementation of IScriptAction
+    public bool ChangesSourceImage { get { return (true); } }
+    public bool ChangesTargetImage { get { return (true); } }
+    public bool ProvidesNewGdiSource { get { return (false); } }
+
+    public bool Execute() {
+      this.SourceImage = this.TargetImage;
+      this.TargetImage = null;
+      return (true);
+    }
+
+    public Bitmap GdiSource { get { return (null); } }
+
+    public cImage SourceImage { get; set; }
+
+    public cImage TargetImage { get; set; }
+    #endregion
   }
 }

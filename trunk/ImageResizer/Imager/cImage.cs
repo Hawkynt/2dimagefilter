@@ -32,6 +32,10 @@
       
  */
 #endregion
+
+// TODO: seamless carving aka content-aware resizing
+// TODO: smart filtering http://www.hiend3d.com/smartflt.html
+
 using System;
 #if !NET35
 using System.Threading.Tasks;
