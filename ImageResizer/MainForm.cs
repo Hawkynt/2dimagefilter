@@ -18,17 +18,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
-// TODO: script recorder/player
+
 using System;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Drawing;
-using System.IO;
 using System.Windows.Forms;
 
 using Classes;
 using Classes.ImageManipulators;
+using Classes.ScriptActions;
+
 using ImageResizer.Properties;
+
 using Imager;
 using Imager.Interface;
 using word = System.UInt16;
@@ -41,17 +43,13 @@ namespace ImageResizer {
   public partial class MainForm : Form {
     #region fields
     /// <summary>
-    /// The currently shown source image.
-    /// </summary>
-    private Image _sourceImage;
-    /// <summary>
-    /// The currently shown target image.
-    /// </summary>
-    private Image _targetImage;
-    /// <summary>
     /// The last used filename for SaveAs.
     /// </summary>
     private string _lastSaveFileName;
+    /// <summary>
+    /// The used scripting engine.
+    /// </summary>
+    private readonly ScriptEngine _scriptEngine = new ScriptEngine();
     #endregion
 
     #region props
@@ -62,11 +60,7 @@ namespace ImageResizer {
     /// The source image.
     /// </value>
     private Image _SourceImage {
-      get {
-        return (this._sourceImage);
-      }
       set {
-        this._sourceImage = value;
         this.gbActions.Enabled =
           this.closeToolStripMenuItem.Enabled =
           value != null;
@@ -83,11 +77,7 @@ namespace ImageResizer {
     /// The target image.
     /// </value>
     private Image _TargetImage {
-      get {
-        return (this._targetImage);
-      }
       set {
-        this._targetImage = value;
         this.butRepeat.Enabled =
           this.butSwitch.Enabled =
             this.saveToolStripMenuItem.Enabled =
@@ -100,7 +90,7 @@ namespace ImageResizer {
     #endregion
 
     #region ctor
-    public MainForm() {
+    public MainForm(string fileToOpenOnStart = null) {
       InitializeComponent();
 
       //this.cbResizeMethod.DataSource = Program.IMAGE_RESIZERS;
@@ -122,200 +112,10 @@ namespace ImageResizer {
       this.chkUseThresholds.Checked = sPixel.AllowThresholds;
 
       this._LoadConfigurationSettings();
-    }
 
-    #endregion
+      if (fileToOpenOnStart != null)
+        this._LoadImageFromFileName(fileToOpenOnStart);
 
-    #region event handlers
-    private void btResize_Click(object _, EventArgs __) {
-      this._ScaleImageWithCurrentParameters(this._SourceImage);
-    }
-
-    private void btSwitch_Click(object sender, EventArgs e) {
-      this._SourceImage = this._TargetImage;
-    }
-
-    private void btRepeat_Click(object sender, EventArgs e) {
-      this._ScaleImageWithCurrentParameters(this._TargetImage);
-    }
-
-    private void openToolStripMenuItem_Click(object sender, EventArgs e) {
-
-      // ask for filename
-      var fileDialog = this.ofdOpenFile;
-      fileDialog.InitialDirectory = string.IsNullOrWhiteSpace(Config.LastLoadDirectory) ? Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) : Config.LastLoadDirectory;
-
-      if (fileDialog.ShowDialog() != DialogResult.OK)
-        return;
-
-      var fileName = fileDialog.FileName;
-      Config.LastLoadDirectory = Path.GetDirectoryName(fileName);
-
-      if (fileName == null)
-        return;
-
-      this._LoadImageFromFileName(fileName);
-    }
-
-    private void saveToolStripMenuItem_Click(object sender, EventArgs e) {
-      var image = this._TargetImage;
-      if (image == null)
-        return;
-
-      var fileName = this._lastSaveFileName;
-      if (fileName == null) {
-        this.saveAsToolStripMenuItem_Click(sender, e);
-        return;
-      }
-
-      var result = CLI.SaveHelper(fileName, image);
-      if (result == CLIExitCode.JpegNotSupportedOnThisPlatform)
-        MessageBox.Show(Resources.txNoJpegSupport, Resources.ttNoJpegSupport);
-      else if (result == CLIExitCode.NothingToSave)
-        MessageBox.Show(Resources.txNothingToSave, Resources.ttNothingToSave);
-    }
-
-    private void saveAsToolStripMenuItem_Click(object sender, EventArgs e) {
-
-      // ask for filename
-      var dialog = this.sfdSave;
-      dialog.InitialDirectory = string.IsNullOrWhiteSpace(Config.LastSaveDirectory) ? Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) : Config.LastSaveDirectory;
-
-      if (dialog.ShowDialog() != DialogResult.OK)
-        return;
-
-      var fileName = dialog.FileName;
-      if (fileName == null)
-        return;
-
-      // store the name to use later on
-      Config.LastSaveDirectory = Path.GetDirectoryName(fileName);
-      this._lastSaveFileName = fileName;
-
-      this.saveToolStripMenuItem_Click(sender, e);
-    }
-
-    private void closeToolStripMenuItem_Click(object sender, EventArgs e) {
-      this._SourceImage = null;
-    }
-
-    private void exitToolStripMenuItem_Click(object sender, EventArgs e) {
-      this.Close();
-    }
-
-    private void iwhSourceImage_Click(object sender, EventArgs e) {
-      this.openToolStripMenuItem_Click(sender, e);
-    }
-
-    private void iwhTargetImage_Click(object sender, EventArgs e) {
-      this.saveToolStripMenuItem_Click(sender, e);
-
-      // start the image with the associated system handler
-      var lastSaveFileName = this._lastSaveFileName;
-      if (lastSaveFileName != null && File.Exists(lastSaveFileName))
-        Process.Start(lastSaveFileName);
-    }
-
-    private void cbResizeMethod_SelectedValueChanged(object sender, EventArgs e) {
-      var method = this.cmbResizeMethod.SelectedValue as IImageManipulator;
-
-      this.txtDescription.Text = method == null ? null : method.Description;
-
-      this._RefreshKernelChart();
-
-      if (!(this.nudWidth.Enabled = method != null && method.SupportsWidth))
-        this.nudWidth.Value = 0;
-
-      if (!(this.nudHeight.Enabled = method != null && method.SupportsHeight))
-        this.nudHeight.Value = 0;
-
-      this.chkUseCenteredGrid.Enabled = method != null && method.SupportsGridCentering;
-      this.chkUseThresholds.Enabled = method != null && method.SupportsThresholds;
-
-      if (!(this.nudRepetitionCount.Enabled = method != null && method.SupportsRepetitionCount))
-        this.nudRepetitionCount.Value = 1;
-
-      this.nudRadius.Enabled = method != null && method.SupportsRadius;
-    }
-
-    private void nudRadius_ValueChanged(object sender, EventArgs e) {
-      this._RefreshKernelChart();
-    }
-
-    private void stretchToolStripMenuItem_Click(object sender, EventArgs e) {
-      Config.SourceSizeMode = (this.iwhSourceImage.SizeMode = PictureBoxSizeMode.StretchImage);
-    }
-
-    private void centerToolStripMenuItem_Click(object sender, EventArgs e) {
-      Config.SourceSizeMode = (this.iwhSourceImage.SizeMode = PictureBoxSizeMode.CenterImage);
-    }
-
-    private void zoomToolStripMenuItem_Click(object sender, EventArgs e) {
-      Config.SourceSizeMode = (this.iwhSourceImage.SizeMode = PictureBoxSizeMode.Zoom);
-    }
-
-    private void stretchToolStripMenuItem1_Click(object sender, EventArgs e) {
-      Config.TargetSizeMode = (this.iwhTargetImage.SizeMode = PictureBoxSizeMode.StretchImage);
-    }
-
-    private void centerToolStripMenuItem1_Click(object sender, EventArgs e) {
-      Config.TargetSizeMode = (this.iwhTargetImage.SizeMode = PictureBoxSizeMode.CenterImage);
-    }
-
-    private void zoomToolStripMenuItem1_Click(object sender, EventArgs e) {
-      Config.TargetSizeMode = (this.iwhTargetImage.SizeMode = PictureBoxSizeMode.Zoom);
-    }
-
-    private void iwhSourceImage_DragEnter(object sender, DragEventArgs e) {
-      if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
-        var files = (Array)e.Data.GetData(DataFormats.FileDrop);
-        if (files != null && files.Length > 0 && _IsSupportedFileExtension(Path.GetExtension((string)files.GetValue(0)))) {
-          e.Effect = DragDropEffects.Copy;
-          return;
-        }
-      }
-      if (e.Data.GetDataPresent(DataFormats.Bitmap)) {
-        e.Effect = DragDropEffects.Copy;
-        return;
-      }
-      e.Effect = DragDropEffects.None;
-    }
-
-    private void iwhSourceImage_DragDrop(object sender, DragEventArgs e) {
-      if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
-        var files = (Array)e.Data.GetData(DataFormats.FileDrop);
-        if (files == null || files.Length <= 0 || !_IsSupportedFileExtension(Path.GetExtension((string)files.GetValue(0))))
-          return;
-        this._LoadImageFromFileName((string)files.GetValue(0));
-        return;
-      }
-      if (e.Data.GetDataPresent(DataFormats.Bitmap)) {
-        var data = e.Data.GetData(DataFormats.Bitmap) as Image;
-        if (data == null)
-          return;
-        this._SourceImage = data;
-        this._lastSaveFileName = null;
-        return;
-      }
-    }
-
-    private void chkKeepAspect_CheckedChanged(object sender, EventArgs e) {
-      var value = this.chkKeepAspect.Checked;
-      if (value) {
-        var sourceImage = this._SourceImage;
-        if (sourceImage == null)
-          return;
-
-        this._CorrectAspectRatioIfNeeded(false);
-      }
-    }
-
-    private void nudWidth_ValueChanged(object sender, EventArgs e) {
-      this._CorrectAspectRatioIfNeeded(false);
-    }
-
-    private void nudHeight_ValueChanged(object sender, EventArgs e) {
-      this._CorrectAspectRatioIfNeeded(true);
     }
 
     #endregion
@@ -334,17 +134,23 @@ namespace ImageResizer {
     /// <summary>
     /// Resizes the given image with the currently set parameters from the GUI.
     /// </summary>
-    /// <param name="sourceImage">The source image.</param>
-    private void _ScaleImageWithCurrentParameters(Image sourceImage) {
+    private void _ScaleImageWithCurrentParameters(bool applyToTarget) {
       var method = (IImageManipulator)this.cmbResizeMethod.SelectedValue;
       var targetWidth = (word)this.nudWidth.Value;
       var targetHeight = (word)this.nudHeight.Value;
+      var maintainAspect = this.chkKeepAspect.Checked;
       var useThresholds = this.chkUseThresholds.Checked;
       var useCenteredGrid = this.chkUseCenteredGrid.Checked;
       var repetitionCount = (byte)this.nudRepetitionCount.Value;
       var horizontalBph = (OutOfBoundsMode)this.cmbHorizontalBPH.SelectedItem;
       var verticalBph = (OutOfBoundsMode)this.cmbVerticalBPH.SelectedItem;
       var radius = (float)this.nudRadius.Value;
+
+      if ((targetWidth <= 0 && method.SupportsWidth) || (targetHeight <= 0 && method.SupportsHeight)) {
+        MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
+        return;
+      }
+
 
       // tell the user that we're busy
       this.msMain.Enabled =
@@ -355,8 +161,10 @@ namespace ImageResizer {
         // filter image
         var stopwatch = new Stopwatch();
         stopwatch.Restart();
-        var target = FilterImage(cImage.FromBitmap((Bitmap)sourceImage), method, targetWidth, targetHeight, horizontalBph, verticalBph, useThresholds, useCenteredGrid, repetitionCount, radius);
-        var result = target == null ? null : target.ToBitmap();
+
+        this._scriptEngine.ExecuteAction(new ResizeCommand(applyToTarget, method, targetWidth, targetHeight,0, maintainAspect, horizontalBph, verticalBph, repetitionCount, useThresholds, useCenteredGrid, radius));
+
+        var result = this._scriptEngine.GdiTarget;
         stopwatch.Stop();
 
         this.SafelyInvoke(() => {
@@ -405,7 +213,9 @@ namespace ImageResizer {
     /// <param name="fileName">Name of the file.</param>
     private void _LoadImageFromFileName(string fileName) {
       try {
-        this._SourceImage = Image.FromFile(fileName);
+        var scriptEngine = this._scriptEngine;
+        scriptEngine.ExecuteAction(new LoadFileCommand(fileName));
+        this._SourceImage = scriptEngine.GdiSource;
         this._lastSaveFileName = null;
       } catch (Exception exception) {
         MessageBox.Show(string.Format(Resources.txCouldNotLoadImage, fileName, exception.Message), Resources.ttCouldNotLoadImage, MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -420,7 +230,7 @@ namespace ImageResizer {
       if (!this.chkKeepAspect.Checked)
         return;
 
-      var image = this._SourceImage;
+      var image = this.iwhSourceImage.Image;
       if (image == null)
         return;
 
@@ -512,6 +322,5 @@ namespace ImageResizer {
         return (true);
       return (false);
     }
-
   }
 }

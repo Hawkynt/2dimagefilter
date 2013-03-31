@@ -60,6 +60,22 @@ namespace ImageResizer.Properties {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to ========================================================================
+        ///   ** {appname} v{version}, {copyright}
+        ///   Version for Windows NT/9x/2000/XP/Vista/7  (All rights reserved)
+        ///------------------------------------------------------------------------
+        ///   This program is free software: you can redistribute it and/or modify
+        ///   it under the terms of the GNU General Public License as published by
+        ///   the Free Software Foundation, either version 3 of the License, or
+        ///   (at your option) any later version. [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string CLIHelpText {
+            get {
+                return ResourceManager.GetString("CLIHelpText", resourceCulture);
+            }
+        }
+        
         internal static System.Drawing.Bitmap Height {
             get {
                 object obj = ResourceManager.GetObject("Height", resourceCulture);
@@ -130,6 +146,15 @@ namespace ImageResizer.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No script.
+        /// </summary>
+        internal static string ttNoScriptToSave {
+            get {
+                return ResourceManager.GetString("ttNoScriptToSave", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No image.
         /// </summary>
         internal static string ttNothingToResize {
@@ -180,6 +205,15 @@ namespace ImageResizer.Properties {
         internal static string txNoJpegSupport {
             get {
                 return ResourceManager.GetString("txNoJpegSupport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is no script to save..
+        /// </summary>
+        internal static string txNoScriptToSave {
+            get {
+                return ResourceManager.GetString("txNoScriptToSave", resourceCulture);
             }
         }
         

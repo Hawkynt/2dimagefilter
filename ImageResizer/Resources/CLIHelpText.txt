@@ -1,0 +1,88 @@
+========================================================================
+   ** {appname} v{version}, {copyright}
+   Version for Windows NT/9x/2000/XP/Vista/7  (All rights reserved)
+------------------------------------------------------------------------
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+========================================================================
+
+============
+How to use :
+============
+
+{location} [{load} <source>] [{resize} <dimensions> <method>[(<repeat>|<paramlist>)]] [{save} <target>] [{script} <script>]...
+
+============
+Explanation:
+============
+
+  {load}          - Loads a file into the buffer.
+    <source>     - the source file to resize
+
+  {save}          - Saves the image in the buffer to a file.
+    <target>     - the target file to write
+
+  {script}        - Processes a script file in the current chain.
+    <script>     - the name of the script file - take care not to build recursive scripts !
+
+  {resize}        - Resizes the image in the buffer and stores the result back to the buffer.
+    <dimensions> - auto | w<x> | h<y> | <x>x<y> | <p>%
+                   If only width or height is specified, the other dimension is auto-detected by aspect ratio
+      auto       - determine target dimensions from used resizing filter
+      <x>        - the final width in pixels for the target
+      <y>        - the final height in pixels for the target
+      <p>        - the percentage to resize eg 400% for 4-times resizing
+    <method>     - the method to use
+    <repeat>     - the number of repetitions using this method
+    <paramlist>  - a list of parameters to apply, separated using ',' and assigned using '='; eg. radius=4, centeredGrid=0
+      {radius}     - a floating point value setting the radius of the filter
+      {centered}   - 1 - use centered grid, 0 - do not use centered grid
+      {thresholds} - 1 - use thresholds, 0 - do not use thresholds
+      {repeat}     - a value 1-255 setting the number of repetitions to apply
+      {vbounds}    - vertical out of bounds handling: const, half, whole, wrap
+      {hbounds}    - horizontal out of bounds handling: const, half, whole, wrap
+
+=========
+Examples:
+=========
+
+{location} {load} input.bmp {resize} 72x92 "Bicubic(vbounds=wrap)" {save} output.png
+{location} {load} input.bmp {resize} w72 "Bicubic" {save} output.png
+{location} {load} input.bmp {resize} h92 "Bicubic(vbounds=whole,hbounds=whole)" {save} output.png
+{location} {load} input.bmp {resize} 325% "Bicubic" {save} output.png
+{location} {load} input.bmp {resize} auto "LQ 2x Smart" {save} output.png
+{location} {load} input.bmp {script} "MyFilterChain.scr" {save} output.png
+{location} {script} "MyScript.scr"
+
+You can load and process multiple files at once by loading after saving again.
+{location} {load}  1.bmp {resize} 10x10 Pixel {save} 1.jpg {load} 2.bmp {resize} 10x10 Pixel {save} 2.jpg
+
+You can also save to multiple files by adding another save parameter.
+{location} {load} 1.bmp {resize} 10x10 Pixel {save} 1.jpg {save} 2.png
+
+Even preprocessing using multiple filters is possible by adding another resize parameter.
+{location} {load} 1.bmp {resize} 10x10 Pixel {resize} auto Scale2x {save} 1.png
+{location} {load} 1.bmp {resize} auto "XBR 3x" {resize} w128 Bicubic {save} 1.png
+
+=========================
+Supported filter methods:
+=========================
+
+{filterlist}
+
+==============
+Miscellaneous:
+==============
+
+For further information, please visit the project's website at:
+  http://code.google.com/p/2dimagefilter/

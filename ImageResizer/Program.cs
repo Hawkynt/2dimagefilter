@@ -61,7 +61,6 @@ namespace ImageResizer {
     static void Main(string[] args) {
 
       // test code: args = new[] { "/LOAD", @"C:\Users\main\Pictures\Logo 64x64.jpg", "/RESIZE", "w200", "Scale 3x(vbounds=half,hbounds=wrap,repeat=1,thresholds=0)", "/SAVE", "test.png" };
-
       /*
        * This works as following:
        * First we look for command line parameters and if there are any of them present, we run the CLI version.
@@ -69,22 +68,26 @@ namespace ImageResizer {
        * If there is no console at all, we show the GUI.
        * This way we're both a CLI and a GUI.
        */
-      if (args != null && args.Length > 0 && args[0] != _FORCE_GUI_CLP_NAME) {
 
-        // execute CLI
+      var firstParam = args != null && args.Length > 0 ? args[0] : null;
+      var fileToOpenOnStart = firstParam != _FORCE_GUI_CLP_NAME && File.Exists(firstParam) ? firstParam : null;
+
+      if (firstParam != null && firstParam != _FORCE_GUI_CLP_NAME && fileToOpenOnStart == null) {
+
+        // execute CLI if arguments are given which are not forcing into gui or a valid filename
         var result = CLI.ParseCommandLineArguments(args);
         Environment.Exit((int)result);
       } else {
         var consoleHandle = _GetConsoleWindow();
 
         // run GUI
-        if (consoleHandle == IntPtr.Zero || AppDomain.CurrentDomain.FriendlyName.Contains(".vshost") || (args != null && args.Length > 0 && args[0] == _FORCE_GUI_CLP_NAME)) {
+        if (consoleHandle == IntPtr.Zero || AppDomain.CurrentDomain.FriendlyName.Contains(".vshost") || firstParam == _FORCE_GUI_CLP_NAME || fileToOpenOnStart != null) {
 
           // we either have no console window or we're started from within visual studio or we are forced into GUI mode
           Application.EnableVisualStyles();
           Application.SetCompatibleTextRenderingDefault(false);
           Config.Load(_CONFIGURATION_FILE_NAME);
-          Application.Run(new MainForm());
+          Application.Run(new MainForm(fileToOpenOnStart));
           Config.Save(_CONFIGURATION_FILE_NAME);
           Environment.Exit((int)CLIExitCode.OK);
         } else {

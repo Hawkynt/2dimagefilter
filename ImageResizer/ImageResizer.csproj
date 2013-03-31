@@ -110,6 +110,8 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\ScriptActions\NullTransformCommand.cs" />
+    <Compile Include="Classes\ScriptSerializerException.cs" />
     <Compile Include="Classes\CLIExitCode.cs" />
     <Compile Include="Classes\IImageManipulator.cs" />
     <Compile Include="Classes\ImageManipulators\RadiusResampler.cs" />
@@ -120,10 +122,18 @@
     <Compile Include="Classes\ImageManipulators\Scalers\NqScaler.cs" />
     <Compile Include="Classes\ImageManipulators\Scalers\PixelScaler.cs" />
     <Compile Include="Classes\ImageManipulators\PlaneExtractor.cs" />
+    <Compile Include="Classes\IScriptAction.cs" />
     <Compile Include="Classes\ReflectionUtils.cs" />
+    <Compile Include="Classes\ScriptActions\LoadFileCommand.cs" />
+    <Compile Include="Classes\ScriptActions\ResizeCommand.cs" />
+    <Compile Include="Classes\ScriptActions\SaveFileCommand.cs" />
+    <Compile Include="Classes\ScriptActions\TargetToSourceCommand.cs" />
+    <Compile Include="Classes\ScriptEngine.cs" />
+    <Compile Include="Classes\ScriptSerializer.cs" />
     <Compile Include="Classes\SupportedManipulators.cs" />
     <Compile Include="Classes\CLI.cs" />
     <Compile Include="Classes\Config.cs" />
+    <Compile Include="Framework\System.StringExtensions.cs" />
     <Compile Include="Framework\System.Windows.Forms.ControlExtensions.cs" />
     <Compile Include="Imager\Classes\EnumDisplayNameAttribute.cs" />
     <Compile Include="Imager\Classes\FloatImage.cs" />
@@ -139,6 +149,9 @@
     <Compile Include="Imager\Interface\NqScalerType.cs" />
     <Compile Include="Imager\Interface\PixelScalerType.cs" />
     <Compile Include="Imager\Interface\XbrScalerType.cs" />
+    <Compile Include="MainForm.EventHandlers.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="UserControls\ImageWithDetails.cs">
       <SubType>UserControl</SubType>
@@ -148,6 +161,12 @@
     </Compile>
     <Compile Include="Framework\System.Drawing.BitmapExtensions.cs" />
     <Compile Include="Framework\System.Windows.Media.Imaging.BitmapSourceExtensions.cs" />
+    <Compile Include="Windows\AboutWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Windows\AboutWindow.Designer.cs">
+      <DependentUpon>AboutWindow.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Imager\cImage.cs" />
@@ -191,6 +210,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UserControls\ImageWithDetails.resx">
       <DependentUpon>ImageWithDetails.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Windows\AboutWindow.resx">
+      <DependentUpon>AboutWindow.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config">
       <SubType>Designer</SubType>
@@ -260,6 +282,10 @@
   <ItemGroup>
     <None Include="Resources\Switch.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\CLIHelpText.txt" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
