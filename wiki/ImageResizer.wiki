@@ -51,12 +51,15 @@ Example:
 Note:
 
 You can load and process multiple files at once by loading after saving again, such as:
+
 {{{ImageResizer /load 1.bmp /resize 10x10 Pixel /save 1.jpg /load 2.bmp /resize 10x10 Pixel /save 2.jpg}}}
 
 You can also save to multiple files by adding another save parameter, such as:
+
 {{{ImageResizer /load 1.bmp /resize 10x10 Pixel /save 1.jpg /save 2.jpg}}}
 
 Even preprocessing using multiple filters is possible by adding another resize parameter, such as:
+
 {{{ImageResizer /load 1.bmp /resize 10x10 Pixel /resize auto Scale2x /save 1.jpg}}}
 
 ==Limitations==
