@@ -25,7 +25,10 @@ ImageResizer-r34.exe [/load <source>] [/resize <dimensions> <method>[(<repeat>|<
 }}}
 
 Example:
+
 {{{ImageResizer-r34.exe /load image_in.bmp /resize w72xh92 "XBR 3x(2,thresholds=0,vbounds=wrap)" /save imageout.png}}}
+
+Notes:
 
 ||  {{{/load}}}          || Loads a file into the buffer.||
 ||    {{{<source>}}}     || the source file to resize||
@@ -47,8 +50,6 @@ Example:
 ||      {{{repeat}}}     || a value 1-255 setting the number of repetitions to apply||
 ||      {{{vbounds}}}    || vertical out of bounds handling: const, half, whole, wrap||
 ||      {{{hbounds}}}    || horizontal out of bounds handling: const, half, whole, wrap||
-
-Note:
 
 You can load and process multiple files at once by loading after saving again, such as:
 
