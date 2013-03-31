@@ -21,12 +21,12 @@ The user interface is very straightforward, you just:
 ===Command Line Interface===
 
 {{{
-ImageResizer-r34.exe [/load <source>] [/resize <dimensions> <method>[(<repeat>|<paramlist>)]] [/save <target>] ...
+ImageResizer [/load <source>] [/resize <dimensions> <method>[(<repeat>|<paramlist>)]] [/save <target>] ...
 }}}
 
 Example:
 
-{{{ImageResizer-r34.exe /load image_in.bmp /resize w72xh92 "XBR 3x(2,thresholds=0,vbounds=wrap)" /save imageout.png}}}
+{{{ImageResizer /load image_in.bmp /resize w72xh92 "XBR 3x(2,thresholds=0,vbounds=wrap)" /save imageout.png}}}
 
 Notes:
 
