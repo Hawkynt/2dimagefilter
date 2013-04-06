@@ -92,7 +92,6 @@ namespace Classes {
       Contract.Requires(engine != null);
       Contract.Requires(filename != null);
       var content = File.ReadAllLines(filename);
-      engine.Clear();
       for (var lineNumber = 0; lineNumber < content.Length; lineNumber++) {
         var line = content[lineNumber];
         var cliExitCode = _ParseScriptLine(line, engine);
@@ -108,7 +107,6 @@ namespace Classes {
     /// <param name="line">The line.</param>
     public static void LoadFromString(ScriptEngine engine, string line) {
       Contract.Requires(engine != null);
-      engine.Clear();
       var cliExitCode = _ParseScriptLine(line, engine);
       if (cliExitCode != CLIExitCode.OK)
         throw new ScriptSerializerException(null, 1, cliExitCode);
@@ -132,6 +130,11 @@ namespace Classes {
       var i = 0;
       while (i < length) {
         var command = arguments[i++].ToLowerInvariant();
+
+        // skip empty stuff
+        if (command.IsNullOrWhiteSpace())
+          continue;
+
         switch (command) {
           #region /LOAD
           case LOAD_COMMAND_NAME: {

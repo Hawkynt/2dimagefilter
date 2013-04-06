@@ -289,6 +289,7 @@ namespace ImageResizer {
         return;
 
       var filename = dialog.FileName;
+      this._scriptEngine.Clear();
       ScriptSerializer.LoadFromFile(this._scriptEngine, filename);
     }
   }
