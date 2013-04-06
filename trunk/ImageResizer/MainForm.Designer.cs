@@ -41,8 +41,8 @@
       System.Windows.Forms.Label label1;
       System.Windows.Forms.GroupBox gbMethod;
       System.Windows.Forms.GroupBox gbDescription;
-      System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-      System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+      System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+      System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
       this.tssBusy = new System.Windows.Forms.ToolStripStatusLabel();
       this.tssBenchmark = new System.Windows.Forms.ToolStripStatusLabel();
       this.iwhSourceImage = new ImageResizer.UserControls.ImageWithDetails();
@@ -840,15 +840,15 @@
       // chtKernel
       // 
       this.chtKernel.BackColor = System.Drawing.SystemColors.Control;
-      chartArea1.Name = "chaChart";
-      this.chtKernel.ChartAreas.Add(chartArea1);
+      chartArea2.Name = "chaChart";
+      this.chtKernel.ChartAreas.Add(chartArea2);
       this.chtKernel.Dock = System.Windows.Forms.DockStyle.Fill;
       this.chtKernel.Location = new System.Drawing.Point(3, 16);
       this.chtKernel.Name = "chtKernel";
-      series1.ChartArea = "chaChart";
-      series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
-      series1.Name = "dsKernelData";
-      this.chtKernel.Series.Add(series1);
+      series2.ChartArea = "chaChart";
+      series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
+      series2.Name = "dsKernelData";
+      this.chtKernel.Series.Add(series2);
       this.chtKernel.Size = new System.Drawing.Size(288, 82);
       this.chtKernel.TabIndex = 0;
       this.chtKernel.Text = "chart1";
@@ -884,16 +884,17 @@
       // 
       // ofdOpenScript
       // 
+      this.ofdOpenScript.DefaultExt = "irs";
       this.ofdOpenScript.FileName = "InputScript";
-      this.ofdOpenScript.Filter = "Script Files|*.scr|All files|*.*";
+      this.ofdOpenScript.Filter = "Image Resizer Script Files|*.irs|All files|*.*";
       this.ofdOpenScript.RestoreDirectory = true;
       this.ofdOpenScript.Title = "Select script to load";
       // 
       // sfdSaveScript
       // 
-      this.sfdSaveScript.DefaultExt = "scr";
+      this.sfdSaveScript.DefaultExt = "irs";
       this.sfdSaveScript.FileName = "OutputScript";
-      this.sfdSaveScript.Filter = "Script Files|*.scr|All files|*.*";
+      this.sfdSaveScript.Filter = "Image Resizer Script Files|*.irs|All files|*.*";
       this.sfdSaveScript.RestoreDirectory = true;
       this.sfdSaveScript.Title = "Enter filename";
       // 

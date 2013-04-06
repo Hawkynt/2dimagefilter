@@ -24,6 +24,17 @@ using System.Collections.Generic;
 namespace System {
   internal static partial class StringExtensions {
     /// <summary>
+    /// Determines whether the given string is <c>null</c> or whitespace-only.
+    /// </summary>
+    /// <param name="This">The this.</param>
+    /// <returns>
+    ///   <c>true</c> if the given string is <c>null</c> or whitespace-only; otherwise, <c>false</c>.
+    /// </returns>
+    public static bool IsNullOrWhiteSpace(this string This) {
+      return (string.IsNullOrWhiteSpace(This));
+    }
+
+    /// <summary>
     /// Splits a string by a given delimiter and respects any quotes.
     /// </summary>
     /// <param name="This">This String.</param>
