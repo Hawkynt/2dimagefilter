@@ -15,7 +15,7 @@ With Indexed it means that the image can only store a limited number of colours 
 
 ===BMP - Lossless / Indexed and Direct===
 
-http://i.stack.imgur.com/J1EEX.png
+https://lh4.googleusercontent.com/-TNyJZfX2E-M/UWAjWNePrOI/AAAAAAAAAjI/luCx_xqXvUo/s800/BMPvsGIF.png
 
 *BMP* is an old format. It is Lossless (no image data is lost on save) but there's also little to no compression at all, meaning saving as BMP results in VERY large file sizes. It can have palettes of both Indexed and Direct, but that's a small consolation. The file sizes are so unnecessarily large that nobody ever really uses this format.
 
@@ -23,7 +23,7 @@ Good for: Nothing really. There isn't anything BMP excels at, or isn't done bett
 
 ===GIF - Lossless / Indexed only===
 
-http://i.stack.imgur.com/F7VtM.png
+https://lh6.googleusercontent.com/-bys_2vwYhHM/UWAjbBLZe9I/AAAAAAAAAjQ/6HLJ0370CB4/s800/GIFvsJPEG.png
 
 *GIF* uses lossless compression, meaning that you can save the image over and over and never lose any data. The file sizes are much smaller than BMP, because good compression is actually used, but it can only store an Indexed palette. This means that there can only be a maximum of 256 different colours in the file. That sounds like quite a small amount, and it is.
 
@@ -33,7 +33,7 @@ Good for: Logos, line drawings, and other simple images that need to be small. O
 
 ===PNG-8 - Lossless / Indexed===
 
-http://i.stack.imgur.com/B09oZ.png
+https://lh3.googleusercontent.com/-6nVIc1DdLfQ/UWAk8sy4ujI/AAAAAAAAAjg/tJUheUUPWsE/s800/PNG-8vsGIF.png
 
 *PNG* is a newer format, and PNG-8 (the indexed version of PNG) is really a good replacement for GIFs. Sadly, however, it has a few drawbacks: Firstly it cannot support animation like GIF can (well it can, but only Firefox seems to support it, unlike GIF animation which is supported by every browser). Secondly it has some support issues with older browsers like IE6. Thirdly, important software like Photoshop have very poor implementation of the format. (Damn you, Adobe!) PNG-8 can only store 256 colours, like GIFs.
 
@@ -53,7 +53,7 @@ Just like PNG-8, PNG-24 supports alpha-transparency, too.
 
 ===JPEG - Lossy / Direct===
 
-http://i.stack.imgur.com/agaQv.png
+https://lh3.googleusercontent.com/-qB_out6DkuI/UWAk5hh4ukI/AAAAAAAAAjY/XccBigjNB-w/s800/JPEGvsGIF.png
 
 *JPEG* or *JPG* images were designed to make detailed photographic images as small as possible by removing information that the human eye won't notice. As a result it's a Lossy format, and saving the same file over and over will result in more data being lost over time. It has a palette of thousands of colours and so is great for photographs, but the lossy compression means it's bad for logos and line drawings: Not only will they look fuzzy, but such images will also have a larger file-size compared to GIFs!
 
