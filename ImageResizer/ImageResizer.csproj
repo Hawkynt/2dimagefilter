@@ -139,6 +139,7 @@
     <Compile Include="Imager\Classes\FloatImage.cs" />
     <Compile Include="Imager\Classes\Kernels.cs" />
     <Compile Include="Imager\Classes\Windows.cs" />
+    <Compile Include="Imager\Filters\ReverseAntiAlias.cs" />
     <Compile Include="Imager\Image.Resizer.Resample.cs" />
     <Compile Include="Imager\Image.Bitmaps.cs" />
     <Compile Include="Imager\Image.Resizer.Interpolation.cs" />

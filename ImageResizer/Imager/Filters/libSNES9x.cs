@@ -20,7 +20,7 @@
 #endregion
 
 namespace Imager.Filters {
-  static class libSNES9x {
+  internal static class libSNES9x {
     /// <summary>
     /// SNES9x's EPXB modified by Hawkynt to support thresholds
     /// </summary>

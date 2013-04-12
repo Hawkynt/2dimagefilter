@@ -20,7 +20,7 @@
 #endregion
 
 namespace Imager.Filters {
-  static class libMAME {
+  internal static class libMAME {
     private const float _gamma58 = 5f / 8f;
     private const float _gamma516 = 5f / 16f;
 

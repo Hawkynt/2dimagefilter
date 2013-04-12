@@ -20,7 +20,7 @@
 #endregion
 
 namespace Imager.Filters {
-  static class libBasic {
+  internal static class libBasic {
     /// <summary>
     /// Horizontal scanlines
     /// </summary>

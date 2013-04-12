@@ -128,5 +128,11 @@ namespace Imager.Interface {
     [Description("SNES9x-ReRecording's EPX-3 scaler.")]
     Epx3,
     #endregion
+
+    #region reverse AA
+    [EnumDisplayName("Reverse AA")]
+    [Description("Hyllian's OpenGL reverse anti-alias filter.")]
+    ReverseAntiAlias,
+    #endregion
   }
 }
