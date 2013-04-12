@@ -20,7 +20,7 @@
 #endregion
 
 namespace Imager.Filters {
-  static class libEagle {
+  internal static class libEagle {
     /// <summary>
     /// good old Eagle Engine modified by Hawkynt to support thresholds
     /// </summary>

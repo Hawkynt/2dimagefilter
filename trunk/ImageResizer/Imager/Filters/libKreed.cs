@@ -20,7 +20,7 @@
 #endregion
 
 namespace Imager.Filters {
-  static class libKreed {
+  internal static class libKreed {
     // used for 2xSaI, Super Eagle, Super 2xSaI
     // using thresholds when comparing (Hawkynt)
     private static int _Conc2D(sPixel c00, sPixel c01, sPixel c10, sPixel c11) {

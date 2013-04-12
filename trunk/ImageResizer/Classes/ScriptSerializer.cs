@@ -35,6 +35,10 @@ namespace Classes {
   internal class ScriptSerializer {
     #region consts
     /// <summary>
+    /// Default file extensions for script files.
+    /// </summary>
+    public const string DEFAULT_FILE_EXTENSION = ".irs";
+    /// <summary>
     /// Used to identify the dimensions
     /// </summary>
     private static readonly Regex _DIMENSIONS_REGEX = new Regex(@"^(auto)|(w(?<width>[0-9]+))|(h(?<height>[0-9]+))|((?<width>[0-9]+)x(?<height>[0-9]+))|((?<percent>)%)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);

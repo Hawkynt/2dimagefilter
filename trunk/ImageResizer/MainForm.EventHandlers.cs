@@ -195,11 +195,12 @@ namespace ImageResizer {
 
     private void iwhSourceImage_DragEnter(object sender, DragEventArgs e) {
       if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
-        var files = (Array)e.Data.GetData(DataFormats.FileDrop);
-        if (files != null && files.Length > 0 && _IsSupportedFileExtension(Path.GetExtension((string)files.GetValue(0)))) {
-          e.Effect = DragDropEffects.Copy;
+        var files = _GetSupportedFiles(e);
+        if (files == null || files.Length < 1)
           return;
-        }
+
+        e.Effect = DragDropEffects.Copy;
+        return;
       }
       if (e.Data.GetDataPresent(DataFormats.Bitmap)) {
         e.Effect = DragDropEffects.Copy;
@@ -210,10 +211,14 @@ namespace ImageResizer {
 
     private void iwhSourceImage_DragDrop(object sender, DragEventArgs e) {
       if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
-        var files = (Array)e.Data.GetData(DataFormats.FileDrop);
-        if (files == null || files.Length <= 0 || !_IsSupportedFileExtension(Path.GetExtension((string)files.GetValue(0))))
+        var files = _GetSupportedFiles(e);
+        if (files == null || files.Length < 1)
           return;
-        this._LoadImageFromFileName((string)files.GetValue(0));
+
+        if (_IsSupportedFileExtension(Path.GetExtension(files[0])))
+          this._LoadImageFromFileName(files[0]);
+        else
+          this._ApplyScriptFile(files[0]);
         return;
       }
       if (e.Data.GetDataPresent(DataFormats.Bitmap)) {

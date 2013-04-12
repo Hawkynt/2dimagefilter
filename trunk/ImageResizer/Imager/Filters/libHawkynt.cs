@@ -20,7 +20,7 @@
 #endregion
 
 namespace Imager.Filters {
-  static class libHawkynt {
+  internal static class libHawkynt {
     /// <summary>
     /// just a bad old-school TV effect
     /// </summary>

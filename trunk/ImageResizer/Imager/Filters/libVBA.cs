@@ -20,7 +20,7 @@
 #endregion
 
 namespace Imager.Filters {
-  static class libVBA {
+  internal static class libVBA {
     /// <summary>
     /// Bilinear Plus Original
     /// </summary>

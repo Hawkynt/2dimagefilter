@@ -77,6 +77,8 @@ namespace Imager {
       {PixelScalerType.EpxB,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libSNES9x.EpxB)},
       {PixelScalerType.EpxC,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libSNES9x.EpxC)},
       {PixelScalerType.Epx3,Tuple.Create<byte, byte, ParameterlessPixelScaler>(3,3,libSNES9x.Epx3)},
+
+      {PixelScalerType.ReverseAntiAlias,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,ReverseAntiAlias.Process)},
     };
 
     /// <summary>

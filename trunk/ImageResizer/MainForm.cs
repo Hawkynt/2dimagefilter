@@ -23,6 +23,8 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 using Classes;
@@ -151,6 +153,17 @@ namespace ImageResizer {
         return;
       }
 
+      var command = new ResizeCommand(applyToTarget, method, targetWidth, targetHeight, 0, maintainAspect, horizontalBph, verticalBph, repetitionCount, useThresholds, useCenteredGrid, radius);
+
+      this._ExecuteScriptActions(command);
+    }
+
+    /// <summary>
+    /// Executes the given script actions.
+    /// </summary>
+    /// <param name="commands">The commands.</param>
+    private void _ExecuteScriptActions(params IScriptAction[] commands) {
+      Contract.Requires(commands != null);
 
       // tell the user that we're busy
       this.msMain.Enabled =
@@ -162,13 +175,16 @@ namespace ImageResizer {
         var stopwatch = new Stopwatch();
         stopwatch.Restart();
 
-        this._scriptEngine.ExecuteAction(new ResizeCommand(applyToTarget, method, targetWidth, targetHeight,0, maintainAspect, horizontalBph, verticalBph, repetitionCount, useThresholds, useCenteredGrid, radius));
+        foreach (var command in commands)
+          this._scriptEngine.ExecuteAction(command);
 
-        var result = this._scriptEngine.GdiTarget;
+        var gdiSource = this._scriptEngine.GdiSource;
+        var gdiTarget = this._scriptEngine.GdiTarget;
         stopwatch.Stop();
 
         this.SafelyInvoke(() => {
-          this._TargetImage = result;
+          this._SourceImage = gdiSource;
+          this._TargetImage = gdiTarget;
 
           this.tssBenchmark.Text = stopwatch.ElapsedMilliseconds + "ms";
           this.tssBenchmark.Visible = true;
@@ -321,6 +337,29 @@ namespace ImageResizer {
       if (extension == ".TIF" || extension == ".TIFF")
         return (true);
       return (false);
+    }
+
+    /// <summary>
+    /// Gets all supported file names from a Drag'N'Drop operation.
+    /// </summary>
+    /// <param name="e">The <see cref="System.Windows.Forms.DragEventArgs"/> instance containing the event data.</param>
+    /// <returns>The list of files which could be accepted.</returns>
+    private static string[] _GetSupportedFiles(DragEventArgs e) {
+      var files = e == null ? null : ((Array)e.Data.GetData(DataFormats.FileDrop)).OfType<string>().ToArray();
+      if (files == null || files.Length < 1)
+        return (null);
+      return (files.Where(f => _IsSupportedFileExtension(Path.GetExtension(f)) || string.Equals(ScriptSerializer.DEFAULT_FILE_EXTENSION, Path.GetExtension(f))).ToArray());
+    }
+
+    /// <summary>
+    /// Applies the given script file to the source image.
+    /// </summary>
+    /// <param name="fileName">Name of the file.</param>
+    private void _ApplyScriptFile(string fileName) {
+      var localEngine = new ScriptEngine();
+      localEngine.AddWithoutExecution(new NullTransformCommand());
+      ScriptSerializer.LoadFromFile(localEngine, fileName);
+      this._ExecuteScriptActions(localEngine.Actions.ToArray());
     }
   }
 }

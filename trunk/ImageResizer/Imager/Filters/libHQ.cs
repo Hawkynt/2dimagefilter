@@ -20,12 +20,12 @@
 #endregion
 
 namespace Imager.Filters {
-  static class libHQ {
+  internal static class libHQ {
     #region Common
     /// <summary>
     /// body for HQ2x etc.
     /// </summary>
-    internal static void ComplexFilter(ref cImage.NqFilterData filterData) {
+    public static void ComplexFilter(ref cImage.NqFilterData filterData) {
       var sourceImage = filterData.sourceImage;
       var srcX = filterData.srcX;
       var srcY = filterData.srcY;
@@ -70,7 +70,7 @@ namespace Imager.Filters {
     /// <summary>
     /// body for HQ2xBold etc. as seen in SNES9x
     /// </summary>
-    internal static void ComplexFilterBold(ref cImage.NqFilterData filterData) {
+    public static void ComplexFilterBold(ref cImage.NqFilterData filterData) {
       var sourceImage = filterData.sourceImage;
       var srcX = filterData.srcX;
       var srcY = filterData.srcY;
@@ -139,7 +139,7 @@ namespace Imager.Filters {
     /// <summary>
     /// body for HQ2xSmart etc. as seen in SNES9x
     /// </summary>
-    internal static void ComplexFilterSmart(ref cImage.NqFilterData filterData) {
+    public static void ComplexFilterSmart(ref cImage.NqFilterData filterData) {
       var sourceImage = filterData.sourceImage;
       var srcX = filterData.srcX;
       var srcY = filterData.srcY;
@@ -159,7 +159,7 @@ namespace Imager.Filters {
     #region filter casepathes
 
     #region standard HQ2x casepath
-    internal static sPixel[] Hq2xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static sPixel[] Hq2xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
       sPixel e01, e10, e11;
       var e00 = e01 = e10 = e11 = c4;
       switch (pattern) {
@@ -1492,7 +1492,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard HQ2x3 casepath
-    internal static sPixel[] Hq2x3Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static sPixel[] Hq2x3Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
       sPixel e01, e10, e11, e20, e21;
       var e00 = e01 = e10 = e11 = e20 = e21 = c4;
       switch (pattern) {
@@ -3664,7 +3664,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard HQ2x4 casepath
-    internal static sPixel[] Hq2x4Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static sPixel[] Hq2x4Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
       sPixel e01, e10, e11, e20, e21, e30, e31;
       var e00 = e01 = e10 = e11 = e20 = e21 = e30 = e31 = c4;
       switch (pattern) {
@@ -6283,7 +6283,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard HQ3x casepath
-    internal static sPixel[] Hq3xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static sPixel[] Hq3xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
       sPixel e01, e02, e10, e11, e12, e20, e21, e22;
       var e00 = e01 = e02 = e10 = e11 = e12 = e20 = e21 = e22 = c4;
       switch (pattern) {
@@ -8874,7 +8874,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard HQ4x casepath
-    internal static sPixel[] Hq4xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static sPixel[] Hq4xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
       sPixel e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23, e30, e31, e32, e33;
       var e00 = e01 = e02 = e03 = e10 = e11 = e12 = e13 = e20 = e21 = e22 = e23 = e30 = e31 = e32 = e33 = c4;
       switch (pattern) {
@@ -12989,7 +12989,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard LQ2x casepath
-    internal static sPixel[] Lq2xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static sPixel[] Lq2xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
       sPixel e01, e10, e11;
       var e00 = e01 = e10 = e11 = c4;
       switch (pattern) {
@@ -13803,7 +13803,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard LQ2x3 casepath
-    internal static sPixel[] Lq2x3Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static sPixel[] Lq2x3Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
       sPixel e01, e10, e11, e20, e21;
       var e00 = e01 = e10 = e11 = e20 = e21 = c4;
       switch (pattern) {
@@ -15131,7 +15131,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard LQ2x4 casepath
-    internal static sPixel[] Lq2x4Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static sPixel[] Lq2x4Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
       sPixel e01, e10, e11, e20, e21, e30, e31;
       var e00 = e01 = e10 = e11 = e20 = e21 = e30 = e31 = c4;
       switch (pattern) {
@@ -16744,7 +16744,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard LQ3x casepath
-    internal static sPixel[] Lq3xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static sPixel[] Lq3xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
       sPixel e01, e02, e10, e11, e12, e20, e21, e22;
       var e00 = e01 = e02 = e10 = e11 = e12 = e20 = e21 = e22 = c4;
       switch (pattern) {
@@ -18241,7 +18241,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard LQ4x casepath
-    internal static sPixel[] Lq4xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static sPixel[] Lq4xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
       sPixel e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23, e30, e31, e32, e33;
       var e00 = e01 = e02 = e03 = e10 = e11 = e12 = e13 = e20 = e21 = e22 = e23 = e30 = e31 = e32 = e33 = c4;
       switch (pattern) {

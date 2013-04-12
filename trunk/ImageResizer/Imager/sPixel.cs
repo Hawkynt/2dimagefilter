@@ -123,7 +123,7 @@ namespace Imager {
     /// <summary>
     /// Purple
     /// </summary>
-    public static readonly sPixel Purple = FromRGB(255, 0, 255);
+    public static readonly sPixel Purple = FromRGBA(255, 0, 255);
     /// <summary>
     /// <c>true</c> when IsLike and IsNotLike should allow little differencies in comparison; otherwise, <c>false</c>.
     /// </summary>
@@ -374,8 +374,20 @@ namespace Imager {
     /// <param name="blue">The blue-value.</param>
     /// <param name="alpha">The alpha-value.</param>
     /// <returns></returns>
-    public static sPixel FromRGB(byte red, byte green, byte blue, byte alpha = 255) {
+    public static sPixel FromRGBA(byte red, byte green, byte blue, byte alpha = 255) {
       return (new sPixel(red, green, blue, alpha));
+    }
+
+    /// <summary>
+    /// Factory to create a <see cref="sPixel"/> instance from red, green and blue value.
+    /// </summary>
+    /// <param name="red">The red-value.</param>
+    /// <param name="green">The green-value.</param>
+    /// <param name="blue">The blue-value.</param>
+    /// <param name="alpha">The alpha-value.</param>
+    /// <returns></returns>
+    public static sPixel FromRGBA(int red, int green, int blue, int alpha = 255) {
+      return (new sPixel(_Float2Byte(red), _Float2Byte(green), _Float2Byte(blue), _Float2Byte(alpha)));
     }
     /// <summary>
     /// Factory to create a <see cref="sPixel"/> instance from grey value.
