@@ -21,21 +21,23 @@ The user interface is very straightforward, you just:
 ===Command Line Interface===
 
 {{{
-ImageResizer [/load <source>] [/resize <dimensions> <method>[(<repeat>|<paramlist>)]] [/save <target>] ...
+ImageResizer [/load <source>] [/resize <dimensions> <method>[(<repeat>|<paramlist>)]] [/save <target>] [/script <scriptfile>]...
 }}}
 
 Example:
 
-{{{ImageResizer /load image_in.bmp /resize 72x92 "XBR 3x(2,thresholds=0,vbounds=wrap)" /save imageout.png}}}
+{{{ImageResizer /load image_in.bmp /resize auto "XBR 3x(2,thresholds=0,vbounds=wrap)" /save imageout.png}}}
 
 Notes:
 
 ||  {{{/load}}}          || Loads a file into the buffer.||
 ||    {{{<source>}}}     || the source file to resize||
-||  {{{/save}}}}         || Saves the image in the buffer to a file.||
+||  {{{/save}}}         || Saves the image in the buffer to a file.||
 ||    {{{<target>}}}     || the target file to write||
+||  {{{/script}}}         || Executes a file containing more commands.||
+||    {{{<scriptfile>}}}     || the script file to use||
 ||  {{{/resize}}}        || Resizes the image in the buffer and stores the result back to the buffer.||
-||    {{{<dimensions>}}} || {{{auto | w<x>} | <h<y>} | <x>x<y> | <p>%}}}||
+||    {{{<dimensions>}}} || {{{auto | <x>w | <y>h | <x>x<y> | <p>%}}}||
 || ||                   If only width or height is specified, the other dimension is auto-detected by aspect ratio||
 ||      {{{auto}}}       || determine target dimensions from used resizing filter||
 ||      {{{<x>}}}        || the final width in pixels for the target||
