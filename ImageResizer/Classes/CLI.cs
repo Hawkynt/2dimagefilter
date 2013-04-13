@@ -155,6 +155,8 @@ namespace Classes {
         .Replace("{load}", ScriptSerializer.LOAD_COMMAND_NAME)
         .Replace("{script}", ScriptSerializer.SCRIPT_COMMAND_NAME)
         .Replace("{resize}", ScriptSerializer.RESIZE_COMMAND_NAME)
+        .Replace("{stdin}", ScriptSerializer.STDIN_COMMAND_NAME)
+        .Replace("{stdout}", ScriptSerializer.STDOUT_COMMAND_NAME)
         ;
       Console.WriteLine(lines);
     }
