@@ -20,7 +20,7 @@
 How to use :
 ============
 
-{location} [{load} <source>] [{resize} <dimensions> <method>[(<repeat>|<paramlist>)]] [{save} <target>] [{script} <script>]...
+{location} [{load} <source>] [{stdin}] [{resize} <dimensions> <method>[(<repeat>|<paramlist>)]] [{save} <target>] [{script} <script>] [{stdout}]...
 
 ============
 Explanation:
@@ -29,6 +29,8 @@ Explanation:
   {load}          - Loads a file into the buffer.
     <source>     - the source file to resize
 
+  {stdin}         - Loads an image from STDIN.
+  {stdout}        - Saves an image in Portable Network Graphics (.png) to STDOUT.
   {save}          - Saves the image in the buffer to a file.
     <target>     - the target file to write
 

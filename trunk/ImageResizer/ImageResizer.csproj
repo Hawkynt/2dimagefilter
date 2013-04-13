@@ -110,6 +110,8 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\ScriptActions\LoadStdInCommand.cs" />
+    <Compile Include="Classes\ScriptActions\SaveStdOutCommand.cs" />
     <Compile Include="Classes\ScriptActions\NullTransformCommand.cs" />
     <Compile Include="Classes\ScriptSerializerException.cs" />
     <Compile Include="Classes\CLIExitCode.cs" />

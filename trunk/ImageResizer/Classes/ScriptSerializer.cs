@@ -63,6 +63,8 @@ namespace Classes {
     internal const string SCRIPT_COMMAND_NAME = "/script";
     internal const string SAVE_COMMAND_NAME = "/save";
     internal const string RESIZE_COMMAND_NAME = "/resize";
+    internal const string STDOUT_COMMAND_NAME = "/stdout";
+    internal const string STDIN_COMMAND_NAME = "/stdin";
 
     #endregion
     /// <summary>
@@ -140,6 +142,19 @@ namespace Classes {
           continue;
 
         switch (command) {
+          #region /STDIN
+          case STDIN_COMMAND_NAME: {
+            engine.AddWithoutExecution(new LoadStdInCommand());
+            engine.AddWithoutExecution(new NullTransformCommand());
+            break;
+          }
+          #endregion
+          #region /STDOUT
+          case STDOUT_COMMAND_NAME: {
+            engine.AddWithoutExecution(new SaveStdOutCommand());
+            break;
+          }
+          #endregion
           #region /LOAD
           case LOAD_COMMAND_NAME: {
             if (length - i < 1) {
