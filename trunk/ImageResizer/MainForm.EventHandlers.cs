@@ -170,27 +170,27 @@ namespace ImageResizer {
     }
 
     private void stretchToolStripMenuItem_Click(object sender, EventArgs e) {
-      Config.SourceSizeMode = (this.iwhSourceImage.SizeMode = PictureBoxSizeMode.StretchImage);
+      this._SourceImageSizeMode = PictureBoxSizeMode.StretchImage;
     }
 
     private void centerToolStripMenuItem_Click(object sender, EventArgs e) {
-      Config.SourceSizeMode = (this.iwhSourceImage.SizeMode = PictureBoxSizeMode.CenterImage);
+      this._SourceImageSizeMode = PictureBoxSizeMode.CenterImage;
     }
 
     private void zoomToolStripMenuItem_Click(object sender, EventArgs e) {
-      Config.SourceSizeMode = (this.iwhSourceImage.SizeMode = PictureBoxSizeMode.Zoom);
+      this._SourceImageSizeMode = PictureBoxSizeMode.Zoom;
     }
 
     private void stretchToolStripMenuItem1_Click(object sender, EventArgs e) {
-      Config.TargetSizeMode = (this.iwhTargetImage.SizeMode = PictureBoxSizeMode.StretchImage);
+      this._TargetImageSizeMode = PictureBoxSizeMode.StretchImage;
     }
 
     private void centerToolStripMenuItem1_Click(object sender, EventArgs e) {
-      Config.TargetSizeMode = (this.iwhTargetImage.SizeMode = PictureBoxSizeMode.CenterImage);
+      this._TargetImageSizeMode = PictureBoxSizeMode.CenterImage;
     }
 
     private void zoomToolStripMenuItem1_Click(object sender, EventArgs e) {
-      Config.TargetSizeMode = (this.iwhTargetImage.SizeMode = PictureBoxSizeMode.Zoom);
+      this._TargetImageSizeMode = PictureBoxSizeMode.Zoom;
     }
 
     private void iwhSourceImage_DragEnter(object sender, DragEventArgs e) {
@@ -264,7 +264,7 @@ namespace ImageResizer {
     }
 
     private void wikiToolStripMenuItem_Click(object sender, EventArgs e) {
-      Process.Start("https://code.google.com/p/2dimagefilter/w/list");
+      Process.Start(Resources.urlWiki);
     }
 
     private void executeToolStripMenuItem_Click(object sender, EventArgs e) {

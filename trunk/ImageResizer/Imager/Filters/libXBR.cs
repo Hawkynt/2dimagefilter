@@ -1,5 +1,4 @@
-﻿#define ORIGINAL_IMPL
-#region (c)2008-2013 Hawkynt
+﻿#region (c)2008-2013 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
@@ -21,9 +20,6 @@
 #endregion
 
 
-#if ORIGINAL_IMPL
-
-#endif
 #if !NET35
 using System.Diagnostics.Contracts;
 #endif
@@ -83,7 +79,7 @@ namespace Imager.Filters {
     /// <summary>
     /// This is the XBR3x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
-    public static void Xbr3X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, bool allowAlphaBlending) {
+    public static void Xbr3X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, bool allowAlphaBlending, bool useOriginalImplementation) {
 #if !NET35
       Contract.Assume(sourceImage != null);
       Contract.Assume(targetImage != null);
@@ -119,10 +115,10 @@ namespace Imager.Filters {
       sPixel e1, e2, e3, e4, e5, e6, e7, e8;
       var e0 = e1 = e2 = e3 = e4 = e5 = e6 = e7 = e8 = pe;
 
-      _Kernel3X(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref e2, ref e5, ref e6, ref e7, ref e8, allowAlphaBlending);
-      _Kernel3X(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e0, ref e1, ref e8, ref e5, ref e2, allowAlphaBlending);
-      _Kernel3X(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e6, ref e3, ref e2, ref e1, ref e0, allowAlphaBlending);
-      _Kernel3X(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref e8, ref e7, ref e0, ref e3, ref e6, allowAlphaBlending);
+      _Kernel3X(pe, pi, ph, pf, pg, pc, pd, pb, f4, i4, h5, i5, ref e2, ref e5, ref e6, ref e7, ref e8, allowAlphaBlending, useOriginalImplementation);
+      _Kernel3X(pe, pc, pf, pb, pi, pa, ph, pd, b1, c1, f4, c4, ref e0, ref e1, ref e8, ref e5, ref e2, allowAlphaBlending, useOriginalImplementation);
+      _Kernel3X(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e6, ref e3, ref e2, ref e1, ref e0, allowAlphaBlending, useOriginalImplementation);
+      _Kernel3X(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref e8, ref e7, ref e0, ref e3, ref e6, allowAlphaBlending, useOriginalImplementation);
 
       targetImage[tgtX + 0, tgtY + 0] = e0;
       targetImage[tgtX + 1, tgtY + 0] = e1;
@@ -302,18 +298,21 @@ namespace Imager.Filters {
       _AlphaBlend32W(ref n7, pixel, blend);
     }
 
-    private static void _Kernel3X(sPixel pe, sPixel pi, sPixel ph, sPixel pf, sPixel pg, sPixel pc, sPixel pd, sPixel pb, sPixel f4, sPixel i4, sPixel h5, sPixel i5, ref sPixel n2, ref sPixel n5, ref sPixel n6, ref sPixel n7, ref sPixel n8, bool blend) {
+    private static void _Kernel3X(sPixel pe, sPixel pi, sPixel ph, sPixel pf, sPixel pg, sPixel pc, sPixel pd, sPixel pb, sPixel f4, sPixel i4, sPixel h5, sPixel i5, ref sPixel n2, ref sPixel n5, ref sPixel n6, ref sPixel n7, ref sPixel n8, bool blend, bool useOriginalImplementation) {
       var ex = (pe != ph && pe != pf);
       if (!ex)
         return;
 
       var e = (_YuvDifference(pe, pc) + _YuvDifference(pe, pg) + _YuvDifference(pi, h5) + _YuvDifference(pi, f4)) + (_YuvDifference(ph, pf) << 2);
       var i = (_YuvDifference(ph, pd) + _YuvDifference(ph, i5) + _YuvDifference(pf, i4) + _YuvDifference(pf, pb)) + (_YuvDifference(pe, pi) << 2);
-#if ORIGINAL_IMPL
-      if ((e < i) && (!_IsEqual(pf, pb) && !_IsEqual(ph, pd) || _IsEqual(pe, pi) && (!_IsEqual(pf, i4) && !_IsEqual(ph, i5)) || _IsEqual(pe, pg) || _IsEqual(pe, pc))) {
-#else
-      if ((e < i) && (!_IsEqual(pf, pb) && !_IsEqual(pf, pc) || !_IsEqual(ph, pd) && !_IsEqual(ph, pg) || _IsEqual(pe, pi) && (!_IsEqual(pf, f4) && !_IsEqual(pf, i4) || !_IsEqual(ph, h5) && !_IsEqual(ph, i5)) || _IsEqual(pe, pg) || _IsEqual(pe, pc))) {
-#endif
+
+      bool state;
+      if (useOriginalImplementation)
+        state = ((e < i) && (!_IsEqual(pf, pb) && !_IsEqual(ph, pd) || _IsEqual(pe, pi) && (!_IsEqual(pf, i4) && !_IsEqual(ph, i5)) || _IsEqual(pe, pg) || _IsEqual(pe, pc)));
+      else
+        state = ((e < i) && (!_IsEqual(pf, pb) && !_IsEqual(pf, pc) || !_IsEqual(ph, pd) && !_IsEqual(ph, pg) || _IsEqual(pe, pi) && (!_IsEqual(pf, f4) && !_IsEqual(pf, i4) || !_IsEqual(ph, h5) && !_IsEqual(ph, i5)) || _IsEqual(pe, pg) || _IsEqual(pe, pc)));
+
+      if (state) {
         var ke = _YuvDifference(pf, pg);
         var ki = _YuvDifference(ph, pc);
         var ex2 = (pe != pc && pb != pc);

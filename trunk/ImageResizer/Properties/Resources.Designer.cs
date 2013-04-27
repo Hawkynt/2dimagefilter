@@ -244,6 +244,24 @@ namespace ImageResizer.Properties {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to https://code.google.com/p/2dimagefilter/.
+        /// </summary>
+        internal static string urlProject {
+            get {
+                return ResourceManager.GetString("urlProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://code.google.com/p/2dimagefilter/w/list.
+        /// </summary>
+        internal static string urlWiki {
+            get {
+                return ResourceManager.GetString("urlWiki", resourceCulture);
+            }
+        }
+        
         internal static System.Drawing.Bitmap Vertical {
             get {
                 object obj = ResourceManager.GetObject("Vertical", resourceCulture);

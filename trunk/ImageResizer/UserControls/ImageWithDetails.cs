@@ -36,7 +36,10 @@ namespace ImageResizer.UserControls {
     [DefaultValue(PictureBoxSizeMode.Normal)]
     public PictureBoxSizeMode SizeMode {
       get { return (this.pbImage.SizeMode); }
-      set { this.pbImage.SizeMode = value; }
+      set {
+        this.pbImage.SizeMode = value;
+        this._CenterPictureBox();
+      }
     }
 
     [DefaultValue(null)]
@@ -44,6 +47,8 @@ namespace ImageResizer.UserControls {
       get { return (this.pbImage.Image); }
       set {
         this.pbImage.Image = value;
+        this._CenterPictureBox();
+
         if (value == null) {
           this.lDetails.Text = string.Empty;
           return;
@@ -70,7 +75,35 @@ namespace ImageResizer.UserControls {
         handler(this, e);
     }
 
+    private void _CenterPictureBox() {
+      var pictureBox = this.pbImage;
+      var panel = this.pnImage;
 
+      if (this.SizeMode == PictureBoxSizeMode.AutoSize || this.SizeMode == PictureBoxSizeMode.StretchImage || this.SizeMode == PictureBoxSizeMode.Zoom) {
+        pictureBox.Dock = DockStyle.Fill;
+        panel.AutoScroll = false;
+        return;
+      }
+
+      var image = this.Image;
+      if (image == null) {
+        pictureBox.Dock = DockStyle.Fill;
+        panel.AutoScroll = false;
+        return;
+      }
+
+      pictureBox.Dock = DockStyle.None;
+      pictureBox.Width = image.Width;
+      pictureBox.Height = image.Height;
+      pictureBox.Left = Math.Max(0, (panel.Width - image.Width) / 2);
+      pictureBox.Top = Math.Max(0, (panel.Height - image.Height) / 2);
+
+      panel.AutoScroll = image.Width > panel.Width || image.Height > panel.Height;
+    }
+
+    private void pnImage_SizeChanged(object sender, EventArgs e) {
+      this._CenterPictureBox();
+    }
 
   }
 }
