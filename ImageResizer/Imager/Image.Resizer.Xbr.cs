@@ -46,7 +46,8 @@ namespace Imager {
     /// </summary>
     internal static readonly Dictionary<XbrScalerType, Tuple<byte, byte, XbrFilter>> XBR_SCALERS = new Dictionary<XbrScalerType, Tuple<byte, byte, XbrFilter>> {
       {XbrScalerType.Xbr2, Tuple.Create<byte, byte, XbrFilter>(2, 2, libXBR.Xbr2X)},
-      {XbrScalerType.Xbr3, Tuple.Create<byte, byte, XbrFilter>(3, 3, libXBR.Xbr3X)},
+      {XbrScalerType.Xbr3, Tuple.Create<byte, byte, XbrFilter>(3, 3, (s, sx, sy, t, tx, ty, a) => libXBR.Xbr3X(s, sx, sy, t, tx, ty, a, true))},
+      {XbrScalerType.Xbr3Modified, Tuple.Create<byte, byte, XbrFilter>(3, 3, (s, sx, sy, t, tx, ty, a) => libXBR.Xbr3X(s, sx, sy, t, tx, ty, a, false))},
       {XbrScalerType.Xbr4, Tuple.Create<byte, byte, XbrFilter>(4, 4, libXBR.Xbr4X)},
     };
 

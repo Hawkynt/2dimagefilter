@@ -26,12 +26,14 @@ using System.Windows.Forms;
 
 using Classes;
 
+using ImageResizer.Properties;
+
 namespace ImageResizer.Windows {
   public partial class AboutWindow : Form {
     public AboutWindow() {
       InitializeComponent();
 
-      var link = new LinkLabel.Link { LinkData = @"https://code.google.com/p/2dimagefilter/" };
+      var link = new LinkLabel.Link { LinkData = Resources.urlProject };
       this.llaHomepage.Links.Add(link);
 
       this.lblInfo.Text = this.lblInfo.Text

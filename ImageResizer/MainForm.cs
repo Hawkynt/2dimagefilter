@@ -89,6 +89,57 @@ namespace ImageResizer {
         this.iwhTargetImage.Image = value;
       }
     }
+
+    private PictureBoxSizeMode _SourceImageSizeMode {
+      get { return (this.iwhSourceImage.SizeMode); }
+      set {
+        Config.SourceSizeMode = this.iwhSourceImage.SizeMode = value;
+        this.stretchToolStripMenuItem.Checked =
+          this.centerToolStripMenuItem.Checked =
+            this.zoomToolStripMenuItem.Checked = false;
+
+        switch (value) {
+          case PictureBoxSizeMode.StretchImage: {
+            this.stretchToolStripMenuItem.Checked = true;
+            break;
+          }
+          case PictureBoxSizeMode.CenterImage: {
+            this.centerToolStripMenuItem.Checked = true;
+            break;
+          }
+          case PictureBoxSizeMode.Zoom: {
+            this.zoomToolStripMenuItem.Checked = true;
+            break;
+          }
+        }
+      }
+    }
+
+    private PictureBoxSizeMode _TargetImageSizeMode {
+      get { return (this.iwhTargetImage.SizeMode); }
+      set {
+        Config.TargetSizeMode = this.iwhTargetImage.SizeMode = value;
+        this.stretchToolStripMenuItem1.Checked =
+          this.centerToolStripMenuItem1.Checked =
+            this.zoomToolStripMenuItem1.Checked = false;
+
+        switch (value) {
+          case PictureBoxSizeMode.StretchImage: {
+            this.stretchToolStripMenuItem1.Checked = true;
+            break;
+          }
+          case PictureBoxSizeMode.CenterImage: {
+            this.centerToolStripMenuItem1.Checked = true;
+            break;
+          }
+          case PictureBoxSizeMode.Zoom: {
+            this.zoomToolStripMenuItem1.Checked = true;
+            break;
+          }
+        }
+      }
+    }
+
     #endregion
 
     #region ctor
@@ -127,10 +178,10 @@ namespace ImageResizer {
     /// </summary>
     private void _LoadConfigurationSettings() {
       if (Config.SourceSizeMode != null)
-        this.iwhSourceImage.SizeMode = Config.SourceSizeMode.Value;
+        this._SourceImageSizeMode = Config.SourceSizeMode.Value;
 
       if (Config.TargetSizeMode != null)
-        this.iwhTargetImage.SizeMode = Config.TargetSizeMode.Value;
+        this._TargetImageSizeMode = Config.TargetSizeMode.Value;
     }
 
     /// <summary>

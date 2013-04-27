@@ -187,4 +187,10 @@
   <data name="txNoScriptToSave" xml:space="preserve">
     <value>There is no script to save.</value>
   </data>
+  <data name="urlProject" xml:space="preserve">
+    <value>https://code.google.com/p/2dimagefilter/</value>
+  </data>
+  <data name="urlWiki" xml:space="preserve">
+    <value>https://code.google.com/p/2dimagefilter/w/list</value>
+  </data>
 </root>

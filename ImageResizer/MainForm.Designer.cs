@@ -41,8 +41,8 @@
       System.Windows.Forms.Label label1;
       System.Windows.Forms.GroupBox gbMethod;
       System.Windows.Forms.GroupBox gbDescription;
-      System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-      System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+      System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+      System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
       this.tssBusy = new System.Windows.Forms.ToolStripStatusLabel();
       this.tssBenchmark = new System.Windows.Forms.ToolStripStatusLabel();
       this.iwhSourceImage = new ImageResizer.UserControls.ImageWithDetails();
@@ -267,7 +267,7 @@
       gbAdvanced.Controls.Add(this.chkUseCenteredGrid);
       gbAdvanced.Controls.Add(this.chkUseThresholds);
       gbAdvanced.Dock = System.Windows.Forms.DockStyle.Top;
-      gbAdvanced.Location = new System.Drawing.Point(0, 271);
+      gbAdvanced.Location = new System.Drawing.Point(0, 285);
       gbAdvanced.Name = "gbAdvanced";
       gbAdvanced.Size = new System.Drawing.Size(294, 130);
       gbAdvanced.TabIndex = 3;
@@ -369,7 +369,7 @@
       gbBorderPixelHandling.Controls.Add(label5);
       gbBorderPixelHandling.Controls.Add(label4);
       gbBorderPixelHandling.Dock = System.Windows.Forms.DockStyle.Top;
-      gbBorderPixelHandling.Location = new System.Drawing.Point(0, 185);
+      gbBorderPixelHandling.Location = new System.Drawing.Point(0, 199);
       gbBorderPixelHandling.Name = "gbBorderPixelHandling";
       gbBorderPixelHandling.Size = new System.Drawing.Size(294, 86);
       gbBorderPixelHandling.TabIndex = 3;
@@ -440,7 +440,7 @@
       gbTargetResolution.Controls.Add(label2);
       gbTargetResolution.Controls.Add(label1);
       gbTargetResolution.Dock = System.Windows.Forms.DockStyle.Top;
-      gbTargetResolution.Location = new System.Drawing.Point(0, 101);
+      gbTargetResolution.Location = new System.Drawing.Point(0, 115);
       gbTargetResolution.Name = "gbTargetResolution";
       gbTargetResolution.Size = new System.Drawing.Size(294, 84);
       gbTargetResolution.TabIndex = 3;
@@ -536,7 +536,7 @@
       gbMethod.Dock = System.Windows.Forms.DockStyle.Top;
       gbMethod.Location = new System.Drawing.Point(0, 0);
       gbMethod.Name = "gbMethod";
-      gbMethod.Size = new System.Drawing.Size(294, 45);
+      gbMethod.Size = new System.Drawing.Size(294, 59);
       gbMethod.TabIndex = 3;
       gbMethod.TabStop = false;
       gbMethod.Text = "Method";
@@ -557,7 +557,7 @@
       gbDescription.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
       gbDescription.Controls.Add(this.txtDescription);
       gbDescription.Dock = System.Windows.Forms.DockStyle.Top;
-      gbDescription.Location = new System.Drawing.Point(0, 45);
+      gbDescription.Location = new System.Drawing.Point(0, 59);
       gbDescription.Name = "gbDescription";
       gbDescription.Size = new System.Drawing.Size(294, 56);
       gbDescription.TabIndex = 5;
@@ -656,27 +656,27 @@
             this.centerToolStripMenuItem,
             this.zoomToolStripMenuItem});
       this.sourceImageToolStripMenuItem.Name = "sourceImageToolStripMenuItem";
-      this.sourceImageToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+      this.sourceImageToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
       this.sourceImageToolStripMenuItem.Text = "Source Image";
       // 
       // stretchToolStripMenuItem
       // 
       this.stretchToolStripMenuItem.Name = "stretchToolStripMenuItem";
-      this.stretchToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
+      this.stretchToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
       this.stretchToolStripMenuItem.Text = "Stretch";
       this.stretchToolStripMenuItem.Click += new System.EventHandler(this.stretchToolStripMenuItem_Click);
       // 
       // centerToolStripMenuItem
       // 
       this.centerToolStripMenuItem.Name = "centerToolStripMenuItem";
-      this.centerToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
+      this.centerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
       this.centerToolStripMenuItem.Text = "Actual";
       this.centerToolStripMenuItem.Click += new System.EventHandler(this.centerToolStripMenuItem_Click);
       // 
       // zoomToolStripMenuItem
       // 
       this.zoomToolStripMenuItem.Name = "zoomToolStripMenuItem";
-      this.zoomToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
+      this.zoomToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
       this.zoomToolStripMenuItem.Text = "Fit";
       this.zoomToolStripMenuItem.Click += new System.EventHandler(this.zoomToolStripMenuItem_Click);
       // 
@@ -687,7 +687,7 @@
             this.centerToolStripMenuItem1,
             this.zoomToolStripMenuItem1});
       this.targetImageToolStripMenuItem.Name = "targetImageToolStripMenuItem";
-      this.targetImageToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+      this.targetImageToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
       this.targetImageToolStripMenuItem.Text = "Target Image";
       // 
       // stretchToolStripMenuItem1
@@ -727,40 +727,40 @@
       // clearToolStripMenuItem
       // 
       this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
-      this.clearToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+      this.clearToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
       this.clearToolStripMenuItem.Text = "Clear";
       this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
       // 
       // loadToolStripMenuItem
       // 
       this.loadToolStripMenuItem.Name = "loadToolStripMenuItem";
-      this.loadToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+      this.loadToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
       this.loadToolStripMenuItem.Text = "Load";
       this.loadToolStripMenuItem.Click += new System.EventHandler(this.loadToolStripMenuItem_Click);
       // 
       // saveToolStripMenuItem1
       // 
       this.saveToolStripMenuItem1.Name = "saveToolStripMenuItem1";
-      this.saveToolStripMenuItem1.Size = new System.Drawing.Size(114, 22);
+      this.saveToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
       this.saveToolStripMenuItem1.Text = "Save";
       this.saveToolStripMenuItem1.Click += new System.EventHandler(this.saveToolStripMenuItem1_Click);
       // 
       // toolStripSeparator3
       // 
       this.toolStripSeparator3.Name = "toolStripSeparator3";
-      this.toolStripSeparator3.Size = new System.Drawing.Size(111, 6);
+      this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
       // 
       // showToolStripMenuItem
       // 
       this.showToolStripMenuItem.Name = "showToolStripMenuItem";
-      this.showToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+      this.showToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
       this.showToolStripMenuItem.Text = "Show";
       this.showToolStripMenuItem.Click += new System.EventHandler(this.showToolStripMenuItem_Click);
       // 
       // executeToolStripMenuItem
       // 
       this.executeToolStripMenuItem.Name = "executeToolStripMenuItem";
-      this.executeToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+      this.executeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
       this.executeToolStripMenuItem.Text = "Execute";
       this.executeToolStripMenuItem.Click += new System.EventHandler(this.executeToolStripMenuItem_Click);
       // 
@@ -830,9 +830,9 @@
       this.gbKernelFunction.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
       this.gbKernelFunction.Controls.Add(this.chtKernel);
       this.gbKernelFunction.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.gbKernelFunction.Location = new System.Drawing.Point(0, 449);
+      this.gbKernelFunction.Location = new System.Drawing.Point(0, 463);
       this.gbKernelFunction.Name = "gbKernelFunction";
-      this.gbKernelFunction.Size = new System.Drawing.Size(294, 101);
+      this.gbKernelFunction.Size = new System.Drawing.Size(294, 87);
       this.gbKernelFunction.TabIndex = 6;
       this.gbKernelFunction.TabStop = false;
       this.gbKernelFunction.Text = "Kernel";
@@ -840,16 +840,16 @@
       // chtKernel
       // 
       this.chtKernel.BackColor = System.Drawing.SystemColors.Control;
-      chartArea2.Name = "chaChart";
-      this.chtKernel.ChartAreas.Add(chartArea2);
+      chartArea1.Name = "chaChart";
+      this.chtKernel.ChartAreas.Add(chartArea1);
       this.chtKernel.Dock = System.Windows.Forms.DockStyle.Fill;
       this.chtKernel.Location = new System.Drawing.Point(3, 16);
       this.chtKernel.Name = "chtKernel";
-      series2.ChartArea = "chaChart";
-      series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
-      series2.Name = "dsKernelData";
-      this.chtKernel.Series.Add(series2);
-      this.chtKernel.Size = new System.Drawing.Size(288, 82);
+      series1.ChartArea = "chaChart";
+      series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
+      series1.Name = "dsKernelData";
+      this.chtKernel.Series.Add(series1);
+      this.chtKernel.Size = new System.Drawing.Size(288, 68);
       this.chtKernel.TabIndex = 0;
       this.chtKernel.Text = "chart1";
       // 
@@ -859,7 +859,7 @@
       this.gbActions.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
       this.gbActions.Controls.Add(flpActions);
       this.gbActions.Dock = System.Windows.Forms.DockStyle.Top;
-      this.gbActions.Location = new System.Drawing.Point(0, 401);
+      this.gbActions.Location = new System.Drawing.Point(0, 415);
       this.gbActions.Name = "gbActions";
       this.gbActions.Size = new System.Drawing.Size(294, 48);
       this.gbActions.TabIndex = 4;
