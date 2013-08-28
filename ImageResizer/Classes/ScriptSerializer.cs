@@ -45,7 +45,7 @@ namespace Classes {
     /// <summary>
     /// Used to identify filter name and parameters
     /// </summary>
-    private static readonly Regex _FILTER_REGEX = new Regex(@"^(?<filter>.*?)(\((?<params>.*?)\))?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex _FILTER_REGEX = new Regex(@"^(?<filter>.*?)(\((?<params>[^\)]*?)\))?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     internal const string CONST_BOUNDS_VALUE = "const";
     internal const string HALF_BOUNDS_VALUE = "half";
@@ -341,7 +341,13 @@ namespace Classes {
 
       }
 
-      var manipulator = SupportedManipulators.MANIPULATORS.Where(resizer => string.Compare(resizer.Key, filterName, true) == 0).Select(kvp => kvp.Value).FirstOrDefault();
+      // find the given manipulator
+      var manipulator = SupportedManipulators.MANIPULATORS
+        .Where(resizer => string.Compare(resizer.Key, filterName, true) == 0)
+        .Select(kvp => kvp.Value)
+        .FirstOrDefault()
+      ;
+
       if (manipulator == null)
         return (CLIExitCode.UnknownFilter);
 
