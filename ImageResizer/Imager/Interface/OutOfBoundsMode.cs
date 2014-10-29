@@ -1,8 +1,8 @@
-﻿#region (c)2008-2013 Hawkynt
+﻿#region (c)2008-2015 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010-2013 Hawkynt
+    Copyright (C) 2008-2015 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Runtime;
+using System.Runtime.CompilerServices;
 
 namespace Imager.Interface {
   /// <summary>
@@ -47,7 +49,7 @@ namespace Imager.Interface {
 
   internal static class OutOfBoundsUtils {
 
-    public delegate int OutOfBoundsHandler(int index, int count, bool overflow, bool underflow);
+    public delegate int OutOfBoundsHandler(int index, int count);
 
     private static readonly Dictionary<OutOfBoundsMode, OutOfBoundsHandler> _OUT_OF_BOUNDS_HANDLERS = new Dictionary<OutOfBoundsMode, OutOfBoundsHandler> {
       {OutOfBoundsMode.ConstantExtension,_ConstantExtension},
@@ -57,11 +59,11 @@ namespace Imager.Interface {
     };
 
     #region out of bounds handlers
-    private static int _ConstantExtension(int index, int count, bool overflow, bool underflow) {
-      return (overflow ? count - 1 : 0);
+    private static int _ConstantExtension(int index, int count) {
+      return (index>=count ? count - 1 : 0);
     }
 
-    private static int _WrapAround(int index, int count, bool overflow, bool underflow) {
+    private static int _WrapAround(int index, int count) {
       /*
         c:2
           -3 -2 -1  0 +1 +2 +3
@@ -72,7 +74,7 @@ namespace Imager.Interface {
            0  1  2  0  1  2  0
           */
 
-      if (overflow)
+      if (index>=count)
         return (index % count);
       /*
       // Loop-version
@@ -94,7 +96,7 @@ namespace Imager.Interface {
       */
     }
 
-    private static int _HalfSampleSymmetric(int index, int count, bool overflow, bool underflow) {
+    private static int _HalfSampleSymmetric(int index, int count) {
 
       // FIXME: calculate this without a loop
       while (true) {
@@ -107,7 +109,7 @@ namespace Imager.Interface {
       }
     }
 
-    private static int _WholeSampleSymmetric(int index, int count, bool overflow, bool underflow) {
+    private static int _WholeSampleSymmetric(int index, int count) {
 
       // FIXME: calculate this without a loop
       while (true) {
@@ -133,56 +135,6 @@ namespace Imager.Interface {
 
       throw new NotSupportedException("The OutOfBoundsMode " + mode + " is not supported");
     }
-
-    /// <summary>
-    /// Checks coordinates for over-/underflow and does the correction based on the given OutOfBoundsMode.
-    /// </summary>
-    /// <param name="index">The coordinate index.</param>
-    /// <param name="count">The sample count.</param>
-    /// <param name="mode">The mode.</param>
-    /// <returns>A coordinate index that is surely between the bounds.</returns>
-    public static int GetBoundsCheckedCoordinate(int index, int count, OutOfBoundsMode mode) {
-#if !NET35
-      Contract.Requires(count > 0, "Number of samples must be above 0");
-#endif
-
-      // check bounds
-      var underflow = index < 0;
-      var overflow = index >= count;
-      if (!(overflow || underflow))
-        return (index);
-
-      // find handler
-      var handler = GetHandlerOrCrash(mode);
-
-      // execute handler
-      return (handler(index, count, overflow, underflow));
-    }
-
-    /// <summary>
-    /// Checks coordinates for over-/underflow and does the correction based on the given OutOfBoundsMode.
-    /// </summary>
-    /// <param name="index">The coordinate index.</param>
-    /// <param name="count">The sample count.</param>
-    /// <param name="handler">The handler.</param>
-    /// <returns>
-    /// A coordinate index that is surely between the bounds.
-    /// </returns>
-    public static int GetBoundsCheckedCoordinate(int index, int count, OutOfBoundsHandler handler) {
-#if !NET35
-      Contract.Requires(count > 0, "Number of samples must be above 0");
-      Contract.Requires(handler != null, "OutOfBounds handler missing");
-#endif
-
-      // check bounds
-      var underflow = index < 0;
-      var overflow = index >= count;
-      if (!(overflow || underflow))
-        return (index);
-
-      // execute handler
-      return (handler(index, count, overflow, underflow));
-    }
-
+    
   }
 }

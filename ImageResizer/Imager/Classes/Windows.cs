@@ -1,8 +1,8 @@
-﻿#region (c)2008-2013 Hawkynt
+﻿#region (c)2008-2015 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010-2013 Hawkynt
+    Copyright (C) 2008-2015 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -83,21 +83,27 @@ namespace Imager.Classes {
     public delegate double RadiusFreeKernelMethod(float n, float radius);
 
     public struct RadiusFreeKernelInfo {
-      public RadiusFreeKernelMethod Kernel;
-      public bool KernelNormalize;
-      public float[] PrefilterAlpha;
-      public float PrefilterScale;
+      public RadiusFreeKernelMethod kernel;
+      public bool kernelNormalize;
+      public float[] prefilterAlpha;
+      public float prefilterScale;
       /// <summary>
       /// Creates a fixed radius kernel with the given radius.
       /// </summary>
       /// <param name="radius">The radius.</param>
       /// <returns></returns>
       public Kernels.FixedRadiusKernelInfo WithRadius(float radius) {
-        var kernel = this.Kernel;
-        var kernelNormalize = this.KernelNormalize;
-        var prefilterAlpha = this.PrefilterAlpha;
-        var prefilterScale = this.PrefilterScale;
-        return (new Kernels.FixedRadiusKernelInfo { Kernel = f => kernel(f, radius), KernelRadius = radius, KernelNormalize = kernelNormalize, PrefilterAlpha = prefilterAlpha, PrefilterScale = prefilterScale });
+        var kernelMethod = this.kernel;
+        var normalize = this.kernelNormalize;
+        var alpha = this.prefilterAlpha;
+        var scale = this.prefilterScale;
+        return (new Kernels.FixedRadiusKernelInfo {
+          Kernel = f => kernelMethod(f, radius),
+          KernelRadius = radius,
+          KernelNormalize = normalize,
+          PrefilterAlpha = alpha,
+          PrefilterScale = scale
+        });
       }
     }
 
@@ -105,25 +111,25 @@ namespace Imager.Classes {
     /// Lookup table for windowing functions
     /// </summary>
     internal static readonly Dictionary<WindowType, RadiusFreeKernelInfo> WINDOWS = new Dictionary<WindowType, RadiusFreeKernelInfo> {
-      {WindowType.Triangular,new RadiusFreeKernelInfo{Kernel =  _TriangularWindow}},
-      {WindowType.Welch,new RadiusFreeKernelInfo{Kernel= _WelchWindow}},
-      {WindowType.Hann,new RadiusFreeKernelInfo{Kernel= _HannWindow}},
-      {WindowType.Hamming,new RadiusFreeKernelInfo{Kernel= (f,r)=>_HammingWindow(f,0.53836d,r)}},
-      {WindowType.Blackman,new RadiusFreeKernelInfo{Kernel= (f,r)=>_BlackmanWindow(f,-(2d*7938d)/18608d + 1,r)}},
-      {WindowType.Nuttal,new RadiusFreeKernelInfo{Kernel= _NuttalWindow}},
-      {WindowType.BlackmanNuttal,new RadiusFreeKernelInfo{Kernel= _BlackmanNuttalWindow}},
-      {WindowType.BlackmanHarris,new RadiusFreeKernelInfo{Kernel= _BlackmanHarrisWindow}},
-      {WindowType.FlatTop,new RadiusFreeKernelInfo{Kernel= _FlatTopWindow,KernelNormalize = true}},
-      {WindowType.PowerOfCosine,new RadiusFreeKernelInfo{Kernel= (f,r)=>_PowerOfCosine(f,1.5f,r),KernelNormalize = true}},
-      {WindowType.Cosine,new RadiusFreeKernelInfo{Kernel= _CosineWindow}},
-      {WindowType.Gauss,new RadiusFreeKernelInfo{Kernel= (f,r)=>_GaussianWindow(f,0.4f,r)}},
-      {WindowType.Tukey,new RadiusFreeKernelInfo{Kernel= (f,r)=>_TukeyWindow(f,0.5f,r)}},
-      {WindowType.Poisson,new RadiusFreeKernelInfo{Kernel= (f,r)=>_PoissonWindow(f,60,r)}},
-      {WindowType.BartlettHann,new RadiusFreeKernelInfo{Kernel= _BartlettHann}},
-      {WindowType.HanningPoisson,new RadiusFreeKernelInfo{Kernel=(f,r)=> _HanningPoisson(f,2,r)}},
-      {WindowType.Bohman,new RadiusFreeKernelInfo{Kernel=_BohmanWindow}},
-      {WindowType.Cauchy,new RadiusFreeKernelInfo{Kernel=(f,r)=>_CauchyWindow(f,3,r)}},
-      {WindowType.Lanczos,new RadiusFreeKernelInfo{Kernel=_LanczosKernel,KernelNormalize = true}},
+      {WindowType.Triangular,new RadiusFreeKernelInfo{kernel =  _TriangularWindow}},
+      {WindowType.Welch,new RadiusFreeKernelInfo{kernel= _WelchWindow}},
+      {WindowType.Hann,new RadiusFreeKernelInfo{kernel= _HannWindow}},
+      {WindowType.Hamming,new RadiusFreeKernelInfo{kernel= (f,r)=>_HammingWindow(f,0.53836d,r)}},
+      {WindowType.Blackman,new RadiusFreeKernelInfo{kernel= (f,r)=>_BlackmanWindow(f,-(2d*7938d)/18608d + 1,r)}},
+      {WindowType.Nuttal,new RadiusFreeKernelInfo{kernel= _NuttalWindow}},
+      {WindowType.BlackmanNuttal,new RadiusFreeKernelInfo{kernel= _BlackmanNuttalWindow}},
+      {WindowType.BlackmanHarris,new RadiusFreeKernelInfo{kernel= _BlackmanHarrisWindow}},
+      {WindowType.FlatTop,new RadiusFreeKernelInfo{kernel= _FlatTopWindow,kernelNormalize = true}},
+      {WindowType.PowerOfCosine,new RadiusFreeKernelInfo{kernel= (f,r)=>_PowerOfCosine(f,1.5f,r),kernelNormalize = true}},
+      {WindowType.Cosine,new RadiusFreeKernelInfo{kernel= _CosineWindow}},
+      {WindowType.Gauss,new RadiusFreeKernelInfo{kernel= (f,r)=>_GaussianWindow(f,0.4f,r)}},
+      {WindowType.Tukey,new RadiusFreeKernelInfo{kernel= (f,r)=>_TukeyWindow(f,0.5f,r)}},
+      {WindowType.Poisson,new RadiusFreeKernelInfo{kernel= (f,r)=>_PoissonWindow(f,60,r)}},
+      {WindowType.BartlettHann,new RadiusFreeKernelInfo{kernel= _BartlettHann}},
+      {WindowType.HanningPoisson,new RadiusFreeKernelInfo{kernel=(f,r)=> _HanningPoisson(f,2,r)}},
+      {WindowType.Bohman,new RadiusFreeKernelInfo{kernel=_BohmanWindow}},
+      {WindowType.Cauchy,new RadiusFreeKernelInfo{kernel=(f,r)=>_CauchyWindow(f,3,r)}},
+      {WindowType.Lanczos,new RadiusFreeKernelInfo{kernel=_LanczosKernel,kernelNormalize = true}},
     };
 
     #region math lib wrappers

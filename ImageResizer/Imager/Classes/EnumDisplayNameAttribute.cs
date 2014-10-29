@@ -1,8 +1,8 @@
-﻿#region (c)2008-2013 Hawkynt
+﻿#region (c)2008-2015 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010-2013 Hawkynt
+    Copyright (C) 2008-2015 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,16 +18,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
 using System;
+using System.ComponentModel;
 
 namespace Imager.Classes {
-  public class EnumDisplayNameAttribute : Attribute {
-    private readonly string _name;
-
-    public string Name { get { return (this._name); } }
-
-    public EnumDisplayNameAttribute(string name) {
-      _name = name;
+  [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
+  public class EnumDisplayNameAttribute : DisplayNameAttribute {
+    public EnumDisplayNameAttribute(string name)
+      : base(name) {
     }
   }
 }

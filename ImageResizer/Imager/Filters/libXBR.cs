@@ -1,8 +1,8 @@
-﻿#region (c)2008-2013 Hawkynt
+﻿#region (c)2008-2015 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010-2013 Hawkynt
+    Copyright (C) 2008-2015 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,9 +20,7 @@
 #endregion
 
 
-#if !NET35
 using System.Diagnostics.Contracts;
-#endif
 
 namespace Imager.Filters {
   internal static class libXBR {
@@ -30,10 +28,8 @@ namespace Imager.Filters {
     /// This is the XBR2x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
     public static void Xbr2X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, bool allowAlphaBlending) {
-#if !NET35
       Contract.Assume(sourceImage != null);
       Contract.Assume(targetImage != null);
-#endif
       var pa = sourceImage[srcX - 1, srcY - 1];
       var pb = sourceImage[srcX + 0, srcY - 1];
       var pc = sourceImage[srcX + 1, srcY - 1];
@@ -80,10 +76,8 @@ namespace Imager.Filters {
     /// This is the XBR3x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
     public static void Xbr3X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, bool allowAlphaBlending, bool useOriginalImplementation) {
-#if !NET35
       Contract.Assume(sourceImage != null);
       Contract.Assume(targetImage != null);
-#endif
       var pa = sourceImage[srcX - 1, srcY - 1];
       var pb = sourceImage[srcX + 0, srcY - 1];
       var pc = sourceImage[srcX + 1, srcY - 1];
@@ -135,10 +129,8 @@ namespace Imager.Filters {
     /// This is the XBR4x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
     public static void Xbr4X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, bool allowAlphaBlending) {
-#if !NET35
       Contract.Assume(sourceImage != null);
       Contract.Assume(targetImage != null);
-#endif
       var pa = sourceImage[srcX - 1, srcY - 1];
       var pb = sourceImage[srcX + 0, srcY - 1];
       var pc = sourceImage[srcX + 1, srcY - 1];

@@ -1,8 +1,8 @@
-﻿#region (c)2008-2013 Hawkynt
+﻿#region (c)2008-2015 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010-2013 Hawkynt
+    Copyright (C) 2008-2015 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,11 +21,9 @@
 
 // TODO: consider a second alpha handling mode like in https://code.google.com/p/hqx-sharp/
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Threading.Tasks;
-
+using Classes;
 using Imager.Filters;
 using Imager.Interface;
 
@@ -51,25 +49,9 @@ namespace Imager {
     internal delegate sPixel[] NqKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8);
 
     /// <summary>
-    /// A struct containing all needed information for processing a single pixel.
-    /// I'll be passing that by reference to allow stackalloc and avoid successive stack copying.
-    /// </summary>
-    internal struct NqFilterData {
-      public cImage sourceImage;
-      public int srcX;
-      public int srcY;
-      public cImage targetImage;
-      public int tgtX;
-      public int tgtY;
-      public byte scaleX;
-      public byte scaleY;
-      public NqKernel kernel;
-    }
-    /// <summary>
     /// The NQ filter itself
     /// </summary>
-    /// <param name="filterData">The filter data.</param>
-    internal delegate void NqFilter(ref NqFilterData filterData);
+    internal delegate void NqFilter(cImage s, int sx, int sy, cImage t, int tx, int ty, byte scx, byte scy, NqKernel kernel);
 
     /// <summary>
     /// Stores all available parameterless pixel scalers.
@@ -108,50 +90,13 @@ namespace Imager {
     /// </returns>
     public cImage ApplyScaler(NqScalerType type, NqMode mode, Rectangle? filterRegion = null) {
       var info = GetPixelScalerInfo(type);
-      var modeHandler = GetPixelScalerInfo(mode);
+      var scaler = GetPixelScalerInfo(mode);
 
-      var startX = filterRegion == null ? 0 : Math.Max(0, filterRegion.Value.Left);
-      var startY = filterRegion == null ? 0 : Math.Max(0, filterRegion.Value.Top);
+      var scaleX = info.Item1;
+      var scaleY = info.Item2;
+      var kernel = info.Item3;
 
-      var endX = filterRegion == null ? this.Width : Math.Min(this.Width, filterRegion.Value.Right);
-      var endY = filterRegion == null ? this.Height : Math.Min(this.Height, filterRegion.Value.Bottom);
-
-      var result = new cImage((endX - startX) * info.Item1, (endY - startY) * info.Item2);
-
-      // run through scaler
-      Parallel.ForEach(
-        Partitioner.Create(startY, endY),
-        () => 0,
-        (range, _, threadStorage) => {
-
-          // prepare stack allocated storage
-          var filterData = new NqFilterData {
-            kernel = info.Item3,
-            scaleX = info.Item1,
-            scaleY = info.Item2,
-            sourceImage = this,
-            targetImage = result
-          };
-
-          // multiply here to save time during the loop
-          filterData.tgtY = range.Item2 * filterData.scaleY;
-          var tgtEndX = endX * filterData.scaleX;
-
-          for (filterData.srcY = range.Item2; filterData.srcY > range.Item1; ) {
-            filterData.srcY--;
-            filterData.tgtY -= filterData.scaleY;
-            filterData.tgtX = tgtEndX;
-            for (filterData.srcX = endX; filterData.srcX > startX; ) {
-              filterData.srcX--;
-              filterData.tgtX -= filterData.scaleX;
-              modeHandler(ref filterData);
-            }
-          }
-          return (threadStorage);
-        },
-        _ => { }
-      );
-      return (result);
+      return (this._RunLoop(filterRegion, scaleX, scaleY, (s, sx, sy, t, tx, ty) => scaler(s, sx, sy, t, tx, ty, scaleX, scaleY, kernel)));
     }
 
     /// <summary>
@@ -176,6 +121,19 @@ namespace Imager {
       if (NQ_MODES.TryGetValue(type, out info))
         return (info);
       throw new NotSupportedException(string.Format("NQ mode '{0}' not supported.", type));
+    }
+
+    /// <summary>
+    /// Gets the scaler information.
+    /// </summary>
+    /// <param name="type">The type of nq scaler.</param>
+    /// <returns></returns>
+    /// <exception cref="System.NotSupportedException"></exception>
+    public static ScalerInformation GetScalerInformation(NqScalerType type) {
+      Tuple<byte, byte, NqKernel> info;
+      if (NQ_SCALERS.TryGetValue(type, out info))
+        return (new ScalerInformation(ReflectionUtils.GetDisplayNameForEnumValue(type), ReflectionUtils.GetDescriptionForEnumValue(type), info.Item1, info.Item2));
+      throw new NotSupportedException(string.Format("NQ scaler '{0}' not supported.", type));
     }
   }
 }
