@@ -1,8 +1,8 @@
-﻿#region (c)2008-2013 Hawkynt
+﻿#region (c)2008-2015 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010-2013 Hawkynt
+    Copyright (C) 2008-2015 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
  */
 #endregion
 
-#define PREFERARRAYCACHE
 using System;
 using dword = System.UInt32;
 namespace Imager {
@@ -27,9 +26,7 @@ namespace Imager {
   /// A little cache that holds calculation results based on the three color components red, green and blue.
   /// </summary>
   public class cRGBCache {
-#if PREFERARRAYCACHE
-    private readonly byte[] _valueCache = new byte[256 * 256 * 256];
-    private readonly byte[] _existsCache = new byte[256 * 256 * 256];
+    private readonly ushort[] _valueCache = new ushort[256 * 256 * 256];
 
     /// <summary>
     /// Gets a value directly from the cache or first calculates that value and writes it the cache.
@@ -37,30 +34,17 @@ namespace Imager {
     /// <param name="key">The 32-bit color code.</param>
     /// <param name="factory">The factory that would calculate a result if it's not already in the cache.</param>
     /// <returns>The calculation result.</returns>
-    public byte GetOrAdd(dword key, Func<dword, byte> factory) {
-      if (this._existsCache[key] != 0)
-        return (this._valueCache[key]);
+    public unsafe byte GetOrAdd(dword key, Func<dword, byte> factory) {
+      fixed (ushort* ptr = this._valueCache) {
+        var result = ptr[key];
+        if (result > 255)
+          return (byte) (result & 255);
 
-      var result = factory(key);
-      this._valueCache[key] = result;
-      this._existsCache[key] = 1;
-      System.Threading.Thread.MemoryBarrier();
-      return (result);
+        result = factory(key);
+        ptr[key] = (ushort) (result | 256);
+        System.Threading.Thread.MemoryBarrier();
+        return ((byte) result);
+      }
     }
-#else
-    /// <summary>
-    /// Our thread-safe dictionary cache
-    /// </summary>
-    private readonly ConcurrentDictionary<UInt32, byte> _cache = new ConcurrentDictionary<uint, byte>();
-    /// <summary>
-    /// Gets a value directly from the cache or first calculates that value and writes it the cache.
-    /// </summary>
-    /// <param name="key">The 32-bit color code.</param>
-    /// <param name="factory">The factory that would calculate a result if it's not already in the cache.</param>
-    /// <returns>The calculation result.</returns>
-    public byte GetOrAdd(dword key, Func<dword, byte> factory) {
-      return (this._cache.GetOrAdd(key, factory));
-    }
-#endif
   } // end class
 } // end namespace

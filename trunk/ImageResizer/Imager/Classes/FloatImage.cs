@@ -1,8 +1,8 @@
-﻿#region (c)2008-2013 Hawkynt
+﻿#region (c)2008-2015 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010-2013 Hawkynt
+    Copyright (C) 2008-2015 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,22 +27,55 @@ using System.Threading.Tasks;
 using Imager.Interface;
 
 namespace Imager.Classes {
-  public class FloatImage {
+  internal class FloatImage {
     #region fields
     private readonly float[] _redPlane;
     private readonly float[] _greenPlane;
     private readonly float[] _bluePlane;
     private readonly float[] _alphaPlane;
 
-    private readonly OutOfBoundsMode _verticalOutOfBoundsMode;
-    private readonly OutOfBoundsMode _horizontalOutOfBoundsMode;
+    private OutOfBoundsMode _horizontalOutOfBoundsMode;
+    private OutOfBoundsUtils.OutOfBoundsHandler _horizontalOutOfBoundsHandler;
+    private OutOfBoundsMode _verticalOutOfBoundsMode;
+    private OutOfBoundsUtils.OutOfBoundsHandler _verticalOutOfBoundsHandler;
+    
     private readonly int _width;
     private readonly int _height;
     #endregion
 
     #region props
-    public OutOfBoundsMode VerticalOutOfBoundsMode { get { return this._verticalOutOfBoundsMode; } }
-    public OutOfBoundsMode HorizontalOutOfBoundsMode { get { return this._horizontalOutOfBoundsMode; } }
+    /// <summary>
+    /// Gets or sets the horizontal out of bounds mode.
+    /// </summary>
+    /// <value>
+    /// The horizontal out of bounds mode.
+    /// </value>
+    public OutOfBoundsMode HorizontalOutOfBoundsMode {
+      get {
+        return this._horizontalOutOfBoundsMode;
+      }
+      set {
+        this._horizontalOutOfBoundsMode = value;
+        this._horizontalOutOfBoundsHandler = OutOfBoundsUtils.GetHandlerOrCrash(value);
+      }
+    }
+    
+    /// <summary>
+    /// Gets or sets the vertical out of bounds mode.
+    /// </summary>
+    /// <value>
+    /// The vertical out of bounds mode.
+    /// </value>
+    public OutOfBoundsMode VerticalOutOfBoundsMode {
+      get {
+        return this._verticalOutOfBoundsMode;
+      }
+      set {
+        this._verticalOutOfBoundsMode = value;
+        this._verticalOutOfBoundsHandler = OutOfBoundsUtils.GetHandlerOrCrash(value);
+      }
+    }
+
     public int Width { get { return this._width; } }
     public int Height { get { return this._height; } }
     #endregion
@@ -51,8 +84,8 @@ namespace Imager.Classes {
     private FloatImage(int width, int height, OutOfBoundsMode horizontalOutOfBoundsMode, OutOfBoundsMode verticalOutOfBoundsMode) {
       this._width = width;
       this._height = height;
-      this._horizontalOutOfBoundsMode = horizontalOutOfBoundsMode;
-      this._verticalOutOfBoundsMode = verticalOutOfBoundsMode;
+      this.HorizontalOutOfBoundsMode = horizontalOutOfBoundsMode;
+      this.VerticalOutOfBoundsMode = verticalOutOfBoundsMode;
 
       // allocate space
       var totalElements = width * height;
@@ -147,26 +180,30 @@ namespace Imager.Classes {
 
     #region get components
     public float Red(int x, int y) {
-      return (_GetValueFromPlane(this._redPlane, x, y, this._width, this._height, this._horizontalOutOfBoundsMode, this._verticalOutOfBoundsMode));
+      return (_GetValueFromPlane(this._redPlane, x, y, this._width, this._height, this._horizontalOutOfBoundsHandler, this._verticalOutOfBoundsHandler));
     }
 
     public float Green(int x, int y) {
-      return (_GetValueFromPlane(this._greenPlane, x, y, this._width, this._height, this._horizontalOutOfBoundsMode, this._verticalOutOfBoundsMode));
+      return (_GetValueFromPlane(this._greenPlane, x, y, this._width, this._height, this._horizontalOutOfBoundsHandler, this._verticalOutOfBoundsHandler));
     }
 
     public float Blue(int x, int y) {
-      return (_GetValueFromPlane(this._bluePlane, x, y, this._width, this._height, this._horizontalOutOfBoundsMode, this._verticalOutOfBoundsMode));
+      return (_GetValueFromPlane(this._bluePlane, x, y, this._width, this._height, this._horizontalOutOfBoundsHandler, this._verticalOutOfBoundsHandler));
     }
 
     public float Alpha(int x, int y) {
-      return (_GetValueFromPlane(this._alphaPlane, x, y, this._width, this._height, this._horizontalOutOfBoundsMode, this._verticalOutOfBoundsMode));
+      return (_GetValueFromPlane(this._alphaPlane, x, y, this._width, this._height, this._horizontalOutOfBoundsHandler, this._verticalOutOfBoundsHandler));
     }
     #endregion
 
     #region utils
-    private static float _GetValueFromPlane(float[] plane, int x, int y, int width, int height, OutOfBoundsMode horizontalOutOfBoundsMode, OutOfBoundsMode verticalOutOfBoundsMode) {
-      x = OutOfBoundsUtils.GetBoundsCheckedCoordinate(x, width, horizontalOutOfBoundsMode);
-      y = OutOfBoundsUtils.GetBoundsCheckedCoordinate(y, height, verticalOutOfBoundsMode);
+    private static float _GetValueFromPlane(float[] plane, int x, int y, int width, int height, OutOfBoundsUtils.OutOfBoundsHandler horizontalOutOfBoundsHandler, OutOfBoundsUtils.OutOfBoundsHandler verticalOutOfBoundsHandler) {
+      if (x < 0 || x >= width)
+        x = horizontalOutOfBoundsHandler(x, width);
+
+      if (y < 0 || y >= height)
+        y = verticalOutOfBoundsHandler(y, height);
+      
       return (plane[y * width + x]);
     }
     #endregion
@@ -422,9 +459,14 @@ namespace Imager.Classes {
           for (var n = 0; n < filterWidth; n++)
             filterCoeff[coeffIndex + n] = 0;
 
-          for (var n = 0; n < kernelWidth; n++)
-            filterCoeff[coeffIndex + OutOfBoundsUtils.GetBoundsCheckedCoordinate(pos + n, srcWidth, boundary) - filterPos[destX]]
-                += (float)kernel(srcX - (pos + n));
+          for (var n = 0; n < kernelWidth; n++) {
+            var index = pos + n;
+            if (index < 0 || index >= srcWidth)
+              index = boundary(index, srcWidth);
+
+            filterCoeff[coeffIndex + index - filterPos[destX]]
+              += (float) kernel(srcX - index);
+          }
         } else {
           filterPos[destX] = (short)pos;
 

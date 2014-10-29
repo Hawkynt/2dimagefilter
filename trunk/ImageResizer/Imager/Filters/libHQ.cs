@@ -1,8 +1,8 @@
-﻿#region (c)2008-2013 Hawkynt
+﻿#region (c)2008-2015 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010-2013 Hawkynt
+    Copyright (C) 2008-2015 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,24 +25,16 @@ namespace Imager.Filters {
     /// <summary>
     /// body for HQ2x etc.
     /// </summary>
-    public static void ComplexFilter(ref cImage.NqFilterData filterData) {
-      var sourceImage = filterData.sourceImage;
-      var srcX = filterData.srcX;
-      var srcY = filterData.srcY;
-      var targetImage = filterData.targetImage;
-      var tgtX = filterData.tgtX;
-      var tgtY = filterData.tgtY;
-      var scaleX = filterData.scaleX;
-      var scaleY = filterData.scaleY;
-      var c0 = sourceImage[srcX - 1, srcY - 1];
-      var c1 = sourceImage[srcX + 0, srcY - 1];
-      var c2 = sourceImage[srcX + 1, srcY - 1];
-      var c3 = sourceImage[srcX - 1, srcY + 0];
-      var c4 = sourceImage[srcX + 0, srcY + 0];
-      var c5 = sourceImage[srcX + 1, srcY + 0];
-      var c6 = sourceImage[srcX - 1, srcY + 1];
-      var c7 = sourceImage[srcX + 0, srcY + 1];
-      var c8 = sourceImage[srcX + 1, srcY + 1];
+    public static void ComplexFilter(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte scaleX, byte scaleY, Imager.cImage.NqKernel kernel) {
+      var c0 = sourceImage.GetPixel(srcX - 1, srcY - 1);
+      var c1 = sourceImage.GetPixel(srcX + 0, srcY - 1);
+      var c2 = sourceImage.GetPixel(srcX + 1, srcY - 1);
+      var c3 = sourceImage.GetPixel(srcX - 1, srcY + 0);
+      var c4 = sourceImage.GetPixel(srcX + 0, srcY + 0);
+      var c5 = sourceImage.GetPixel(srcX + 1, srcY + 0);
+      var c6 = sourceImage.GetPixel(srcX - 1, srcY + 1);
+      var c7 = sourceImage.GetPixel(srcX + 0, srcY + 1);
+      var c8 = sourceImage.GetPixel(srcX + 1, srcY + 1);
       byte pattern = 0;
       if ((c4.IsNotLike(c0)))
         pattern |= 1;
@@ -60,35 +52,26 @@ namespace Imager.Filters {
         pattern |= 64;
       if ((c4.IsNotLike(c8)))
         pattern |= 128;
-      var result = filterData.kernel(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8);
+      var result = kernel(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8);
       byte offset = 0;
       for (byte y = 0; y < scaleY; y++)
         for (byte x = 0; x < scaleX; x++)
-          targetImage[tgtX + x, tgtY + y] = result[offset++];
+          targetImage.SetPixel(tgtX + x, tgtY + y, result[offset++]);
     } // end sub
 
     /// <summary>
     /// body for HQ2xBold etc. as seen in SNES9x
     /// </summary>
-    public static void ComplexFilterBold(ref cImage.NqFilterData filterData) {
-      var sourceImage = filterData.sourceImage;
-      var srcX = filterData.srcX;
-      var srcY = filterData.srcY;
-      var targetImage = filterData.targetImage;
-      var tgtX = filterData.tgtX;
-      var tgtY = filterData.tgtY;
-      var scaleX = filterData.scaleX;
-      var scaleY = filterData.scaleY;
-
-      var c0 = sourceImage[srcX - 1, srcY - 1];
-      var c1 = sourceImage[srcX + 0, srcY - 1];
-      var c2 = sourceImage[srcX + 1, srcY - 1];
-      var c3 = sourceImage[srcX - 1, srcY + 0];
-      var c4 = sourceImage[srcX + 0, srcY + 0];
-      var c5 = sourceImage[srcX + 1, srcY + 0];
-      var c6 = sourceImage[srcX - 1, srcY + 1];
-      var c7 = sourceImage[srcX + 0, srcY + 1];
-      var c8 = sourceImage[srcX + 1, srcY + 1];
+    public static void ComplexFilterBold(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte scaleX, byte scaleY, Imager.cImage.NqKernel kernel) {
+      var c0 = sourceImage.GetPixel(srcX - 1, srcY - 1);
+      var c1 = sourceImage.GetPixel(srcX + 0, srcY - 1);
+      var c2 = sourceImage.GetPixel(srcX + 1, srcY - 1);
+      var c3 = sourceImage.GetPixel(srcX - 1, srcY + 0);
+      var c4 = sourceImage.GetPixel(srcX + 0, srcY + 0);
+      var c5 = sourceImage.GetPixel(srcX + 1, srcY + 0);
+      var c6 = sourceImage.GetPixel(srcX - 1, srcY + 1);
+      var c7 = sourceImage.GetPixel(srcX + 0, srcY + 1);
+      var c8 = sourceImage.GetPixel(srcX + 1, srcY + 1);
       var brightness = new[] { 
         c0.Brightness,
         c1.Brightness,
@@ -129,30 +112,26 @@ namespace Imager.Filters {
         pattern |= 64;
       if ((c4.IsNotLike(c8)) && ((brightness[8] > avgBrightness) != dc4))
         pattern |= 128;
-      var result = filterData.kernel(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8);
+      var result = kernel(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8);
       byte offset = 0;
       for (byte y = 0; y < scaleY; y++)
         for (byte x = 0; x < scaleX; x++)
-          targetImage[tgtX + x, tgtY + y] = result[offset++];
+          targetImage.SetPixel(tgtX + x, tgtY + y, result[offset++]);
     } // end sub
 
     /// <summary>
     /// body for HQ2xSmart etc. as seen in SNES9x
     /// </summary>
-    public static void ComplexFilterSmart(ref cImage.NqFilterData filterData) {
-      var sourceImage = filterData.sourceImage;
-      var srcX = filterData.srcX;
-      var srcY = filterData.srcY;
-
-      var c0 = sourceImage[srcX - 1, srcY - 1];
-      var c2 = sourceImage[srcX + 1, srcY - 1];
-      var c4 = sourceImage[srcX, srcY];
-      var c6 = sourceImage[srcX - 1, srcY + 1];
-      var c8 = sourceImage[srcX + 1, srcY + 1];
+    public static void ComplexFilterSmart(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte scaleX, byte scaleY, Imager.cImage.NqKernel kernel) {
+      var c0 = sourceImage.GetPixel(srcX - 1, srcY - 1);
+      var c2 = sourceImage.GetPixel(srcX + 1, srcY - 1);
+      var c4 = sourceImage.GetPixel(srcX, srcY);
+      var c6 = sourceImage.GetPixel(srcX - 1, srcY + 1);
+      var c8 = sourceImage.GetPixel(srcX + 1, srcY + 1);
       if (c0.IsLike(c4) || c2.IsLike(c4) || c6.IsLike(c4) || c8.IsLike(c4))
-        ComplexFilter(ref filterData);
+        ComplexFilter(sourceImage, srcX, srcY, targetImage, tgtX, tgtY, scaleX, scaleY, kernel);
       else
-        ComplexFilterBold(ref filterData);
+        ComplexFilterBold(sourceImage, srcX, srcY, targetImage, tgtX, tgtY, scaleX, scaleY, kernel);
     } // end sub
     #endregion
 

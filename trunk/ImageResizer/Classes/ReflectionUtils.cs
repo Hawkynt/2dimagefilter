@@ -1,8 +1,8 @@
-﻿#region (c)2008-2013 Hawkynt
+﻿#region (c)2008-2015 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010-2013 Hawkynt
+    Copyright (C) 2008-2015 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 
-using Imager.Classes;
 
 namespace Classes {
   internal static class ReflectionUtils {
@@ -50,8 +49,8 @@ namespace Classes {
       Contract.Requires(typeof(TEnumeration).IsEnum, "Only enum supported");
       var valueName = Enum.GetName(typeof(TEnumeration), value);
       var fieldInfo = typeof(TEnumeration).GetMember(valueName)[0];
-      var descriptionAttribute = (EnumDisplayNameAttribute)fieldInfo.GetCustomAttributes(typeof(EnumDisplayNameAttribute), false).FirstOrDefault();
-      return (descriptionAttribute == null ? valueName : descriptionAttribute.Name);
+      var descriptionAttribute = (DisplayNameAttribute)fieldInfo.GetCustomAttributes(typeof(DisplayNameAttribute), false).FirstOrDefault();
+      return (descriptionAttribute == null ? valueName : descriptionAttribute.DisplayName);
     }
 
     /// <summary>

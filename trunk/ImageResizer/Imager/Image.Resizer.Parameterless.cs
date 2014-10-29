@@ -1,8 +1,8 @@
-﻿#region (c)2008-2013 Hawkynt
+﻿#region (c)2008-2015 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010-2013 Hawkynt
+    Copyright (C) 2008-2015 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,11 +19,9 @@
  */
 #endregion
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Threading.Tasks;
-
+using Classes;
 using Imager.Filters;
 using Imager.Interface;
 
@@ -91,39 +89,11 @@ namespace Imager {
     /// </returns>
     public cImage ApplyScaler(PixelScalerType type, Rectangle? filterRegion = null) {
       var info = GetPixelScalerInfo(type);
+      var scaleX = info.Item1;
+      var scaleY = info.Item2;
+      var scaler = info.Item3;
 
-      var startX = filterRegion == null ? 0 : Math.Max(0, filterRegion.Value.Left);
-      var startY = filterRegion == null ? 0 : Math.Max(0, filterRegion.Value.Top);
-
-      var endX = filterRegion == null ? this.Width : Math.Min(this.Width, filterRegion.Value.Right);
-      var endY = filterRegion == null ? this.Height : Math.Min(this.Height, filterRegion.Value.Bottom);
-
-      var result = new cImage((endX - startX) * info.Item1, (endY - startY) * info.Item2);
-
-      // run through scaler
-      Parallel.ForEach(
-        Partitioner.Create(startY, endY),
-        () => 0,
-        (range, _, threadStorage) => {
-          for (var y = range.Item2; y > range.Item1; ) {
-            --y;
-            for (var x = endX; x > startX; ) {
-              --x;
-              info.Item3(
-                this,
-                x,
-                y,
-                result,
-                x * info.Item1,
-                y * info.Item2
-                );
-            }
-          }
-          return (threadStorage);
-        },
-        _ => { }
-      );
-      return (result);
+      return (this._RunLoop(filterRegion, scaleX, scaleY, (s, sx, sy, t, tx, ty) => scaler(s, sx, sy, t, tx, ty)));
     }
 
     /// <summary>
@@ -135,6 +105,19 @@ namespace Imager {
       Tuple<byte, byte, ParameterlessPixelScaler> info;
       if (PIXEL_SCALERS.TryGetValue(type, out info))
         return (info);
+      throw new NotSupportedException(string.Format("Parameterless scaler '{0}' not supported.", type));
+    }
+
+    /// <summary>
+    /// Gets the scaler information.
+    /// </summary>
+    /// <param name="type">The type of pixel scaler.</param>
+    /// <returns></returns>
+    /// <exception cref="System.NotSupportedException"></exception>
+    public static ScalerInformation GetScalerInformation(PixelScalerType type) {
+      Tuple<byte, byte, ParameterlessPixelScaler> info;
+      if (PIXEL_SCALERS.TryGetValue(type, out info))
+        return (new ScalerInformation(ReflectionUtils.GetDisplayNameForEnumValue(type), ReflectionUtils.GetDescriptionForEnumValue(type), info.Item1, info.Item2));
       throw new NotSupportedException(string.Format("Parameterless scaler '{0}' not supported.", type));
     }
   }

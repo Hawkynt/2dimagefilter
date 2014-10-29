@@ -1,8 +1,8 @@
-﻿#region (c)2008-2013 Hawkynt
+﻿#region (c)2008-2015 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2010-2013 Hawkynt
+    Copyright (C) 2008-2015 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,10 +37,10 @@
 // TODO: smart filtering http://www.hiend3d.com/smartflt.html
 
 using System;
-#if !NET35
+using System.Runtime;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
-#endif
 using Imager.Interface;
 
 namespace Imager {
@@ -305,8 +305,7 @@ namespace Imager {
         this._horizontalOutOfBoundsHandler = OutOfBoundsUtils.GetHandlerOrCrash(value);
       }
     }
-
-
+    
     /// <summary>
     /// Gets or sets the vertical out of bounds mode.
     /// </summary>
@@ -361,7 +360,6 @@ namespace Imager {
         return;
 
       var width = sourceImage._width;
-#if !NET35
       Parallel.ForEach(Partitioner.Create(0, this._height), () => 0, (range, _, threadStorage) => {
         for (var y = range.Item2; y > range.Item1; ) {
           --y;
@@ -373,15 +371,6 @@ namespace Imager {
         return (threadStorage);
       }, _ => {
       });
-#else
-      for (var y = this._height; y > 0; ) {
-        --y;
-        for (var x = width; x > 0; ) {
-          --x;
-          this[x, y] = filterFunction(sourceImage[x, y]);
-        }
-      }
-#endif
     }
 
     /// <summary>
@@ -395,7 +384,6 @@ namespace Imager {
         return;
 
       var width = sourceImage._width;
-#if !NET35
       Parallel.ForEach(Partitioner.Create(0, this._height), () => 0, (range, _, threadStorage) => {
         for (var y = range.Item2; y > range.Item1; ) {
           --y;
@@ -407,15 +395,6 @@ namespace Imager {
         return (threadStorage);
       }, _ => {
       });
-#else
-      for (var y = this._height; y > 0; ) {
-        --y;
-        for (var x = width; x > 0; ) {
-          --x;
-          this[x, y] = sPixel.FromGrey(colorFilter(sourceImage[x, y]));
-        }
-      }
-#endif
     }
 
     /// <summary>
@@ -423,16 +402,35 @@ namespace Imager {
     /// </summary>
     /// <value>The pixel</value>
     public sPixel this[int x, int y] {
-      get {
-        x = OutOfBoundsUtils.GetBoundsCheckedCoordinate(x, this._width, this._horizontalOutOfBoundsHandler);
-        y = OutOfBoundsUtils.GetBoundsCheckedCoordinate(y, this._height, this._verticalOutOfBoundsHandler);
-        return (this._imageData[y * this._width + x]);
-      }
-      set {
-        if (x < this._width && y < this._height && x >= 0 && y >= 0)
-          this._imageData[y * this._width + x] = value;
-      }
+      get { return this.GetPixel(x, y); }
+      set { this.SetPixel(x, y, value); }
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [TargetedPatchingOptOut("")]
+    internal void SetPixel(int x, int y, sPixel value) {
+      var width = this._width;
+      var height = this._height;
+
+      if (x < width && y < height && x >= 0 && y >= 0)
+        this._imageData[y * width + x] = value;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [TargetedPatchingOptOut("")]
+    internal sPixel GetPixel(int x, int y) {
+      var width = this._width;
+      var height = this._height;
+
+      if (x < 0 || x >= width)
+        x = this._horizontalOutOfBoundsHandler(x, width);
+
+      if (y < 0 || y >= height)
+        y = this._verticalOutOfBoundsHandler(y, height);
+
+      return (this._imageData[y * width + x]);
+    }
+
     #endregion
 
     /// <summary>
@@ -450,12 +448,7 @@ namespace Imager {
     /// </summary>
     /// <param name="pixel">The pixel instance.</param>
     public void Fill(sPixel pixel) {
-#if !NET35
       Parallel.For(0, this._imageData.LongLength, offset => this._imageData[offset] = pixel);
-#else
-      for (var offset = 0; offset < this._imageData.LongLength; offset++)
-        this._imageData[offset] = pixel;
-#endif
     }
 
     #region ICloneable Members
