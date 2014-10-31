@@ -49,7 +49,7 @@ namespace Imager.Interface {
 
   internal static class OutOfBoundsUtils {
 
-    public delegate int OutOfBoundsHandler(int index, int count);
+    public delegate int OutOfBoundsHandler(int index, int count,bool isUnderflow);
 
     private static readonly Dictionary<OutOfBoundsMode, OutOfBoundsHandler> _OUT_OF_BOUNDS_HANDLERS = new Dictionary<OutOfBoundsMode, OutOfBoundsHandler> {
       {OutOfBoundsMode.ConstantExtension,_ConstantExtension},
@@ -59,11 +59,11 @@ namespace Imager.Interface {
     };
 
     #region out of bounds handlers
-    private static int _ConstantExtension(int index, int count) {
-      return (index>=count ? count - 1 : 0);
+    private static int _ConstantExtension(int index, int count,bool isUnderflow) {
+      return (isUnderflow ? 0 : count - 1);
     }
 
-    private static int _WrapAround(int index, int count) {
+    private static int _WrapAround(int index, int count,bool isUnderflow) {
       /*
         c:2
           -3 -2 -1  0 +1 +2 +3
@@ -74,7 +74,7 @@ namespace Imager.Interface {
            0  1  2  0  1  2  0
           */
 
-      if (index>=count)
+      if (!isUnderflow)
         return (index % count);
       /*
       // Loop-version
@@ -96,7 +96,7 @@ namespace Imager.Interface {
       */
     }
 
-    private static int _HalfSampleSymmetric(int index, int count) {
+    private static int _HalfSampleSymmetric(int index, int count, bool isUnderflow) {
 
       // FIXME: calculate this without a loop
       while (true) {
@@ -109,7 +109,7 @@ namespace Imager.Interface {
       }
     }
 
-    private static int _WholeSampleSymmetric(int index, int count) {
+    private static int _WholeSampleSymmetric(int index, int count, bool isUnderflow) {
 
       // FIXME: calculate this without a loop
       while (true) {

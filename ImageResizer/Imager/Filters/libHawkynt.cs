@@ -24,27 +24,35 @@ namespace Imager.Filters {
     /// <summary>
     /// just a bad old-school TV effect
     /// </summary>
-    public static void Tv2x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
-      var pixel = sourceImage[srcX, srcY];
+    public static void Tv2x(PixelWorker<sPixel> worker) {
+      var pixel = worker.SourceP0P0();
       var luminance = pixel.Luminance;
-      targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);
-      targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0, pixel.Alpha);
-      targetImage[tgtX + 0, tgtY + 1] = new sPixel(0, 0, pixel.Blue, pixel.Alpha);
-      targetImage[tgtX + 1, tgtY + 1] = sPixel.FromGrey(luminance, pixel.Alpha);
+      worker.TargetP0P0(new sPixel(pixel.Red, 0, 0, pixel.Alpha));
+      worker.TargetP1P0(new sPixel(0, pixel.Green, 0, pixel.Alpha));
+      worker.TargetP0P1(new sPixel(0, 0, pixel.Blue, pixel.Alpha));
+      worker.TargetP1P1(sPixel.FromGrey(luminance, pixel.Alpha));
     }
 
     /// <summary>
     /// another bad one a made for MS-Dos in 1998
     /// </summary>
-    public static void Tv3x(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
-      var pixel = sourceImage[srcX, srcY];
-      var ap = (sbyte)(1 - ((srcX & 1) << 1));
-      targetImage[tgtX + 0, tgtY + 0] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);
-      targetImage[tgtX + 1, tgtY + 0] = new sPixel(0, pixel.Green, 0, pixel.Alpha);
-      targetImage[tgtX + 2, tgtY + 0] = new sPixel(0, 0, pixel.Blue, pixel.Alpha);
-      targetImage[tgtX + 0, tgtY + ap] = new sPixel(pixel.Red, 0, 0, pixel.Alpha);
-      targetImage[tgtX + 1, tgtY - ap] = new sPixel(0, pixel.Green, 0, pixel.Alpha);
-      targetImage[tgtX + 2, tgtY + ap] = new sPixel(0, 0, pixel.Blue, pixel.Alpha);
+    public static void Tv3x(PixelWorker<sPixel> worker) {
+      var pixel = worker.SourceP0P0();
+      worker.TargetP0P0(new sPixel(pixel.Red, 0, 0, pixel.Alpha));
+      worker.TargetP1P0(new sPixel(0, pixel.Green, 0, pixel.Alpha));
+      worker.TargetP2P0(new sPixel(0, 0, pixel.Blue, pixel.Alpha));
+      if ((worker.SourceX() & 1) == 0) {
+        worker.TargetP0P1(new sPixel(pixel.Red, 0, 0, pixel.Alpha));
+        if (worker.SourceY() > 0)
+          worker.TargetP1M1(new sPixel(0, pixel.Green, 0, pixel.Alpha));
+        worker.TargetP2P1(new sPixel(0, 0, pixel.Blue, pixel.Alpha));
+      } else {
+        if (worker.SourceY() > 0)
+          worker.TargetP0M1(new sPixel(pixel.Red, 0, 0, pixel.Alpha));
+        worker.TargetP1P1(new sPixel(0, pixel.Green, 0, pixel.Alpha));
+        if (worker.SourceY() > 0)
+          worker.TargetP2M1(new sPixel(0, 0, pixel.Blue, pixel.Alpha));
+      }
 
     }
 

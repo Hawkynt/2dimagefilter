@@ -407,7 +407,6 @@ namespace Imager {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [TargetedPatchingOptOut("")]
     internal void SetPixel(int x, int y, sPixel value) {
       var width = this._width;
       var height = this._height;
@@ -417,18 +416,22 @@ namespace Imager {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [TargetedPatchingOptOut("")]
     internal sPixel GetPixel(int x, int y) {
       var width = this._width;
       var height = this._height;
 
       if (x < 0 || x >= width)
-        x = this._horizontalOutOfBoundsHandler(x, width);
+        x = this._horizontalOutOfBoundsHandler(x, width,x<0);
 
       if (y < 0 || y >= height)
-        y = this._verticalOutOfBoundsHandler(y, height);
+        y = this._verticalOutOfBoundsHandler(y, height,y<0);
 
       return (this._imageData[y * width + x]);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal sPixel[] GetImageData() {
+      return (this._imageData);
     }
 
     #endregion

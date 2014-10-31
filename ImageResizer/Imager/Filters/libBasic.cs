@@ -24,21 +24,21 @@ namespace Imager.Filters {
     /// <summary>
     /// Horizontal scanlines
     /// </summary>
-    public static void HorizontalScanlines(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, float grayFactor) {
-      var pixel = sourceImage[srcX, srcY];
-      targetImage[tgtX, tgtY] = pixel;
+    public static void HorizontalScanlines(PixelWorker<sPixel> worker , float grayFactor) {
+      var pixel = worker.SourceP0P0();
+      worker.TargetP0P0( pixel);
       var factor = grayFactor / 100f + 1f;
-      targetImage[tgtX, tgtY + 1] = pixel * factor;
+      worker.TargetP0P1(pixel * factor);
     }
 
     /// <summary>
     /// Vertical scanlines
     /// </summary>
-    public static void VerticalScanlines(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, float grayFactor) {
-      var pixel = sourceImage[srcX, srcY];
-      targetImage[tgtX, tgtY] = pixel;
+    public static void VerticalScanlines(PixelWorker<sPixel>worker , float grayFactor) {
+      var pixel = worker.SourceP0P0();
+      worker.TargetP0P0(pixel);
       var factor = grayFactor / 100f + 1f;
-      targetImage[tgtX + 1, tgtY] = pixel * factor;
+      worker.TargetP1P0( pixel * factor);
     }
 
   }

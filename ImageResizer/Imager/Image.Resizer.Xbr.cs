@@ -30,22 +30,17 @@ namespace Imager {
     /// <summary>
     /// The XBR filter itself
     /// </summary>
-    /// <param name="sourceImage">The source image.</param>
-    /// <param name="srcX">The SRC X.</param>
-    /// <param name="srcY">The SRC Y.</param>
-    /// <param name="targetImage">The target image.</param>
-    /// <param name="tgtX">The TGT X.</param>
-    /// <param name="tgtY">The TGT Y.</param>
+    /// <param name="worker">The worker.</param>
     /// <param name="allowAlphaBlending">if set to <c>true</c> [allow alpha blending].</param>
-    internal delegate void XbrFilter(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, bool allowAlphaBlending);
+    internal delegate void XbrFilter(PixelWorker<sPixel> worker , bool allowAlphaBlending);
 
     /// <summary>
     /// Stores all available parameterless pixel scalers.
     /// </summary>
     internal static readonly Dictionary<XbrScalerType, Tuple<byte, byte, XbrFilter>> XBR_SCALERS = new Dictionary<XbrScalerType, Tuple<byte, byte, XbrFilter>> {
       {XbrScalerType.Xbr2, Tuple.Create<byte, byte, XbrFilter>(2, 2, libXBR.Xbr2X)},
-      {XbrScalerType.Xbr3, Tuple.Create<byte, byte, XbrFilter>(3, 3, (s, sx, sy, t, tx, ty, a) => libXBR.Xbr3X(s, sx, sy, t, tx, ty, a, true))},
-      {XbrScalerType.Xbr3Modified, Tuple.Create<byte, byte, XbrFilter>(3, 3, (s, sx, sy, t, tx, ty, a) => libXBR.Xbr3X(s, sx, sy, t, tx, ty, a, false))},
+      {XbrScalerType.Xbr3, Tuple.Create<byte, byte, XbrFilter>(3, 3, (worker, a) => libXBR.Xbr3X(worker, a, true))},
+      {XbrScalerType.Xbr3Modified, Tuple.Create<byte, byte, XbrFilter>(3, 3, (worker, a) => libXBR.Xbr3X(worker, a, false))},
       {XbrScalerType.Xbr4, Tuple.Create<byte, byte, XbrFilter>(4, 4, libXBR.Xbr4X)},
     };
 
@@ -64,7 +59,7 @@ namespace Imager {
       var scaleY = info.Item2;
       var scaler = info.Item3;
 
-      return (this._RunLoop(filterRegion, scaleX, scaleY, (s, sx, sy, t, tx, ty) => scaler(s, sx, sy, t, tx, ty, allowAlphaBlending)));
+      return (this._RunLoop(filterRegion, scaleX, scaleY, worker => scaler(worker, allowAlphaBlending)));
     }
 
     /// <summary>

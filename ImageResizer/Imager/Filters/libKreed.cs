@@ -48,19 +48,20 @@ namespace Imager.Filters {
     /// <summary>
     /// Kreed's SuperEagle modified by Hawkynt to allow thresholds
     /// </summary>
-    public static void SuperEagle(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
-      var c1 = sourceImage[srcX, srcY - 1];
-      var c2 = sourceImage[srcX + 1, srcY - 1];
-      var c3 = sourceImage[srcX - 1, srcY];
-      var c4 = sourceImage[srcX, srcY];
-      var c5 = sourceImage[srcX + 1, srcY];
-      var c6 = sourceImage[srcX - 1, srcY + 1];
-      var c7 = sourceImage[srcX, srcY + 1];
-      var c8 = sourceImage[srcX + 1, srcY + 1];
-      var d1 = sourceImage[srcX, srcY + 2];
-      var d2 = sourceImage[srcX + 1, srcY + 2];
-      var d4 = sourceImage[srcX + 2, srcY];
-      var d5 = sourceImage[srcX + 2, srcY + 1];
+    public static void SuperEagle(PixelWorker<sPixel> worker) {
+      var c0 = worker.SourceM1M1();
+      var c1 = worker.SourceP0M1();
+      var c2 = worker.SourceP1M1();
+      var c3 = worker.SourceM1P0();
+      var c4 = worker.SourceP0P0();
+      var c5 = worker.SourceP1P0();
+      var c6 = worker.SourceM1P1();
+      var c7 = worker.SourceP0P1();
+      var c8 = worker.SourceP1P1();
+      var d1 = worker.SourceP0P2();
+      var d2 = worker.SourceP1P2();
+      var d4 = worker.SourceP2P0();
+      var d5 = worker.SourceP2P1();
 
       sPixel e00 = c4, e11 = c4;
       sPixel e01, e10;
@@ -138,32 +139,32 @@ namespace Imager.Filters {
         }
       }
 
-      targetImage[tgtX + 0, tgtY + 0] = e00;
-      targetImage[tgtX + 1, tgtY + 0] = e01;
-      targetImage[tgtX + 0, tgtY + 1] = e10;
-      targetImage[tgtX + 1, tgtY + 1] = e11;
+      worker.TargetP0P0(e00);
+      worker.TargetP1P0(e01);
+      worker.TargetP0P1(e10);
+      worker.TargetP1P1(e11);
     }
 
     /// <summary>
     /// Derek Liauw Kie Fa's 2XSaI
     /// </summary>
-    public static void SaI2X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
-      var c0 = sourceImage[srcX - 1, srcY - 1];
-      var c1 = sourceImage[srcX, srcY - 1];
-      var c2 = sourceImage[srcX + 1, srcY - 1];
-      var c3 = sourceImage[srcX - 1, srcY];
-      var c4 = sourceImage[srcX, srcY];
-      var c5 = sourceImage[srcX + 1, srcY];
-      var c6 = sourceImage[srcX - 1, srcY + 1];
-      var c7 = sourceImage[srcX, srcY + 1];
-      var c8 = sourceImage[srcX + 1, srcY + 1];
-      var d0 = sourceImage[srcX - 1, srcY + 2];
-      var d1 = sourceImage[srcX, srcY + 2];
-      var d2 = sourceImage[srcX + 1, srcY + 2];
-      var d3 = sourceImage[srcX + 2, srcY - 1];
-      var d4 = sourceImage[srcX + 2, srcY];
-      var d5 = sourceImage[srcX + 2, srcY + 1];
-
+    public static void SaI2X(PixelWorker<sPixel> worker) {
+      var c0 = worker.SourceM1M1();
+      var c1 = worker.SourceP0M1();
+      var c2 = worker.SourceP1M1();
+      var c3 = worker.SourceM1P0();
+      var c4 = worker.SourceP0P0();
+      var c5 = worker.SourceP1P0();
+      var c6 = worker.SourceM1P1();
+      var c7 = worker.SourceP0P1();
+      var c8 = worker.SourceP1P1();
+      var d0 = worker.SourceM1P2();
+      var d1 = worker.SourceP0P2();
+      var d2 = worker.SourceP1P2();
+      var d3 = worker.SourceP2M1();
+      var d4 = worker.SourceP2P0();
+      var d5 = worker.SourceP2P1(); 
+      
       sPixel e01, e10, e11;
       var e00 = e01 = e10 = e11 = c4;
 
@@ -232,33 +233,33 @@ namespace Imager.Filters {
         }
       }
 
-      targetImage[tgtX + 0, tgtY + 0] = e00;
-      targetImage[tgtX + 1, tgtY + 0] = e01;
-      targetImage[tgtX + 0, tgtY + 1] = e10;
-      targetImage[tgtX + 1, tgtY + 1] = e11;
+      worker.TargetP0P0(e00);
+      worker.TargetP1P0(e01);
+      worker.TargetP0P1(e10);
+      worker.TargetP1P1(e11);
     }
 
     /// <summary>
     /// Kreed's SuperSaI
     /// </summary>
-    public static void SuperSaI(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
-      var c0 = sourceImage[srcX - 1, srcY - 1];
-      var c1 = sourceImage[srcX, srcY - 1];
-      var c2 = sourceImage[srcX + 1, srcY - 1];
-      var c3 = sourceImage[srcX - 1, srcY];
-      var c4 = sourceImage[srcX, srcY];
-      var c5 = sourceImage[srcX + 1, srcY];
-      var c6 = sourceImage[srcX - 1, srcY + 1];
-      var c7 = sourceImage[srcX, srcY + 1];
-      var c8 = sourceImage[srcX + 1, srcY + 1];
-      var d0 = sourceImage[srcX - 1, srcY + 2];
-      var d1 = sourceImage[srcX, srcY + 2];
-      var d2 = sourceImage[srcX + 1, srcY + 2];
-      var d3 = sourceImage[srcX + 2, srcY - 1];
-      var d4 = sourceImage[srcX + 2, srcY];
-      var d5 = sourceImage[srcX + 2, srcY + 1];
-      var d6 = sourceImage[srcX + 2, srcY + 2];
-
+    public static void SuperSaI(PixelWorker<sPixel> worker) {
+      var c0 = worker.SourceM1M1();
+      var c1 = worker.SourceP0M1();
+      var c2 = worker.SourceP1M1();
+      var c3 = worker.SourceM1P0();
+      var c4 = worker.SourceP0P0();
+      var c5 = worker.SourceP1P0();
+      var c6 = worker.SourceM1P1();
+      var c7 = worker.SourceP0P1();
+      var c8 = worker.SourceP1P1(); 
+      var d0 = worker.SourceM1P2();
+      var d1 = worker.SourceP0P2();
+      var d2 = worker.SourceP1P2();
+      var d3 = worker.SourceP2M1();
+      var d4 = worker.SourceP2P0();
+      var d5 = worker.SourceP2P1();
+      var d6 = worker.SourceP2P2(); 
+      
       sPixel e01, e10, e11;
       var e00 = e01 = e11 = c4;
 
@@ -314,10 +315,10 @@ namespace Imager.Filters {
         e00 = sPixel.Interpolate(sPixel.Interpolate(c7, c3, c8), c4);
       }
 
-      targetImage[tgtX + 0, tgtY + 0] = e00;
-      targetImage[tgtX + 1, tgtY + 0] = e01;
-      targetImage[tgtX + 0, tgtY + 1] = e10;
-      targetImage[tgtX + 1, tgtY + 1] = e11;
+      worker.TargetP0P0(e00);
+      worker.TargetP1P0(e01);
+      worker.TargetP0P1(e10);
+      worker.TargetP1P1(e11);
     }
 
 

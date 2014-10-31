@@ -160,6 +160,11 @@
     <Compile Include="Imager\Interface\PixelScalerType.cs" />
     <Compile Include="Imager\Interface\ScalerInformation.cs" />
     <Compile Include="Imager\Interface\XbrScalerType.cs" />
+    <Compile Include="Imager\PixelWorker.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PixelWorker.tt</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.EventHandlers.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -231,6 +236,10 @@
     <None Include="Imager\Image.Resizer.Loop.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Image.Resizer.Loop.cs</LastGenOutput>
+    </None>
+    <None Include="Imager\PixelWorker.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PixelWorker.cs</LastGenOutput>
     </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

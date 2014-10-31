@@ -46,12 +46,12 @@ namespace Imager {
     /// <param name="c7">The c7.</param>
     /// <param name="c8">The c8.</param>
     /// <returns></returns>
-    internal delegate sPixel[] NqKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8);
+    internal delegate void NqKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8,PixelWorker<sPixel> worker);
 
     /// <summary>
     /// The NQ filter itself
     /// </summary>
-    internal delegate void NqFilter(cImage s, int sx, int sy, cImage t, int tx, int ty, byte scx, byte scy, NqKernel kernel);
+    internal delegate void NqFilter(PixelWorker<sPixel> worker , byte scx, byte scy, NqKernel kernel);
 
     /// <summary>
     /// Stores all available parameterless pixel scalers.
@@ -96,7 +96,7 @@ namespace Imager {
       var scaleY = info.Item2;
       var kernel = info.Item3;
 
-      return (this._RunLoop(filterRegion, scaleX, scaleY, (s, sx, sy, t, tx, ty) => scaler(s, sx, sy, t, tx, ty, scaleX, scaleY, kernel)));
+      return (this._RunLoop(filterRegion, scaleX, scaleY, worker => scaler(worker, scaleX, scaleY, kernel)));
     }
 
     /// <summary>

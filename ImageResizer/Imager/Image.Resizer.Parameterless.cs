@@ -26,28 +26,25 @@ using Imager.Filters;
 using Imager.Interface;
 
 namespace Imager {
+  /// <summary>
+  /// 
+  /// </summary>
   public partial class cImage {
     /// <summary>
     /// The kernel of a parameterless pixel scaler.
     /// </summary>
-    /// <param name="sourceImage">The source image.</param>
-    /// <param name="srcX">The source X.</param>
-    /// <param name="srcY">The source Y.</param>
-    /// <param name="targetImage">The target image.</param>
-    /// <param name="tgtX">The target X.</param>
-    /// <param name="tgtY">The target Y.</param>
-    internal delegate void ParameterlessPixelScaler(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY);
+    internal delegate void ParameterlessPixelScaler(PixelWorker<sPixel> worker);
 
     /// <summary>
     /// Stores all available parameterless pixel scalers.
     /// </summary>
     internal static readonly Dictionary<PixelScalerType, Tuple<byte, byte, ParameterlessPixelScaler>> PIXEL_SCALERS = new Dictionary<PixelScalerType, Tuple<byte, byte, ParameterlessPixelScaler>> {
-      {PixelScalerType.HorizontalHalfDarkScanlines,Tuple.Create<byte, byte, ParameterlessPixelScaler>(1,2,(s,sx,sy,t,tx,ty)=>libBasic.HorizontalScanlines(s,sx,sy,t,tx,ty,-50f))},
-      {PixelScalerType.HorizontalHalfLightScanlines,Tuple.Create<byte, byte, ParameterlessPixelScaler>(1,2,(s,sx,sy,t,tx,ty)=>libBasic.HorizontalScanlines(s,sx,sy,t,tx,ty,+50f))},
-      {PixelScalerType.HorizontalFullLightScanlines,Tuple.Create<byte, byte, ParameterlessPixelScaler>(1,2,(s,sx,sy,t,tx,ty)=>libBasic.HorizontalScanlines(s,sx,sy,t,tx,ty,+100f))},
-      {PixelScalerType.VerticalHalfDarkScanlines,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,1,(s,sx,sy,t,tx,ty)=>libBasic.VerticalScanlines(s,sx,sy,t,tx,ty,-50f))},
-      {PixelScalerType.VerticalHalfLightScanlines,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,1,(s,sx,sy,t,tx,ty)=>libBasic.VerticalScanlines(s,sx,sy,t,tx,ty,+50f))},
-      {PixelScalerType.VerticalFullLightScanlines,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,1,(s,sx,sy,t,tx,ty)=>libBasic.VerticalScanlines(s,sx,sy,t,tx,ty,+100f))},
+      {PixelScalerType.HorizontalHalfDarkScanlines,Tuple.Create<byte, byte, ParameterlessPixelScaler>(1,2,w=>libBasic.HorizontalScanlines(w,-50f))},
+      {PixelScalerType.HorizontalHalfLightScanlines,Tuple.Create<byte, byte, ParameterlessPixelScaler>(1,2,w=>libBasic.HorizontalScanlines(w,+50f))},
+      {PixelScalerType.HorizontalFullLightScanlines,Tuple.Create<byte, byte, ParameterlessPixelScaler>(1,2,w=>libBasic.HorizontalScanlines(w,+100f))},
+      {PixelScalerType.VerticalHalfDarkScanlines,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,1,w=>libBasic.VerticalScanlines(w,-50f))},
+      {PixelScalerType.VerticalHalfLightScanlines,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,1,w=>libBasic.VerticalScanlines(w,+50f))},
+      {PixelScalerType.VerticalFullLightScanlines,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,1,w=>libBasic.VerticalScanlines(w,+100f))},
 
       {PixelScalerType.MameTv,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libMAME.Tv2x)},
       {PixelScalerType.MameTv3,Tuple.Create<byte, byte, ParameterlessPixelScaler>(3,3,libMAME.Tv3x)},
@@ -93,7 +90,7 @@ namespace Imager {
       var scaleY = info.Item2;
       var scaler = info.Item3;
 
-      return (this._RunLoop(filterRegion, scaleX, scaleY, (s, sx, sy, t, tx, ty) => scaler(s, sx, sy, t, tx, ty)));
+      return (this._RunLoop(filterRegion, scaleX, scaleY, w=>scaler(w)));
     }
 
     /// <summary>

@@ -27,36 +27,35 @@ namespace Imager.Filters {
     /// <summary>
     /// This is the XBR2x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
-    public static void Xbr2X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, bool allowAlphaBlending) {
-      Contract.Assume(sourceImage != null);
-      Contract.Assume(targetImage != null);
-      var pa = sourceImage[srcX - 1, srcY - 1];
-      var pb = sourceImage[srcX + 0, srcY - 1];
-      var pc = sourceImage[srcX + 1, srcY - 1];
+    public static void Xbr2X(PixelWorker<sPixel> worker , bool allowAlphaBlending) {
+      Contract.Assume(worker!= null);
+      var pa = worker.SourceM1M1();
+      var pb = worker.SourceP0M1();
+      var pc = worker.SourceP1M1();
 
-      var pd = sourceImage[srcX - 1, srcY + 0];
-      var pe = sourceImage[srcX + 0, srcY + 0];
-      var pf = sourceImage[srcX + 1, srcY + 0];
+      var pd = worker.SourceM1P0();
+      var pe = worker.SourceP0P0();
+      var pf = worker.SourceP1P0();
 
-      var pg = sourceImage[srcX - 1, srcY + 1];
-      var ph = sourceImage[srcX + 0, srcY + 1];
-      var pi = sourceImage[srcX + 1, srcY + 1];
+      var pg = worker.SourceM1P1();
+      var ph = worker.SourceP0P1();
+      var pi = worker.SourceP1P1();
 
-      var a1 = sourceImage[srcX - 1, srcY - 2];
-      var b1 = sourceImage[srcX + 0, srcY - 2];
-      var c1 = sourceImage[srcX + 1, srcY - 2];
+      var a1 = worker.SourceM1M2();
+      var b1 = worker.SourceP0M2();
+      var c1 = worker.SourceP1M2();
 
-      var a0 = sourceImage[srcX - 2, srcY - 1];
-      var d0 = sourceImage[srcX - 2, srcY + 0];
-      var g0 = sourceImage[srcX - 2, srcY + 1];
+      var a0 = worker.SourceM2M1();
+      var d0 = worker.SourceM2P0();
+      var g0 = worker.SourceM2P1();
 
-      var c4 = sourceImage[srcX + 2, srcY - 1];
-      var f4 = sourceImage[srcX + 2, srcY + 0];
-      var i4 = sourceImage[srcX + 2, srcY + 1];
+      var c4 = worker.SourceP2M1();
+      var f4 = worker.SourceP2P0();
+      var i4 = worker.SourceP2P1();
 
-      var g5 = sourceImage[srcX - 1, srcY + 2];
-      var h5 = sourceImage[srcX + 0, srcY + 2];
-      var i5 = sourceImage[srcX + 1, srcY + 2];
+      var g5 = worker.SourceM1P2();
+      var h5 = worker.SourceP0P2();
+      var i5 = worker.SourceP1P2();
 
       sPixel e1, e2, e3;
       var e0 = e1 = e2 = e3 = pe;
@@ -66,45 +65,44 @@ namespace Imager.Filters {
       _Kernel2Xv5(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e2, ref e1, ref e0, allowAlphaBlending);
       _Kernel2Xv5(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref e3, ref e0, ref e2, allowAlphaBlending);
 
-      targetImage[tgtX + 0, tgtY + 0] = e0;
-      targetImage[tgtX + 1, tgtY + 0] = e1;
-      targetImage[tgtX + 0, tgtY + 1] = e2;
-      targetImage[tgtX + 1, tgtY + 1] = e3;
+      worker.TargetP0P0(e0);
+      worker.TargetP1P0(e1);
+      worker.TargetP0P1(e2);
+      worker.TargetP1P1(e3);
     }
 
     /// <summary>
     /// This is the XBR3x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
-    public static void Xbr3X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, bool allowAlphaBlending, bool useOriginalImplementation) {
-      Contract.Assume(sourceImage != null);
-      Contract.Assume(targetImage != null);
-      var pa = sourceImage[srcX - 1, srcY - 1];
-      var pb = sourceImage[srcX + 0, srcY - 1];
-      var pc = sourceImage[srcX + 1, srcY - 1];
+    public static void Xbr3X(PixelWorker<sPixel> worker ,  bool allowAlphaBlending, bool useOriginalImplementation) {
+      Contract.Assume(worker != null);
+      var pa = worker.SourceM1M1();
+      var pb = worker.SourceP0M1();
+      var pc = worker.SourceP1M1();
 
-      var pd = sourceImage[srcX - 1, srcY + 0];
-      var pe = sourceImage[srcX + 0, srcY + 0];
-      var pf = sourceImage[srcX + 1, srcY + 0];
+      var pd = worker.SourceM1P0();
+      var pe = worker.SourceP0P0();
+      var pf = worker.SourceP1P0();
 
-      var pg = sourceImage[srcX - 1, srcY + 1];
-      var ph = sourceImage[srcX + 0, srcY + 1];
-      var pi = sourceImage[srcX + 1, srcY + 1];
+      var pg = worker.SourceM1P1();
+      var ph = worker.SourceP0P1();
+      var pi = worker.SourceP1P1();
 
-      var a1 = sourceImage[srcX - 1, srcY - 2];
-      var b1 = sourceImage[srcX + 0, srcY - 2];
-      var c1 = sourceImage[srcX + 1, srcY - 2];
+      var a1 = worker.SourceM1M2();
+      var b1 = worker.SourceP0M2();
+      var c1 = worker.SourceP1M2();
 
-      var a0 = sourceImage[srcX - 2, srcY - 1];
-      var d0 = sourceImage[srcX - 2, srcY + 0];
-      var g0 = sourceImage[srcX - 2, srcY + 1];
+      var a0 = worker.SourceM2M1();
+      var d0 = worker.SourceM2P0();
+      var g0 = worker.SourceM2P1();
 
-      var c4 = sourceImage[srcX + 2, srcY - 1];
-      var f4 = sourceImage[srcX + 2, srcY + 0];
-      var i4 = sourceImage[srcX + 2, srcY + 1];
+      var c4 = worker.SourceP2M1();
+      var f4 = worker.SourceP2P0();
+      var i4 = worker.SourceP2P1();
 
-      var g5 = sourceImage[srcX - 1, srcY + 2];
-      var h5 = sourceImage[srcX + 0, srcY + 2];
-      var i5 = sourceImage[srcX + 1, srcY + 2];
+      var g5 = worker.SourceM1P2();
+      var h5 = worker.SourceP0P2();
+      var i5 = worker.SourceP1P2();
 
       sPixel e1, e2, e3, e4, e5, e6, e7, e8;
       var e0 = e1 = e2 = e3 = e4 = e5 = e6 = e7 = e8 = pe;
@@ -114,50 +112,49 @@ namespace Imager.Filters {
       _Kernel3X(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e6, ref e3, ref e2, ref e1, ref e0, allowAlphaBlending, useOriginalImplementation);
       _Kernel3X(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref e8, ref e7, ref e0, ref e3, ref e6, allowAlphaBlending, useOriginalImplementation);
 
-      targetImage[tgtX + 0, tgtY + 0] = e0;
-      targetImage[tgtX + 1, tgtY + 0] = e1;
-      targetImage[tgtX + 2, tgtY + 0] = e2;
-      targetImage[tgtX + 0, tgtY + 1] = e3;
-      targetImage[tgtX + 1, tgtY + 1] = e4;
-      targetImage[tgtX + 2, tgtY + 1] = e5;
-      targetImage[tgtX + 0, tgtY + 2] = e6;
-      targetImage[tgtX + 1, tgtY + 2] = e7;
-      targetImage[tgtX + 2, tgtY + 2] = e8;
+      worker.TargetP0P0(e0);
+      worker.TargetP1P0(e1);
+      worker.TargetP2P0(e2);
+      worker.TargetP0P1(e3);
+      worker.TargetP1P1(e4);
+      worker.TargetP2P1(e5);
+      worker.TargetP0P2(e6);
+      worker.TargetP1P2(e7);
+      worker.TargetP2P2(e8);
     }
 
     /// <summary>
     /// This is the XBR4x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
-    public static void Xbr4X(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, bool allowAlphaBlending) {
-      Contract.Assume(sourceImage != null);
-      Contract.Assume(targetImage != null);
-      var pa = sourceImage[srcX - 1, srcY - 1];
-      var pb = sourceImage[srcX + 0, srcY - 1];
-      var pc = sourceImage[srcX + 1, srcY - 1];
+    public static void Xbr4X(PixelWorker<sPixel> worker, bool allowAlphaBlending) {
+      Contract.Assume(worker != null);
+      var pa = worker.SourceM1M1();
+      var pb = worker.SourceP0M1();
+      var pc = worker.SourceP1M1();
 
-      var pd = sourceImage[srcX - 1, srcY + 0];
-      var pe = sourceImage[srcX + 0, srcY + 0];
-      var pf = sourceImage[srcX + 1, srcY + 0];
+      var pd = worker.SourceM1P0();
+      var pe = worker.SourceP0P0();
+      var pf = worker.SourceP1P0();
 
-      var pg = sourceImage[srcX - 1, srcY + 1];
-      var ph = sourceImage[srcX + 0, srcY + 1];
-      var pi = sourceImage[srcX + 1, srcY + 1];
+      var pg = worker.SourceM1P1();
+      var ph = worker.SourceP0P1();
+      var pi = worker.SourceP1P1();
 
-      var a1 = sourceImage[srcX - 1, srcY - 2];
-      var b1 = sourceImage[srcX + 0, srcY - 2];
-      var c1 = sourceImage[srcX + 1, srcY - 2];
+      var a1 = worker.SourceM1M2();
+      var b1 = worker.SourceP0M2();
+      var c1 = worker.SourceP1M2();
 
-      var a0 = sourceImage[srcX - 2, srcY - 1];
-      var d0 = sourceImage[srcX - 2, srcY + 0];
-      var g0 = sourceImage[srcX - 2, srcY + 1];
+      var a0 = worker.SourceM2M1();
+      var d0 = worker.SourceM2P0();
+      var g0 = worker.SourceM2P1();
 
-      var c4 = sourceImage[srcX + 2, srcY - 1];
-      var f4 = sourceImage[srcX + 2, srcY + 0];
-      var i4 = sourceImage[srcX + 2, srcY + 1];
+      var c4 = worker.SourceP2M1();
+      var f4 = worker.SourceP2P0();
+      var i4 = worker.SourceP2P1();
 
-      var g5 = sourceImage[srcX - 1, srcY + 2];
-      var h5 = sourceImage[srcX + 0, srcY + 2];
-      var i5 = sourceImage[srcX + 1, srcY + 2];
+      var g5 = worker.SourceM1P2();
+      var h5 = worker.SourceP0P2();
+      var i5 = worker.SourceP1P2();
 
       sPixel e1, e2, e3, e4, e5, e6, e7, e8, e9, ea, eb, ec, ed, ee, ef;
       var e0 = e1 = e2 = e3 = e4 = e5 = e6 = e7 = e8 = e9 = ea = eb = ec = ed = ee = ef = pe;
@@ -167,22 +164,22 @@ namespace Imager.Filters {
       _Kernel4Xv2(pe, pa, pb, pd, pc, pg, pf, ph, d0, a0, b1, a1, ref e0, ref e1, ref e4, ref ec, ref e8, ref e5, ref e2, ref e3, allowAlphaBlending);
       _Kernel4Xv2(pe, pg, pd, ph, pa, pi, pb, pf, h5, g5, d0, g0, ref ec, ref e8, ref ed, ref ef, ref ee, ref e9, ref e4, ref e0, allowAlphaBlending);
 
-      targetImage[tgtX + 0, tgtY + 0] = e0;
-      targetImage[tgtX + 1, tgtY + 0] = e1;
-      targetImage[tgtX + 2, tgtY + 0] = e2;
-      targetImage[tgtX + 3, tgtY + 0] = e3;
-      targetImage[tgtX + 0, tgtY + 1] = e4;
-      targetImage[tgtX + 1, tgtY + 1] = e5;
-      targetImage[tgtX + 2, tgtY + 1] = e6;
-      targetImage[tgtX + 3, tgtY + 1] = e7;
-      targetImage[tgtX + 0, tgtY + 2] = e8;
-      targetImage[tgtX + 1, tgtY + 2] = e9;
-      targetImage[tgtX + 2, tgtY + 2] = ea;
-      targetImage[tgtX + 3, tgtY + 2] = eb;
-      targetImage[tgtX + 0, tgtY + 3] = ec;
-      targetImage[tgtX + 1, tgtY + 3] = ed;
-      targetImage[tgtX + 2, tgtY + 3] = ee;
-      targetImage[tgtX + 3, tgtY + 3] = ef;
+      worker.TargetP0P0(e0);
+      worker.TargetP1P0(e1);
+      worker.TargetP2P0(e2);
+      worker.TargetP3P0(e3);
+      worker.TargetP0P1(e4);
+      worker.TargetP1P1(e5);
+      worker.TargetP2P1(e6);
+      worker.TargetP3P1(e7);
+      worker.TargetP0P2(e8);
+      worker.TargetP1P2(e9);
+      worker.TargetP2P2(ea);
+      worker.TargetP3P2(eb);
+      worker.TargetP0P3(ec);
+      worker.TargetP1P3(ed);
+      worker.TargetP2P3(ee);
+      worker.TargetP3P3(ef);
     }
 
     private static uint _YuvDifference(sPixel a, sPixel b) {
