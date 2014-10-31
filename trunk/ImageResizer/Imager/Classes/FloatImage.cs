@@ -199,10 +199,10 @@ namespace Imager.Classes {
     #region utils
     private static float _GetValueFromPlane(float[] plane, int x, int y, int width, int height, OutOfBoundsUtils.OutOfBoundsHandler horizontalOutOfBoundsHandler, OutOfBoundsUtils.OutOfBoundsHandler verticalOutOfBoundsHandler) {
       if (x < 0 || x >= width)
-        x = horizontalOutOfBoundsHandler(x, width);
+        x = horizontalOutOfBoundsHandler(x, width,x<0);
 
       if (y < 0 || y >= height)
-        y = verticalOutOfBoundsHandler(y, height);
+        y = verticalOutOfBoundsHandler(y, height,y<0);
       
       return (plane[y * width + x]);
     }
@@ -462,7 +462,7 @@ namespace Imager.Classes {
           for (var n = 0; n < kernelWidth; n++) {
             var index = pos + n;
             if (index < 0 || index >= srcWidth)
-              index = boundary(index, srcWidth);
+              index = boundary(index, srcWidth,index<0);
 
             filterCoeff[coeffIndex + index - filterPos[destX]]
               += (float) kernel(srcX - index);

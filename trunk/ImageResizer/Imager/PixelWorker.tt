@@ -1,0 +1,172 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#
+  var shiftMultipliers=Enumerable.Range(0,8).ToDictionary(i=>1<<i,i=>i);
+  var sourceXRange=new[]{-2,-1,0,1,2,3};
+  var sourceYRange=new[]{-2,-1,0,1,2,3};
+  var targetXRange=new[]{0,1,2,3,4};
+  var targetYRange=new[]{-1,0,1,2,3,4};
+  Func<int,string> GetLineDescription=v=>v<0?"M"+Math.Abs(v).ToString():"P"+v.ToString();
+  Func<int,int,string> GetPointDescription=(x,y)=>GetLineDescription(x)+GetLineDescription(y);
+#>
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using Imager.Interface;
+
+namespace Imager {
+  /// <summary>
+  /// This class gets us fast access to a small window of pixels in the source and target images.
+  /// </summary>
+  internal class PixelWorker<TColorStorage> {
+    private readonly IList<TColorStorage> _sourceImage;
+    private int _sourceX;
+    private readonly int _sourceY;
+    private int _sourceOffset;
+    
+    private readonly int _sourceWidth;
+    private readonly int _sourceHeight;
+    private readonly OutOfBoundsUtils.OutOfBoundsHandler _sourceXWrapper;
+    private readonly OutOfBoundsUtils.OutOfBoundsHandler _sourceYWrapper;
+
+    private readonly IList<TColorStorage> _targetImage;
+    private int _targetOffset;
+
+    #region offset calculators for source image
+    // these are lazy calculated offsets, so once used, the method pointer gets replaced by a function that returns the calculated constant
+<# foreach(var i in sourceXRange.Where(i=>i!=0)) { #>
+    private Func<int> _sourceOffset<#=GetLineDescription(i)#>X;
+    private int _sourceOffset<#=GetLineDescription(i)#>XValue;
+<# } #>
+<# foreach(var i in sourceYRange.Where(i=>i!=0)) { #>
+    private Func<int> _sourceOffset<#=GetLineDescription(i)#>Y;
+    private int _sourceOffset<#=GetLineDescription(i)#>YValue;
+<# } #>
+    #endregion
+
+    #region offsets for target image
+<# foreach(var i in targetXRange.Where(i=>i!=0)) { #>
+    private const int _targetOffset<#=GetLineDescription(i)#>X = <#=i#>;
+<# } #>
+<# foreach(var i in targetYRange.Where(i=>i!=0)) { #>
+    private readonly int _targetOffset<#=GetLineDescription(i)#>Y;
+<# } #>
+    #endregion
+
+    public PixelWorker(IList<TColorStorage> sourceImage, int sourceX, int sourceY, int sourceWidth, int sourceHeight, OutOfBoundsUtils.OutOfBoundsHandler sourceXWrapper, OutOfBoundsUtils.OutOfBoundsHandler sourceYWrapper, IList<TColorStorage> targetImage, int targetX, int targetY, int targetWidth) {
+      Contract.Requires(sourceX >= 0 && sourceX < sourceWidth && sourceY >= 0 && sourceY < sourceHeight);
+      this._sourceImage = sourceImage;
+      this._sourceX = sourceX;
+      this._sourceY = sourceY;
+      this._sourceWidth = sourceWidth;
+      this._sourceHeight = sourceHeight;
+
+      // we can safely calculate this offset, because we assume that the central source pixel is never out of bounds
+      this._sourceOffset = sourceWidth * sourceY + sourceX;
+
+      // we only check pixels in a row or column once for over-/underflow, to avoid calling the wrappers over and over again
+      this._sourceXWrapper = sourceXWrapper;
+      this._sourceYWrapper = sourceYWrapper;
+
+      // we calculate a delta offset for pixels around the center and store these independent X from Y
+<# foreach(var i in sourceXRange.Where(i=>i!=0)) { #>
+      this._sourceOffset<#=GetLineDescription(i)#>X = this._CalculateOffset<#=GetLineDescription(i)#>X;
+<# } #>
+<# foreach(var i in sourceYRange.Where(i=>i!=0)) { #>
+      this._sourceOffset<#=GetLineDescription(i)#>Y = this._CalculateOffset<#=GetLineDescription(i)#>Y;
+<# } #>
+
+      this._targetImage = targetImage;
+      this._targetOffset = targetWidth * targetY + targetX;
+
+      // pre-calculating the row offset for target image, because they surely get used
+<# foreach(var i in targetYRange.Where(i=>i!=0)) { #>
+      this._targetOffset<#=GetLineDescription(i)#>Y = targetWidth<#=i==1?"     ":(shiftMultipliers.ContainsKey(i)?" << "+shiftMultipliers[i].ToString():" *  "+i.ToString())#>;          // for nx<#=(i+1)#> filters
+<# } #>
+    }
+
+    public int SourceX(){
+      return(this._sourceX);
+    }
+
+    public int SourceY(){
+      return(this._sourceY);
+    }
+
+    public int SourceHeight(){
+      return(this._sourceHeight);
+    }
+
+    public void IncrementX(int targetXIncrementor){
+      this._targetOffset+=targetXIncrementor;
+      this._sourceOffset++;
+      this._sourceX++;
+<# foreach(var i in sourceXRange.Where(i=>i!=0)) { #>
+<# if(i==-1){ #>
+      this._sourceOffset<#=GetLineDescription(i)#>X = this._GetOffset<#=GetLineDescription(i)#>X;
+      this._sourceOffset<#=GetLineDescription(i)#>XValue = -1;
+<# } else { #>
+      this._sourceOffset<#=GetLineDescription(i)#>X = this._CalculateOffset<#=GetLineDescription(i)#>X;
+<# } #>
+<# } #>
+    }
+
+    #region access source points
+<# foreach(var y in sourceYRange) { #>
+<# foreach(var x in sourceXRange) { #>
+    public TColorStorage Source<#=GetPointDescription(x,y)#>() {
+      return (this._sourceImage[this._sourceOffset<#=x==0?string.Empty:" + this._sourceOffset"+GetLineDescription(x)+"X()"#><#=y==0?string.Empty:" + this._sourceOffset"+GetLineDescription(y)+"Y()"#>]);
+    }
+<# } #>
+<# } #>
+    #endregion
+
+    #region access target points
+<# foreach(var y in targetYRange) { #>
+<# foreach(var x in targetXRange) { #>
+    public void Target<#=GetPointDescription(x,y)#>(TColorStorage value) {
+      this._targetImage[this._targetOffset<#=x==0?string.Empty:" + _targetOffset"+GetLineDescription(x)+"X"#><#=y==0?string.Empty:" + this._targetOffset"+GetLineDescription(y)+"Y"#>] = value;
+    }
+<# } #>
+<# } #>
+    #endregion
+
+    #region calculate source offset deltas
+
+<# foreach(var i in sourceXRange.Where(i=>i!=0)) { #>
+    private int _GetOffset<#=GetLineDescription(i)#>X() { return (this._sourceOffset<#=GetLineDescription(i)#>XValue); }
+    private int _CalculateOffset<#=GetLineDescription(i)#>X() {
+      var current = this._sourceX;
+      var value = current <#=i<0?"- "+Math.Abs(i).ToString():"+ "+i.ToString()#>;
+      if (value <#=i<0?"< 0":">= this._sourceWidth"#>)
+        value = this._sourceXWrapper(value, this._sourceWidth, <#=i<0?"true":"false"#>);
+
+      var result = value - current;
+      this._sourceOffset<#=GetLineDescription(i)#>XValue = result;
+      this._sourceOffset<#=GetLineDescription(i)#>X = this._GetOffset<#=GetLineDescription(i)#>X;
+      return (result);
+    }
+<# } #>
+<# foreach(var i in sourceYRange.Where(i=>i!=0)) { #>
+    private int _GetOffset<#=GetLineDescription(i)#>Y() { return (this._sourceOffset<#=GetLineDescription(i)#>YValue); }
+    private int _CalculateOffset<#=GetLineDescription(i)#>Y() {
+      var current = this._sourceY;
+      var value = current <#=i<0?"- "+Math.Abs(i).ToString():"+ "+i.ToString()#>;
+      if (value <#=i<0?"< 0":">= this._sourceHeight"#>)
+        value = this._sourceYWrapper(value, this._sourceHeight, <#=i<0?"true":"false"#>);
+
+      var result = (value - current) * this._sourceWidth;
+      this._sourceOffset<#=GetLineDescription(i)#>YValue = result;
+      this._sourceOffset<#=GetLineDescription(i)#>Y = this._GetOffset<#=GetLineDescription(i)#>Y;
+      return (result);
+    }
+<# } #>
+    #endregion
+
+  }
+}

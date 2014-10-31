@@ -24,16 +24,16 @@ namespace Imager.Filters {
     /// <summary>
     /// SNES9x's EPXB modified by Hawkynt to support thresholds
     /// </summary>
-    public static void EpxB(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
-      var c0 = sourceImage[srcX - 1, srcY - 1];
-      var c1 = sourceImage[srcX + 0, srcY - 1];
-      var c2 = sourceImage[srcX + 1, srcY - 1];
-      var c3 = sourceImage[srcX - 1, srcY + 0];
-      var c4 = sourceImage[srcX + 0, srcY + 0];
-      var c5 = sourceImage[srcX + 1, srcY + 0];
-      var c6 = sourceImage[srcX - 1, srcY + 1];
-      var c7 = sourceImage[srcX + 0, srcY + 1];
-      var c8 = sourceImage[srcX + 1, srcY + 1];
+    public static void EpxB(PixelWorker<sPixel> worker ) {
+      var c0 = worker.SourceM1M1();
+      var c1 = worker.SourceP0M1();
+      var c2 = worker.SourceP1M1();
+      var c3 = worker.SourceM1P0();
+      var c4 = worker.SourceP0P0();
+      var c5 = worker.SourceP1P0();
+      var c6 = worker.SourceM1P1();
+      var c7 = worker.SourceP0P1();
+      var c8 = worker.SourceP1P1();
       sPixel e01, e10, e11;
       var e00 = e01 = e10 = e11 = c4;
       if (
@@ -99,25 +99,25 @@ namespace Imager.Filters {
         }
       }
 
-      targetImage[tgtX + 0, tgtY + 0] = e00;
-      targetImage[tgtX + 1, tgtY + 0] = e01;
-      targetImage[tgtX + 0, tgtY + 1] = e10;
-      targetImage[tgtX + 1, tgtY + 1] = e11;
+      worker.TargetP0P0(e00);
+      worker.TargetP1P0(e01);
+      worker.TargetP0P1(e10);
+      worker.TargetP1P1(e11);
     }
 
     /// <summary>
     /// SNES9x's EPX3 modified by Hawkynt to support thresholds
     /// </summary>
-    public static void Epx3(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
-      var c0 = sourceImage[srcX - 1, srcY - 1];
-      var c1 = sourceImage[srcX + 0, srcY - 1];
-      var c2 = sourceImage[srcX + 1, srcY - 1];
-      var c3 = sourceImage[srcX - 1, srcY + 0];
-      var c4 = sourceImage[srcX + 0, srcY + 0];
-      var c5 = sourceImage[srcX + 1, srcY + 0];
-      var c6 = sourceImage[srcX - 1, srcY + 1];
-      var c7 = sourceImage[srcX + 0, srcY + 1];
-      var c8 = sourceImage[srcX + 1, srcY + 1];
+    public static void Epx3(PixelWorker<sPixel>worker ) {
+      var c0 = worker.SourceM1M1();
+      var c1 = worker.SourceP0M1();
+      var c2 = worker.SourceP1M1();
+      var c3 = worker.SourceM1P0();
+      var c4 = worker.SourceP0P0();
+      var c5 = worker.SourceP1P0();
+      var c6 = worker.SourceM1P1();
+      var c7 = worker.SourceP0P1();
+      var c8 = worker.SourceP1P1();
       sPixel e01, e02, e10, e11, e12, e20, e21, e22;
       var e00 = e01 = e02 = e10 = e11 = e12 = e20 = e21 = e22 = c4;
 
@@ -194,30 +194,30 @@ namespace Imager.Filters {
         }
       }
 
-      targetImage[tgtX + 0, tgtY + 0] = e00;
-      targetImage[tgtX + 1, tgtY + 0] = e01;
-      targetImage[tgtX + 2, tgtY + 0] = e02;
-      targetImage[tgtX + 0, tgtY + 1] = e10;
-      targetImage[tgtX + 1, tgtY + 1] = e11;
-      targetImage[tgtX + 2, tgtY + 1] = e12;
-      targetImage[tgtX + 0, tgtY + 2] = e20;
-      targetImage[tgtX + 1, tgtY + 2] = e21;
-      targetImage[tgtX + 2, tgtY + 2] = e22;
+      worker.TargetP0P0(e00);
+      worker.TargetP1P0(e01);
+      worker.TargetP2P0(e02);
+      worker.TargetP0P1(e10);
+      worker.TargetP1P1(e11);
+      worker.TargetP2P1(e12);
+      worker.TargetP0P2(e20);
+      worker.TargetP1P2(e21);
+      worker.TargetP2P2(e22);
     }
 
     /// <summary>
     /// SNES9x's EPXC modified by Hawkynt to support thresholds
     /// </summary>
-    public static void EpxC(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
-      var c0 = sourceImage[srcX - 1, srcY - 1];
-      var c1 = sourceImage[srcX + 0, srcY - 1];
-      var c2 = sourceImage[srcX + 1, srcY - 1];
-      var c3 = sourceImage[srcX - 1, srcY + 0];
-      var c4 = sourceImage[srcX + 0, srcY + 0];
-      var c5 = sourceImage[srcX + 1, srcY + 0];
-      var c6 = sourceImage[srcX - 1, srcY + 1];
-      var c7 = sourceImage[srcX + 0, srcY + 1];
-      var c8 = sourceImage[srcX + 1, srcY + 1];
+    public static void EpxC(PixelWorker<sPixel> worker) {
+      var c0 = worker.SourceM1M1();
+      var c1 = worker.SourceP0M1();
+      var c2 = worker.SourceP1M1();
+      var c3 = worker.SourceM1P0();
+      var c4 = worker.SourceP0P0();
+      var c5 = worker.SourceP1P0();
+      var c6 = worker.SourceM1P1();
+      var c7 = worker.SourceP0P1();
+      var c8 = worker.SourceP1P1();
       sPixel e01, e10, e11;
       var e00 = e01 = e10 = e11 = c4;
 
@@ -319,10 +319,10 @@ namespace Imager.Filters {
         }
       }
 
-      targetImage[tgtX + 0, tgtY + 0] = e00;
-      targetImage[tgtX + 1, tgtY + 0] = e01;
-      targetImage[tgtX + 0, tgtY + 1] = e10;
-      targetImage[tgtX + 1, tgtY + 1] = e11;
+      worker.TargetP0P0(e00);
+      worker.TargetP1P0(e01);
+      worker.TargetP0P1(e10);
+      worker.TargetP1P1(e11);
     }
 
 

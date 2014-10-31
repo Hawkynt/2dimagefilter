@@ -5,34 +5,30 @@ namespace Imager.Filters {
   internal static class ReverseAntiAlias {
     /// <summary>
     /// Christoph Feck's (christoph@maxiom.de) Reverse Anti-Alias filter
+    /// TODO: make mathutils and join clamp, min and max with the ones from spixel
     /// </summary>
-    /// <param name="sourceImage"></param>
-    /// <param name="srcX"></param>
-    /// <param name="srcY"></param>
-    /// <param name="targetImage"></param>
-    /// <param name="tgtX"></param>
-    /// <param name="tgtY"></param>
-    public static void Process(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY) {
+    /// <param name="worker">The worker.</param>
+    public static void Process(PixelWorker<sPixel>worker ) {
 
-      var B1 = sourceImage[srcX + 0, srcY - 2];
-      var B = sourceImage[srcX + 0, srcY - 1];
-      var D = sourceImage[srcX - 1, srcY + 0];
-      var E = sourceImage[srcX + 0, srcY + 0];
-      var F = sourceImage[srcX + 1, srcY + 0];
-      var H = sourceImage[srcX + 0, srcY + 1];
-      var H5 = sourceImage[srcX + 0, srcY + 2];
-      var D0 = sourceImage[srcX - 2, srcY + 0];
-      var F4 = sourceImage[srcX + 2, srcY + 0];
+      var b1 = worker.SourceP0M2();
+      var b = worker.SourceP0M1();
+      var d = worker.SourceM1P0();
+      var e = worker.SourceP0P0();
+      var f = worker.SourceP1P0();
+      var h = worker.SourceP0P1();
+      var h5 = worker.SourceP0P2();
+      var d0 = worker.SourceM2P0();
+      var f4 = worker.SourceP2P0();
 
-      var redPart = _ReverseAntiAlias(B1.Red, B.Red, D.Red, E.Red, F.Red, H.Red, H5.Red, D0.Red, F4.Red);
-      var greenPart = _ReverseAntiAlias(B1.Green, B.Green, D.Green, E.Green, F.Green, H.Green, H5.Green, D0.Green, F4.Green);
-      var bluePart = _ReverseAntiAlias(B1.Blue, B.Blue, D.Blue, E.Blue, F.Blue, H.Blue, H5.Blue, D0.Blue, F4.Blue);
-      var alphaPart = _ReverseAntiAlias(B1.Alpha, B.Alpha, D.Alpha, E.Alpha, F.Alpha, H.Alpha, H5.Alpha, D0.Alpha, F4.Alpha);
+      var redPart = _ReverseAntiAlias(b1.Red, b.Red, d.Red, e.Red, f.Red, h.Red, h5.Red, d0.Red, f4.Red);
+      var greenPart = _ReverseAntiAlias(b1.Green, b.Green, d.Green, e.Green, f.Green, h.Green, h5.Green, d0.Green, f4.Green);
+      var bluePart = _ReverseAntiAlias(b1.Blue, b.Blue, d.Blue, e.Blue, f.Blue, h.Blue, h5.Blue, d0.Blue, f4.Blue);
+      var alphaPart = _ReverseAntiAlias(b1.Alpha, b.Alpha, d.Alpha, e.Alpha, f.Alpha, h.Alpha, h5.Alpha, d0.Alpha, f4.Alpha);
 
-      targetImage[tgtX + 0, tgtY + 0] = sPixel.FromRGBA(redPart.Item1, greenPart.Item1, bluePart.Item1, alphaPart.Item1);
-      targetImage[tgtX + 1, tgtY + 0] = sPixel.FromRGBA(redPart.Item2, greenPart.Item2, bluePart.Item2, alphaPart.Item2);
-      targetImage[tgtX + 0, tgtY + 1] = sPixel.FromRGBA(redPart.Item3, greenPart.Item3, bluePart.Item3, alphaPart.Item3);
-      targetImage[tgtX + 1, tgtY + 1] = sPixel.FromRGBA(redPart.Item4, greenPart.Item4, bluePart.Item4, alphaPart.Item4);
+      worker.TargetP0P0( sPixel.FromRGBA(redPart.Item1, greenPart.Item1, bluePart.Item1, alphaPart.Item1));
+      worker.TargetP1P0(sPixel.FromRGBA(redPart.Item2, greenPart.Item2, bluePart.Item2, alphaPart.Item2));
+      worker.TargetP0P1( sPixel.FromRGBA(redPart.Item3, greenPart.Item3, bluePart.Item3, alphaPart.Item3));
+      worker.TargetP1P1( sPixel.FromRGBA(redPart.Item4, greenPart.Item4, bluePart.Item4, alphaPart.Item4));
     }
 
     /// <summary>

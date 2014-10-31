@@ -25,16 +25,16 @@ namespace Imager.Filters {
     /// <summary>
     /// body for HQ2x etc.
     /// </summary>
-    public static void ComplexFilter(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte scaleX, byte scaleY, Imager.cImage.NqKernel kernel) {
-      var c0 = sourceImage.GetPixel(srcX - 1, srcY - 1);
-      var c1 = sourceImage.GetPixel(srcX + 0, srcY - 1);
-      var c2 = sourceImage.GetPixel(srcX + 1, srcY - 1);
-      var c3 = sourceImage.GetPixel(srcX - 1, srcY + 0);
-      var c4 = sourceImage.GetPixel(srcX + 0, srcY + 0);
-      var c5 = sourceImage.GetPixel(srcX + 1, srcY + 0);
-      var c6 = sourceImage.GetPixel(srcX - 1, srcY + 1);
-      var c7 = sourceImage.GetPixel(srcX + 0, srcY + 1);
-      var c8 = sourceImage.GetPixel(srcX + 1, srcY + 1);
+    public static void ComplexFilter(PixelWorker<sPixel> worker, byte scaleX, byte scaleY, cImage.NqKernel kernel) {
+      var c0 = worker.SourceM1M1();
+      var c1 = worker.SourceP0M1();
+      var c2 = worker.SourceP1M1();
+      var c3 = worker.SourceM1P0();
+      var c4 = worker.SourceP0P0();
+      var c5 = worker.SourceP1P0();
+      var c6 = worker.SourceM1P1();
+      var c7 = worker.SourceP0P1();
+      var c8 = worker.SourceP1P1();
       byte pattern = 0;
       if ((c4.IsNotLike(c0)))
         pattern |= 1;
@@ -52,26 +52,22 @@ namespace Imager.Filters {
         pattern |= 64;
       if ((c4.IsNotLike(c8)))
         pattern |= 128;
-      var result = kernel(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8);
-      byte offset = 0;
-      for (byte y = 0; y < scaleY; y++)
-        for (byte x = 0; x < scaleX; x++)
-          targetImage.SetPixel(tgtX + x, tgtY + y, result[offset++]);
+      kernel(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8,worker);
     } // end sub
 
     /// <summary>
     /// body for HQ2xBold etc. as seen in SNES9x
     /// </summary>
-    public static void ComplexFilterBold(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte scaleX, byte scaleY, Imager.cImage.NqKernel kernel) {
-      var c0 = sourceImage.GetPixel(srcX - 1, srcY - 1);
-      var c1 = sourceImage.GetPixel(srcX + 0, srcY - 1);
-      var c2 = sourceImage.GetPixel(srcX + 1, srcY - 1);
-      var c3 = sourceImage.GetPixel(srcX - 1, srcY + 0);
-      var c4 = sourceImage.GetPixel(srcX + 0, srcY + 0);
-      var c5 = sourceImage.GetPixel(srcX + 1, srcY + 0);
-      var c6 = sourceImage.GetPixel(srcX - 1, srcY + 1);
-      var c7 = sourceImage.GetPixel(srcX + 0, srcY + 1);
-      var c8 = sourceImage.GetPixel(srcX + 1, srcY + 1);
+    public static void ComplexFilterBold(PixelWorker<sPixel> worker, byte scaleX, byte scaleY, cImage.NqKernel kernel) {
+      var c0 = worker.SourceM1M1();
+      var c1 = worker.SourceP0M1();
+      var c2 = worker.SourceP1M1();
+      var c3 = worker.SourceM1P0();
+      var c4 = worker.SourceP0P0();
+      var c5 = worker.SourceP1P0();
+      var c6 = worker.SourceM1P1();
+      var c7 = worker.SourceP0P1();
+      var c8 = worker.SourceP1P1();
       var brightness = new[] { 
         c0.Brightness,
         c1.Brightness,
@@ -112,33 +108,29 @@ namespace Imager.Filters {
         pattern |= 64;
       if ((c4.IsNotLike(c8)) && ((brightness[8] > avgBrightness) != dc4))
         pattern |= 128;
-      var result = kernel(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8);
-      byte offset = 0;
-      for (byte y = 0; y < scaleY; y++)
-        for (byte x = 0; x < scaleX; x++)
-          targetImage.SetPixel(tgtX + x, tgtY + y, result[offset++]);
+      kernel(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8,worker);
     } // end sub
 
     /// <summary>
     /// body for HQ2xSmart etc. as seen in SNES9x
     /// </summary>
-    public static void ComplexFilterSmart(cImage sourceImage, int srcX, int srcY, cImage targetImage, int tgtX, int tgtY, byte scaleX, byte scaleY, Imager.cImage.NqKernel kernel) {
-      var c0 = sourceImage.GetPixel(srcX - 1, srcY - 1);
-      var c2 = sourceImage.GetPixel(srcX + 1, srcY - 1);
-      var c4 = sourceImage.GetPixel(srcX, srcY);
-      var c6 = sourceImage.GetPixel(srcX - 1, srcY + 1);
-      var c8 = sourceImage.GetPixel(srcX + 1, srcY + 1);
+    public static void ComplexFilterSmart(PixelWorker<sPixel> worker, byte scaleX, byte scaleY, cImage.NqKernel kernel) {
+      var c0 = worker.SourceM1M1();
+      var c2 = worker.SourceP1M1();
+      var c4 = worker.SourceP0P0();
+      var c6 = worker.SourceM1P1();
+      var c8 = worker.SourceP1P1();
       if (c0.IsLike(c4) || c2.IsLike(c4) || c6.IsLike(c4) || c8.IsLike(c4))
-        ComplexFilter(sourceImage, srcX, srcY, targetImage, tgtX, tgtY, scaleX, scaleY, kernel);
+        ComplexFilter(worker, scaleX, scaleY, kernel);
       else
-        ComplexFilterBold(sourceImage, srcX, srcY, targetImage, tgtX, tgtY, scaleX, scaleY, kernel);
+        ComplexFilterBold(worker, scaleX, scaleY, kernel);
     } // end sub
     #endregion
 
     #region filter casepathes
 
     #region standard HQ2x casepath
-    public static sPixel[] Hq2xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static void Hq2xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
       sPixel e01, e10, e11;
       var e00 = e01 = e10 = e11 = c4;
       switch (pattern) {
@@ -1464,14 +1456,14 @@ namespace Imager.Filters {
         break;
         #endregion
       }
-      return (new[]{
-      e00, e01, 
-      e10, e11, 
-      });
+      worker.TargetP0P0(e00);
+      worker.TargetP1P0(e01);
+      worker.TargetP0P1(e10);
+      worker.TargetP1P1(e11);
     }
     #endregion
     #region standard HQ2x3 casepath
-    public static sPixel[] Hq2x3Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static void Hq2x3Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
       sPixel e01, e10, e11, e20, e21;
       var e00 = e01 = e10 = e11 = e20 = e21 = c4;
       switch (pattern) {
@@ -3635,15 +3627,16 @@ namespace Imager.Filters {
         break;
         #endregion
       }
-      return (new[]{
-      e00, e01, 
-      e10, e11, 
-      e20, e21, 
-      });
+      worker.TargetP0P0(e00);
+      worker.TargetP1P0(e01);
+      worker.TargetP0P1(e10);
+      worker.TargetP1P1(e11);
+      worker.TargetP0P2(e20);
+      worker.TargetP1P2(e21);
     }
     #endregion
     #region standard HQ2x4 casepath
-    public static sPixel[] Hq2x4Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static void Hq2x4Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
       sPixel e01, e10, e11, e20, e21, e30, e31;
       var e00 = e01 = e10 = e11 = e20 = e21 = e30 = e31 = c4;
       switch (pattern) {
@@ -6253,16 +6246,18 @@ namespace Imager.Filters {
         break;
         #endregion
       }
-      return (new[]{
-      e00, e01, 
-      e10, e11, 
-      e20, e21, 
-      e30, e31, 
-      });
+      worker.TargetP0P0(e00);
+      worker.TargetP1P0(e01);
+      worker.TargetP0P1(e10);
+      worker.TargetP1P1(e11);
+      worker.TargetP0P2(e20);
+      worker.TargetP1P2(e21);
+      worker.TargetP0P3(e30);
+      worker.TargetP1P3(e31);
     }
     #endregion
     #region standard HQ3x casepath
-    public static sPixel[] Hq3xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static void Hq3xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
       sPixel e01, e02, e10, e11, e12, e20, e21, e22;
       var e00 = e01 = e02 = e10 = e11 = e12 = e20 = e21 = e22 = c4;
       switch (pattern) {
@@ -8845,15 +8840,19 @@ namespace Imager.Filters {
         break;
         #endregion
       }
-      return (new[]{
-      e00, e01, e02, 
-      e10, e11, e12, 
-      e20, e21, e22, 
-      });
+      worker.TargetP0P0(e00);
+      worker.TargetP1P0(e01);
+      worker.TargetP2P0(e02);
+      worker.TargetP0P1(e10);
+      worker.TargetP1P1(e11);
+      worker.TargetP2P1(e12);
+      worker.TargetP0P2(e20);
+      worker.TargetP1P2(e21);
+      worker.TargetP2P2(e22);
     }
     #endregion
     #region standard HQ4x casepath
-    public static sPixel[] Hq4xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static void Hq4xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
       sPixel e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23, e30, e31, e32, e33;
       var e00 = e01 = e02 = e03 = e10 = e11 = e12 = e13 = e20 = e21 = e22 = e23 = e30 = e31 = e32 = e33 = c4;
       switch (pattern) {
@@ -12959,16 +12958,26 @@ namespace Imager.Filters {
         break;
         #endregion
       }
-      return (new[]{
-      e00, e01, e02, e03, 
-      e10, e11, e12, e13, 
-      e20, e21, e22, e23, 
-      e30, e31, e32, e33, 
-      });
+      worker.TargetP0P0(e00);
+      worker.TargetP1P0(e01);
+      worker.TargetP2P0(e02);
+      worker.TargetP3P0(e03);
+      worker.TargetP0P1(e10);
+      worker.TargetP1P1(e11);
+      worker.TargetP2P1(e12);
+      worker.TargetP3P1(e13); 
+      worker.TargetP0P2(e20);
+      worker.TargetP1P2(e21);
+      worker.TargetP2P2(e22);
+      worker.TargetP3P2(e23);
+      worker.TargetP0P3(e30);
+      worker.TargetP1P3(e31);
+      worker.TargetP2P3(e32);
+      worker.TargetP3P3(e33);
     }
     #endregion
     #region standard LQ2x casepath
-    public static sPixel[] Lq2xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static void Lq2xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
       sPixel e01, e10, e11;
       var e00 = e01 = e10 = e11 = c4;
       switch (pattern) {
@@ -13775,14 +13784,14 @@ namespace Imager.Filters {
         break;
         #endregion
       }
-      return (new[]{
-      e00, e01, 
-      e10, e11, 
-      });
+      worker.TargetP0P0(e00);
+      worker.TargetP0P1(e01);
+      worker.TargetP1P0(e10);
+      worker.TargetP1P1(e11);
     }
     #endregion
     #region standard LQ2x3 casepath
-    public static sPixel[] Lq2x3Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static void Lq2x3Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
       sPixel e01, e10, e11, e20, e21;
       var e00 = e01 = e10 = e11 = e20 = e21 = c4;
       switch (pattern) {
@@ -15102,15 +15111,16 @@ namespace Imager.Filters {
         break;
         #endregion
       }
-      return (new[]{
-      e00, e01, 
-      e10, e11, 
-      e20, e21, 
-      });
+      worker.TargetP0P0(e00);
+      worker.TargetP0P1(e01);
+      worker.TargetP1P0(e10);
+      worker.TargetP1P1(e11);
+      worker.TargetP2P0(e20);
+      worker.TargetP2P1(e21);
     }
     #endregion
     #region standard LQ2x4 casepath
-    public static sPixel[] Lq2x4Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static void Lq2x4Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
       sPixel e01, e10, e11, e20, e21, e30, e31;
       var e00 = e01 = e10 = e11 = e20 = e21 = e30 = e31 = c4;
       switch (pattern) {
@@ -16714,16 +16724,18 @@ namespace Imager.Filters {
         break;
         #endregion
       }
-      return (new[]{
-      e00, e01, 
-      e10, e11, 
-      e20, e21, 
-      e30, e31, 
-      });
+      worker.TargetP0P0(e00);
+      worker.TargetP0P1(e01);
+      worker.TargetP1P0(e10);
+      worker.TargetP1P1(e11);
+      worker.TargetP2P0(e20);
+      worker.TargetP2P1(e21);
+      worker.TargetP3P0(e30);
+      worker.TargetP3P1(e31);
     }
     #endregion
     #region standard LQ3x casepath
-    public static sPixel[] Lq3xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static void Lq3xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
       sPixel e01, e02, e10, e11, e12, e20, e21, e22;
       var e00 = e01 = e02 = e10 = e11 = e12 = e20 = e21 = e22 = c4;
       switch (pattern) {
@@ -18212,15 +18224,19 @@ namespace Imager.Filters {
         break;
         #endregion
       }
-      return (new[]{
-      e00, e01, e02, 
-      e10, e11, e12, 
-      e20, e21, e22, 
-      });
+      worker.TargetP0P0(e00);
+      worker.TargetP0P1(e01);
+      worker.TargetP0P2(e02);
+      worker.TargetP1P0(e10);
+      worker.TargetP1P1(e11);
+      worker.TargetP1P2(e12);
+      worker.TargetP2P0(e20);
+      worker.TargetP2P1(e21);
+      worker.TargetP2P2(e22);
     }
     #endregion
     #region standard LQ4x casepath
-    public static sPixel[] Lq4xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8) {
+    public static void Lq4xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
       sPixel e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23, e30, e31, e32, e33;
       var e00 = e01 = e02 = e03 = e10 = e11 = e12 = e13 = e20 = e21 = e22 = e23 = e30 = e31 = e32 = e33 = c4;
       switch (pattern) {
@@ -20584,12 +20600,22 @@ namespace Imager.Filters {
         break;
         #endregion
       }
-      return (new[]{
-      e00, e01, e02, e03, 
-      e10, e11, e12, e13, 
-      e20, e21, e22, e23, 
-      e30, e31, e32, e33, 
-      });
+      worker.TargetP0P0(e00);
+      worker.TargetP0P1(e01);
+      worker.TargetP0P2(e02);
+      worker.TargetP0P3(e03);
+      worker.TargetP1P0(e10);
+      worker.TargetP1P1(e11);
+      worker.TargetP1P2(e12);
+      worker.TargetP1P3(e13);
+      worker.TargetP2P0(e20);
+      worker.TargetP2P1(e21);
+      worker.TargetP2P2(e22);
+      worker.TargetP2P3(e23);
+      worker.TargetP3P0(e30);
+      worker.TargetP3P1(e31);
+      worker.TargetP3P2(e32);
+      worker.TargetP3P3(e33);
     }
     #endregion
 
