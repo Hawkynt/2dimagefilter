@@ -27,30 +27,28 @@ namespace Imager.Filters {
     /// <summary>
     /// This is the XBR2x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
-    public static void Xbr2X(PixelWorker<sPixel> worker , bool allowAlphaBlending) {
-      Contract.Assume(worker!= null);
-      var pa = worker.SourceM1M1();
-      var pb = worker.SourceP0M1();
-      var pc = worker.SourceP1M1();
-
-      var pd = worker.SourceM1P0();
-      var pe = worker.SourceP0P0();
-      var pf = worker.SourceP1P0();
-
-      var pg = worker.SourceM1P1();
-      var ph = worker.SourceP0P1();
-      var pi = worker.SourceP1P1();
-
+    public static void Xbr2X(PixelWorker<sPixel> worker, bool allowAlphaBlending) {
+      Contract.Assume(worker != null);
       var a1 = worker.SourceM1M2();
       var b1 = worker.SourceP0M2();
       var c1 = worker.SourceP1M2();
 
       var a0 = worker.SourceM2M1();
-      var d0 = worker.SourceM2P0();
-      var g0 = worker.SourceM2P1();
-
+      var pa = worker.SourceM1M1();
+      var pb = worker.SourceP0M1();
+      var pc = worker.SourceP1M1();
       var c4 = worker.SourceP2M1();
+
+      var d0 = worker.SourceM2P0();
+      var pd = worker.SourceM1P0();
+      var pe = worker.SourceP0P0();
+      var pf = worker.SourceP1P0();
       var f4 = worker.SourceP2P0();
+
+      var g0 = worker.SourceM2P1();
+      var pg = worker.SourceM1P1();
+      var ph = worker.SourceP0P1();
+      var pi = worker.SourceP1P1();
       var i4 = worker.SourceP2P1();
 
       var g5 = worker.SourceM1P2();
@@ -74,30 +72,28 @@ namespace Imager.Filters {
     /// <summary>
     /// This is the XBR3x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
-    public static void Xbr3X(PixelWorker<sPixel> worker ,  bool allowAlphaBlending, bool useOriginalImplementation) {
+    public static void Xbr3X(PixelWorker<sPixel> worker, bool allowAlphaBlending, bool useOriginalImplementation) {
       Contract.Assume(worker != null);
-      var pa = worker.SourceM1M1();
-      var pb = worker.SourceP0M1();
-      var pc = worker.SourceP1M1();
-
-      var pd = worker.SourceM1P0();
-      var pe = worker.SourceP0P0();
-      var pf = worker.SourceP1P0();
-
-      var pg = worker.SourceM1P1();
-      var ph = worker.SourceP0P1();
-      var pi = worker.SourceP1P1();
-
       var a1 = worker.SourceM1M2();
       var b1 = worker.SourceP0M2();
       var c1 = worker.SourceP1M2();
 
       var a0 = worker.SourceM2M1();
-      var d0 = worker.SourceM2P0();
-      var g0 = worker.SourceM2P1();
-
+      var pa = worker.SourceM1M1();
+      var pb = worker.SourceP0M1();
+      var pc = worker.SourceP1M1();
       var c4 = worker.SourceP2M1();
+
+      var d0 = worker.SourceM2P0();
+      var pd = worker.SourceM1P0();
+      var pe = worker.SourceP0P0();
+      var pf = worker.SourceP1P0();
       var f4 = worker.SourceP2P0();
+
+      var g0 = worker.SourceM2P1();
+      var pg = worker.SourceM1P1();
+      var ph = worker.SourceP0P1();
+      var pi = worker.SourceP1P1();
       var i4 = worker.SourceP2P1();
 
       var g5 = worker.SourceM1P2();
@@ -128,28 +124,26 @@ namespace Imager.Filters {
     /// </summary>
     public static void Xbr4X(PixelWorker<sPixel> worker, bool allowAlphaBlending) {
       Contract.Assume(worker != null);
-      var pa = worker.SourceM1M1();
-      var pb = worker.SourceP0M1();
-      var pc = worker.SourceP1M1();
-
-      var pd = worker.SourceM1P0();
-      var pe = worker.SourceP0P0();
-      var pf = worker.SourceP1P0();
-
-      var pg = worker.SourceM1P1();
-      var ph = worker.SourceP0P1();
-      var pi = worker.SourceP1P1();
-
       var a1 = worker.SourceM1M2();
       var b1 = worker.SourceP0M2();
       var c1 = worker.SourceP1M2();
 
       var a0 = worker.SourceM2M1();
-      var d0 = worker.SourceM2P0();
-      var g0 = worker.SourceM2P1();
-
+      var pa = worker.SourceM1M1();
+      var pb = worker.SourceP0M1();
+      var pc = worker.SourceP1M1();
       var c4 = worker.SourceP2M1();
+
+      var d0 = worker.SourceM2P0();
+      var pd = worker.SourceM1P0();
+      var pe = worker.SourceP0P0();
+      var pf = worker.SourceP1P0();
       var f4 = worker.SourceP2P0();
+
+      var g0 = worker.SourceM2P1();
+      var pg = worker.SourceM1P1();
+      var ph = worker.SourceP0P1();
+      var pi = worker.SourceP1P1();
       var i4 = worker.SourceP2P1();
 
       var g5 = worker.SourceM1P2();

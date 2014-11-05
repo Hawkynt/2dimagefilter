@@ -19,9 +19,8 @@
  */
 #endregion
 
-using System.ComponentModel;
-
 using Imager.Classes;
+using System.ComponentModel;
 
 namespace Imager.Interface {
   public enum PixelScalerType {
@@ -133,6 +132,24 @@ namespace Imager.Interface {
     [EnumDisplayName("Reverse AA")]
     [Description("Hyllian's OpenGL reverse anti-alias filter.")]
     ReverseAntiAlias,
+    #endregion
+
+    #region FNES
+    [EnumDisplayName("DES")]
+    [Description("FNES' DES filter.")]
+    DES,
+    [EnumDisplayName("DES II")]
+    [Description("FNES' DES2 filter.")]
+    DES2,
+    [EnumDisplayName("2xSCL")]
+    [Description("FNES' 2xSCL filter.")]
+    Normal2xScl,
+    [EnumDisplayName("Super 2xSCL")]
+    [Description("FNES' Super 2xSCL filter.")]
+    Super2xScl,
+    [EnumDisplayName("Ultra 2xSCL")]
+    [Description("FNES' Ultra 2xSCL filter.")]
+    Ultra2xScl,
     #endregion
   }
 }

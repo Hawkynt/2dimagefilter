@@ -32,8 +32,6 @@ namespace Imager {
     private int _sourceOffsetP1XValue;
     private Func<int> _sourceOffsetP2X;
     private int _sourceOffsetP2XValue;
-    private Func<int> _sourceOffsetP3X;
-    private int _sourceOffsetP3XValue;
     private Func<int> _sourceOffsetM2Y;
     private int _sourceOffsetM2YValue;
     private Func<int> _sourceOffsetM1Y;
@@ -42,20 +40,16 @@ namespace Imager {
     private int _sourceOffsetP1YValue;
     private Func<int> _sourceOffsetP2Y;
     private int _sourceOffsetP2YValue;
-    private Func<int> _sourceOffsetP3Y;
-    private int _sourceOffsetP3YValue;
     #endregion
 
     #region offsets for target image
     private const int _targetOffsetP1X = 1;
     private const int _targetOffsetP2X = 2;
     private const int _targetOffsetP3X = 3;
-    private const int _targetOffsetP4X = 4;
     private readonly int _targetOffsetM1Y;
     private readonly int _targetOffsetP1Y;
     private readonly int _targetOffsetP2Y;
     private readonly int _targetOffsetP3Y;
-    private readonly int _targetOffsetP4Y;
     #endregion
 
     public PixelWorker(IList<TColorStorage> sourceImage, int sourceX, int sourceY, int sourceWidth, int sourceHeight, OutOfBoundsUtils.OutOfBoundsHandler sourceXWrapper, OutOfBoundsUtils.OutOfBoundsHandler sourceYWrapper, IList<TColorStorage> targetImage, int targetX, int targetY, int targetWidth) {
@@ -78,12 +72,10 @@ namespace Imager {
       this._sourceOffsetM1X = this._CalculateOffsetM1X;
       this._sourceOffsetP1X = this._CalculateOffsetP1X;
       this._sourceOffsetP2X = this._CalculateOffsetP2X;
-      this._sourceOffsetP3X = this._CalculateOffsetP3X;
       this._sourceOffsetM2Y = this._CalculateOffsetM2Y;
       this._sourceOffsetM1Y = this._CalculateOffsetM1Y;
       this._sourceOffsetP1Y = this._CalculateOffsetP1Y;
       this._sourceOffsetP2Y = this._CalculateOffsetP2Y;
-      this._sourceOffsetP3Y = this._CalculateOffsetP3Y;
 
       this._targetImage = targetImage;
       this._targetOffset = targetWidth * targetY + targetX;
@@ -93,7 +85,6 @@ namespace Imager {
       this._targetOffsetP1Y = targetWidth     ;          // for nx2 filters
       this._targetOffsetP2Y = targetWidth << 1;          // for nx3 filters
       this._targetOffsetP3Y = targetWidth *  3;          // for nx4 filters
-      this._targetOffsetP4Y = targetWidth << 2;          // for nx5 filters
     }
 
     public int SourceX(){
@@ -117,7 +108,6 @@ namespace Imager {
       this._sourceOffsetM1XValue = -1;
       this._sourceOffsetP1X = this._CalculateOffsetP1X;
       this._sourceOffsetP2X = this._CalculateOffsetP2X;
-      this._sourceOffsetP3X = this._CalculateOffsetP3X;
     }
 
     #region access source points
@@ -136,9 +126,6 @@ namespace Imager {
     public TColorStorage SourceP2M2() {
       return (this._sourceImage[this._sourceOffset + this._sourceOffsetP2X() + this._sourceOffsetM2Y()]);
     }
-    public TColorStorage SourceP3M2() {
-      return (this._sourceImage[this._sourceOffset + this._sourceOffsetP3X() + this._sourceOffsetM2Y()]);
-    }
     public TColorStorage SourceM2M1() {
       return (this._sourceImage[this._sourceOffset + this._sourceOffsetM2X() + this._sourceOffsetM1Y()]);
     }
@@ -153,9 +140,6 @@ namespace Imager {
     }
     public TColorStorage SourceP2M1() {
       return (this._sourceImage[this._sourceOffset + this._sourceOffsetP2X() + this._sourceOffsetM1Y()]);
-    }
-    public TColorStorage SourceP3M1() {
-      return (this._sourceImage[this._sourceOffset + this._sourceOffsetP3X() + this._sourceOffsetM1Y()]);
     }
     public TColorStorage SourceM2P0() {
       return (this._sourceImage[this._sourceOffset + this._sourceOffsetM2X()]);
@@ -172,9 +156,6 @@ namespace Imager {
     public TColorStorage SourceP2P0() {
       return (this._sourceImage[this._sourceOffset + this._sourceOffsetP2X()]);
     }
-    public TColorStorage SourceP3P0() {
-      return (this._sourceImage[this._sourceOffset + this._sourceOffsetP3X()]);
-    }
     public TColorStorage SourceM2P1() {
       return (this._sourceImage[this._sourceOffset + this._sourceOffsetM2X() + this._sourceOffsetP1Y()]);
     }
@@ -189,9 +170,6 @@ namespace Imager {
     }
     public TColorStorage SourceP2P1() {
       return (this._sourceImage[this._sourceOffset + this._sourceOffsetP2X() + this._sourceOffsetP1Y()]);
-    }
-    public TColorStorage SourceP3P1() {
-      return (this._sourceImage[this._sourceOffset + this._sourceOffsetP3X() + this._sourceOffsetP1Y()]);
     }
     public TColorStorage SourceM2P2() {
       return (this._sourceImage[this._sourceOffset + this._sourceOffsetM2X() + this._sourceOffsetP2Y()]);
@@ -208,27 +186,6 @@ namespace Imager {
     public TColorStorage SourceP2P2() {
       return (this._sourceImage[this._sourceOffset + this._sourceOffsetP2X() + this._sourceOffsetP2Y()]);
     }
-    public TColorStorage SourceP3P2() {
-      return (this._sourceImage[this._sourceOffset + this._sourceOffsetP3X() + this._sourceOffsetP2Y()]);
-    }
-    public TColorStorage SourceM2P3() {
-      return (this._sourceImage[this._sourceOffset + this._sourceOffsetM2X() + this._sourceOffsetP3Y()]);
-    }
-    public TColorStorage SourceM1P3() {
-      return (this._sourceImage[this._sourceOffset + this._sourceOffsetM1X() + this._sourceOffsetP3Y()]);
-    }
-    public TColorStorage SourceP0P3() {
-      return (this._sourceImage[this._sourceOffset + this._sourceOffsetP3Y()]);
-    }
-    public TColorStorage SourceP1P3() {
-      return (this._sourceImage[this._sourceOffset + this._sourceOffsetP1X() + this._sourceOffsetP3Y()]);
-    }
-    public TColorStorage SourceP2P3() {
-      return (this._sourceImage[this._sourceOffset + this._sourceOffsetP2X() + this._sourceOffsetP3Y()]);
-    }
-    public TColorStorage SourceP3P3() {
-      return (this._sourceImage[this._sourceOffset + this._sourceOffsetP3X() + this._sourceOffsetP3Y()]);
-    }
     #endregion
 
     #region access target points
@@ -244,9 +201,6 @@ namespace Imager {
     public void TargetP3M1(TColorStorage value) {
       this._targetImage[this._targetOffset + _targetOffsetP3X + this._targetOffsetM1Y] = value;
     }
-    public void TargetP4M1(TColorStorage value) {
-      this._targetImage[this._targetOffset + _targetOffsetP4X + this._targetOffsetM1Y] = value;
-    }
     public void TargetP0P0(TColorStorage value) {
       this._targetImage[this._targetOffset] = value;
     }
@@ -258,9 +212,6 @@ namespace Imager {
     }
     public void TargetP3P0(TColorStorage value) {
       this._targetImage[this._targetOffset + _targetOffsetP3X] = value;
-    }
-    public void TargetP4P0(TColorStorage value) {
-      this._targetImage[this._targetOffset + _targetOffsetP4X] = value;
     }
     public void TargetP0P1(TColorStorage value) {
       this._targetImage[this._targetOffset + this._targetOffsetP1Y] = value;
@@ -274,9 +225,6 @@ namespace Imager {
     public void TargetP3P1(TColorStorage value) {
       this._targetImage[this._targetOffset + _targetOffsetP3X + this._targetOffsetP1Y] = value;
     }
-    public void TargetP4P1(TColorStorage value) {
-      this._targetImage[this._targetOffset + _targetOffsetP4X + this._targetOffsetP1Y] = value;
-    }
     public void TargetP0P2(TColorStorage value) {
       this._targetImage[this._targetOffset + this._targetOffsetP2Y] = value;
     }
@@ -289,9 +237,6 @@ namespace Imager {
     public void TargetP3P2(TColorStorage value) {
       this._targetImage[this._targetOffset + _targetOffsetP3X + this._targetOffsetP2Y] = value;
     }
-    public void TargetP4P2(TColorStorage value) {
-      this._targetImage[this._targetOffset + _targetOffsetP4X + this._targetOffsetP2Y] = value;
-    }
     public void TargetP0P3(TColorStorage value) {
       this._targetImage[this._targetOffset + this._targetOffsetP3Y] = value;
     }
@@ -303,24 +248,6 @@ namespace Imager {
     }
     public void TargetP3P3(TColorStorage value) {
       this._targetImage[this._targetOffset + _targetOffsetP3X + this._targetOffsetP3Y] = value;
-    }
-    public void TargetP4P3(TColorStorage value) {
-      this._targetImage[this._targetOffset + _targetOffsetP4X + this._targetOffsetP3Y] = value;
-    }
-    public void TargetP0P4(TColorStorage value) {
-      this._targetImage[this._targetOffset + this._targetOffsetP4Y] = value;
-    }
-    public void TargetP1P4(TColorStorage value) {
-      this._targetImage[this._targetOffset + _targetOffsetP1X + this._targetOffsetP4Y] = value;
-    }
-    public void TargetP2P4(TColorStorage value) {
-      this._targetImage[this._targetOffset + _targetOffsetP2X + this._targetOffsetP4Y] = value;
-    }
-    public void TargetP3P4(TColorStorage value) {
-      this._targetImage[this._targetOffset + _targetOffsetP3X + this._targetOffsetP4Y] = value;
-    }
-    public void TargetP4P4(TColorStorage value) {
-      this._targetImage[this._targetOffset + _targetOffsetP4X + this._targetOffsetP4Y] = value;
     }
     #endregion
 
@@ -374,18 +301,6 @@ namespace Imager {
       this._sourceOffsetP2X = this._GetOffsetP2X;
       return (result);
     }
-    private int _GetOffsetP3X() { return (this._sourceOffsetP3XValue); }
-    private int _CalculateOffsetP3X() {
-      var current = this._sourceX;
-      var value = current + 3;
-      if (value >= this._sourceWidth)
-        value = this._sourceXWrapper(value, this._sourceWidth, false);
-
-      var result = value - current;
-      this._sourceOffsetP3XValue = result;
-      this._sourceOffsetP3X = this._GetOffsetP3X;
-      return (result);
-    }
     private int _GetOffsetM2Y() { return (this._sourceOffsetM2YValue); }
     private int _CalculateOffsetM2Y() {
       var current = this._sourceY;
@@ -432,18 +347,6 @@ namespace Imager {
       var result = (value - current) * this._sourceWidth;
       this._sourceOffsetP2YValue = result;
       this._sourceOffsetP2Y = this._GetOffsetP2Y;
-      return (result);
-    }
-    private int _GetOffsetP3Y() { return (this._sourceOffsetP3YValue); }
-    private int _CalculateOffsetP3Y() {
-      var current = this._sourceY;
-      var value = current + 3;
-      if (value >= this._sourceHeight)
-        value = this._sourceYWrapper(value, this._sourceHeight, false);
-
-      var result = (value - current) * this._sourceWidth;
-      this._sourceOffsetP3YValue = result;
-      this._sourceOffsetP3Y = this._GetOffsetP3Y;
       return (result);
     }
     #endregion
