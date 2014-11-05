@@ -112,6 +112,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\ImageManipulators\Scalers\XbrzScaler.cs" />
     <Compile Include="Classes\ScriptActions\LoadStdInCommand.cs" />
     <Compile Include="Classes\ScriptActions\SaveStdOutCommand.cs" />
     <Compile Include="Classes\ScriptActions\NullTransformCommand.cs" />
@@ -143,6 +144,9 @@
     <Compile Include="Imager\Classes\FloatImage.cs" />
     <Compile Include="Imager\Classes\Kernels.cs" />
     <Compile Include="Imager\Classes\Windows.cs" />
+    <Compile Include="Imager\Filters\lib2xSCL.cs" />
+    <Compile Include="Imager\Filters\libDES.cs" />
+    <Compile Include="Imager\Filters\libXBRz.cs" />
     <Compile Include="Imager\Filters\ReverseAntiAlias.cs" />
     <Compile Include="Imager\Image.Resizer.Loop.cs">
       <AutoGen>True</AutoGen>
@@ -152,6 +156,7 @@
     <Compile Include="Imager\Image.Resizer.Resample.cs" />
     <Compile Include="Imager\Image.Bitmaps.cs" />
     <Compile Include="Imager\Image.Resizer.Interpolation.cs" />
+    <Compile Include="Imager\Image.Resizer.Xbrz.cs" />
     <Compile Include="Imager\Image.Resizer.Xbr.cs" />
     <Compile Include="Imager\Image.Resizer.Nx.cs" />
     <Compile Include="Imager\Image.Resizer.Parameterless.cs" />
@@ -159,6 +164,7 @@
     <Compile Include="Imager\Interface\NqScalerType.cs" />
     <Compile Include="Imager\Interface\PixelScalerType.cs" />
     <Compile Include="Imager\Interface\ScalerInformation.cs" />
+    <Compile Include="Imager\Interface\XbrzScalerType.cs" />
     <Compile Include="Imager\Interface\XbrScalerType.cs" />
     <Compile Include="Imager\PixelWorker.cs">
       <AutoGen>True</AutoGen>

@@ -18,15 +18,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
-using System.Collections.Generic;
-using System.Linq;
-
 using Classes.ImageManipulators;
 using Classes.ImageManipulators.Scalers;
-
 using Imager;
 using Imager.Classes;
 using Imager.Interface;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Classes {
   internal static class SupportedManipulators {
@@ -66,6 +64,13 @@ namespace Classes {
 .Concat(
       from p in ReflectionUtils.GetEnumValues<XbrScalerType>()
       select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p), new XbrScaler(p, true))
+)
+    #endregion
+
+    #region add xbrz resizer
+.Concat(
+      from p in ReflectionUtils.GetEnumValues<XbrzScalerType>()
+      select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p), new XbrzScaler(p))
 )
     #endregion
 

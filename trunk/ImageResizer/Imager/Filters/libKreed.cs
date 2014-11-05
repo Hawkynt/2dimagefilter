@@ -55,13 +55,13 @@ namespace Imager.Filters {
       var c3 = worker.SourceM1P0();
       var c4 = worker.SourceP0P0();
       var c5 = worker.SourceP1P0();
+      var d4 = worker.SourceP2P0();
       var c6 = worker.SourceM1P1();
       var c7 = worker.SourceP0P1();
       var c8 = worker.SourceP1P1();
+      var d5 = worker.SourceP2P1();
       var d1 = worker.SourceP0P2();
       var d2 = worker.SourceP1P2();
-      var d4 = worker.SourceP2P0();
-      var d5 = worker.SourceP2P1();
 
       sPixel e00 = c4, e11 = c4;
       sPixel e01, e10;
@@ -152,19 +152,19 @@ namespace Imager.Filters {
       var c0 = worker.SourceM1M1();
       var c1 = worker.SourceP0M1();
       var c2 = worker.SourceP1M1();
+      var d3 = worker.SourceP2M1();
       var c3 = worker.SourceM1P0();
       var c4 = worker.SourceP0P0();
       var c5 = worker.SourceP1P0();
+      var d4 = worker.SourceP2P0();
       var c6 = worker.SourceM1P1();
       var c7 = worker.SourceP0P1();
       var c8 = worker.SourceP1P1();
+      var d5 = worker.SourceP2P1();
       var d0 = worker.SourceM1P2();
       var d1 = worker.SourceP0P2();
       var d2 = worker.SourceP1P2();
-      var d3 = worker.SourceP2M1();
-      var d4 = worker.SourceP2P0();
-      var d5 = worker.SourceP2P1(); 
-      
+
       sPixel e01, e10, e11;
       var e00 = e01 = e10 = e11 = c4;
 
@@ -246,20 +246,20 @@ namespace Imager.Filters {
       var c0 = worker.SourceM1M1();
       var c1 = worker.SourceP0M1();
       var c2 = worker.SourceP1M1();
+      var d3 = worker.SourceP2M1();
       var c3 = worker.SourceM1P0();
       var c4 = worker.SourceP0P0();
       var c5 = worker.SourceP1P0();
+      var d4 = worker.SourceP2P0();
       var c6 = worker.SourceM1P1();
       var c7 = worker.SourceP0P1();
-      var c8 = worker.SourceP1P1(); 
+      var c8 = worker.SourceP1P1();
+      var d5 = worker.SourceP2P1();
       var d0 = worker.SourceM1P2();
       var d1 = worker.SourceP0P2();
       var d2 = worker.SourceP1P2();
-      var d3 = worker.SourceP2M1();
-      var d4 = worker.SourceP2P0();
-      var d5 = worker.SourceP2P1();
-      var d6 = worker.SourceP2P2(); 
-      
+      var d6 = worker.SourceP2P2();
+
       sPixel e01, e10, e11;
       var e00 = e01 = e11 = c4;
 

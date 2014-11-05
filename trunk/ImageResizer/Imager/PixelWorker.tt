@@ -6,10 +6,10 @@
 <#@ output extension=".cs" #>
 <#
   var shiftMultipliers=Enumerable.Range(0,8).ToDictionary(i=>1<<i,i=>i);
-  var sourceXRange=new[]{-2,-1,0,1,2,3};
-  var sourceYRange=new[]{-2,-1,0,1,2,3};
-  var targetXRange=new[]{0,1,2,3,4};
-  var targetYRange=new[]{-1,0,1,2,3,4};
+  var sourceXRange=new[]{-2,-1,0,1,2};
+  var sourceYRange=new[]{-2,-1,0,1,2};
+  var targetXRange=new[]{0,1,2,3};
+  var targetYRange=new[]{-1,0,1,2,3};
   Func<int,string> GetLineDescription=v=>v<0?"M"+Math.Abs(v).ToString():"P"+v.ToString();
   Func<int,int,string> GetPointDescription=(x,y)=>GetLineDescription(x)+GetLineDescription(y);
 #>

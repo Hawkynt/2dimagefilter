@@ -18,12 +18,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
-using System;
-using System.Collections.Generic;
-using System.Drawing;
 using Classes;
 using Imager.Filters;
 using Imager.Interface;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
 
 namespace Imager {
   /// <summary>
@@ -74,6 +74,12 @@ namespace Imager {
       {PixelScalerType.Epx3,Tuple.Create<byte, byte, ParameterlessPixelScaler>(3,3,libSNES9x.Epx3)},
 
       {PixelScalerType.ReverseAntiAlias,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,ReverseAntiAlias.Process)},
+
+      {PixelScalerType.DES,Tuple.Create<byte, byte, ParameterlessPixelScaler>(1,1,libDES.DES)},
+      {PixelScalerType.DES2,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libDES.DES2)},
+      {PixelScalerType.Normal2xScl,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,lib2xSCL.Do2XScl)},
+      {PixelScalerType.Super2xScl,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,lib2xSCL.DoSuper2XScl)},
+      {PixelScalerType.Ultra2xScl,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,lib2xSCL.DoUltra2XScl)},
     };
 
     /// <summary>
@@ -90,7 +96,7 @@ namespace Imager {
       var scaleY = info.Item2;
       var scaler = info.Item3;
 
-      return (this._RunLoop(filterRegion, scaleX, scaleY, w=>scaler(w)));
+      return (this._RunLoop(filterRegion, scaleX, scaleY, w => scaler(w)));
     }
 
     /// <summary>
