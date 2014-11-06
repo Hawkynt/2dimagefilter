@@ -52,7 +52,7 @@ namespace Imager.Filters {
         pattern |= 64;
       if ((c4.IsNotLike(c8)))
         pattern |= 128;
-      kernel(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8,worker);
+      kernel(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8, worker);
     } // end sub
 
     /// <summary>
@@ -108,7 +108,7 @@ namespace Imager.Filters {
         pattern |= 64;
       if ((c4.IsNotLike(c8)) && ((brightness[8] > avgBrightness) != dc4))
         pattern |= 128;
-      kernel(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8,worker);
+      kernel(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8, worker);
     } // end sub
 
     /// <summary>
@@ -12965,7 +12965,7 @@ namespace Imager.Filters {
       worker.TargetP0P1(e10);
       worker.TargetP1P1(e11);
       worker.TargetP2P1(e12);
-      worker.TargetP3P1(e13); 
+      worker.TargetP3P1(e13);
       worker.TargetP0P2(e20);
       worker.TargetP1P2(e21);
       worker.TargetP2P2(e22);
@@ -13785,8 +13785,8 @@ namespace Imager.Filters {
         #endregion
       }
       worker.TargetP0P0(e00);
-      worker.TargetP0P1(e01);
-      worker.TargetP1P0(e10);
+      worker.TargetP1P0(e01);
+      worker.TargetP0P1(e10);
       worker.TargetP1P1(e11);
     }
     #endregion
@@ -15112,11 +15112,11 @@ namespace Imager.Filters {
         #endregion
       }
       worker.TargetP0P0(e00);
-      worker.TargetP0P1(e01);
-      worker.TargetP1P0(e10);
+      worker.TargetP1P0(e01);
+      worker.TargetP0P1(e10);
       worker.TargetP1P1(e11);
-      worker.TargetP2P0(e20);
-      worker.TargetP2P1(e21);
+      worker.TargetP0P2(e20);
+      worker.TargetP1P2(e21);
     }
     #endregion
     #region standard LQ2x4 casepath
@@ -16725,13 +16725,13 @@ namespace Imager.Filters {
         #endregion
       }
       worker.TargetP0P0(e00);
-      worker.TargetP0P1(e01);
-      worker.TargetP1P0(e10);
+      worker.TargetP1P0(e01);
+      worker.TargetP0P1(e10);
       worker.TargetP1P1(e11);
-      worker.TargetP2P0(e20);
-      worker.TargetP2P1(e21);
-      worker.TargetP3P0(e30);
-      worker.TargetP3P1(e31);
+      worker.TargetP0P2(e20);
+      worker.TargetP1P2(e21);
+      worker.TargetP0P3(e30);
+      worker.TargetP1P3(e31);
     }
     #endregion
     #region standard LQ3x casepath
@@ -18225,13 +18225,13 @@ namespace Imager.Filters {
         #endregion
       }
       worker.TargetP0P0(e00);
-      worker.TargetP0P1(e01);
-      worker.TargetP0P2(e02);
-      worker.TargetP1P0(e10);
+      worker.TargetP1P0(e01);
+      worker.TargetP2P0(e02);
+      worker.TargetP0P1(e10);
       worker.TargetP1P1(e11);
-      worker.TargetP1P2(e12);
-      worker.TargetP2P0(e20);
-      worker.TargetP2P1(e21);
+      worker.TargetP2P1(e12);
+      worker.TargetP0P2(e20);
+      worker.TargetP1P2(e21);
       worker.TargetP2P2(e22);
     }
     #endregion
@@ -20601,20 +20601,20 @@ namespace Imager.Filters {
         #endregion
       }
       worker.TargetP0P0(e00);
-      worker.TargetP0P1(e01);
-      worker.TargetP0P2(e02);
-      worker.TargetP0P3(e03);
-      worker.TargetP1P0(e10);
+      worker.TargetP1P0(e01);
+      worker.TargetP2P0(e02);
+      worker.TargetP3P0(e03);
+      worker.TargetP0P1(e10);
       worker.TargetP1P1(e11);
-      worker.TargetP1P2(e12);
-      worker.TargetP1P3(e13);
-      worker.TargetP2P0(e20);
-      worker.TargetP2P1(e21);
+      worker.TargetP2P1(e12);
+      worker.TargetP3P1(e13);
+      worker.TargetP0P2(e20);
+      worker.TargetP1P2(e21);
       worker.TargetP2P2(e22);
-      worker.TargetP2P3(e23);
-      worker.TargetP3P0(e30);
-      worker.TargetP3P1(e31);
-      worker.TargetP3P2(e32);
+      worker.TargetP3P2(e23);
+      worker.TargetP0P3(e30);
+      worker.TargetP1P3(e31);
+      worker.TargetP2P3(e32);
       worker.TargetP3P3(e33);
     }
     #endregion
