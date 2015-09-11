@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>2dimagefilter by Hawkynt</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">2dimagefilter</h1>
+        <p class="header">A collection of image filters, some especially suited to scale-up low res computer graphics.</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/Hawkynt/2dimagefilter/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/Hawkynt/2dimagefilter/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/Hawkynt/2dimagefilter">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/Hawkynt">Hawkynt</a></p>
+
+
+      </header>
+      <section>
+        <h1>
+<a id="2d-image-and-texture-filter" class="anchor" href="#2d-image-and-texture-filter" aria-hidden="true"><span class="octicon octicon-link"></span></a>2D-Image and Texture Filter</h1>
+
+<p>This project tries to get all available image filters together, known to upscale lowres computer and console graphics. The goal is to modify them all to allow them to be used on a wide range of low-res graphics. One of the steps to achieve that is converting the filter algorithms, normally written to make comparisons like</p>
+
+<pre><code>(color1==color2)?color1:color3
+</code></pre>
+
+<p>into something like that</p>
+
+<pre><code>(color1 IsLike color2)?Interpolate(color1,color2):color3
+</code></pre>
+
+<p>I'm trying not to use code from other projects directly, but I implement their algo's in a similar way.</p>
+
+<p>As of now (2015) this project has become a reference for much more image resampling algorithms. Even very exotic windowing functions found their way into the code, so the next goal is more like getting each possible available rescaling algo into the library.</p>
+
+<p>So credits go to the following scalers:<br>
+Eagle (the godfather himself)<br>
+Super Eagle (thanks Kreed and ZSNES)<br>
+SaI2x, Super2xSaI (also Kreed and DOSBox)<br>
+Scale2x, Scale3x (thanks MAME for these)<br>
+AdvInterp2x, AdvInterp3x (also MAME)<br>
+HQ2x, HQ3x, HQ4x (Maxim Stepin)<br>
+LQ2x, LQ3x, LQ4x (AFAIK SNES9x but AdvMAME also)<br>
+HQ2x3, HQ2x4, LQ2x3, LQ2x4 (AdvMAME again)<br>
+nQx Bold and Smart Version (SNES9x, VirtualBoyAdvance)<br>
+Bilinear Plus Original and Modified (VBA-rr)<br>
+XBR2x, XBR3x, XBR4x Normal and NonBlend (thanks Hyllian)<br>
+Resampling kernels (Pascal Getreuer)<br>
+XBRz (Zenju)<br>
+SCL, DES (FNES)  </p>
+
+<h1>
+<a id="prerequisites" class="anchor" href="#prerequisites" aria-hidden="true"><span class="octicon octicon-link"></span></a>Prerequisites</h1>
+
+<ul>
+<li>.NET Framework 4.5</li>
+</ul>
+
+<h1>
+<a id="downloads" class="anchor" href="#downloads" aria-hidden="true"><span class="octicon octicon-link"></span></a>Downloads</h1>
+
+<ul>
+<li>Standalone v1.1.3.3 (<a href="http://en.file-upload.net/download-9803513/ImageResizer-r133.exe.html">r133</a>)</li>
+<li>Paint.NET Plugin (<a href="http://en.file-upload.net/download-9803540/2dImageFilter-r133.dll.html">r133</a>)</li>
+</ul>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>
