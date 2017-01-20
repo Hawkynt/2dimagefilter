@@ -97,12 +97,14 @@ namespace Imager.Filters {
       worker.TargetP1P1(p3);
     }
 
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static sPixel _Mixpal(sPixel c1, sPixel c2) {
-      return (sPixel.Interpolate(c1, c2, 3, 1));
-    }
+#endif
+    private static sPixel _Mixpal(sPixel c1, sPixel c2) => sPixel.Interpolate(c1, c2, 3, 1);
 
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static sPixel _Unmix(sPixel c1, sPixel c2) {
 
       /* A variant of an unsharp mask, without the blur part. */
@@ -122,10 +124,9 @@ namespace Imager.Filters {
       return (sPixel.FromRGBA(r, g, b, (c1.Alpha + c2.Alpha) >> 1));
     }
 
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int _Fix(int n, int min, int max) {
-      return (n < min ? min : n > max ? max : n);
-    }
-
+#endif
+    private static int _Fix(int n, int min, int max) => n < min ? min : n > max ? max : n;
   } // end class
 } // end namespace

@@ -23,13 +23,13 @@ using System;
 namespace Classes {
   internal class ScriptSerializerException : Exception {
     private readonly string _filename;
-    public string Filename { get { return (this._filename); } }
+    public string Filename => (this._filename);
 
     private readonly int _lineNumber;
-    public int LineNumber { get { return (this._lineNumber); } }
+    public int LineNumber => (this._lineNumber);
 
     private readonly CLIExitCode _errorType;
-    public CLIExitCode ErrorType { get { return (this._errorType); } }
+    public CLIExitCode ErrorType => (this._errorType);
 
     public ScriptSerializerException(string filename, int lineNumber, CLIExitCode errorType) {
       this._filename = filename;

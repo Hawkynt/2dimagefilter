@@ -31,32 +31,39 @@ namespace Classes.ImageManipulators {
     private readonly InterpolationMode _type;
 
     #region Implementation of IImageManipulator
-    public bool SupportsWidth { get { return (true); } }
-    public bool SupportsHeight { get { return (true); } }
-    public bool SupportsRepetitionCount { get { return (false); } }
-    public bool SupportsGridCentering { get { return (false); } }
-    public bool SupportsRadius { get { return (false); } }
-    public bool ChangesResolution { get { return (true); } }
-    public bool SupportsThresholds { get { return (false); } }
+    public bool SupportsWidth => (true);
+    public bool SupportsHeight => (true);
+    public bool SupportsRepetitionCount => (false);
+    public bool SupportsGridCentering => (false);
+    public bool SupportsRadius => (false);
+    public bool ChangesResolution => (true);
+    public bool SupportsThresholds => (false);
+
     public string Description {
       get {
         switch (this._type) {
-          case InterpolationMode.NearestNeighbor: {
+          case InterpolationMode.NearestNeighbor:
+          {
             return ("Nearest neighbor interpolation using the Microsoft GDI+ API.");
           }
-          case InterpolationMode.Bilinear: {
+          case InterpolationMode.Bilinear:
+          {
             return ("Bilinear interpolation using the Microsoft GDI+ API. No prefiltering is done. This mode is not suitable for shrinking an image below 50 percent of its original size.");
           }
-          case InterpolationMode.Bicubic: {
+          case InterpolationMode.Bicubic:
+          {
             return ("Bicubic interpolation using the Microsoft GDI+ API. No prefiltering is done. This mode is not suitable for shrinking an image below 25 percent of its original size.");
           }
-          case InterpolationMode.HighQualityBilinear: {
+          case InterpolationMode.HighQualityBilinear:
+          {
             return ("Bilinear interpolation using the Microsoft GDI+ API. Prefiltering is performed to ensure high-quality shrinking.");
           }
-          case InterpolationMode.HighQualityBicubic: {
+          case InterpolationMode.HighQualityBicubic:
+          {
             return ("Bicubic interpolation using the Microsoft GDI+ API. Prefiltering is performed to ensure high-quality shrinking.");
           }
-          default: {
+          default:
+          {
             return (null);
           }
         }

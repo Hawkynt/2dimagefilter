@@ -35,9 +35,10 @@ namespace Classes.ImageManipulators.Scalers {
       Contract.Requires(source != null);
       return (source.ApplyScaler(this._type, this._mode));
     }
-    public override byte ScaleFactorX { get { return (this._scaleFactorX); } }
-    public override byte ScaleFactorY { get { return (this._scaleFactorY); } }
-    public override string Description { get { return (ReflectionUtils.GetDescriptionForEnumValue(this._type)); } }
+    public override byte ScaleFactorX => (this._scaleFactorX);
+    public override byte ScaleFactorY => (this._scaleFactorY);
+    public override string Description => (ReflectionUtils.GetDescriptionForEnumValue(this._type));
+
     #endregion
 
     public NqScaler(NqScalerType type, NqMode mode) {

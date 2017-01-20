@@ -51,8 +51,8 @@ Explanation:
       {centered}   - 1 - use centered grid, 0 - do not use centered grid
       {thresholds} - 1 - use thresholds, 0 - do not use thresholds
       {repeat}     - a value 1-255 setting the number of repetitions to apply
-      {vbounds}    - vertical out of bounds handling: const, half, whole, wrap
-      {hbounds}    - horizontal out of bounds handling: const, half, whole, wrap
+      {vbounds}    - vertical out of bounds handling: const, half, whole, wrap, transparent
+      {hbounds}    - horizontal out of bounds handling: const, half, whole, wrap, transparent
 
 =========
 Examples:

@@ -31,23 +31,27 @@ namespace Imager.Filters {
 
     private static readonly ScalerCfg _CONFIGURATION = new ScalerCfg();
 
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void _AlphaBlend(int n, int m, ImagePointer dstPtr, sPixel col) {
-      dstPtr.SetPixel(sPixel.Interpolate(col, dstPtr.GetPixel(), n, m - n));
-    }
+#endif
+    private static void _AlphaBlend(int n, int m, ImagePointer dstPtr, sPixel col)
+      => dstPtr.SetPixel(sPixel.Interpolate(col, dstPtr.GetPixel(), n, m - n))
+      ;
 
     //fill block with the given color
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static void _FillBlock(sPixel[] trg, int trgi, int pitch, sPixel col, int blockSize) {
       for (var y = 0; y < blockSize; ++y, trgi += pitch)
         for (var x = 0; x < blockSize; ++x)
           trg[trgi + x] = col;
     }
 
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static double _Square(double value) {
-      return value * value;
-    }
+#endif
+    private static double _Square(double value) => value * value;
 
     private static double _DistYCbCr(sPixel pix1, sPixel pix2, double lumaWeight) {
       //http://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.601_conversion
@@ -265,7 +269,7 @@ namespace Imager.Filters {
       if (BlendInfo.GetBottomR(blend) >= BlendType.BlendDominant)
         doLineBlend = true;
 
-        //make sure there is no second blending in an adjacent
+      //make sure there is no second blending in an adjacent
       //rotation for this pixel: handles insular pixels, mario eyes
       //but support double-blending for 90? corners
       else if (BlendInfo.GetTopR(blend) != BlendType.BlendNone && !eq._(e, g))
@@ -274,7 +278,7 @@ namespace Imager.Filters {
       else if (BlendInfo.GetBottomL(blend) != BlendType.BlendNone && !eq._(e, c))
         doLineBlend = false;
 
-        //no full blending for L-shapes; blend corner only (handles "mario mushroom eyes")
+      //no full blending for L-shapes; blend corner only (handles "mario mushroom eyes")
       else if (eq._(g, h) && eq._(h, i) && eq._(i, f) && eq._(f, c) && !eq._(e, i))
         doLineBlend = false;
 

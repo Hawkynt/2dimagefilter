@@ -27,10 +27,10 @@ using Imager;
 namespace Classes.ScriptActions {
   internal class LoadStdInCommand : IScriptAction {
     #region Implementation of IScriptAction
-    public bool ChangesSourceImage { get { return (true); } }
+    public bool ChangesSourceImage => (true);
 
-    public bool ChangesTargetImage { get { return (true); } }
-    public bool ProvidesNewGdiSource { get { return (true); } }
+    public bool ChangesTargetImage => (true);
+    public bool ProvidesNewGdiSource => (true);
 
     public bool Execute() {
       using (var stream = Console.OpenStandardInput())

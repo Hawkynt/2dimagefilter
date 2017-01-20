@@ -26,9 +26,9 @@ using Imager;
 namespace Classes.ScriptActions {
   internal class TargetToSourceCommand : IScriptAction {
     #region Implementation of IScriptAction
-    public bool ChangesSourceImage { get { return (true); } }
-    public bool ChangesTargetImage { get { return (true); } }
-    public bool ProvidesNewGdiSource { get { return (false); } }
+    public bool ChangesSourceImage => true;
+    public bool ChangesTargetImage => true;
+    public bool ProvidesNewGdiSource => false;
 
     public bool Execute() {
       this.SourceImage = this.TargetImage;
@@ -36,7 +36,7 @@ namespace Classes.ScriptActions {
       return (true);
     }
 
-    public Bitmap GdiSource { get { return (null); } }
+    public Bitmap GdiSource => null;
 
     public cImage SourceImage { get; set; }
 

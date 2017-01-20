@@ -28,10 +28,10 @@ using Imager;
 namespace Classes.ScriptActions {
   internal class SaveFileCommand : IScriptAction {
     #region Implementation of IScriptAction
-    public bool ChangesSourceImage { get { return (false); } }
+    public bool ChangesSourceImage => (false);
 
-    public bool ChangesTargetImage { get { return (false); } }
-    public bool ProvidesNewGdiSource { get { return (false); } }
+    public bool ChangesTargetImage => (false);
+    public bool ProvidesNewGdiSource => (false);
 
     public bool Execute() {
       var result = CLI.SaveHelper(this._fileName, this.TargetImage.ToBitmap());
@@ -43,7 +43,7 @@ namespace Classes.ScriptActions {
       return (result == CLIExitCode.OK);
     }
 
-    public Bitmap GdiSource { get { return (null); } }
+    public Bitmap GdiSource => (null);
 
     public cImage SourceImage { get; set; }
 
@@ -52,7 +52,7 @@ namespace Classes.ScriptActions {
 
     private readonly string _fileName;
 
-    public string FileName { get { return (this._fileName); } }
+    public string FileName => (this._fileName);
 
     public SaveFileCommand(string fileName) {
       Contract.Requires(!string.IsNullOrWhiteSpace(fileName));

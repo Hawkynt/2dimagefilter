@@ -65,7 +65,9 @@ namespace Imager {
     /// <param name="b">The b.</param>
     /// <param name="c">The c.</param>
     /// <returns></returns>
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static byte _Max(byte a, byte b, byte c) {
       byte d = (a > b ? a : b);
       return (d > c ? d : c);
@@ -78,7 +80,9 @@ namespace Imager {
     /// <param name="b">The b.</param>
     /// <param name="c">The c.</param>
     /// <returns></returns>
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static byte _Min(byte a, byte b, byte c) {
       byte d = (a < b ? a : b);
       return (d < c ? d : c);
@@ -89,7 +93,9 @@ namespace Imager {
     /// </summary>
     /// <param name="value">The value.</param>
     /// <returns></returns>
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static float _Byte2Single(byte value) {
       return (value / 255f);
     }
@@ -99,7 +105,9 @@ namespace Imager {
     /// </summary>
     /// <param name="value">The value.</param>
     /// <returns></returns>
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static double _Byte2Double(byte value) {
       return (value / 255d);
     }
@@ -109,7 +117,9 @@ namespace Imager {
     /// </summary>
     /// <param name="value">The value.</param>
     /// <returns></returns>
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static byte _TopClamp(int value) {
       return (value > byte.MaxValue ? byte.MaxValue : (byte)value);
     }
@@ -119,7 +129,9 @@ namespace Imager {
     /// </summary>
     /// <param name="value">The value.</param>
     /// <returns></returns>
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static byte _FullClamp(int value) {
       return (value > byte.MaxValue ? byte.MaxValue : value < byte.MinValue ? byte.MinValue : (byte)value);
     }
@@ -129,7 +141,9 @@ namespace Imager {
     /// </summary>
     /// <param name="value">The float value to clip.</param>
     /// <returns>The clipped value</returns>
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static byte _FullClamp(float value) {
       return (value > byte.MaxValue ? byte.MaxValue : value < byte.MinValue ? byte.MinValue : (byte)value);
     }
@@ -139,7 +153,9 @@ namespace Imager {
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The alpha component</returns>
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static byte _GetAlpha(uint rgbBytes) {
       return ((byte)(rgbBytes >> 24));
     }
@@ -149,7 +165,9 @@ namespace Imager {
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The red component</returns>
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static byte _GetRed(uint rgbBytes) {
       return ((byte)(rgbBytes >> 16));
     }
@@ -159,7 +177,9 @@ namespace Imager {
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The green component</returns>
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static byte _GetGreen(uint rgbBytes) {
       return ((byte)(rgbBytes >> 8));
     }
@@ -169,7 +189,9 @@ namespace Imager {
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The blue component</returns>
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static byte _GetBlue(uint rgbBytes) {
       return ((byte)(rgbBytes));
     }
@@ -189,6 +211,11 @@ namespace Imager {
     public static readonly sPixel White = FromGrey(255);
 
     /// <summary>
+    /// Transparent
+    /// </summary>
+    public static readonly sPixel Transparent = FromRGBA(255, 0, 255, 0);
+
+    /// <summary>
     /// Purple
     /// </summary>
     public static readonly sPixel Purple = FromRGBA(255, 0, 255);
@@ -202,17 +229,13 @@ namespace Imager {
     /// Gets the minimum value of Red, Green and Blue.
     /// </summary>
     /// <value>The minimum.</value>
-    public byte Minimum {
-      get { return (_Min(this.Red, this.Green, this.Blue)); }
-    }
+    public byte Minimum => _Min(this.Red, this.Green, this.Blue);
 
     /// <summary>
     /// Gets the maximum value of Red, Green and Blue.
     /// </summary>
     /// <value>The maximum.</value>
-    public byte Maximum {
-      get { return (_Max(this.Red, this.Green, this.Blue)); }
-    }
+    public byte Maximum => _Max(this.Red, this.Green, this.Blue);
 
     /// <summary>
     /// Factor that is used to avoid noise in color extraction.
@@ -390,9 +413,7 @@ namespace Imager {
     /// Gets an instance of type Color or sets the actual pixel to that color.
     /// </summary>
     /// <value>The color.</value>
-    public Color Color {
-      get { return (Color.FromArgb(this.Alpha, this.Red, this.Green, this.Blue)); }
-    }
+    public Color Color => (Color.FromArgb(this.Alpha, this.Red, this.Green, this.Blue));
 
     #region byte values
 
@@ -400,69 +421,45 @@ namespace Imager {
     /// Gets or sets the alpha component.
     /// </summary>
     /// <value>The alpha-value.</value>
-    public byte Alpha {
-      get { return (_GetAlpha(this._rgbBytes)); }
-    }
+    public byte Alpha => (_GetAlpha(this._rgbBytes));
 
     /// <summary>
     /// Gets or sets the red component.
     /// </summary>
     /// <value>The red-value.</value>
-    public byte Red {
-      get { return (_GetRed(this._rgbBytes)); }
-    }
+    public byte Red => (_GetRed(this._rgbBytes));
 
     /// <summary>
     /// Gets or sets the green component.
     /// </summary>
     /// <value>The green-value.</value>
-    public byte Green {
-      get { return (_GetGreen(this._rgbBytes)); }
-    }
+    public byte Green => (_GetGreen(this._rgbBytes));
 
     /// <summary>
     /// Gets or sets the blue component.
     /// </summary>
     /// <value>The blue-value.</value>
-    public byte Blue {
-      get { return (_GetBlue(this._rgbBytes)); }
-    }
+    public byte Blue => (_GetBlue(this._rgbBytes));
 
     #endregion
 
     #region float values
 
-    public double DoubleRed {
-      get { return (_Byte2Double(this.Red)); }
-    }
+    public double DoubleRed => (_Byte2Double(this.Red));
 
-    public float SingleRed {
-      get { return (_Byte2Single(this.Red)); }
-    }
+    public float SingleRed => (_Byte2Single(this.Red));
 
-    public double DoubleGreen {
-      get { return (_Byte2Double(this.Green)); }
-    }
+    public double DoubleGreen => (_Byte2Double(this.Green));
 
-    public float SingleGreen {
-      get { return (_Byte2Single(this.Green)); }
-    }
+    public float SingleGreen => (_Byte2Single(this.Green));
 
-    public double DoubleBlue {
-      get { return (_Byte2Double(this.Blue)); }
-    }
+    public double DoubleBlue => (_Byte2Double(this.Blue));
 
-    public float SingleBlue {
-      get { return (_Byte2Single(this.Blue)); }
-    }
+    public float SingleBlue => (_Byte2Single(this.Blue));
 
-    public double DoubleAlpha {
-      get { return (_Byte2Double(this.Alpha)); }
-    }
+    public double DoubleAlpha => (_Byte2Double(this.Alpha));
 
-    public float SingleAlpha {
-      get { return (_Byte2Single(this.Alpha)); }
-    }
+    public float SingleAlpha => (_Byte2Single(this.Alpha));
 
     #endregion
 
@@ -487,9 +484,7 @@ namespace Imager {
     /// <param name="blue">The blue-value.</param>
     /// <param name="alpha">The alpha-value.</param>
     /// <returns></returns>
-    public static sPixel FromRGBA(byte red, byte green, byte blue, byte alpha = 255) {
-      return (new sPixel(red, green, blue, alpha));
-    }
+    public static sPixel FromRGBA(byte red, byte green, byte blue, byte alpha = 255) => new sPixel(red, green, blue, alpha);
 
     /// <summary>
     /// Factory to create a <see cref="sPixel"/> instance from red, green and blue value.
@@ -582,18 +577,7 @@ namespace Imager {
     /// <returns>
     /// A <see cref="System.String"/> that represents this instance.
     /// </returns>
-    public override string ToString() {
-      return (
-        string.Format(
-          "({0:X8}) Red:{1}, Green:{2}, Blue:{3}, Alpha:{4}",
-          this._rgbBytes,
-          this.Red,
-          this.Green,
-          this.Blue,
-          this.Alpha
-          )
-        );
-    }
+    public override string ToString() => $"({this._rgbBytes:X8}) Red:{this.Red}, Green:{this.Green}, Blue:{this.Blue}, Alpha:{this.Alpha}";
 
     /// <summary>
     /// Returns a hash code for this instance.
@@ -601,9 +585,7 @@ namespace Imager {
     /// <returns>
     /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
     /// </returns>
-    public override int GetHashCode() {
-      return ((int)this._rgbBytes);
-    }
+    public override int GetHashCode() => (int)this._rgbBytes;
 
     #region operators
 
@@ -1039,7 +1021,9 @@ namespace Imager {
 
   internal static partial class MathExtensions {
     [TargetedPatchingOptOut("")]
+#if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static uint Abs(this int v) {
 #if DEBUG
       return (uint)(v < 0 ? -v : v);

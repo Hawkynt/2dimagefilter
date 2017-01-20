@@ -19,6 +19,8 @@
  */
 #endregion
 
+using Classes.ScriptActions;
+using Imager.Interface;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -26,9 +28,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-
-using Classes.ScriptActions;
-using Imager.Interface;
 using word = System.UInt16;
 
 namespace Classes {
@@ -51,6 +50,7 @@ namespace Classes {
     internal const string HALF_BOUNDS_VALUE = "half";
     internal const string WHOLE_BOUNDS_VALUE = "whole";
     internal const string WRAP_BOUNDS_VALUE = "wrap";
+    internal const string TRANSPARENT_BOUNDS_VALUE = "transparent";
 
     internal const string REPEAT_PARAMETER_NAME = "repeat";
     internal const string RADIUS_PARAMETER_NAME = "radius";
@@ -296,6 +296,8 @@ namespace Classes {
                 vbounds = OutOfBoundsMode.WholeSampleSymmetric;
               else if (value == WRAP_BOUNDS_VALUE)
                 vbounds = OutOfBoundsMode.WrapAround;
+              else if (value == TRANSPARENT_BOUNDS_VALUE)
+                vbounds = OutOfBoundsMode.Transparent;
               else
                 return (CLIExitCode.InvalidOutOfBoundsMode);
               break;
@@ -310,6 +312,8 @@ namespace Classes {
                 hbounds = OutOfBoundsMode.WholeSampleSymmetric;
               else if (value == WRAP_BOUNDS_VALUE)
                 hbounds = OutOfBoundsMode.WrapAround;
+              else if (value == TRANSPARENT_BOUNDS_VALUE)
+                hbounds = OutOfBoundsMode.Transparent;
               else
                 return (CLIExitCode.InvalidOutOfBoundsMode);
               break;
@@ -420,6 +424,8 @@ namespace Classes {
         return (WHOLE_BOUNDS_VALUE);
       if (mode == OutOfBoundsMode.WrapAround)
         return (WRAP_BOUNDS_VALUE);
+      if (mode == OutOfBoundsMode.Transparent)
+        return (TRANSPARENT_BOUNDS_VALUE);
       throw new NotImplementedException();
     }
 

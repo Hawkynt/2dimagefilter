@@ -28,10 +28,10 @@ using Imager;
 namespace Classes.ScriptActions {
   internal class SaveStdOutCommand : IScriptAction {
     #region Implementation of IScriptAction
-    public bool ChangesSourceImage { get { return (false); } }
+    public bool ChangesSourceImage => (false);
 
-    public bool ChangesTargetImage { get { return (false); } }
-    public bool ProvidesNewGdiSource { get { return (false); } }
+    public bool ChangesTargetImage => (false);
+    public bool ProvidesNewGdiSource => (false);
 
     public bool Execute() {
       using (var stream = Console.OpenStandardOutput())
@@ -39,7 +39,7 @@ namespace Classes.ScriptActions {
       return (true);
     }
 
-    public Bitmap GdiSource { get { return (null); } }
+    public Bitmap GdiSource => (null);
 
     public cImage SourceImage { get; set; }
 

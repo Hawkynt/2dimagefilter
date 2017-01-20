@@ -20,9 +20,6 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Runtime;
-using System.Runtime.CompilerServices;
 
 namespace Imager.Interface {
   /// <summary>
@@ -44,26 +41,31 @@ namespace Imager.Interface {
     /// <summary>
     /// cde abcde abc
     /// </summary>
-    WrapAround
+    WrapAround,
+    /// <summary>
+    /// ttt abcde ttt
+    /// </summary>
+    Transparent,
   }
 
   internal static class OutOfBoundsUtils {
 
-    public delegate int OutOfBoundsHandler(int index, int count,bool isUnderflow);
+    public delegate int OutOfBoundsHandler(int index, int count, bool isUnderflow);
 
     private static readonly Dictionary<OutOfBoundsMode, OutOfBoundsHandler> _OUT_OF_BOUNDS_HANDLERS = new Dictionary<OutOfBoundsMode, OutOfBoundsHandler> {
       {OutOfBoundsMode.ConstantExtension,_ConstantExtension},
       {OutOfBoundsMode.WrapAround,_WrapAround},
       {OutOfBoundsMode.HalfSampleSymmetric,_HalfSampleSymmetric},
-      {OutOfBoundsMode.WholeSampleSymmetric,_WholeSampleSymmetric}
+      {OutOfBoundsMode.WholeSampleSymmetric,_WholeSampleSymmetric},
+      {OutOfBoundsMode.Transparent,_ConstantExtension},
     };
 
     #region out of bounds handlers
-    private static int _ConstantExtension(int index, int count,bool isUnderflow) {
+    private static int _ConstantExtension(int index, int count, bool isUnderflow) {
       return (isUnderflow ? 0 : count - 1);
     }
 
-    private static int _WrapAround(int index, int count,bool isUnderflow) {
+    private static int _WrapAround(int index, int count, bool isUnderflow) {
       /*
         c:2
           -3 -2 -1  0 +1 +2 +3
@@ -135,6 +137,6 @@ namespace Imager.Interface {
 
       throw new NotSupportedException("The OutOfBoundsMode " + mode + " is not supported");
     }
-    
+
   }
 }

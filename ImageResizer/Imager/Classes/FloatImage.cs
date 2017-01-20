@@ -38,7 +38,7 @@ namespace Imager.Classes {
     private OutOfBoundsUtils.OutOfBoundsHandler _horizontalOutOfBoundsHandler;
     private OutOfBoundsMode _verticalOutOfBoundsMode;
     private OutOfBoundsUtils.OutOfBoundsHandler _verticalOutOfBoundsHandler;
-    
+
     private readonly int _width;
     private readonly int _height;
     #endregion
@@ -59,7 +59,7 @@ namespace Imager.Classes {
         this._horizontalOutOfBoundsHandler = OutOfBoundsUtils.GetHandlerOrCrash(value);
       }
     }
-    
+
     /// <summary>
     /// Gets or sets the vertical out of bounds mode.
     /// </summary>
@@ -76,8 +76,9 @@ namespace Imager.Classes {
       }
     }
 
-    public int Width { get { return this._width; } }
-    public int Height { get { return this._height; } }
+    public int Width => this._width;
+    public int Height => this._height;
+
     #endregion
 
     #region ctor
@@ -199,11 +200,11 @@ namespace Imager.Classes {
     #region utils
     private static float _GetValueFromPlane(float[] plane, int x, int y, int width, int height, OutOfBoundsUtils.OutOfBoundsHandler horizontalOutOfBoundsHandler, OutOfBoundsUtils.OutOfBoundsHandler verticalOutOfBoundsHandler) {
       if (x < 0 || x >= width)
-        x = horizontalOutOfBoundsHandler(x, width,x<0);
+        x = horizontalOutOfBoundsHandler(x, width, x < 0);
 
       if (y < 0 || y >= height)
-        y = verticalOutOfBoundsHandler(y, height,y<0);
-      
+        y = verticalOutOfBoundsHandler(y, height, y < 0);
+
       return (plane[y * width + x]);
     }
     #endregion
@@ -345,11 +346,13 @@ namespace Imager.Classes {
         n0 = n;
 
       switch (outOfBoundsMode) {
-        case OutOfBoundsMode.ConstantExtension: {
+        case OutOfBoundsMode.ConstantExtension:
+        {
           sum = plane[offset + 0] / (1 - alpha);
           break;
         }
-        case OutOfBoundsMode.WholeSampleSymmetric: {
+        case OutOfBoundsMode.WholeSampleSymmetric:
+        {
           sum = plane[offset + 0];
           weight = 1;
           iEnd = n0 * stride;
@@ -360,7 +363,8 @@ namespace Imager.Classes {
           }
           break;
         }
-        default: {
+        default:
+        {
           /* BOUNDARY_HSYMMETRIC */
           sum = plane[offset + 0] * (1 + alpha);
           weight = alpha;
@@ -383,18 +387,21 @@ namespace Imager.Classes {
       }
 
       switch (outOfBoundsMode) {
-        case OutOfBoundsMode.ConstantExtension: {
+        case OutOfBoundsMode.ConstantExtension:
+        {
           last = plane[offset + iEnd] = (alpha * (-plane[offset + iEnd] + (alpha - 1) * alpha * last))
             / ((alpha - 1) * (alpha * alpha - 1));
           break;
         }
-        case OutOfBoundsMode.WholeSampleSymmetric: {
+        case OutOfBoundsMode.WholeSampleSymmetric:
+        {
           plane[offset + iEnd] += alpha * last;
           last = plane[offset + iEnd] = (alpha / (alpha * alpha - 1))
             * (plane[offset + iEnd] + alpha * plane[offset + iEnd - stride]);
           break;
         }
-        default: {
+        default:
+        {
           plane[offset + iEnd] += alpha * last;
           last = plane[offset + iEnd] *= alpha / (alpha - 1);
           break;
@@ -462,10 +469,10 @@ namespace Imager.Classes {
           for (var n = 0; n < kernelWidth; n++) {
             var index = pos + n;
             if (index < 0 || index >= srcWidth)
-              index = boundary(index, srcWidth,index<0);
+              index = boundary(index, srcWidth, index < 0);
 
             filterCoeff[coeffIndex + index - filterPos[destX]]
-              += (float) kernel(srcX - index);
+              += (float)kernel(srcX - index);
           }
         } else {
           filterPos[destX] = (short)pos;
@@ -474,7 +481,7 @@ namespace Imager.Classes {
             filterCoeff[coeffIndex + n] = (float)kernel(srcX - (pos + n));
         }
 
-        if (kernelNormalize)	/* Normalize */ {
+        if (kernelNormalize)  /* Normalize */ {
           var sum = 0f;
 
           for (var n = 0; n < filterWidth; n++)

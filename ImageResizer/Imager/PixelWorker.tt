@@ -24,17 +24,18 @@ namespace Imager {
   /// This class gets us fast access to a small window of pixels in the source and target images.
   /// </summary>
   internal class PixelWorker<TColorStorage> {
-    private readonly IList<TColorStorage> _sourceImage;
+    private readonly Func<int, TColorStorage> _sourceImageGetter;
     private int _sourceX;
     private readonly int _sourceY;
     private int _sourceOffset;
     
     private readonly int _sourceWidth;
+    private readonly int _sourceStride;
     private readonly int _sourceHeight;
     private readonly OutOfBoundsUtils.OutOfBoundsHandler _sourceXWrapper;
     private readonly OutOfBoundsUtils.OutOfBoundsHandler _sourceYWrapper;
 
-    private readonly IList<TColorStorage> _targetImage;
+    private readonly Action<int,TColorStorage> _targetImageSetter;
     private int _targetOffset;
 
     #region offset calculators for source image
@@ -50,20 +51,18 @@ namespace Imager {
     #endregion
 
     #region offsets for target image
-<# foreach(var i in targetXRange.Where(i=>i!=0)) { #>
-    private const int _targetOffset<#=GetLineDescription(i)#>X = <#=i#>;
-<# } #>
 <# foreach(var i in targetYRange.Where(i=>i!=0)) { #>
     private readonly int _targetOffset<#=GetLineDescription(i)#>Y;
 <# } #>
     #endregion
 
-    public PixelWorker(IList<TColorStorage> sourceImage, int sourceX, int sourceY, int sourceWidth, int sourceHeight, OutOfBoundsUtils.OutOfBoundsHandler sourceXWrapper, OutOfBoundsUtils.OutOfBoundsHandler sourceYWrapper, IList<TColorStorage> targetImage, int targetX, int targetY, int targetWidth) {
+    public PixelWorker(Func<int, TColorStorage> sourceImageGetter, int sourceX, int sourceY, int sourceWidth, int sourceHeight, int sourceStride, OutOfBoundsUtils.OutOfBoundsHandler sourceXWrapper, OutOfBoundsUtils.OutOfBoundsHandler sourceYWrapper, Action<int, TColorStorage> targetImageSetter, int targetX, int targetY, int targetStride) {
       Contract.Requires(sourceX >= 0 && sourceX < sourceWidth && sourceY >= 0 && sourceY < sourceHeight);
-      this._sourceImage = sourceImage;
+      this._sourceImageGetter = sourceImageGetter;
       this._sourceX = sourceX;
       this._sourceY = sourceY;
       this._sourceWidth = sourceWidth;
+      this._sourceStride = sourceStride;
       this._sourceHeight = sourceHeight;
 
       // we can safely calculate this offset, because we assume that the central source pixel is never out of bounds
@@ -81,26 +80,18 @@ namespace Imager {
       this._sourceOffset<#=GetLineDescription(i)#>Y = this._CalculateOffset<#=GetLineDescription(i)#>Y;
 <# } #>
 
-      this._targetImage = targetImage;
-      this._targetOffset = targetWidth * targetY + targetX;
+      this._targetImageSetter = targetImageSetter;
+      this._targetOffset = targetStride * targetY + targetX;
 
       // pre-calculating the row offset for target image, because they surely get used
 <# foreach(var i in targetYRange.Where(i=>i!=0)) { #>
-      this._targetOffset<#=GetLineDescription(i)#>Y = targetWidth<#=i==1?"     ":(shiftMultipliers.ContainsKey(i)?" << "+shiftMultipliers[i].ToString():" *  "+i.ToString())#>;          // for nx<#=(i+1)#> filters
+      this._targetOffset<#=GetLineDescription(i)#>Y = targetStride<#=i==1?"     ":(shiftMultipliers.ContainsKey(i)?" << "+shiftMultipliers[i].ToString():" *  "+i.ToString())#>;          // for nx<#=(i+1)#> filters
 <# } #>
     }
 
-    public int SourceX(){
-      return(this._sourceX);
-    }
-
-    public int SourceY(){
-      return(this._sourceY);
-    }
-
-    public int SourceHeight(){
-      return(this._sourceHeight);
-    }
+    public int SourceX() => this._sourceX;
+    public int SourceY() => this._sourceY;
+    public int SourceHeight() => this._sourceHeight;
 
     public void IncrementX(int targetXIncrementor){
       this._targetOffset+=targetXIncrementor;
@@ -119,9 +110,9 @@ namespace Imager {
     #region access source points
 <# foreach(var y in sourceYRange) { #>
 <# foreach(var x in sourceXRange) { #>
-    public TColorStorage Source<#=GetPointDescription(x,y)#>() {
-      return (this._sourceImage[this._sourceOffset<#=x==0?string.Empty:" + this._sourceOffset"+GetLineDescription(x)+"X()"#><#=y==0?string.Empty:" + this._sourceOffset"+GetLineDescription(y)+"Y()"#>]);
-    }
+    public TColorStorage Source<#=GetPointDescription(x,y)#>()
+      => this._sourceImageGetter(this._sourceOffset<#=x==0?string.Empty:" + this._sourceOffset"+GetLineDescription(x)+"X()"#><#=y==0?string.Empty:" + this._sourceOffset"+GetLineDescription(y)+"Y()"#>)
+      ;
 <# } #>
 <# } #>
     #endregion
@@ -129,9 +120,9 @@ namespace Imager {
     #region access target points
 <# foreach(var y in targetYRange) { #>
 <# foreach(var x in targetXRange) { #>
-    public void Target<#=GetPointDescription(x,y)#>(TColorStorage value) {
-      this._targetImage[this._targetOffset<#=x==0?string.Empty:" + _targetOffset"+GetLineDescription(x)+"X"#><#=y==0?string.Empty:" + this._targetOffset"+GetLineDescription(y)+"Y"#>] = value;
-    }
+    public void Target<#=GetPointDescription(x,y)#>(TColorStorage value)
+      => this._targetImageSetter(this._targetOffset<#=x==0?string.Empty:" + "+x#><#=y==0?string.Empty:" + this._targetOffset"+GetLineDescription(y)+"Y"#>, value)
+      ;
 <# } #>
 <# } #>
     #endregion
@@ -139,7 +130,7 @@ namespace Imager {
     #region calculate source offset deltas
 
 <# foreach(var i in sourceXRange.Where(i=>i!=0)) { #>
-    private int _GetOffset<#=GetLineDescription(i)#>X() { return (this._sourceOffset<#=GetLineDescription(i)#>XValue); }
+    private int _GetOffset<#=GetLineDescription(i)#>X() => this._sourceOffset<#=GetLineDescription(i)#>XValue;
     private int _CalculateOffset<#=GetLineDescription(i)#>X() {
       var current = this._sourceX;
       var value = current <#=i<0?"- "+Math.Abs(i).ToString():"+ "+i.ToString()#>;
@@ -153,14 +144,14 @@ namespace Imager {
     }
 <# } #>
 <# foreach(var i in sourceYRange.Where(i=>i!=0)) { #>
-    private int _GetOffset<#=GetLineDescription(i)#>Y() { return (this._sourceOffset<#=GetLineDescription(i)#>YValue); }
+    private int _GetOffset<#=GetLineDescription(i)#>Y() => this._sourceOffset<#=GetLineDescription(i)#>YValue;
     private int _CalculateOffset<#=GetLineDescription(i)#>Y() {
       var current = this._sourceY;
       var value = current <#=i<0?"- "+Math.Abs(i).ToString():"+ "+i.ToString()#>;
       if (value <#=i<0?"< 0":">= this._sourceHeight"#>)
         value = this._sourceYWrapper(value, this._sourceHeight, <#=i<0?"true":"false"#>);
 
-      var result = (value - current) * this._sourceWidth;
+      var result = (value - current) * this._sourceStride;
       this._sourceOffset<#=GetLineDescription(i)#>YValue = result;
       this._sourceOffset<#=GetLineDescription(i)#>Y = this._GetOffset<#=GetLineDescription(i)#>Y;
       return (result);

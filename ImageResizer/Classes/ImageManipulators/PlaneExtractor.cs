@@ -31,14 +31,15 @@ namespace Classes.ImageManipulators {
     private readonly string _description;
 
     #region Implementation of IImageManipulator
-    public bool SupportsWidth { get { return (false); } }
-    public bool SupportsHeight { get { return (false); } }
-    public bool SupportsRepetitionCount { get { return (false); } }
-    public bool SupportsGridCentering { get { return (false); } }
-    public bool ChangesResolution { get { return (false); } }
-    public bool SupportsThresholds { get { return (false); } }
-    public bool SupportsRadius { get { return (false); } }
-    public string Description { get { return (this._description); } }
+    public bool SupportsWidth => (false);
+    public bool SupportsHeight => (false);
+    public bool SupportsRepetitionCount => (false);
+    public bool SupportsGridCentering => (false);
+    public bool ChangesResolution => (false);
+    public bool SupportsThresholds => (false);
+    public bool SupportsRadius => (false);
+    public string Description => (this._description);
+
     #endregion
 
     public cImage Apply(cImage source) {

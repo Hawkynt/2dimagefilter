@@ -30,14 +30,15 @@ namespace Classes.ImageManipulators {
     private readonly KernelType _type;
 
     #region Implementation of IImageManipulator
-    public bool SupportsWidth { get { return (true); } }
-    public bool SupportsHeight { get { return (true); } }
-    public bool SupportsRepetitionCount { get { return (false); } }
-    public bool SupportsGridCentering { get { return (true); } }
-    public bool SupportsThresholds { get { return (false); } }
-    public bool SupportsRadius { get { return (false); } }
-    public bool ChangesResolution { get { return (true); } }
-    public string Description { get { return (ReflectionUtils.GetDescriptionForEnumValue(this._type)); } }
+    public bool SupportsWidth => (true);
+    public bool SupportsHeight => (true);
+    public bool SupportsRepetitionCount => (false);
+    public bool SupportsGridCentering => (true);
+    public bool SupportsThresholds => (false);
+    public bool SupportsRadius => (false);
+    public bool ChangesResolution => (true);
+    public string Description => (ReflectionUtils.GetDescriptionForEnumValue(this._type));
+
     #endregion
 
     public cImage Apply(cImage source, int width, int height, bool useCenteredGrid) {

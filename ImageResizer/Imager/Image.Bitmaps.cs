@@ -18,8 +18,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
+using System.Collections.Concurrent;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Threading.Tasks;
 
 namespace Imager {
   partial class cImage {
@@ -35,27 +38,49 @@ namespace Imager {
     /// </returns>
     public Bitmap ToBitmap(int sx, int sy, int width, int height) {
       var result = new Bitmap(width, height);
-      // NOTE: fucking bitmap does not allow parallel writes
       var bitmapData = result.LockBits(
         new Rectangle(0, 0, width, height),
         ImageLockMode.WriteOnly,
         PixelFormat.Format32bppArgb
       );
-      var fillBytes = bitmapData.Stride - bitmapData.Width * 4;
-      unsafe {
-        var offset = (byte*)bitmapData.Scan0.ToPointer();
-        for (var y = sy; y < sy + height; y++) {
-          for (var x = sx; x < sx + width; x++) {
-            var pixel = this[x, y];
-            *(offset + 3) = pixel.Alpha;
-            *(offset + 2) = pixel.Red;
-            *(offset + 1) = pixel.Green;
-            *(offset + 0) = pixel.Blue;
-            offset += 4;
+
+      var targetStride = bitmapData.Stride;
+      var fillBytes = targetStride - bitmapData.Width * 4;
+      var sourceStride = this._width;
+      var sourceImageData = this._imageData;
+
+      Parallel.ForEach(
+        Partitioner.Create(sy, sy + height),
+        () => 0,
+        (range, _, threadStorage) => {
+          var minY = range.Item1;
+          var maxY = range.Item2;
+          unsafe
+          {
+            fixed (sPixel* sourceFix = sourceImageData)
+            {
+              var offset = (byte*)bitmapData.Scan0.ToPointer() + minY * targetStride;
+              for (var y = minY; y < maxY; ++y) {
+                var sourceOffset = sourceStride * y + sx;
+                for (var x = sx; x < sx + width; x++) {
+                  var pixel = sourceFix[sourceOffset];
+                  sourceOffset++;
+
+                  *(offset + 3) = pixel.Alpha;
+                  *(offset + 2) = pixel.Red;
+                  *(offset + 1) = pixel.Green;
+                  *(offset + 0) = pixel.Blue;
+                  offset += 4;
+                }
+                offset += fillBytes;
+              }
+            }
           }
-          offset += fillBytes;
-        }
-      }
+          return threadStorage;
+
+        },
+        _ => { }
+      );
       result.UnlockBits(bitmapData);
       return (result);
     }
@@ -64,9 +89,7 @@ namespace Imager {
     /// Converts this image to a <see cref="Bitmap"/> instance.
     /// </summary>
     /// <returns>The <see cref="Bitmap"/> instance</returns>
-    public Bitmap ToBitmap() {
-      return (ToBitmap(0, 0, this._width, this._height));
-    }
+    public Bitmap ToBitmap() => this.ToBitmap(0, 0, this._width, this._height);
 
     // NOTE: Bitmap objects does not support parallel read-outs blame Microsoft
     /// <summary>
@@ -76,6 +99,7 @@ namespace Imager {
     public static cImage FromBitmap(Bitmap bitmap) {
       if (bitmap == null)
         return (null);
+
       var result = new cImage(bitmap.Width, bitmap.Height);
 
       var height = result._height;
@@ -87,14 +111,20 @@ namespace Imager {
         PixelFormat.Format32bppArgb
       );
       var intFillX = bitmapData.Stride - bitmapData.Width * 4;
-      unsafe {
-        var ptrOffset = (byte*)bitmapData.Scan0.ToPointer();
-        for (var y = 0; y < height; y++) {
-          for (var x = 0; x < width; x++) {
-            result[x, y] = new sPixel(*(ptrOffset + 2), *(ptrOffset + 1), *(ptrOffset + 0), *(ptrOffset + 3));
-            ptrOffset += 4;
+      unsafe
+      {
+        fixed (sPixel* target = result._imageData)
+        {
+          var ptrOffset = (byte*)bitmapData.Scan0.ToPointer();
+          for (var y = 0; y < height; y++) {
+            var offset = y * width;
+            for (var x = 0; x < width; x++) {
+              target[offset] = new sPixel(*(ptrOffset + 2), *(ptrOffset + 1), *(ptrOffset + 0), *(ptrOffset + 3));
+              offset++;
+              ptrOffset += 4;
+            }
+            ptrOffset += intFillX;
           }
-          ptrOffset += intFillX;
         }
       }
       bitmap.UnlockBits(bitmapData);

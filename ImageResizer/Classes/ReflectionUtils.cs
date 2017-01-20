@@ -64,7 +64,7 @@ namespace Classes {
       var valueName = Enum.GetName(typeof(TEnumeration), value);
       var fieldInfo = typeof(TEnumeration).GetMember(valueName)[0];
       var descriptionAttribute = (DescriptionAttribute)fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault();
-      return (descriptionAttribute == null ? null : descriptionAttribute.Description);
+      return descriptionAttribute?.Description;
     }
 
     /// <summary>
@@ -77,7 +77,7 @@ namespace Classes {
       Contract.Requires(getter != null);
       var assembly = Assembly.GetEntryAssembly();
       var attribute = assembly.GetCustomAttributes(typeof(TAttribute), true).First();
-      return (getter((TAttribute)attribute));
+      return getter((TAttribute)attribute);
     }
 
     /// <summary>
@@ -90,21 +90,19 @@ namespace Classes {
     public static string GetDescriptionForClass(Type classType) {
       Contract.Requires(classType != null);
       var attribute = (DescriptionAttribute)classType.GetCustomAttributes(typeof(DescriptionAttribute), true).FirstOrDefault();
-      if (attribute == null) {
+      if (attribute != null)
+        return attribute.Description;
 
-        // when no description attribute was found
-        var name = classType.FullName;
-        var lastDot = name == null ? -1 : name.LastIndexOf('.');
+      // when no description attribute was found
+      var name = classType.FullName;
+      var lastDot = name?.LastIndexOf('.') ?? -1;
 
-        // when there is no dot in the type name, just return the name
-        if (lastDot < 0)
-          return (name);
+      // when there is no dot in the type name, just return the name
+      if (lastDot < 0)
+        return (name);
 
-        // otherwise return the last part of the name
-        return (name.Substring(lastDot + 1));
-      }
-
-      return (attribute.Description);
+      // otherwise return the last part of the name
+      return name.Substring(lastDot + 1);
     }
   }
 }

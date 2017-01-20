@@ -31,10 +31,10 @@ using word = System.UInt16;
 namespace Classes.ScriptActions {
   internal class ResizeCommand : IScriptAction {
     #region Implementation of IScriptAction
-    public bool ChangesSourceImage { get { return (false); } }
+    public bool ChangesSourceImage => (false);
 
-    public bool ChangesTargetImage { get { return (true); } }
-    public bool ProvidesNewGdiSource { get { return (false); } }
+    public bool ChangesTargetImage => (true);
+    public bool ProvidesNewGdiSource => (false);
 
     public bool Execute() {
       var source = this._applyToTarget ? this.TargetImage : this.SourceImage;
@@ -89,7 +89,7 @@ namespace Classes.ScriptActions {
       return (true);
     }
 
-    public Bitmap GdiSource { get { return (null); } }
+    public Bitmap GdiSource => (null);
 
     public cImage SourceImage { get; set; }
 
@@ -97,37 +97,37 @@ namespace Classes.ScriptActions {
     #endregion
 
     private readonly IImageManipulator _manipulator;
-    public IImageManipulator Manipulator { get { return (this._manipulator); } }
+    public IImageManipulator Manipulator => (this._manipulator);
 
     private readonly word _width;
-    public word Width { get { return (this._width); } }
+    public word Width => (this._width);
 
     private readonly word _height;
-    public word Height { get { return (this._height); } }
+    public word Height => (this._height);
 
     private readonly bool _maintainAspect;
-    public bool MaintainAspect { get { return (this._maintainAspect); } }
+    public bool MaintainAspect => (this._maintainAspect);
 
     private readonly OutOfBoundsMode _horizontalBph;
-    public OutOfBoundsMode HorizontalBph { get { return (this._horizontalBph); } }
+    public OutOfBoundsMode HorizontalBph => (this._horizontalBph);
 
     private readonly OutOfBoundsMode _verticalBph;
-    public OutOfBoundsMode VerticalBph { get { return (this._verticalBph); } }
+    public OutOfBoundsMode VerticalBph => (this._verticalBph);
 
     private readonly byte _count;
-    public byte Count { get { return (this._count); } }
+    public byte Count => (this._count);
 
     private readonly bool _useThresholds;
-    public bool UseThresholds { get { return (this._useThresholds); } }
+    public bool UseThresholds => (this._useThresholds);
 
     private readonly bool _useCenteredGrid;
-    public bool UseCenteredGrid { get { return (this._useCenteredGrid); } }
+    public bool UseCenteredGrid => (this._useCenteredGrid);
 
     private readonly float _radius;
-    public float Radius { get { return (this._radius); } }
+    public float Radius => (this._radius);
 
     private readonly word _percentage;
-    public word Percentage { get { return (this._percentage); } }
+    public word Percentage => (this._percentage);
 
     private readonly bool _applyToTarget;
 

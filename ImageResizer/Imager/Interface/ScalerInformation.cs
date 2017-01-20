@@ -12,20 +12,12 @@ namespace Imager.Interface {
       this._displayName = displayName;
     }
 
-    public string Description {
-      get { return this._description; }
-    }
+    public string Description => this._description;
 
-    public byte ScaleFactorX {
-      get { return this._scaleFactorX; }
-    }
+    public byte ScaleFactorX => this._scaleFactorX;
 
-    public byte ScaleFactorY {
-      get { return this._scaleFactorY; }
-    }
+    public byte ScaleFactorY => this._scaleFactorY;
 
-    public string DisplayName {
-      get { return this._displayName; }
-    }
+    public string DisplayName => this._displayName;
   }
 }

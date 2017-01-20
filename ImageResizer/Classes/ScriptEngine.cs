@@ -20,11 +20,10 @@
 #endregion
 
 using System;
-using System.Drawing;
-using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-
+using System.Drawing;
+using System.Linq;
 using Imager;
 
 namespace Classes {
@@ -57,8 +56,7 @@ namespace Classes {
       get { return (this._sourceImage); }
       private set {
         this._sourceImage = value;
-        if (this._gdiSource != null)
-          this._gdiSource.Dispose();
+        this._gdiSource?.Dispose();
         this._gdiSource = null;
       }
     }
@@ -73,8 +71,7 @@ namespace Classes {
       get { return (this._targetImage); }
       private set {
         this._targetImage = value;
-        if (this._gdiTarget != null)
-          this._gdiTarget.Dispose();
+        this._gdiTarget?.Dispose();
         this._gdiTarget = null;
       }
     }
@@ -82,12 +79,12 @@ namespace Classes {
     /// <summary>
     /// Gets the GDI source.
     /// </summary>
-    public Bitmap GdiSource { get { return (this._gdiSource ?? (this._gdiSource = this._sourceImage == null ? null : this._sourceImage.ToBitmap())); } }
+    public Bitmap GdiSource => (this._gdiSource ?? (this._gdiSource = this._sourceImage?.ToBitmap()));
 
     /// <summary>
     /// Gets the GDI target.
     /// </summary>
-    public Bitmap GdiTarget { get { return (this._gdiTarget ?? (this._gdiTarget = this._targetImage == null ? null : this._targetImage.ToBitmap())); } }
+    public Bitmap GdiTarget => (this._gdiTarget ?? (this._gdiTarget = this._targetImage?.ToBitmap()));
 
     /// <summary>
     /// Current list of actions.
@@ -113,23 +110,19 @@ namespace Classes {
     /// <summary>
     /// Clears the action list.
     /// </summary>
-    public void Clear() {
-      this._actionList.Clear();
-    }
+    public void Clear() => this._actionList.Clear();
 
     /// <summary>
     /// Gets the actions.
     /// Note: We're creating an enumeration so our own list stays save and is not modified by another class.
     /// </summary>
-    public IEnumerable<IScriptAction> Actions { get { return (this._actionList.Select(t => t)); } }
+    public IEnumerable<IScriptAction> Actions => this._actionList.Select(t => t);
 
     /// <summary>
     /// Executes the action.
     /// </summary>
     /// <param name="action">The action.</param>
-    public void ExecuteAction(IScriptAction action) {
-      this._ExecuteAction(action, true);
-    }
+    public void ExecuteAction(IScriptAction action) => this._ExecuteAction(action, true);
 
     /// <summary>
     /// Repeats the actions from the action list.
@@ -139,11 +132,9 @@ namespace Classes {
     public void RepeatActions(Action<ScriptEngine, IScriptAction> preAction = null, Action<ScriptEngine, IScriptAction> postAction = null) {
       var actions = this._actionList;
       foreach (var action in actions) {
-        if (preAction != null)
-          preAction(this, action);
+        preAction?.Invoke(this, action);
         this._ExecuteAction(action, false);
-        if (postAction != null)
-          postAction(this, action);
+        postAction?.Invoke(this, action);
       }
     }
 

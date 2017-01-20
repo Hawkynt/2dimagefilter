@@ -47,14 +47,15 @@ namespace Imager {
           var targetY = (threadSrcMinY - startY) * scaleY;
           for (var sourceY = threadSrcMinY; sourceY < threadSrcMaxY;++sourceY) {
             var worker=new PixelWorker<sPixel>(
-              this.GetImageData(), 
+              i=>this.GetImageData()[i],
               startX,
               sourceY, 
               this._width, 
-              this._height, 
+              this._height,
+              this._width,  
               this._horizontalOutOfBoundsHandler,
               this._verticalOutOfBoundsHandler, 
-              result.GetImageData(), 
+              (i,c)=>result.GetImageData()[i]=c,
               0, 
               targetY, 
               result._width
