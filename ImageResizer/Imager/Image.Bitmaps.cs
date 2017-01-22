@@ -63,13 +63,19 @@ namespace Imager {
               for (var y = minY; y < maxY; ++y) {
                 var sourceOffset = sourceStride * y + sx;
                 for (var x = sx; x < sx + width; x++) {
+
+                  *((int*)offset) = ((int*)sourceFix)[sourceOffset];
+                  // Note: the above works because bitmap and sPixel have the same pixel format and pixel size (int32)
+                  /*
                   var pixel = sourceFix[sourceOffset];
-                  sourceOffset++;
 
                   *(offset + 3) = pixel.Alpha;
                   *(offset + 2) = pixel.Red;
                   *(offset + 1) = pixel.Green;
                   *(offset + 0) = pixel.Blue;
+                  */
+
+                  sourceOffset++;
                   offset += 4;
                 }
                 offset += fillBytes;
@@ -119,7 +125,11 @@ namespace Imager {
           for (var y = 0; y < height; y++) {
             var offset = y * width;
             for (var x = 0; x < width; x++) {
-              target[offset] = new sPixel(*(ptrOffset + 2), *(ptrOffset + 1), *(ptrOffset + 0), *(ptrOffset + 3));
+
+              ((int*)target)[offset] = *((int*)ptrOffset);
+              // Note: the above works because bitmap and sPixel have the same pixel format and pixel size (int32)
+              //target[offset] = new sPixel(*(ptrOffset + 2), *(ptrOffset + 1), *(ptrOffset + 0), *(ptrOffset + 3));
+
               offset++;
               ptrOffset += 4;
             }
