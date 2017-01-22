@@ -26,6 +26,36 @@ using System.Threading.Tasks;
 
 namespace Imager {
   partial class cImage {
+
+#if NETFX_45
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+
+    /// <summary>
+    /// Copies 32-bit blocks from source to target.
+    /// </summary>
+    /// <param name="source">The source.</param>
+    /// <param name="sourceOffset">The source offset.</param>
+    /// <param name="target">The target.</param>
+    /// <param name="targetOffset">The target offset.</param>
+    /// <param name="count">The count.</param>
+    private static unsafe void _CopyBlock(int* source, int sourceOffset, int* target, int targetOffset, int count) {
+      source += sourceOffset;
+      target += targetOffset;
+
+      // copy 64-bit as long as possible
+      while (count > 1) {
+        *((long*)target) = *((long*)source);
+        source += 2;
+        target += 2;
+        count -= 2;
+      }
+
+      // copy remaining 32-bit 
+      if (count > 0)
+        *(target) = *(source);
+    }
+
     /// <summary>
     /// Converts this image to a <see cref="Bitmap"/> instance.
     /// </summary>
@@ -38,56 +68,74 @@ namespace Imager {
     /// </returns>
     public Bitmap ToBitmap(int sx, int sy, int width, int height) {
       var result = new Bitmap(width, height);
-      var bitmapData = result.LockBits(
-        new Rectangle(0, 0, width, height),
-        ImageLockMode.WriteOnly,
-        PixelFormat.Format32bppArgb
-      );
+      BitmapData bitmapData = null;
+      try {
+        bitmapData = result.LockBits(
+          new Rectangle(0, 0, width, height),
+          ImageLockMode.WriteOnly,
+          PixelFormat.Format32bppArgb
+        );
 
-      var targetStride = bitmapData.Stride;
-      var fillBytes = targetStride - bitmapData.Width * 4;
-      var sourceStride = this._width;
-      var sourceImageData = this._imageData;
+        var sourceImageData = this._imageData;
+        var sourceStrideInDWords = this._width;
+        var targetStrideInBytes = bitmapData.Stride;
+        if (sx == 0 && width == this._width && (sourceStrideInDWords << 2) == targetStrideInBytes) {
 
-      Parallel.ForEach(
-        Partitioner.Create(sy, sy + height),
-        () => 0,
-        (range, _, threadStorage) => {
-          var minY = range.Item1;
-          var maxY = range.Item2;
-          unsafe
-          {
-            fixed (sPixel* sourceFix = sourceImageData)
-            {
-              var offset = (byte*)bitmapData.Scan0.ToPointer() + minY * targetStride;
-              for (var y = minY; y < maxY; ++y) {
-                var sourceOffset = sourceStride * y + sx;
-                for (var x = sx; x < sx + width; x++) {
-
-                  *((int*)offset) = ((int*)sourceFix)[sourceOffset];
-                  // Note: the above works because bitmap and sPixel have the same pixel format and pixel size (int32)
-                  /*
-                  var pixel = sourceFix[sourceOffset];
-
-                  *(offset + 3) = pixel.Alpha;
-                  *(offset + 2) = pixel.Red;
-                  *(offset + 1) = pixel.Green;
-                  *(offset + 0) = pixel.Blue;
-                  */
-
-                  sourceOffset++;
-                  offset += 4;
-                }
-                offset += fillBytes;
+          // special case, copy whole lines of same strides
+          Parallel.ForEach(
+            Partitioner.Create(sy, sy + height),
+            () => 0,
+            (range, _, threadStorage) => {
+              var minY = range.Item1;
+              var maxY = range.Item2;
+              unsafe
+              {
+                // copy all lines in one block
+                fixed (sPixel* sourceFix = sourceImageData)
+                  _CopyBlock(
+                    (int*)sourceFix,
+                    minY * sourceStrideInDWords,
+                    (int*)bitmapData.Scan0.ToPointer(),
+                    (minY - sy) * (targetStrideInBytes >> 2),
+                    (maxY - minY) * sourceStrideInDWords
+                  );
               }
-            }
-          }
-          return threadStorage;
+              return threadStorage;
+            },
+            _ => { }
+          );
+        } else {
+          Parallel.ForEach(
+            Partitioner.Create(sy, sy + height),
+            () => 0,
+            (range, _, threadStorage) => {
+              var minY = range.Item1;
+              var maxY = range.Item2;
+              unsafe
+              {
+                fixed (sPixel* sourceFix = sourceImageData)
+                {
+                  var sourceOffset = minY * sourceStrideInDWords + sx;
+                  var targetOffset = (byte*)bitmapData.Scan0.ToPointer() + minY * targetStrideInBytes;
+                  for (var y = minY; y < maxY; ++y) {
 
-        },
-        _ => { }
-      );
-      result.UnlockBits(bitmapData);
+                    // copy the needed pixels of one line and move on to the next
+                    _CopyBlock((int*)sourceFix, sourceOffset, (int*)targetOffset, 0, width);
+                    sourceOffset += sourceStrideInDWords;
+                    targetOffset += targetStrideInBytes;
+                  }
+                }
+              }
+              return threadStorage;
+
+            },
+            _ => { }
+            );
+        }
+      } finally {
+        if (bitmapData != null)
+          result.UnlockBits(bitmapData);
+      }
       return (result);
     }
 
@@ -123,16 +171,8 @@ namespace Imager {
         {
           var ptrOffset = (byte*)bitmapData.Scan0.ToPointer();
           for (var y = 0; y < height; y++) {
-            var offset = y * width;
-            for (var x = 0; x < width; x++) {
-
-              ((int*)target)[offset] = *((int*)ptrOffset);
-              // Note: the above works because bitmap and sPixel have the same pixel format and pixel size (int32)
-              //target[offset] = new sPixel(*(ptrOffset + 2), *(ptrOffset + 1), *(ptrOffset + 0), *(ptrOffset + 3));
-
-              offset++;
-              ptrOffset += 4;
-            }
+            _CopyBlock((int*)ptrOffset, 0, (int*)target, y * width, width);
+            ptrOffset += width << 2;
             ptrOffset += intFillX;
           }
         }
