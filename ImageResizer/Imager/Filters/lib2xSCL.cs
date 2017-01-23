@@ -117,9 +117,9 @@ namespace Imager.Filters {
       var gb = c2.Green;
       var bb = c2.Blue;
 
-      var r = ((_Fix((ra + (ra - rb)), 0, 255) + rb) >> 1);
-      var g = ((_Fix((ga + (ga - gb)), 0, 255) + gb) >> 1);
-      var b = ((_Fix((ba + (ba - bb)), 0, 255) + bb) >> 1);
+      var r = ((_ClampToByteRange((ra + (ra - rb))) + rb) >> 1);
+      var g = ((_ClampToByteRange((ga + (ga - gb))) + gb) >> 1);
+      var b = ((_ClampToByteRange((ba + (ba - bb))) + bb) >> 1);
 
       return (sPixel.FromRGBA(r, g, b, (c1.Alpha + c2.Alpha) >> 1));
     }
@@ -127,6 +127,6 @@ namespace Imager.Filters {
 #if NETFX_45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-    private static int _Fix(int n, int min, int max) => n < min ? min : n > max ? max : n;
+    private static int _ClampToByteRange(int n) => n < 0 ? 0 : n > 255 ? 255 : n;
   } // end class
 } // end namespace

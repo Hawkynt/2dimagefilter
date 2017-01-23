@@ -30,10 +30,6 @@ using System.Threading.Tasks;
 namespace Imager {
   partial class cImage {
 
-#if NETFX_45
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-
     /// <summary>
     /// Copies 32-bit blocks from source to target.
     /// </summary>
@@ -42,6 +38,9 @@ namespace Imager {
     /// <param name="target">The target.</param>
     /// <param name="targetOffset">The target offset.</param>
     /// <param name="count">The count.</param>
+#if NETFX_45
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private static unsafe void _CopyBlock(int* source, int sourceOffset, int* target, int targetOffset, int count) {
       source += sourceOffset;
       target += targetOffset;
