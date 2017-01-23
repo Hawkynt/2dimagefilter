@@ -22,6 +22,9 @@
 using System.Collections.Concurrent;
 using System.Drawing;
 using System.Drawing.Imaging;
+#if NETFX_45
+using System.Runtime.CompilerServices;
+#endif
 using System.Threading.Tasks;
 
 namespace Imager {
@@ -159,26 +162,61 @@ namespace Imager {
       var height = result._height;
       var width = result._width;
 
-      var bitmapData = bitmap.LockBits(
-        new Rectangle(0, 0, width, height),
-        ImageLockMode.ReadOnly,
-        PixelFormat.Format32bppArgb
-      );
-      var intFillX = bitmapData.Stride - bitmapData.Width * 4;
-      unsafe
-      {
-        fixed (sPixel* target = result._imageData)
-        {
-          var ptrOffset = (byte*)bitmapData.Scan0.ToPointer();
-          for (var y = 0; y < height; y++) {
-            _CopyBlock((int*)ptrOffset, 0, (int*)target, y * width, width);
-            ptrOffset += width << 2;
-            ptrOffset += intFillX;
+      BitmapData bitmapData = null;
+      try {
+        bitmapData = bitmap.LockBits(
+          new Rectangle(0, 0, width, height),
+          ImageLockMode.ReadOnly,
+          PixelFormat.Format32bppArgb
+          );
+
+        var targetStrideInDWords = width;
+        if (targetStrideInDWords << 2 == bitmapData.Stride) {
+
+          // special case...source and target stride are identical -> copy whole blocks of data
+          Parallel.ForEach(
+            Partitioner.Create(0, height),
+            () => 0,
+            (range, _, threadStorage) => {
+              var minY = range.Item1;
+              var maxY = range.Item2;
+              unsafe
+              {
+                // copy all lines in one block
+                fixed (sPixel* sourceFix = result._imageData)
+                  _CopyBlock(
+                    (int*)bitmapData.Scan0.ToPointer(),
+                    minY * (bitmapData.Stride >> 2),
+                    (int*)sourceFix,
+                    minY * targetStrideInDWords,
+                    (maxY - minY) * targetStrideInDWords
+                    );
+              }
+              return threadStorage;
+            },
+            _ => { }
+            );
+        } else {
+
+          // fall back to line by line copy
+          var intFillX = bitmapData.Stride - bitmapData.Width * 4;
+          unsafe
+          {
+            fixed (sPixel* target = result._imageData)
+            {
+              var ptrOffset = (byte*)bitmapData.Scan0.ToPointer();
+              for (var y = 0; y < height; y++) {
+                _CopyBlock((int*)ptrOffset, 0, (int*)target, y * width, width);
+                ptrOffset += width << 2;
+                ptrOffset += intFillX;
+              }
+            }
           }
         }
+      } finally {
+        if (bitmapData != null)
+          bitmap.UnlockBits(bitmapData);
       }
-      bitmap.UnlockBits(bitmapData);
-
       return (result);
     }
   }
