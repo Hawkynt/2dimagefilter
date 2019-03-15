@@ -26,10 +26,11 @@ using System.Drawing.Imaging;
 using System.Runtime.CompilerServices;
 #endif
 using System.Threading.Tasks;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Imager {
   partial class cImage {
-
     /// <summary>
     /// Copies 32-bit blocks from source to target.
     /// </summary>
@@ -73,66 +74,66 @@ namespace Imager {
       BitmapData bitmapData = null;
       try {
         bitmapData = result.LockBits(
-          new Rectangle(0, 0, width, height),
-          ImageLockMode.WriteOnly,
-          PixelFormat.Format32bppArgb
+          rect: new Rectangle(0, 0, width, height),
+          flags: ImageLockMode.WriteOnly,
+          format: System.Drawing.Imaging.PixelFormat.Format32bppArgb
         );
 
         var sourceImageData = this._imageData;
         var sourceStrideInDWords = this._width;
         var targetStrideInBytes = bitmapData.Stride;
+        var targetImageData = bitmapData.Scan0;
+
         if (sx == 0 && width == this._width && (sourceStrideInDWords << 2) == targetStrideInBytes) {
 
           // special case, copy whole lines of same strides
           Parallel.ForEach(
-            Partitioner.Create(sy, sy + height),
-            () => 0,
-            (range, _, threadStorage) => {
-              var minY = range.Item1;
-              var maxY = range.Item2;
-              unsafe
-              {
-                // copy all lines in one block
-                fixed (sPixel* sourceFix = sourceImageData)
-                  _CopyBlock(
-                    (int*)sourceFix,
-                    minY * sourceStrideInDWords,
-                    (int*)bitmapData.Scan0.ToPointer(),
-                    (minY - sy) * (targetStrideInBytes >> 2),
-                    (maxY - minY) * sourceStrideInDWords
-                  );
-              }
-              return threadStorage;
-            },
-            _ => { }
+            source: Partitioner.Create(sy, sy + height),
+            localInit: () => 0,
+            body:
+              (range, _, threadStorage) => {
+                var minY = range.Item1;
+                var maxY = range.Item2;
+                unsafe {
+                  // copy all lines in one block
+                  fixed (sPixel* sourceFix = sourceImageData)
+                    _CopyBlock(
+                      source: (int*)sourceFix,
+                      sourceOffset: minY * sourceStrideInDWords,
+                      target: (int*)targetImageData.ToPointer(),
+                      targetOffset: (minY - sy) * (targetStrideInBytes >> 2),
+                      count: (maxY - minY) * sourceStrideInDWords
+                    );
+                }
+                return threadStorage;
+              },
+            localFinally: _ => { }
           );
         } else {
           Parallel.ForEach(
-            Partitioner.Create(sy, sy + height),
-            () => 0,
-            (range, _, threadStorage) => {
-              var minY = range.Item1;
-              var maxY = range.Item2;
-              unsafe
-              {
-                fixed (sPixel* sourceFix = sourceImageData)
-                {
-                  var sourceOffset = minY * sourceStrideInDWords + sx;
-                  var targetOffset = (byte*)bitmapData.Scan0.ToPointer() + minY * targetStrideInBytes;
-                  for (var y = minY; y < maxY; ++y) {
+            source: Partitioner.Create(sy, sy + height),
+            localInit: () => 0,
+            body:
+              (range, _, threadStorage) => {
+                var minY = range.Item1;
+                var maxY = range.Item2;
+                unsafe {
+                  fixed (sPixel* sourceFix = sourceImageData) {
+                    var sourceOffset = minY * sourceStrideInDWords + sx;
+                    var targetOffset = (byte*)targetImageData.ToPointer() + minY * targetStrideInBytes;
+                    for (var y = minY; y < maxY; ++y) {
 
-                    // copy the needed pixels of one line and move on to the next
-                    _CopyBlock((int*)sourceFix, sourceOffset, (int*)targetOffset, 0, width);
-                    sourceOffset += sourceStrideInDWords;
-                    targetOffset += targetStrideInBytes;
+                      // copy the needed pixels of one line and move on to the next
+                      _CopyBlock((int*)sourceFix, sourceOffset, (int*)targetOffset, 0, width);
+                      sourceOffset += sourceStrideInDWords;
+                      targetOffset += targetStrideInBytes;
+                    }
                   }
                 }
-              }
-              return threadStorage;
-
-            },
-            _ => { }
-            );
+                return threadStorage;
+              },
+            localFinally: _ => { }
+          );
         }
       } finally {
         if (bitmapData != null)
@@ -164,46 +165,47 @@ namespace Imager {
       BitmapData bitmapData = null;
       try {
         bitmapData = bitmap.LockBits(
-          new Rectangle(0, 0, width, height),
-          ImageLockMode.ReadOnly,
-          PixelFormat.Format32bppArgb
+          rect: new Rectangle(0, 0, width, height),
+          flags: ImageLockMode.ReadOnly,
+          format: System.Drawing.Imaging.PixelFormat.Format32bppArgb
           );
 
         var targetStrideInDWords = width;
-        if (targetStrideInDWords << 2 == bitmapData.Stride) {
+        var sourceStride = bitmapData.Stride;
+        var sourceImageData = bitmapData.Scan0;
+
+        if (targetStrideInDWords << 2 == sourceStride) {
 
           // special case...source and target stride are identical -> copy whole blocks of data
           Parallel.ForEach(
-            Partitioner.Create(0, height),
-            () => 0,
-            (range, _, threadStorage) => {
-              var minY = range.Item1;
-              var maxY = range.Item2;
-              unsafe
-              {
-                // copy all lines in one block
-                fixed (sPixel* sourceFix = result._imageData)
-                  _CopyBlock(
-                    (int*)bitmapData.Scan0.ToPointer(),
-                    minY * (bitmapData.Stride >> 2),
-                    (int*)sourceFix,
-                    minY * targetStrideInDWords,
-                    (maxY - minY) * targetStrideInDWords
-                    );
-              }
-              return threadStorage;
-            },
-            _ => { }
+            source: Partitioner.Create(0, height),
+            localInit: () => 0,
+            body:
+              (range, _, threadStorage) => {
+                var minY = range.Item1;
+                var maxY = range.Item2;
+                unsafe {
+                  // copy all lines in one block
+                  fixed (sPixel* sourceFix = result._imageData)
+                    _CopyBlock(
+                      source: (int*)sourceImageData.ToPointer(),
+                      sourceOffset: minY * (sourceStride >> 2),
+                      target: (int*)sourceFix,
+                      targetOffset: minY * targetStrideInDWords,
+                      count: (maxY - minY) * targetStrideInDWords
+                      );
+                }
+                return threadStorage;
+              },
+            localFinally: _ => { }
             );
         } else {
 
           // fall back to line by line copy
-          var intFillX = bitmapData.Stride - bitmapData.Width * 4;
-          unsafe
-          {
-            fixed (sPixel* target = result._imageData)
-            {
-              var ptrOffset = (byte*)bitmapData.Scan0.ToPointer();
+          var intFillX = sourceStride - width * 4;
+          unsafe {
+            fixed (sPixel* target = result._imageData) {
+              var ptrOffset = (byte*)sourceImageData.ToPointer();
               for (var y = 0; y < height; y++) {
                 _CopyBlock((int*)ptrOffset, 0, (int*)target, y * width, width);
                 ptrOffset += width << 2;
@@ -215,6 +217,172 @@ namespace Imager {
       } finally {
         if (bitmapData != null)
           bitmap.UnlockBits(bitmapData);
+      }
+      return (result);
+    }
+
+    /// <summary>
+    /// Converts this image to a <see cref="BitmapSource"/> instance.
+    /// </summary>
+    /// <param name="sx">The start x.</param>
+    /// <param name="sy">The start y.</param>
+    /// <param name="width">The width.</param>
+    /// <param name="height">The height.</param>
+    /// <returns>
+    /// The <see cref="BitmapSource"/> instance
+    /// </returns>
+    public BitmapSource ToBitmapSource(int sx, int sy, int width, int height) {
+      var result = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
+
+      try {
+        result.Lock();
+
+        var sourceImageData = this._imageData;
+        var sourceStrideInDWords = this._width;
+        var targetStrideInBytes = result.BackBufferStride;
+        var targetImageData = result.BackBuffer;
+
+        if (sx == 0 && width == this._width && (sourceStrideInDWords << 2) == targetStrideInBytes) {
+
+          // special case, copy whole lines of same strides
+          Parallel.ForEach(
+            source: Partitioner.Create(sy, sy + height),
+            localInit: () => 0,
+            body:
+              (range, _, threadStorage) => {
+                var minY = range.Item1;
+                var maxY = range.Item2;
+                unsafe {
+                  // copy all lines in one block
+                  fixed (sPixel* sourceFix = sourceImageData)
+                    _CopyBlock(
+                      source: (int*)sourceFix,
+                      sourceOffset: minY * sourceStrideInDWords,
+                      target: (int*)targetImageData.ToPointer(),
+                      targetOffset: (minY - sy) * (targetStrideInBytes >> 2),
+                      count: (maxY - minY) * sourceStrideInDWords
+                    );
+                }
+                return threadStorage;
+              },
+            localFinally: _ => { }
+          );
+        } else {
+          Parallel.ForEach(
+            source: Partitioner.Create(sy, sy + height),
+            localInit: () => 0,
+            body:
+              (range, _, threadStorage) => {
+                var minY = range.Item1;
+                var maxY = range.Item2;
+                unsafe {
+                  fixed (sPixel* sourceFix = sourceImageData) {
+                    var sourceOffset = minY * sourceStrideInDWords + sx;
+                    var targetOffset = (byte*)targetImageData.ToPointer() + minY * targetStrideInBytes;
+                    for (var y = minY; y < maxY; ++y) {
+
+                      // copy the needed pixels of one line and move on to the next
+                      _CopyBlock((int*)sourceFix, sourceOffset, (int*)targetOffset, 0, width);
+                      sourceOffset += sourceStrideInDWords;
+                      targetOffset += targetStrideInBytes;
+                    }
+                  }
+                }
+                return threadStorage;
+              },
+            localFinally: _ => { }
+          );
+        }
+      } finally {
+        result.Unlock();
+      }
+      return (result);
+    }
+
+    /// <summary>
+    /// Converts this image to a <see cref="BitmapSource"/> instance.
+    /// </summary>
+    /// <returns>The <see cref="BitmapSource"/> instance</returns>
+    public BitmapSource ToBitmapSource() => this.ToBitmapSource(0, 0, this._width, this._height);
+
+    // NOTE: Bitmap objects does not support parallel read-outs blame Microsoft
+    /// <summary>
+    /// Initializes a new instance of the <see cref="cImage"/> class from a <see cref="BitmapSource"/> instance.
+    /// </summary>
+    /// <param name="bitmapSource">The bitmap.</param>
+    public static cImage FromBitmapSource(BitmapSource bitmapSource) {
+      if (bitmapSource == null)
+        return (null);
+
+      var result = new cImage(bitmapSource.PixelWidth, bitmapSource.PixelHeight);
+
+      var height = result._height;
+      var width = result._width;
+
+      var finalSource = bitmapSource;
+
+      if (bitmapSource.Format != PixelFormats.Bgra32) {
+        var formatedBitmapSource = new FormatConvertedBitmap();
+
+        formatedBitmapSource.BeginInit();
+        formatedBitmapSource.Source = bitmapSource;
+        formatedBitmapSource.DestinationFormat = PixelFormats.Bgra32;
+        formatedBitmapSource.EndInit();
+
+        finalSource = formatedBitmapSource;
+      }
+
+      var writeableBitmap = new WriteableBitmap(finalSource);
+
+      try {
+        writeableBitmap.Lock();
+
+        var targetStrideInDWords = width;
+        var sourceStride = writeableBitmap.BackBufferStride;
+        var sourceImageData = writeableBitmap.BackBuffer;
+
+        if (targetStrideInDWords << 2 == sourceStride) {
+
+          // special case...source and target stride are identical -> copy whole blocks of data
+          Parallel.ForEach(
+            source: Partitioner.Create(0, height),
+            localInit: () => 0,
+            body:
+              (range, _, threadStorage) => {
+                var minY = range.Item1;
+                var maxY = range.Item2;
+
+                unsafe {
+                  // copy all lines in one block
+                  fixed (sPixel* sourceFix = result._imageData)
+                    _CopyBlock(
+                      source: (int*)sourceImageData.ToPointer(),
+                      sourceOffset: minY * (sourceStride >> 2),
+                      target: (int*)sourceFix,
+                      targetOffset: minY * targetStrideInDWords,
+                      count: (maxY - minY) * targetStrideInDWords
+                      );
+                }
+                return threadStorage;
+              },
+            localFinally: _ => { }
+            );
+        } else {
+          // fall back to line by line copy
+          var intFillX = sourceStride - sourceStride * 4;
+          unsafe {
+            fixed (sPixel* target = result._imageData) {
+              var ptrOffset = (byte*)sourceImageData.ToPointer();
+              for (var y = 0; y < height; y++) {
+                _CopyBlock((int*)ptrOffset, 0, (int*)target, y * width, width);
+                ptrOffset += width << 2;
+                ptrOffset += intFillX;
+              }
+            }
+          }
+        }
+      } finally {
+        writeableBitmap.Unlock();
       }
       return (result);
     }
