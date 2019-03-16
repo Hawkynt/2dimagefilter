@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{13BDB1CA-845C-44A6-BFBD-AD2428A318D4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ImageResizerLibrary</RootNamespace>
+    <AssemblyName>ImageResizerLibrary</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NETFX_45</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Classes\ReflectionUtils.cs" />
+    <Compile Include="Framework\System.Drawing.BitmapExtensions.cs" />
+    <Compile Include="Framework\System.StringExtensions.cs" />
+    <Compile Include="Framework\System.Windows.Media.Imaging.BitmapSourceExtensions.cs" />
+    <Compile Include="Imager\cImage.cs" />
+    <Compile Include="Imager\Classes\EnumDisplayNameAttribute.cs" />
+    <Compile Include="Imager\Classes\FloatImage.cs" />
+    <Compile Include="Imager\Classes\Kernels.cs" />
+    <Compile Include="Imager\Classes\Windows.cs" />
+    <Compile Include="Imager\cRGBCache.cs" />
+    <Compile Include="Imager\Filters\lib2xSCL.cs" />
+    <Compile Include="Imager\Filters\libBasic.cs" />
+    <Compile Include="Imager\Filters\libDES.cs" />
+    <Compile Include="Imager\Filters\libEagle.cs" />
+    <Compile Include="Imager\Filters\libHawkynt.cs" />
+    <Compile Include="Imager\Filters\libHQ.cs" />
+    <Compile Include="Imager\Filters\libKreed.cs" />
+    <Compile Include="Imager\Filters\libMAME.cs" />
+    <Compile Include="Imager\Filters\libSNES9x.cs" />
+    <Compile Include="Imager\Filters\libVBA.cs" />
+    <Compile Include="Imager\Filters\libXBR.cs" />
+    <Compile Include="Imager\Filters\libXBRz.cs" />
+    <Compile Include="Imager\Filters\ReverseAntiAlias.cs" />
+    <Compile Include="Imager\Image.Bitmaps.cs" />
+    <Compile Include="Imager\Image.Resizer.Interpolation.cs" />
+    <Compile Include="Imager\Image.Resizer.Loop.cs">
+      <DependentUpon>Image.Resizer.Loop.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Imager\Image.Resizer.Nx.cs" />
+    <Compile Include="Imager\Image.Resizer.Parameterless.cs" />
+    <Compile Include="Imager\Image.Resizer.Resample.cs" />
+    <Compile Include="Imager\Image.Resizer.Xbr.cs" />
+    <Compile Include="Imager\Image.Resizer.Xbrz.cs" />
+    <Compile Include="Imager\Interface\NqMode.cs" />
+    <Compile Include="Imager\Interface\NqScalerType.cs" />
+    <Compile Include="Imager\Interface\OutOfBoundsMode.cs" />
+    <Compile Include="Imager\Interface\PixelScalerType.cs" />
+    <Compile Include="Imager\Interface\ScalerInformation.cs" />
+    <Compile Include="Imager\Interface\XbrScalerType.cs" />
+    <Compile Include="Imager\Interface\XbrzScalerType.cs" />
+    <Compile Include="Imager\PixelWorker.cs">
+      <DependentUpon>PixelWorker.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Imager\sPixel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Imager\Image.Resizer.Loop.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Image.Resizer.Loop.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Imager\PixelWorker.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PixelWorker.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

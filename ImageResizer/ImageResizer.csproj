@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ImageResizer</RootNamespace>
     <AssemblyName>ImageResizer</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -112,65 +112,32 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\ImageManipulators\Scalers\XbrzScaler.cs" />
-    <Compile Include="Classes\ScriptActions\LoadStdInCommand.cs" />
-    <Compile Include="Classes\ScriptActions\SaveStdOutCommand.cs" />
-    <Compile Include="Classes\ScriptActions\NullTransformCommand.cs" />
-    <Compile Include="Classes\ScriptSerializerException.cs" />
+    <Compile Include="Classes\CLI.cs" />
     <Compile Include="Classes\CLIExitCode.cs" />
+    <Compile Include="Classes\Config.cs" />
     <Compile Include="Classes\IImageManipulator.cs" />
+    <Compile Include="Classes\ImageManipulators\AScaler.cs" />
+    <Compile Include="Classes\ImageManipulators\Interpolator.cs" />
+    <Compile Include="Classes\ImageManipulators\PlaneExtractor.cs" />
     <Compile Include="Classes\ImageManipulators\RadiusResampler.cs" />
     <Compile Include="Classes\ImageManipulators\Resampler.cs" />
-    <Compile Include="Classes\ImageManipulators\Interpolator.cs" />
-    <Compile Include="Classes\ImageManipulators\AScaler.cs" />
-    <Compile Include="Classes\ImageManipulators\Scalers\XbrScaler.cs" />
     <Compile Include="Classes\ImageManipulators\Scalers\NqScaler.cs" />
     <Compile Include="Classes\ImageManipulators\Scalers\PixelScaler.cs" />
-    <Compile Include="Classes\ImageManipulators\PlaneExtractor.cs" />
+    <Compile Include="Classes\ImageManipulators\Scalers\XbrScaler.cs" />
+    <Compile Include="Classes\ImageManipulators\Scalers\XbrzScaler.cs" />
     <Compile Include="Classes\IScriptAction.cs" />
-    <Compile Include="Classes\ReflectionUtils.cs" />
     <Compile Include="Classes\ScriptActions\LoadFileCommand.cs" />
+    <Compile Include="Classes\ScriptActions\LoadStdInCommand.cs" />
+    <Compile Include="Classes\ScriptActions\NullTransformCommand.cs" />
     <Compile Include="Classes\ScriptActions\ResizeCommand.cs" />
     <Compile Include="Classes\ScriptActions\SaveFileCommand.cs" />
+    <Compile Include="Classes\ScriptActions\SaveStdOutCommand.cs" />
     <Compile Include="Classes\ScriptActions\TargetToSourceCommand.cs" />
     <Compile Include="Classes\ScriptEngine.cs" />
     <Compile Include="Classes\ScriptSerializer.cs" />
+    <Compile Include="Classes\ScriptSerializerException.cs" />
     <Compile Include="Classes\SupportedManipulators.cs" />
-    <Compile Include="Classes\CLI.cs" />
-    <Compile Include="Classes\Config.cs" />
-    <Compile Include="Framework\System.StringExtensions.cs" />
     <Compile Include="Framework\System.Windows.Forms.ControlExtensions.cs" />
-    <Compile Include="Imager\Classes\EnumDisplayNameAttribute.cs" />
-    <Compile Include="Imager\Classes\FloatImage.cs" />
-    <Compile Include="Imager\Classes\Kernels.cs" />
-    <Compile Include="Imager\Classes\Windows.cs" />
-    <Compile Include="Imager\Filters\lib2xSCL.cs" />
-    <Compile Include="Imager\Filters\libDES.cs" />
-    <Compile Include="Imager\Filters\libXBRz.cs" />
-    <Compile Include="Imager\Filters\ReverseAntiAlias.cs" />
-    <Compile Include="Imager\Image.Resizer.Loop.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Image.Resizer.Loop.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Imager\Image.Resizer.Resample.cs" />
-    <Compile Include="Imager\Image.Bitmaps.cs" />
-    <Compile Include="Imager\Image.Resizer.Interpolation.cs" />
-    <Compile Include="Imager\Image.Resizer.Xbrz.cs" />
-    <Compile Include="Imager\Image.Resizer.Xbr.cs" />
-    <Compile Include="Imager\Image.Resizer.Nx.cs" />
-    <Compile Include="Imager\Image.Resizer.Parameterless.cs" />
-    <Compile Include="Imager\Interface\NqMode.cs" />
-    <Compile Include="Imager\Interface\NqScalerType.cs" />
-    <Compile Include="Imager\Interface\PixelScalerType.cs" />
-    <Compile Include="Imager\Interface\ScalerInformation.cs" />
-    <Compile Include="Imager\Interface\XbrzScalerType.cs" />
-    <Compile Include="Imager\Interface\XbrScalerType.cs" />
-    <Compile Include="Imager\PixelWorker.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>PixelWorker.tt</DependentUpon>
-    </Compile>
     <Compile Include="MainForm.EventHandlers.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -181,8 +148,6 @@
     <Compile Include="UserControls\ImageWithDetails.Designer.cs">
       <DependentUpon>ImageWithDetails.cs</DependentUpon>
     </Compile>
-    <Compile Include="Framework\System.Drawing.BitmapExtensions.cs" />
-    <Compile Include="Framework\System.Windows.Media.Imaging.BitmapSourceExtensions.cs" />
     <Compile Include="Windows\AboutWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -191,19 +156,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Imager\cImage.cs" />
-    <Compile Include="Imager\cRGBCache.cs" />
-    <Compile Include="Imager\Filters\libVBA.cs" />
-    <Compile Include="Imager\Filters\libSNES9x.cs" />
-    <Compile Include="Imager\Filters\libHQ.cs" />
-    <Compile Include="Imager\Filters\libKreed.cs" />
-    <Compile Include="Imager\Filters\libEagle.cs" />
-    <Compile Include="Imager\Filters\libHawkynt.cs" />
-    <Compile Include="Imager\Filters\libMAME.cs" />
-    <Compile Include="Imager\Filters\libBasic.cs" />
-    <Compile Include="Imager\Filters\libXBR.cs" />
-    <Compile Include="Imager\Interface\OutOfBoundsMode.cs" />
-    <Compile Include="Imager\sPixel.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -238,14 +190,6 @@
     </EmbeddedResource>
     <None Include="app.config">
       <SubType>Designer</SubType>
-    </None>
-    <None Include="Imager\Image.Resizer.Loop.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Image.Resizer.Loop.cs</LastGenOutput>
-    </None>
-    <None Include="Imager\PixelWorker.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PixelWorker.cs</LastGenOutput>
     </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -317,6 +261,12 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ImageResizerLibrary\ImageResizerLibrary.csproj">
+      <Project>{13bdb1ca-845c-44a6-bfbd-ad2428a318d4}</Project>
+      <Name>ImageResizerLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
