@@ -1,0 +1,130 @@
+
+CPP=g++
+CPPFLAGS=-Wall -Wundef -O2 -fno-common
+ASM=nasm -dELF
+LLB=${CPP} -shared
+STR=strip -K RenderPluginGetInfo -K RenderPluginOutput $@
+
+all: 2xPM.rpi 2xPM_LQ.rpi 2xSaI.rpi Double.rpi DoubleRaw.rpi hq2x.rpi hq3x.rpi hq4x.rpi MDNTSC.rpi Scale2x.rpi Scale3x.rpi Scale4x.rpi Quad.rpi QuadRaw.rpi
+
+2xPM.rpi: 2xPM.o
+	$(LLB) -o 2xPM.rpi 2xPM.o
+	$(STR)
+
+2xPM_LQ.rpi: 2xPM_LQ.o
+	$(LLB) -o 2xPM_LQ.rpi 2xPM_LQ.o
+	$(STR)
+
+2xSaI.rpi: 2xSaI.o Main_2xSaI.o
+	$(LLB) -o 2xSaI.rpi 2xSaI.o Main_2xSaI.o
+	$(STR)
+
+Double.rpi: Main_Double.o
+	$(LLB) -o Double.rpi Main_Double.o
+	$(STR)
+
+DoubleRaw.rpi: Main_DoubleRaw.o
+	$(LLB) -o DoubleRaw.rpi Main_DoubleRaw.o
+	$(STR)
+
+hq2x.rpi: hq2x16_555.o hq2x16_565.o Main_hq2x.o
+	$(LLB) -o hq2x.rpi hq2x16_555.o hq2x16_565.o Main_hq2x.o
+	$(STR)
+
+hq3x.rpi: hq3x16_555.o hq3x16_565.o Main_hq3x.o
+	$(LLB) -o hq3x.rpi hq3x16_555.o hq3x16_565.o Main_hq3x.o
+	$(STR)
+
+hq4x.rpi: hq4x16_555.o hq4x16_565.o Main_hq4x.o
+	$(LLB) -o hq4x.rpi hq4x16_555.o hq4x16_565.o Main_hq4x.o
+	$(STR)
+
+MDNTSC.rpi: md_ntsc.o Main_MDNTSC.o
+	$(LLB) -o MDNTSC.rpi md_ntsc.o Main_MDNTSC.o
+	$(STR)
+
+Scale2x.rpi: Main_Scale2x.o
+	$(LLB) -o Scale2x.rpi Main_Scale2x.o
+	$(STR)
+
+Scale3x.rpi: Main_Scale3x.o
+	$(LLB) -o Scale3x.rpi Main_Scale3x.o
+	$(STR)
+
+Scale4x.rpi: Main_Scale4x.o
+	$(LLB) -o Scale4x.rpi Main_Scale4x.o
+	$(STR)
+
+Quad.rpi: Main_Quad.o
+	$(LLB) -o Quad.rpi Main_Quad.o
+	$(STR)
+
+QuadRaw.rpi: Main_QuadRaw.o
+	$(LLB) -o QuadRaw.rpi Main_QuadRaw.o
+	$(STR)
+
+2xSaI.o: 2xSaI/2xSaI.asm
+	$(ASM) -felf -O1 -o $@ $<
+
+hq2x16_555.o: hq2x/hq2x16_555.asm
+	$(ASM) -felf -O1 -o $@ $<
+
+hq2x16_565.o: hq2x/hq2x16_565.asm
+	$(ASM) -felf -O1 -o $@ $<
+
+hq3x16_555.o: hq3x/hq3x16_555.asm
+	$(ASM) -felf -O1 -o $@ $<
+
+hq3x16_565.o: hq3x/hq3x16_565.asm
+	$(ASM) -felf -O1 -o $@ $<
+
+hq4x16_555.o: hq4x/hq4x16_555.asm
+	$(ASM) -felf -O1 -o $@ $<
+
+hq4x16_565.o: hq4x/hq4x16_565.asm
+	$(ASM) -felf -O1 -o $@ $<
+
+2xPM.o: 2xPM/2xPM.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<
+
+2xPM_LQ.o: 2xPM_LQ/2xPM_LQ.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<
+
+Main_2xSaI.o: 2xSaI/Main_2xSaI.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<
+
+Main_Double.o: Double/Main_Double.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<
+
+Main_DoubleRaw.o: DoubleRaw/Main_DoubleRaw.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<
+
+Main_hq2x.o: hq2x/Main_hq2x.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<
+
+Main_hq3x.o: hq3x/Main_hq3x.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<
+
+Main_hq4x.o: hq4x/Main_hq4x.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<
+
+md_ntsc.o: MDNTSC/md/md_ntsc.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<
+
+Main_MDNTSC.o: MDNTSC/Main_MDNTSC.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<
+
+Main_Scale2x.o: Scale2x/Main_Scale2x.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<
+
+Main_Scale3x.o: Scale3x/Main_Scale3x.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<
+
+Main_Scale4x.o: Scale4x/Main_Scale4x.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<
+
+Main_Quad.o: Quad/Main_Quad.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<
+
+Main_QuadRaw.o: QuadRaw/Main_QuadRaw.cpp
+	$(CPP) -c -o $@ $(CPPFLAGS) $<

@@ -1,0 +1,45 @@
+/*
+  Dirk Stevens' Eagle enhanced for 3x by Hawkynt 
+  Hawkynt modified it by using YUV-threshold comparison
+  and interpolation.
+  when setting YUV thresholds to 0 it runs like the original eagle
+*/
+if (!MUH && !MUL) {
+  P(0,0)=I3(1,1,1,0,1,3);
+}
+
+if (!MUE && !MUR) {
+  P(2,0)=I3(1,1,1,1,2,5);
+}
+
+if (!MDG && !MDL) {
+  P(0,2)=I3(1,1,1,3,6,7);
+}
+
+if (!MDF && !MDR) {
+  P(2,2)=I3(1,1,1,5,7,8);
+}
+
+if (!MUH && !MUL && !MUE && !MUR) {
+  my $varA=I3(1,1,1,0,1,3);
+  my $varB=I3(1,1,1,1,2,5);
+  P(1,0)=I2(1,1,$varA,$varB);
+}
+
+if (!MUE && !MUR && !MDF && !MDR) {
+  my $varA=I3(1,1,1,1,2,5);
+  my $varB=I3(1,1,1,5,7,8);
+  P(2,1)=I2(1,1,$varA,$varB);
+}
+
+if (!MDG && !MDL && !MDF && !MDR) {
+  my $varA=I3(1,1,1,3,6,7);
+  my $varB=I3(1,1,1,5,7,8);
+  P(1,2)=I2(1,1,$varA,$varB);
+}
+
+if (!MUH && !MUL && !MDG && !MDL) {
+  my $varA=I3(1,1,1,0,1,3);
+  my $varB=I3(1,1,1,3,6,7);
+  P(0,1)=I2(1,1,$varA,$varB);
+}

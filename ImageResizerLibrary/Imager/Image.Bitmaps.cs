@@ -48,7 +48,7 @@ namespace Imager {
 
       // copy 64-bit as long as possible
       while (count > 1) {
-        *((long*)target) = *((long*)source);
+        *(long*)target = *(long*)source;
         source += 2;
         target += 2;
         count -= 2;
@@ -56,7 +56,7 @@ namespace Imager {
 
       // copy remaining 32-bit 
       if (count > 0)
-        *(target) = *(source);
+        *target = *source;
     }
 
     /// <summary>
@@ -69,22 +69,16 @@ namespace Imager {
     /// <returns>
     /// The <see cref="Bitmap"/> instance
     /// </returns>
-    public Bitmap ToBitmap(int sx, int sy, int width, int height) {
+    public unsafe Bitmap ToBitmap(int sx, int sy, int width, int height) {
       var result = new Bitmap(width, height);
-      BitmapData bitmapData = null;
-      try {
-        bitmapData = result.LockBits(
-          rect: new Rectangle(0, 0, width, height),
-          flags: ImageLockMode.WriteOnly,
-          format: System.Drawing.Imaging.PixelFormat.Format32bppArgb
-        );
-
+      using(var data=result.LockForWrite()) {
+        var bitmapData = data.BitmapData;
         var sourceImageData = this._imageData;
         var sourceStrideInDWords = this._width;
         var targetStrideInBytes = bitmapData.Stride;
-        var targetImageData = bitmapData.Scan0;
+        var targetImageData = (int*)bitmapData.Scan0.ToPointer();
 
-        if (sx == 0 && width == this._width && (sourceStrideInDWords << 2) == targetStrideInBytes) {
+        if (sx == 0 && width == this._width && sourceStrideInDWords << 2 == targetStrideInBytes) {
 
           // special case, copy whole lines of same strides
           Parallel.ForEach(
@@ -94,17 +88,16 @@ namespace Imager {
               (range, _, threadStorage) => {
                 var minY = range.Item1;
                 var maxY = range.Item2;
-                unsafe {
-                  // copy all lines in one block
-                  fixed (sPixel* sourceFix = sourceImageData)
-                    _CopyBlock(
-                      source: (int*)sourceFix,
-                      sourceOffset: minY * sourceStrideInDWords,
-                      target: (int*)targetImageData.ToPointer(),
-                      targetOffset: (minY - sy) * (targetStrideInBytes >> 2),
-                      count: (maxY - minY) * sourceStrideInDWords
-                    );
-                }
+                
+                // copy all lines in one block
+                fixed (sPixel* sourceFix = sourceImageData)
+                  _CopyBlock(
+                    source: (int*)sourceFix,
+                    sourceOffset: minY * sourceStrideInDWords,
+                    target: targetImageData,
+                    targetOffset: (minY - sy) * (targetStrideInBytes >> 2),
+                    count: (maxY - minY) * sourceStrideInDWords
+                  );
                 return threadStorage;
               },
             localFinally: _ => { }
@@ -117,29 +110,25 @@ namespace Imager {
               (range, _, threadStorage) => {
                 var minY = range.Item1;
                 var maxY = range.Item2;
-                unsafe {
-                  fixed (sPixel* sourceFix = sourceImageData) {
-                    var sourceOffset = minY * sourceStrideInDWords + sx;
-                    var targetOffset = (byte*)targetImageData.ToPointer() + minY * targetStrideInBytes;
-                    for (var y = minY; y < maxY; ++y) {
+                fixed (sPixel* sourceFix = sourceImageData) {
+                  var sourceOffset = minY * sourceStrideInDWords + sx;
+                  var targetOffset = (byte*)targetImageData + minY * targetStrideInBytes;
+                  for (var y = minY; y < maxY; ++y) {
 
-                      // copy the needed pixels of one line and move on to the next
-                      _CopyBlock((int*)sourceFix, sourceOffset, (int*)targetOffset, 0, width);
-                      sourceOffset += sourceStrideInDWords;
-                      targetOffset += targetStrideInBytes;
-                    }
+                    // copy the needed pixels of one line and move on to the next
+                    _CopyBlock((int*)sourceFix, sourceOffset, (int*)targetOffset, 0, width);
+                    sourceOffset += sourceStrideInDWords;
+                    targetOffset += targetStrideInBytes;
                   }
                 }
+
                 return threadStorage;
               },
             localFinally: _ => { }
           );
         }
-      } finally {
-        if (bitmapData != null)
-          result.UnlockBits(bitmapData);
-      }
-      return (result);
+      } 
+      return result;
     }
 
     /// <summary>
@@ -153,7 +142,7 @@ namespace Imager {
     /// Initializes a new instance of the <see cref="cImage"/> class from a <see cref="Bitmap"/> instance.
     /// </summary>
     /// <param name="bitmap">The bitmap.</param>
-    public static cImage FromBitmap(Bitmap bitmap) {
+    public static unsafe cImage FromBitmap(Bitmap bitmap) {
       if (bitmap == null)
         return (null);
 
@@ -162,17 +151,12 @@ namespace Imager {
       var height = result._height;
       var width = result._width;
 
-      BitmapData bitmapData = null;
-      try {
-        bitmapData = bitmap.LockBits(
-          rect: new Rectangle(0, 0, width, height),
-          flags: ImageLockMode.ReadOnly,
-          format: System.Drawing.Imaging.PixelFormat.Format32bppArgb
-          );
+      using(var data=bitmap.LockForRead()) {
+        var bitmapData = data.BitmapData;
 
         var targetStrideInDWords = width;
         var sourceStride = bitmapData.Stride;
-        var sourceImageData = bitmapData.Scan0;
+        var sourceImageData = (int*)bitmapData.Scan0.ToPointer();
 
         if (targetStrideInDWords << 2 == sourceStride) {
 
@@ -184,17 +168,16 @@ namespace Imager {
               (range, _, threadStorage) => {
                 var minY = range.Item1;
                 var maxY = range.Item2;
-                unsafe {
-                  // copy all lines in one block
-                  fixed (sPixel* sourceFix = result._imageData)
-                    _CopyBlock(
-                      source: (int*)sourceImageData.ToPointer(),
-                      sourceOffset: minY * (sourceStride >> 2),
-                      target: (int*)sourceFix,
-                      targetOffset: minY * targetStrideInDWords,
-                      count: (maxY - minY) * targetStrideInDWords
-                      );
-                }
+                
+                // copy all lines in one block
+                fixed (sPixel* sourceFix = result._imageData)
+                  _CopyBlock(
+                    source: sourceImageData,
+                    sourceOffset: minY * (sourceStride >> 2),
+                    target: (int*)sourceFix,
+                    targetOffset: minY * targetStrideInDWords,
+                    count: (maxY - minY) * targetStrideInDWords
+                  );
                 return threadStorage;
               },
             localFinally: _ => { }
@@ -203,22 +186,17 @@ namespace Imager {
 
           // fall back to line by line copy
           var intFillX = sourceStride - width * 4;
-          unsafe {
-            fixed (sPixel* target = result._imageData) {
-              var ptrOffset = (byte*)sourceImageData.ToPointer();
-              for (var y = 0; y < height; y++) {
-                _CopyBlock((int*)ptrOffset, 0, (int*)target, y * width, width);
-                ptrOffset += width << 2;
-                ptrOffset += intFillX;
-              }
+          fixed (sPixel* target = result._imageData) {
+            var ptrOffset = (byte*)sourceImageData;
+            for (var y = 0; y < height; y++) {
+              _CopyBlock((int*)ptrOffset, 0, (int*)target, y * width, width);
+              ptrOffset += width << 2;
+              ptrOffset += intFillX;
             }
           }
         }
-      } finally {
-        if (bitmapData != null)
-          bitmap.UnlockBits(bitmapData);
       }
-      return (result);
+      return result;
     }
 
     /// <summary>
@@ -312,7 +290,7 @@ namespace Imager {
     /// <param name="bitmapSource">The bitmap.</param>
     public static cImage FromBitmapSource(BitmapSource bitmapSource) {
       if (bitmapSource == null)
-        return (null);
+        return null;
 
       var result = new cImage(bitmapSource.PixelWidth, bitmapSource.PixelHeight);
 
@@ -384,7 +362,7 @@ namespace Imager {
       } finally {
         writeableBitmap.Unlock();
       }
-      return (result);
+      return result;
     }
   }
 }

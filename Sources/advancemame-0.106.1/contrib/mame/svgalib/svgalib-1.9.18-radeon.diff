@@ -1,0 +1,43 @@
+diff -u --recursive svgalib-1.9.18/src/drivers/r128.c svgalib-1.9.18-patched/src/drivers/r128.c
+--- svgalib-1.9.18/src/drivers/r128.c	2003-08-02 20:52:57.000000000 +0200
++++ svgalib-1.9.18-patched/src/drivers/r128.c	2003-10-13 17:13:52.000000000 +0200
+@@ -807,7 +807,6 @@
+     };
+ 
+     if (freq > pll->max_pll_freq)      freq = pll->max_pll_freq;
+-    if (freq * 12 < pll->min_pll_freq) freq = pll->min_pll_freq / 12;
+ 
+     for (post_div = &post_divs[0]; post_div->divider; ++post_div) {
+ 	save->pll_output_freq = post_div->divider * freq;
+@@ -815,6 +814,11 @@
+ 	    && save->pll_output_freq <= pll->max_pll_freq) break;
+     }
+ 
++	if (!post_div->divider) {
++		post_div = post_divs + 5;
++		save->pll_output_freq = post_div->divider * freq;
++	}
++
+     save->dot_clock_freq = freq;
+     save->feedback_div   = R128Div(pll->reference_div * save->pll_output_freq,
+ 				   pll->reference_freq);
+@@ -851,7 +855,6 @@
+     };
+ 
+     if (freq > pll->max_pll_freq)      freq = pll->max_pll_freq;
+-    if (freq * 12 < pll->min_pll_freq) freq = pll->min_pll_freq / 12;
+ 
+     for (post_div = &post_divs[0]; post_div->divider; ++post_div) {
+ 	save->pll_output_freq = post_div->divider * freq;
+@@ -859,6 +862,11 @@
+ 	    && save->pll_output_freq <= pll->max_pll_freq) break;
+     }
+ 
++	if (!post_div->divider) {
++		post_div = post_divs + 6;
++		save->pll_output_freq = post_div->divider * freq;
++	}
++
+     save->dot_clock_freq = freq;
+     save->feedback_div   = R128Div(pll->reference_div * save->pll_output_freq,
+ 				   pll->reference_freq);

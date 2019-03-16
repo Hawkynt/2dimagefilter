@@ -1,0 +1,87 @@
+lazymacro: A Simple Macro Feature For Snes9x (Windows Port)
+=================================================================
+
+First, the macro must be defined, which is done under Input - Edit Input Macro.
+
+Each button corresponds to its plaintext representation during "show controller
+input", which includes:
+
+<, >, v, ^ for directions. (Less than, greater than, lowercase V, carat)
+A, B, X, Y, L, R for standard buttons.
+S, s for start and select. Start is the capital S.
+
+Other syntax that is used for macro building:
+
+() (parenthesis)
+  are used to group more than one button on the same frame.
+[] (brackets)
+  are used to group part of the macro together and repeat it several times
+  within each total macro loop.
+. (period)
+  indicates a 'blank' frame where no buttons are pressed.
+| (pipe)
+  indicates a different starting point for the macro to loop.
+  Without this character, the beginning is the default looping point.
+! (exclamation point)
+  indicates to end the macro instead of looping it.
+r (lowercase R)
+  indicates 'blank' frames.
+w (lowercase W)
+  indicates to repeat previous input.
++ (plus)
+  indicates to hold a key by default (auto-hold).
+- (minus)
+  indicates to cancel auto-hold.
+
+Here are some example strings:
+
+S^.^v.v<><>BAS!
+  The konami code (pressing "up, up, down, down, left, right, left, right, B,
+  A, start"), and it does not repeat. Note that there is no character for
+  indicating "go to the next frame" - it is assumed. Parenthesis must be used
+  to group more than one button onto the same frame.
+
+[Y]6 [(Y>)]5
+  Presses Y for six frames, then presses Y and "right" for five frames, and
+  repeats indefinitely. The space is ignored (but can be used for readability).
+  This is part of the key sequence used for 6/5 in Super Mario World.
+  Also, "+Y r6 [>]5" means the same sequence.
+
+[(>A)]11(<A)(<)(<A)
+  Presses "right" and A for 11 frames, then switches to "left" and A for a frame,
+  then releases A for a frame, then represses A for a frame, and repeats.
+  This is a 14-frame right-side walljump macro for Super Metroid.
+  Also, "+(A>) r11(<>)(A<>)(<>)" means the same sequence.
+
++A <>(A<) -A > w6
+  Same as "(A<)(A>)(<)(>) [>]6".
+
+Second, the macro must have a hotkey defined, which is done under
+Input - Customize Hotkeys - Page 6 (new page). Each macro number corresponds to
+which player's macro you've filled out on the Edit Input Macro dialog box from earlier.
+
+Note: You can switch macro on/off from Macro Editor dialog, but it's not very useful.
+Note: "Clear All" hotkey switches all macros to off.
+
+When a macro is "activated" with its hotkey during recording, the controller
+input given for it begins to cycle automatically as frames are advanced until
+the hotkey is used again to disable the macro.
+
+There is a radio button on the Edit Input Macro dialog box, which is for
+selecting the "user input mode":
+
+  * Setting this to None will not allow any user input during a macro.
+  * Setting this to Overwrite will add any button presses that the user gives
+    on any given frame. (OR logic)
+  * Setting this to Toggle will add any button presses that the user gives on
+    any given frame, unless the button is already pressed by the macro on
+    that frame - in that case, the button is "toggled" off. (XOR logic)
+
+This feature is excellent when part of a process can be automated and part of
+it cannot. An example of this is 6/5 during Super Mario World, where jumping
+can be added in manually as needed.
+
+
+-- 
+Most of the text was written by JXQ,
+then modified by gocha a little.

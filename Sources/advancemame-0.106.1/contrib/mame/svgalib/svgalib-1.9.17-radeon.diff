@@ -1,0 +1,52 @@
+diff -u --recursive svgalib-1.9.17/src/drivers/r128.c svgalib-1.9.17-patched/src/drivers/r128.c
+--- svgalib-1.9.17/src/drivers/r128.c	2002-09-04 17:28:10.000000000 +0200
++++ svgalib-1.9.17-patched/src/drivers/r128.c	2003-07-03 20:25:49.000000000 +0200
+@@ -203,7 +203,7 @@
+     OUTREG(R128_MEM_VGA_WP_SEL,	      restore->mem_vga_wp_sel);
+     OUTREG(R128_MEM_VGA_RP_SEL,	      restore->mem_vga_rp_sel);
+ 
+-    if(chiptype == Rage128) {
++    if(chiptype == Radeon) {
+         OUTREG(RADEON_SURFACE_CNTL,   restore->surface_cntl);
+         OUTREG(RADEON_DAC_CNTL2,     restore->dac_cntl2);
+         OUTREG(RADEON_CRTC_MORE_CNTL,restore->crtc_more_cntl);
+@@ -807,7 +807,6 @@
+     };
+ 
+     if (freq > pll->max_pll_freq)      freq = pll->max_pll_freq;
+-    if (freq * 12 < pll->min_pll_freq) freq = pll->min_pll_freq / 12;
+ 
+     for (post_div = &post_divs[0]; post_div->divider; ++post_div) {
+ 	save->pll_output_freq = post_div->divider * freq;
+@@ -815,6 +814,11 @@
+ 	    && save->pll_output_freq <= pll->max_pll_freq) break;
+     }
+ 
++	if (!post_div->divider) {
++		post_div = post_divs + 5;
++		save->pll_output_freq = post_div->divider * freq;
++	}
++
+     save->dot_clock_freq = freq;
+     save->feedback_div   = R128Div(pll->reference_div * save->pll_output_freq,
+ 				   pll->reference_freq);
+@@ -851,7 +855,6 @@
+     };
+ 
+     if (freq > pll->max_pll_freq)      freq = pll->max_pll_freq;
+-    if (freq * 12 < pll->min_pll_freq) freq = pll->min_pll_freq / 12;
+ 
+     for (post_div = &post_divs[0]; post_div->divider; ++post_div) {
+ 	save->pll_output_freq = post_div->divider * freq;
+@@ -859,6 +862,11 @@
+ 	    && save->pll_output_freq <= pll->max_pll_freq) break;
+     }
+ 
++	if (!post_div->divider) {
++		post_div = post_divs + 6;
++		save->pll_output_freq = post_div->divider * freq;
++	}
++
+     save->dot_clock_freq = freq;
+     save->feedback_div   = R128Div(pll->reference_div * save->pll_output_freq,
+ 				   pll->reference_freq);

@@ -1,0 +1,13 @@
+diff -u --recursive svgalib-1.9.17/src/vgamisc.c svgalib-1.9.17-patched/src/vgamisc.c
+--- svgalib-1.9.17/src/vgamisc.c	2002-08-04 11:28:40.000000000 +0200
++++ svgalib-1.9.17-patched/src/vgamisc.c	2003-02-05 01:34:04.000000000 +0100
+@@ -38,7 +38,7 @@
+ 
+ void vga_waitretrace(void)
+ {
+-#if 1
++#if 0
+     ioctl(__svgalib_mem_fd, SVGALIB_HELPER_IOCWAITRETRACE, NULL);
+ #else
+     if (__svgalib_driverspecs->emul && __svgalib_driverspecs->emul->waitretrace) {
+

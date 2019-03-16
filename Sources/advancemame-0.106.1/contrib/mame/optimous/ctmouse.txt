@@ -1,0 +1,86 @@
+Cute Mouse driver v1.6 Copyright (c) 1997-1999 Nagy Daniel
+Release date: 02-18-1999
+
+Description:
+------------
+
+ctmouse.com  - driver for Microsoft, Mouse Systems and Logitech serial mice
+ctmousep.com - driver for PS/2 mice
+protocol.com - mouse protocol analyzer
+
+These programs are mouse drivers, which support many mouse protocols.
+Basically they were written to use as small amount of memory as possible.
+The amount of memory they need is about 7K. They try to install themselves
+into upper memory first if availbale, so do not load high them with
+external utilities (like DOS lh command).
+
+These drivers support standard Microsoft, Mouse Systems, Logitech MouseMan
+and PS/2 protocols. There are two separate programs to achieve the smallest
+memory requirement possible.
+
+- The first driver autodetects the mouse, but if you're inpatient or the
+  detection fails, it is possible to force a specific mode with command line
+  options.
+- The second driver is for PS/2 only.
+
+Help can be obtainded with the '/?' command line option.
+
+- The prococol analyzer gets its input from COM1 (port 3f8h) if a mouse
+  is attached. The only command line option is a number from 3 to 5
+  (default is 3), which is the number of packets the mouse sends in a
+  single motion or button press/release (see the technote). If the
+  driver doesn't work with your mouse, please install a proper driver
+  and run this analyzer, maybe your protocol is not supported by CuteMouse.
+
+These programs are freeware, which means that anyone is free to use and
+distribute these programs as long as the programs and this documentation
+are not modified.
+You're not allowed to sell the package and programs based on this source
+unless prior agreement with the author!
+
+This driver is part of the FreeDOS project now, with the complete source code.
+Check out http://www.freedos.org
+
+Please do not write any e-mails to me asking for including things.
+However, working patches with comments and mouse protocol specifications
+are welcome.
+
+History:
+--------
+
+1.6  - Positioning bugs fixed in videomode 13h
+     - Added protocol analyzer (debugging purposes only)
+
+1.5  - Fixed memory allocation bugs
+       Bugfixes and optimizations
+
+1.4  - Added self-load high capability
+     - Horizontal and vertical speed can be different (good for some games...)
+     - Added support for the 1Ah and 1Bh INT 33h calls
+     - Fixed some small bugs and a BIG bug
+
+1.3  - Fixed some small bugs and added 'ctmousep.com' for PS/2 mice
+
+1.2a - Fixed a bug in the Driver Disable function (1fh)
+
+1.2  - Added command line option to force IRQ number of COM port
+
+1.1  - Added comand line options to force a specific mode
+     - Rewritten Mouse Systems initalization routine. Now more Genius mice
+       with 3 buttons will work
+
+1.0  - First public release
+
+Credits go to:
+-------------
+
+- Fernando Papa Budzyn for the self-loadhigh capability
+- Arkady V. Belousov (ark@mos.ru) for the bugfixes and optimizations
+- Robert Riebisch for mode 13h positioning bug fixes
+- All who helped me with ideas and codes
+
+Contact:
+--------
+
+mailto:nagyd@almos.vein.hu
+mailto:heartwork@deathsdoor.com

@@ -1,0 +1,12 @@
+diff -u --recursive svgalib-1.9.19/kernel/svgalib_helper/main.c svgalib-1.9.19-patched/kernel/svgalib_helper/main.c
+--- svgalib-1.9.19/kernel/svgalib_helper/main.c	2004-05-07 11:10:22.000000000 +0200
++++ svgalib-1.9.19-patched/kernel/svgalib_helper/main.c	2004-12-26 17:57:18.000000000 +0100
+@@ -584,7 +584,7 @@
+     if(pci_present()) {
+         while((dev= all_devices ? 
+ 					pci_find_device(PCI_ANY_ID, PCI_ANY_ID, dev) :
+-					pci_find_class(PCI_CLASS_DISPLAY_VGA<<8,dev)) && 
++					pci_get_class(PCI_CLASS_DISPLAY_VGA<<8,dev)) &&
+               (num_devices<=MAX_NR_DEVICES)) {
+             if((sh_pci_devs[num_devices]=kmalloc(sizeof(struct sh_pci_device),GFP_KERNEL))==NULL) {
+                 goto nomem_error;

@@ -1,0 +1,120 @@
+ui_helpimage kbd.png
+
+ui_helptag keyboard[0,esc] 6 5 12 12
+ui_helptag keyboard[0,f1] 26 5 12 12
+ui_helptag keyboard[0,f2] 38 5 12 12
+ui_helptag keyboard[0,f3] 50 5 12 12
+ui_helptag keyboard[0,f4] 62 5 12 12
+ui_helptag keyboard[0,f5] 81 5 12 12
+ui_helptag keyboard[0,f6] 93 5 12 12
+ui_helptag keyboard[0,f7] 105 5 12 12
+ui_helptag keyboard[0,f8] 117 5 12 12
+ui_helptag keyboard[0,f9] 137 5 12 12
+ui_helptag keyboard[0,f10] 149 5 12 12
+ui_helptag keyboard[0,f11] 161 5 12 12
+ui_helptag keyboard[0,f12] 173 5 12 12
+
+ui_helptag keyboard[0,backquote] 6 24 12 12
+ui_helptag keyboard[0,1] 18 24 12 12
+ui_helptag keyboard[0,2] 30 24 12 12
+ui_helptag keyboard[0,3] 42 24 12 12
+ui_helptag keyboard[0,4] 54 24 12 12
+ui_helptag keyboard[0,5] 66 24 12 12
+ui_helptag keyboard[0,6] 78 24 12 12
+ui_helptag keyboard[0,7] 90 24 12 12
+ui_helptag keyboard[0,8] 102 24 12 12
+ui_helptag keyboard[0,9] 114 24 12 12
+ui_helptag keyboard[0,0] 126 24 12 12
+ui_helptag keyboard[0,minus] 138 24 12 12
+ui_helptag keyboard[0,equals] 150 24 12 12
+ui_helptag keyboard[0,backspace] 162 24 24 12
+
+ui_helptag keyboard[0,tab] 6 36 18 12
+ui_helptag keyboard[0,q] 24 36 12 12
+ui_helptag keyboard[0,w] 36 36 12 12
+ui_helptag keyboard[0,e] 48 36 12 12
+ui_helptag keyboard[0,r] 60 36 12 12
+ui_helptag keyboard[0,t] 72 36 12 12
+ui_helptag keyboard[0,y] 84 36 12 12
+ui_helptag keyboard[0,u] 96 36 12 12
+ui_helptag keyboard[0,i] 108 36 12 12
+ui_helptag keyboard[0,o] 120 36 12 12
+ui_helptag keyboard[0,p] 132 36 12 12
+ui_helptag keyboard[0,openbrace] 144 36 12 12
+ui_helptag keyboard[0,closebrace] 156 36 12 12
+ui_helptag keyboard[0,enter] 168 36 18 12
+
+ui_helptag keyboard[0,capslock] 6 48 21 12
+ui_helptag keyboard[0,a] 27 48 12 12
+ui_helptag keyboard[0,s] 39 48 12 12
+ui_helptag keyboard[0,d] 51 48 12 12
+ui_helptag keyboard[0,f] 63 48 12 12
+ui_helptag keyboard[0,g] 75 48 12 12
+ui_helptag keyboard[0,h] 87 48 12 12
+ui_helptag keyboard[0,j] 99 48 12 12
+ui_helptag keyboard[0,k] 111 48 12 12
+ui_helptag keyboard[0,l] 123 48 12 12
+ui_helptag keyboard[0,semicolon] 135 48 12 12
+ui_helptag keyboard[0,quote] 147 48 12 12
+ui_helptag keyboard[0,backslash] 159 48 12 12
+ui_helptag keyboard[0,enter] 171 48 15 12
+
+ui_helptag keyboard[0,lshift] 6 60 14 12
+ui_helptag keyboard[0,less] 20 60 12 12
+ui_helptag keyboard[0,z] 32 60 12 12
+ui_helptag keyboard[0,x] 44 60 12 12
+ui_helptag keyboard[0,c] 56 60 12 12
+ui_helptag keyboard[0,v] 68 60 12 12
+ui_helptag keyboard[0,b] 80 60 12 12
+ui_helptag keyboard[0,n] 92 60 12 12
+ui_helptag keyboard[0,m] 104 60 12 12
+ui_helptag keyboard[0,comma] 116 60 12 12
+ui_helptag keyboard[0,period] 128 60 12 12
+ui_helptag keyboard[0,slash] 140 60 12 12
+ui_helptag keyboard[0,rshift] 152 60 34 12
+
+ui_helptag keyboard[0,lcontrol] 6 72 14 12
+ui_helptag keyboard[0,lwin] 20 72 14 12
+ui_helptag keyboard[0,lalt] 34 72 14 12
+ui_helptag keyboard[0,space] 48 72 82 12
+ui_helptag keyboard[0,ralt] 130 72 14 12
+ui_helptag keyboard[0,rwin] 144 72 14 12
+ui_helptag keyboard[0,menu] 158 72 14 12
+ui_helptag keyboard[0,rcontrol] 172 72 14 12
+
+ui_helptag keyboard[0,prtscr] 195 5 12 12
+ui_helptag keyboard[0,scrlock] 207 5 12 12
+ui_helptag keyboard[0,pause] 219 5 12 12
+
+ui_helptag keyboard[0,insert] 195 24 12 12
+ui_helptag keyboard[0,home] 207 24 12 12
+ui_helptag keyboard[0,pgup] 219 24 12 12
+ui_helptag keyboard[0,del] 195 36 12 12
+ui_helptag keyboard[0,end] 207 36 12 12
+ui_helptag keyboard[0,pgdn] 219 36 12 12
+
+ui_helptag keyboard[0,up] 207 60 12 12
+ui_helptag keyboard[0,left] 195 72 12 12
+ui_helptag keyboard[0,down] 207 72 12 12
+ui_helptag keyboard[0,right] 219 72 12 12
+
+ui_helptag keyboard[0,numlock] 240 24 12 12
+ui_helptag keyboard[0,slash_pad] 252 24 12 12
+ui_helptag keyboard[0,asterisk_pad] 264 24 12 12
+ui_helptag keyboard[0,minus_pad] 276 24 12 12
+ui_helptag keyboard[0,7_pad] 240 36 12 12
+ui_helptag keyboard[0,8_pad] 252 36 12 12
+ui_helptag keyboard[0,9_pad] 264 36 12 12
+ui_helptag keyboard[0,plus_pad] 276 36 12 12
+ui_helptag keyboard[0,4_pad] 240 48 12 12
+ui_helptag keyboard[0,5_pad] 252 48 12 12
+ui_helptag keyboard[0,6_pad] 264 48 12 12
+ui_helptag keyboard[0,plus_pad] 276 48 12 12
+ui_helptag keyboard[0,1_pad] 240 60 12 12
+ui_helptag keyboard[0,2_pad] 252 60 12 12
+ui_helptag keyboard[0,3_pad] 264 60 12 12
+ui_helptag keyboard[0,enter_pad] 276 60 12 12
+ui_helptag keyboard[0,0_pad] 240 72 24 12
+ui_helptag keyboard[0,period_pad] 264 72 12 12
+ui_helptag keyboard[0,enter_pad] 276 72 12 12
+

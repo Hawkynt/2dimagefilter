@@ -1,0 +1,26 @@
+--- drivers/video/riva/riva_hw.c.ori	2003-07-25 17:01:15.000000000 +0200
++++ drivers/video/riva/riva_hw.c	2003-07-25 17:05:24.000000000 +0200
+@@ -1125,21 +1125,21 @@
+ 
+     highP = 4 - (chip->Architecture == NV_ARCH_03);
+     for (P = 0; P <= highP; P ++)
+     {
+         Freq = VClk << P;
+-        if ((Freq >= 128000) && (Freq <= chip->MaxVClockFreqKHz))
++        if ((Freq >= 128000 || P == highP) && (Freq <= chip->MaxVClockFreqKHz))
+         {
+             for (M = lowM; M <= highM; M++)
+             {
+                 N    = (VClk * M / chip->CrystalFreqKHz) << P;
+                 Freq = (chip->CrystalFreqKHz * N / M) >> P;
+                 if (Freq > VClk)
+                     DeltaNew = Freq - VClk;
+                 else
+                     DeltaNew = VClk - Freq;
+-                if (DeltaNew < DeltaOld)
++                if (DeltaNew < DeltaOld && N<256)
+                 {
+                     *mOut     = M;
+                     *nOut     = N;
+                     *pOut     = P;
+                     *clockOut = Freq;

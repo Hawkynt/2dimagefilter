@@ -1,0 +1,320 @@
+ifopt --verbose     verbose 1
+
+# --
+
+do ifopt --help
+   echo "
+CBuild options:
+    --help              Display this help message
+    --vebose            Enable more verbose command printing
+
+Target options:
+    clean               Clean a previously compiled build
+    debug               Compile a debug build
+    profile             Compile a profiling build
+
+Package options:
+    --skip-allegrogl    Do not use AllegroGL even if found
+    --skip-hawknl       Do not use HawkNL even if found
+    --skip-openal       Do not use OpenAL even if found
+    --skip-zlib         Do not use zlib even if found
+
+Other options:
+    --tag=TAG           Set version tag to TAG (e.g WIP)
+    --debug-level=X     Set debug information level to X
+"
+
+   exit 0
+done
+
+# --
+
+# Platform compatibility.
+
+PLAT = 'generic'
+
+ifplat macosx PLAT = 'macosx'
+ifplat msdos  PLAT = 'msdos'
+ifplat unix   PLAT = 'unix'
+ifplat win32  PLAT = 'win32'
+
+ifopt --verbose echo "Building for ${PLAT}..."
+
+PATH_SEP = '/'
+
+ifplat win32 PATH_SEP = '\\'
+ifplat msdos PATH_SEP = '\\'
+
+# --
+
+# Build directory (where the scripts are, and temporary files go).
+BUILD_DIR = 'build'
+
+# Where our Source Code files are located.
+SRC_DIR = 'src'
+
+# Where our support files (such as fakenes.dat) reside.
+SUPPORT_DIR = 'support'
+
+# Object file directory.
+OBJ_DIR = "${BUILD_DIR}/${PLAT}"
+
+ifopt debug   OBJ_DIR += '-debug'
+ifopt profile OBJ_DIR += '-profile'
+
+# Dependancy directory (keep this the same as OBJ_DIR).
+DEP_DIR = "${OBJ_DIR}"
+
+# Source Code subdirectories.
+SRC_ETCDIR = etc
+SRC_SHAREDDIR = shared
+SRC_SOUNDDIR = sound
+
+# Create missing directories.
+do ifnopt clean
+   ifnexist "${OBJ_DIR}" mkdir "${OBJ_DIR}"
+   ifnexist "${OBJ_DIR}/${SRC_ETCDIR}"    mkdir "${OBJ_DIR}/${SRC_ETCDIR}"
+   ifnexist "${OBJ_DIR}/${SRC_SHAREDDIR}" mkdir "${OBJ_DIR}/${SRC_SHAREDDIR}"
+   ifnexist "${OBJ_DIR}/${SRC_SOUNDDIR}"  mkdir "${OBJ_DIR}/${SRC_SOUNDDIR}"
+done
+
+# File list stubs (we will append to these later).
+CLEANFILES = ''
+SRCFILES   = ''
+
+# --
+
+# Includes.
+CPPFLAGS += " -I${DEP_DIR} -I${SRC_DIR} -I${SRC_DIR}/include -I${SUPPORT_DIR}"
+
+# Set default CFLAGS.
+CFLAGS ?= '-pipe -O3 -ffast-math -fomit-frame-pointer -s'
+
+# Overrides.
+ifopt debug   CFLAGS = "-O0 -g$('getoptval' --debug-level)"
+ifopt profile CFLAGS = '-O2 -pg'
+
+# Extensions.
+CFLAGS += ' -W -Wall -Wno-unused'
+
+# Unix support.
+ifplat unix CFLAGS += ' -DPOSIX'
+
+# Version tagging.
+ifopt --tag CFLAGS += " -DVERSION_TAG=\\\"$('getoptval' --tag)\\\""
+
+# --
+
+STDOUT_LOG="${BUILD_DIR}/stdout.log"
+STDERR_LOG="${BUILD_DIR}/stderr.log"
+
+ifnopt --skip-allegrogl invoke "${BUILD_DIR}/alleggl.cbd"
+ifnopt --skip-hawknl    invoke "${BUILD_DIR}/hawknl.cbd"
+ifnopt --skip-openal    invoke "${BUILD_DIR}/openal.cbd"
+ifnopt --skip-zlib      invoke "${BUILD_DIR}/zlib.cbd"
+
+invoke "${BUILD_DIR}/alleg.cbd"
+
+CLEANFILES += " ${STDOUT_LOG} ${STDERR_LOG}"
+
+# --
+
+# Our little configure script. =)
+
+CFG_HEADER = "${DEP_DIR}/config.h"
+
+do ifnopt clean
+   do ifnexist "${CFG_HEADER}"
+      CFG_EXE = "${BUILD_DIR}/configure${EXE_EXT}"
+
+      ifopt --verbose echo "Runner: ${CFG_EXE}"
+
+      @!call "${CC}" -o "${CFG_EXE}" "${BUILD_DIR}/configure.c"
+   
+      do ifnret 0
+         echo "uh-oh, it looks like ${CFG_EXE} failed to build"
+         echo 'bailing out...'
+   
+         exit 1
+      done
+
+      echo "Creating ${CFG_HEADER}..."
+
+      setstdout "${CFG_HEADER}"
+   
+      # Kludge due to Windows/DOS requiring \ instead of /.
+      @!call "${BUILD_DIR}${PATH_SEP}configure${EXE_EXT}"
+   
+      do ifnret 0
+         setstdout ''
+   
+         echo "uh-oh it looks like ${CFG_EXE} failed to run"
+         echo 'bailing out...'
+   
+         exit 1
+      done
+   
+      setstdout ''
+   
+      @rm "${CFG_EXE}"
+   done
+
+   CPPFLAGS += " -imacros ${CFG_HEADER}"
+done
+
+CLEANFILES += " ${CFG_HEADER}"
+
+
+# --
+
+# Datafile conversion.
+
+DATA_SRC    = "${DEP_DIR}/datafile.c"
+DATA_HEADER = "${DEP_DIR}/datafile.h"
+
+do ifnopt clean
+   do ifnexist "${DATA_SRC}"
+      DAT2C_EXE = "${BUILD_DIR}/dat2c${EXE_EXT}"
+
+      ifopt --verbose echo "Runner: ${DAT2C_EXE}"
+
+      @!call "${CC}" -o "${DAT2C_EXE}" "${BUILD_DIR}/dat2c.c" "${DAT2C_FLAGS}"
+   
+      do ifnret 0
+         echo "uh-oh, it looks like ${DAT2C_EXE} failed to build"
+         echo 'bailing out...'
+   
+         exit 1
+      done
+
+      # Kludge due to Windows/DOS requiring \ instead of /.
+      @!call "${BUILD_DIR}${PATH_SEP}dat2c${EXE_EXT}" -o "${DATA_SRC}" -h "${DATA_HEADER}" -p datafile "${SUPPORT_DIR}/fakenes.dat"
+   
+      do ifnret 0
+         echo "uh-oh, it looks like ${DAT2C_EXE} failed to run"
+         echo 'bailing out...'
+   
+         exit 1
+      done
+   
+      @rm "${DAT2C_EXE}"
+   done
+done
+
+CLEANFILES += " ${DATA_SRC} ${DATA_HEADER}"
+
+# --
+
+# Windows resources.
+
+do ifplat win32
+   RESOURCE_OBJ = "${OBJ_DIR}/resource.o"
+
+   do ifnopt clean
+      do ifnexist "${RESOURCE_OBJ}"
+         echo "Creating ${RESOURCE_OBJ}..."
+
+         @!call echo ALLEGRO_ICON ICON "${SUPPORT_DIR}/fakenes.ico" | windres -O coff -o "${RESOURCE_OBJ}"
+   
+         do ifnret 0
+            echo "uh-oh, it looks like ${RESOURCE_OBJ} failed to compile"
+            echo 'bailing out...'
+   
+            exit 1
+         done
+      done
+
+      LDFLAGS += " ${RESOURCE_OBJ}"
+   done
+
+   CLEANFILES += " ${RESOURCE_OBJ}"
+done
+
+# --
+
+EXE_NAME = 'fakenes'
+
+ifopt debug   EXE_NAME += 'd'
+ifopt profile EXE_NAME += 'p'
+
+do ifplat win32
+   EXE_NAME += 'w'
+
+   ifnopt clean LDFLAGS += ' -mwindows'
+done
+
+do ifnopt clean
+  ifopt profile LDFLAGS += ' -pg'
+done
+
+# --
+
+src_paths "${DEP_DIR}" "${SRC_DIR}" "${SUPPORT_DIR}"
+
+# Dependancies.
+SRCFILES += "datafile.c "
+
+# Source files.
+SRCFILES += 'apu.cpp '
+SRCFILES += 'audio.c '
+SRCFILES += 'audiolib.c '
+SRCFILES += 'cheats.c '
+SRCFILES += 'core.c '
+SRCFILES += 'cpu.c '
+SRCFILES += 'dsp.c '
+SRCFILES += "${SRC_ETCDIR}/hqx.c "
+SRCFILES += "${SRC_ETCDIR}/snes_ntsc.c "
+SRCFILES += 'gui.c '
+SRCFILES += 'input.c '
+SRCFILES += 'log.c '
+SRCFILES += 'main.c '
+SRCFILES += 'mmc.c '
+SRCFILES += 'net.c '
+SRCFILES += 'netplay.c '
+SRCFILES += 'platform.c '
+SRCFILES += 'ppu.c '
+SRCFILES += 'rewind.c '
+SRCFILES += 'rom.c '
+SRCFILES += 'save.c '
+SRCFILES += "${SRC_SHAREDDIR}/bufferfile.cpp "
+SRCFILES += "${SRC_SHAREDDIR}/crc32.cpp "
+SRCFILES += "${SRC_SOUNDDIR}/mmc5.cpp "
+SRCFILES += "${SRC_SOUNDDIR}/sound.cpp "
+SRCFILES += "${SRC_SOUNDDIR}/vrc6.cpp "
+SRCFILES += 'video.c '
+                              
+# --
+
+ifopt clean goto clean
+
+# --
+
+# C++ support.
+CXXFLAGS = "${CFLAGS}"
+
+# We have to include this or we get undefined references to new & delete.
+LDFLAGS += ' -lstdc++'
+
+compile ${SRCFILES}
+
+# --
+
+linkexec "${EXE_NAME}"
+
+# Done building.
+exit 0
+
+# --
+
+:clean
+
+rm     ${CLEANFILES}
+rmobj  ${SRCFILES}
+rm     "${OBJ_DIR}/${SRC_ETCDIR}"
+rm     "${OBJ_DIR}/${SRC_SHAREDDIR}"
+rm     "${OBJ_DIR}/${SRC_SOUNDDIR}"
+rm     "${OBJ_DIR}"
+rmexec "${EXE_NAME}"
+
+# Done cleaning.
+exit 0

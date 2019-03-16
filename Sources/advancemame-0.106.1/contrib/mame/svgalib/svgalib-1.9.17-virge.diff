@@ -1,0 +1,22 @@
+diff -u --recursive svgalib-1.9.17/src/drivers/savage.c svgalib-1.9.17-patched/src/drivers/savage.c
+--- svgalib-1.9.17/src/drivers/savage.c	2002-10-15 19:06:30.000000000 +0200
++++ svgalib-1.9.17-patched/src/drivers/savage.c	2003-02-13 03:01:22.000000000 +0100
+@@ -526,7 +526,7 @@
+         {31,  0, 4, 170000},
+         {31,  0, 3, 135000},
+         {31,  0, 4, 220000},
+-        {31,  0, 3, 135000},
++        {31,  0, 4, 135000},
+         {31,  0, 4, 170000},
+         {31,  0, 4, 170000},
+         {127, 0, 4, 180000},
+@@ -540,7 +540,7 @@
+     vgaS3VPtr new = (vgaS3VPtr)(moderegs+VGA_TOTAL_REGS);
+    
+     if(modeinfo->bitsPerPixel==16) {
+-        if((chipset==VIRGE)|| (chipset==TRIO64)) {
++        if((chipset==VIRGE)|| (chipset==TRIO64) || (chipset==VIRGEDX)) {
+             modetiming->HDisplay *=2;
+             modetiming->HSyncStart *=2;
+             modetiming->HSyncEnd *=2;
+

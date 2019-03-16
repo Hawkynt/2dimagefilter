@@ -1,0 +1,61 @@
+--- include/linux/fb.h.ori	2003-12-18 03:58:39.000000000 +0100
++++ include/linux/fb.h	2004-01-11 16:49:02.000000000 +0100
+@@ -1,10 +1,7 @@
+ #ifndef _LINUX_FB_H
+ #define _LINUX_FB_H
+ 
+-#include <linux/tty.h>
+-#include <linux/workqueue.h>
+ #include <asm/types.h>
+-#include <asm/io.h>
+ 
+ /* Definitions of frame buffers						*/
+ 
+@@ -331,23 +328,13 @@
+ #define FB_PIXMAP_IO      4     /* memory is iomapped       */
+ #define FB_PIXMAP_SYNC    256   /* set if GPU can DMA       */
+ 
+-struct fb_pixmap {
+-        __u8  *addr;                      /* pointer to memory             */  
+-	__u32 size;                       /* size of buffer in bytes       */
+-	__u32 offset;                     /* current offset to buffer      */
+-	__u32 buf_align;                  /* byte alignment of each bitmap */
+-	__u32 scan_align;                 /* alignment per scanline        */
+-	__u32 flags;                      /* see FB_PIXMAP_*               */
+-					  /* access methods                */
+-	void (*outbuf)(u8 *dst, u8 *addr, unsigned int size); 
+-	u8   (*inbuf) (u8 *addr);
+-	spinlock_t lock;                  /* spinlock                      */
+-	atomic_t count;
+-};
+ #ifdef __KERNEL__
+ 
++#include <linux/tty.h>
++#include <asm/io.h>
+ #include <linux/fs.h>
+ #include <linux/init.h>
++#include <linux/workqueue.h>
+ 
+ struct fb_info;
+ struct vm_area_struct;
+@@ -395,6 +382,20 @@
+     int (*fb_mmap)(struct fb_info *info, struct file *file, struct vm_area_struct *vma);
+ };
+ 
++struct fb_pixmap {
++        __u8  *addr;                      /* pointer to memory             */  
++	__u32 size;                       /* size of buffer in bytes       */
++	__u32 offset;                     /* current offset to buffer      */
++	__u32 buf_align;                  /* byte alignment of each bitmap */
++	__u32 scan_align;                 /* alignment per scanline        */
++	__u32 flags;                      /* see FB_PIXMAP_*               */
++					  /* access methods                */
++	void (*outbuf)(u8 *dst, u8 *addr, unsigned int size); 
++	u8 (*inbuf) (u8 *addr);
++	spinlock_t lock;                  /* spinlock                      */
++	atomic_t count;
++};
++
+ struct fb_info {
+    int node;
+    int flags;

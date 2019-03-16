@@ -1,0 +1,2033 @@
+diff -rdu snes9x-improvement11-beta15/unix/unix.cpp snes9x-improvement11-beta15-lua0.05/unix/unix.cpp
+--- snes9x-improvement11-beta15/unix/unix.cpp	Fri Jan 18 17:03:24 2008
++++ snes9x-improvement11-beta15-lua0.05/unix/unix.cpp	Wed Feb  6 10:15:20 2008
+@@ -86,9 +86,6 @@
+   Super NES and Super Nintendo Entertainment System are trademarks of
+   Nintendo Co., Limited and its subsidiary companies.
+ *******************************************************************************/
+-
+-
+-
+ #include <signal.h>
+ #include <errno.h>
+ 
+@@ -144,6 +141,8 @@
+ //typedef void (*SIG_PF)();
+ //#endif
+ 
++#include <sys/select.h>
++
+ #include "snes9x.h"
+ #include "memmap.h"
+ #include "debug.h"
+@@ -156,7 +155,18 @@
+ #include "soundux.h"
+ #include "spc700.h"
+ #include "spc7110.h"
+-#include "conffile.h"
++#include "logger.h"
++
++#include "x11.h"
++#include "snapshot.h"
++
++#include "s9xlua.h"
++
++#ifdef SPCTOOL
++#include "spctool/spc700.h"
++extern "C" void TraceSPC (unsigned char *PC, unsigned short YA, unsigned char X,
++			  SPCFlags PS, unsigned char *SP);
++#endif
+ 
+ #ifdef _NETPLAY_SUPPORT
+ #include "netplay.h"
+@@ -165,11 +175,13 @@
+ uint32 joypads [5] = {0};
+ int NumControllers = 5;
+ 
++fd_set waitfds;
++int maxwaitfds = -1;
++
+ #ifdef JOYSTICK_SUPPORT
+ #if defined(__linux)
+ #include <linux/joystick.h>
+ int js_fd [4] = {-1, -1, -1, -1};
+-char *js_device [4] = {"/dev/js0", "/dev/js1", "/dev/js2", "/dev/js3"};
+ int js_map_button [4][16] = {
+     {
+ 	SNES_B_MASK, SNES_A_MASK, SNES_A_MASK,
+@@ -197,35 +209,36 @@
+     }
+ };
+ 
++#if 0
++SNES_A_MASK, SNES_B_MASK, SNES_X_MASK, SNES_Y_MASK,
++		            SNES_TL_MASK, SNES_TR_MASK, SNES_START_MASK, SNES_SELECT_MASK,
++			    0, 0, 0, 0, 0, 0, 0, 0},
++			   {SNES_A_MASK, SNES_B_MASK, SNES_X_MASK, SNES_Y_MASK,
++			    SNES_TL_MASK, SNES_TR_MASK, SNES_START_MASK, SNES_SELECT_MASK,
++			    0, 0, 0, 0, 0, 0, 0, 0},
++			   {SNES_A_MASK, SNES_B_MASK, SNES_X_MASK, SNES_Y_MASK,
++			    SNES_TL_MASK, SNES_TR_MASK, SNES_START_MASK, SNES_SELECT_MASK,
++			    0, 0, 0, 0, 0, 0, 0, 0},
++			   {SNES_A_MASK, SNES_B_MASK, SNES_X_MASK, SNES_Y_MASK,
++			    SNES_TL_MASK, SNES_TR_MASK, SNES_START_MASK, SNES_SELECT_MASK,
++			    0, 0, 0, 0, 0, 0, 0, 0}};
++#endif
++char *js_device [4] = {"/dev/js0", "/dev/js1", "/dev/js2", "/dev/js3"};
+ #endif
+ 
++int FromPause = 1;
++
+ void InitJoysticks ();
+ void ReadJoysticks ();
+ #endif
+ 
+-#if !defined(NOSOUND) && defined (__linux)
+-#define CONFIGURABLE_SOUND_DEVICE
+-    char *sound_device = "/dev/dsp";
+-#endif
+-#if !defined(NOSOUND) && defined (__sun)
+-#define CONFIGURABLE_SOUND_DEVICE
+-    char *sound_device = "/dev/audio";
+-#endif
+-
+ void InitTimer ();
+ void *S9xProcessSound (void *);
++void S9xProcessEvents(bool8 blocking);
+ 
+ char *rom_filename = NULL;
+ char *snapshot_filename = NULL;
+ char *SDD1_pack = NULL;
+-const char *base_dir="~" SLASH_STR ".snes96_snapshots";
+-const char *snapshot_dir=base_dir;
+-const char *sram_dir=base_dir;
+-const char *screenshot_dir=base_dir;
+-const char *spc_dir=base_dir;
+-const char *patch_dir=base_dir;
+-const char *rom_dir="." SLASH_STR "roms";
+-const char *inc_format="%03d";
+ 
+ //FIXME: I see no reason not to configureenable this for all Unixen
+ #if defined(DEBUGGER) && (defined(__linux) || defined(__sun))
+@@ -247,6 +260,13 @@
+     exit (1);
+ }
+ 
++static void S9xInfoMessage(const char *msg)
++{
++    S9xSetInfoString(msg);
++    if(Settings.Paused) puts(msg);
++}
++
++
+ void S9xParseArg (char **argv, int &i, int argc)
+ {
+ #ifdef JOYSTICK_SUPPORT
+@@ -381,37 +401,39 @@
+ 	S9xParseDisplayArg (argv, i, argc);
+ }
+ 
+-void S9xPostRomInit()
++#include "cheats.h"
++
++void sigcont(int number)
+ {
++	printf("Sigcont\n");
++	::FromPause = 1;
+ }
+ 
+-#include "cheats.h"
+-
+ int main (int argc, char **argv)
+ {
++    signal(SIGCONT, sigcont);
+     if (argc < S9xMinCommandLineArgs ())
+ 	S9xUsage ();
+ 	
+     ZeroMemory (&Settings, sizeof (Settings));
+-
+-	Settings.StopEmulation = TRUE;
+-
++    Settings.HighSpeedSeek = 0;
+ #ifdef JOYSTICK_SUPPORT
+     Settings.JoystickEnabled = TRUE;
+ #else
+     Settings.JoystickEnabled = FALSE;
+ #endif
+-
+-    Settings.SoundPlaybackRate = 5;
++    Settings.UpAndDown = 0;
++    Settings.SoundPlaybackRate = 4;
+     Settings.Stereo = TRUE;
+     Settings.SoundBufferSize = 0;
+-    Settings.APUEnabled = Settings.NextAPUEnabled = TRUE;
+-
+-//    S9xLoadConfigFiles(argv, argc);
+-
+-//
+     Settings.CyclesPercentage = 100;
+     Settings.DisableSoundEcho = FALSE;
++#ifndef NOSOUND
++    Settings.APUEnabled = Settings.NextAPUEnabled = TRUE;
++    Settings.InterpolatedSound = TRUE;
++#else
++    Settings.APUEnabled = Settings.NextAPUEnabled = FALSE;
++#endif
+     Settings.H_Max = SNES_CYCLES_PER_SCANLINE;
+     Settings.SkipFrames = AUTO_FRAMERATE;
+     Settings.ShutdownMaster = TRUE;
+@@ -420,12 +442,12 @@
+     Settings.FrameTime = Settings.FrameTimeNTSC;
+     Settings.DisableSampleCaching = FALSE;
+     Settings.DisableMasterVolume = FALSE;
+-    Settings.InterpolatedSound = TRUE;
+     Settings.Mouse = TRUE;
+     Settings.SuperScope = TRUE;
+     Settings.MultiPlayer5 = TRUE;
+     Settings.ControllerOption = SNES_JOYPAD;
+     Settings.Transparency = FALSE;
++//    Settings.SixteenBit = FALSE;
+     Settings.SupportHiRes = FALSE;
+     Settings.NetPlay = FALSE;
+     Settings.ServerName [0] = 0;
+@@ -438,26 +460,24 @@
+     Settings.TurboMode = FALSE;
+     Settings.TurboSkipFrames = 40;
+     Settings.StretchScreenshots = 1;
+-
+-    Settings.AutoDisplayMessages = TRUE;
+-
+-    Settings.HBlankStart = (256 * Settings.H_Max) / SNES_HCOUNTER_MAX;
+-//
+-
+     rom_filename = S9xParseArgs (argv, argc);
+ 
+     Settings.Transparency = Settings.ForceTransparency;
+     if (Settings.ForceNoTransparency)
+ 	Settings.Transparency = FALSE;
+ 
++//    if (Settings.Transparency)
++//	Settings.SixteenBit = TRUE;
++
++    Settings.HBlankStart = (256 * Settings.H_Max) / SNES_HCOUNTER_MAX;
++
+     if (!Memory.Init () || !S9xInitAPU())
+ 	OutOfMemory ();
+ 
+-	Memory.PostRomInitFunc = S9xPostRomInit;
+-
+     S9xInitSound (Settings.SoundPlaybackRate, Settings.Stereo,
+                   Settings.SoundBufferSize);
+ 
++    if (!Settings.APUEnabled)
+ 	S9xSetSoundMute (TRUE);
+ 
+     uint32 saved_flags = CPU.Flags;
+@@ -466,13 +486,9 @@
+     S9xSetRenderPixelFormat (RGB565);
+ #endif
+ 
+-	bool8 loaded = FALSE;
+-
+     if (rom_filename)
+-		loaded = Memory.LoadROM (rom_filename);
+-	Settings.StopEmulation = !loaded;
+-
+-	if (!loaded && rom_filename)
++    {
++	if (!Memory.LoadROM (rom_filename))
+ 	{
+ 	    char dir [_MAX_DIR + 1];
+ 	    char drive [_MAX_DRIVE + 1];
+@@ -493,18 +509,14 @@
+ 	    }
+ 	    _splitpath (fname, drive, dir, name, ext);
+ 	    _makepath (fname, drive, dir, name, ext);
+-	    if ((Settings.StopEmulation = !Memory.LoadROM (fname)))
++	    if (!Memory.LoadROM (fname))
+ 	    {
+ 		fprintf (stderr, "Error opening: %s\n", rom_filename);
+ 		exit (1);
+ 	    }
+-		loaded = TRUE;
+ 	}
+-
+-	if (loaded)
+-	{
+ 	Memory.LoadSRAM (S9xGetFilename (".srm", SRAM_DIR));
+-	S9xLoadCheatFile (S9xGetFilename (".cht", PATCH_DIR));
++	S9xLoadCheatFile (S9xGetFilename (".cht", CHEAT_DIR));
+     }
+     else
+     {
+@@ -597,18 +609,55 @@
+ #endif
+ 
+     InitTimer ();
+-
++    if (!Settings.APUEnabled)
+ 	S9xSetSoundMute (FALSE);
+ 
++    /* FIXME: Is someone using this dead code, or should it go? */
++#if 0
++    {
++	FILE *fs = fopen ("test.bin", "r");
++	if (fs)
++	{
++	    memset (IAPU.RAM, 0, 1024 * 64);
++	    int bytes = fread (IAPU.RAM + 1024, 1, 13, fs);
++	    bytes = fread (IAPU.RAM + 1024, 1, 1024 * 63, fs);
++	    fclose (fs);
++#ifdef SPCTOOL
++	    _FixSPC (1024, 0, 0, 0, 0, 0xff);
++#else
++	    IAPU.PC = IAPU.RAM + 1024;
++#endif
++	    APU.Flags ^= TRACE_FLAG;
++	    extern FILE *apu_trace;
++	    if (APU.Flags & TRACE_FLAG)
++	    {
++#ifdef SPCTOOL
++		printf ("ENABLED\n");
++		_SetSPCDbg (TraceSPC);                   //Install debug handler
++#endif
++		if (apu_trace == NULL)
++		    apu_trace = fopen ("aputrace.log", "wb");
++	    }
++	    CPU.Cycles = 1024 * 10;
++	    APU_EXECUTE ();
++	    exit (0);
++	}
++    }
++#endif
++
+     while (1)
+     {
+-	if (!Settings.Paused
++	if ((!Settings.Paused) || Settings.FrameAdvance || Settings.HighSpeedSeek > 0 || S9xLuaSpeed() > 0
+ #ifdef DEBUGGER
+ 	    || (CPU.Flags & (DEBUG_MODE_FLAG | SINGLE_STEP_FLAG))
+ #endif
+            )
++           {
++            Settings.FrameAdvance = 0;
+ 	    S9xMainLoop ();
++	    S9xLuaFrameBoundary();
+ 
++           }
+ 	if (Settings.Paused
+ #ifdef DEBUGGER
+ 	    || (CPU.Flags & DEBUG_MODE_FLAG)
+@@ -625,10 +674,11 @@
+ 	}
+ 	else
+ #endif
+-	if (Settings.Paused)
++	if (Settings.Paused && !Settings.HighSpeedSeek)
+ 	{
+ 	    S9xProcessEvents (FALSE);
+-	    usleep(100000);
++            fd_set copy = waitfds;
++	    select(maxwaitfds+1, &copy, NULL, NULL, NULL);
+ 	}
+ 
+ #ifdef JOYSTICK_SUPPORT
+@@ -656,14 +706,13 @@
+ 
+ void S9xExit ()
+ {
+-	Settings.StopEmulation = TRUE;
+   if(Settings.SPC7110)
+     (*CleanUp7110)();
+ 
+    S9xSetSoundMute (TRUE);
+     S9xDeinitDisplay ();
+     Memory.SaveSRAM (S9xGetFilename (".srm", SRAM_DIR));
+-    S9xSaveCheatFile (S9xGetFilename (".cht", PATCH_DIR));
++    S9xSaveCheatFile (S9xGetFilename (".cht", CHEAT_DIR));
+     Memory.Deinit ();
+     S9xDeinitAPU ();
+ 
+@@ -686,7 +735,7 @@
+ void InitJoysticks ()
+ {
+ #ifdef JSIOCGVERSION
+-    int version, j;
++    int version;
+     unsigned char axes, buttons;
+ 
+     if ((js_fd [0] = open (js_device [0], O_RDONLY | O_NONBLOCK)) < 0)
+@@ -698,6 +747,7 @@
+ 	return;
+     }
+ 
++/*
+     if (ioctl (js_fd [0], JSIOCGVERSION, &version))
+     {
+         fprintf(stderr, "joystick: You need at least driver version 1.0"
+@@ -705,42 +755,222 @@
+ 	close (js_fd [0]);
+ 	return;
+     }
+-    for(j=1; j<4; j++){
+-        js_fd [j] = open (js_device [j], O_RDONLY | O_NONBLOCK);
+-    }
++*/
++    FD_SET(js_fd[0], &waitfds);
++    js_fd [1] = open (js_device [1], O_RDONLY | O_NONBLOCK);
++    if (js_fd[1] >= 0) FD_SET(js_fd[1], &waitfds);
++    js_fd [2] = open (js_device [2], O_RDONLY | O_NONBLOCK);
++    if (js_fd[2] >= 0) FD_SET(js_fd[2], &waitfds); 
++
++    js_fd [3] = open (js_device [3], O_RDONLY | O_NONBLOCK);
++    if (js_fd[3] >= 0) FD_SET(js_fd[3], &waitfds); 
+ 
++#define MAX(a,b) ((a) > (b) ? (a) : (b))
++
++    maxwaitfds = MAX(MAX(maxwaitfds, js_fd[0]),MAX(js_fd[1], MAX(js_fd[2], js_fd[3])));
++
++#undef MAX
++/*
+ #ifdef JSIOCGNAME
+     char name [130];
+     bzero (name, 128);
+     if (ioctl (js_fd [0], JSIOCGNAME(128), name) > 0) 
+     {
+-        printf ("Using %s (%s) as pad1\n", name, js_device [0]);
+-        for(j=1; j<4; j++){
+-            if (js_fd [j] > 0)
+-            {
+-                ioctl (js_fd [j], JSIOCGNAME(128), name);
+-                printf ("  and %s (%s) as pad%d\n", name, js_device [j], j+1);
+-            }
+-        }
++        printf ("Using %s (%s) as pad1", name, js_device [0]);
++        if (js_fd [1] > 0)
++	{
++	    ioctl (js_fd [1], JSIOCGNAME(128), name);
++	    printf ("and %s (%s) as pad2", name, js_device [1]);
++	}
+     } 
+     else
+ #endif
+     {
+ 	ioctl (js_fd [0], JSIOCGAXES, &axes);
+ 	ioctl (js_fd [0], JSIOCGBUTTONS, &buttons);
+-	printf ("Using %d-axis %d-button joystick (%s) as pad1\n", axes, buttons, js_device [0]);
+-		for(j=1; j<4; j++){
+-			if (js_fd [j] > 0)
+-			{
+-				ioctl (js_fd [j], JSIOCGAXES, &axes);
+-				ioctl (js_fd [j], JSIOCGBUTTONS, &buttons);
+-				printf (" and %d-axis %d-button (%s) as pad%d\n", axes, buttons, js_device [j], j+1);
+-			}
++	printf ("Using %d-axis %d-button joystick (%s) as pad1", axes, buttons, js_device [0]);
++	if (js_fd [1] > 0)
++	{
++	    ioctl (js_fd [0], JSIOCGAXES, &axes);
++	    ioctl (js_fd [0], JSIOCGBUTTONS, &buttons);
++	    printf (" and %d-axis %d-button (%s) as pad2", axes, buttons, js_device [1]);
++	}
++    }
++*/
++    puts (".");
++#endif
++}
++
++
++#ifdef DEHACKED_JOYPAD
++
++int js_ss_slot = 100;
++int js_ss_press = 0;
++
++
++void ReadJoysticks ()
++{
++
++#ifdef JSIOCGVERSION
++    struct js_event js_ev;
++    int i;
++
++    for (i = 0; i < 4 && js_fd [i] >= 0; i++)
++    {
++	while (read (js_fd[i], &js_ev, sizeof (struct js_event)) == sizeof (struct js_event) )
++	{
++	    switch (js_ev.type & ~JS_EVENT_INIT)
++	    {
++	    case JS_EVENT_AXIS:
++		if (js_ev.number == 4)
++		{
++		    if(js_ev.value < -16384)
++		    {
++			joypads [i] |= SNES_LEFT_MASK; 
++			joypads [i] &= ~SNES_RIGHT_MASK;
++			break;
++		    }
++		    if (js_ev.value > 16384)
++		    {
++			joypads [i] &= ~SNES_LEFT_MASK;
++			joypads [i] |= SNES_RIGHT_MASK; 
++			break;
++		    }
++		    joypads [i] &= ~SNES_LEFT_MASK;
++		    joypads [i] &= ~SNES_RIGHT_MASK;
++		    break;	
+ 		}
++
++		if (js_ev.number == 5)
++		{
++		    if (js_ev.value < -16384)
++		    {
++			joypads [i] |= SNES_UP_MASK; 
++			joypads [i] &= ~SNES_DOWN_MASK;
++			break;
++		    }
++		    if (js_ev.value > 16384)
++		    {
++			joypads [i] &= ~SNES_UP_MASK;
++			joypads [i] |= SNES_DOWN_MASK; 
++			break;
++		    }
++		    joypads [i] &= ~SNES_UP_MASK;
++		    joypads [i] &= ~SNES_DOWN_MASK;
++		    break;	
++		}
++		
++		if (js_ev.number == 0)
++		{
++		
++		    if (js_ev.value < -16384 && !js_ss_press)
++		    {
++		    	js_ss_slot--;
++		    	fprintf(stderr, "\nNew savestate slot: %d\n", js_ss_slot);
++			js_ss_press=1;
++		    	break;
++		    }
++		    if (js_ev.value > 16384 && !js_ss_press)
++		    {
++		    	js_ss_slot++;
++		    	fprintf(stderr, "\nNew savestate slot: %d\n", js_ss_slot);
++		    	js_ss_press = 1;
++		    	break;
++		    }
++		    if (js_ev.value == 0)
++			    js_ss_press = 0;
++		    break;
++		}
++		// if (js_ev.number == 3) // axis not used...
++		
++		if (js_ev.number == 2)
++		{
++		    if (js_ev.value > 16384 || js_ev.value < -16384)
++		    {
++			joypads [i] &= ~(SNES_TL_MASK | SNES_TR_MASK);
++			joypads [i] |= SNES_TL_MASK | SNES_TR_MASK; 
++			break;
++		    }
++		    joypads [i] &= ~SNES_TR_MASK;
++		    joypads [i] &= ~SNES_TR_MASK;
++		    break;
++		}
++		if (js_ev.number == 3)
++		{
++		    if (js_ev.value < -16384)
++		    {
++			joypads [i] |= SNES_TL_MASK; 
++			joypads [i] &= ~SNES_TR_MASK;
++			break;
++		    }
++		    if (js_ev.value > 16384)
++		    {
++			joypads [i] &= ~SNES_TL_MASK;
++			joypads [i] |= SNES_TR_MASK; 
++			break;
++		    }
++		    joypads [i] &= ~SNES_TL_MASK;
++		    joypads [i] &= ~SNES_TR_MASK;
++		    break;	
++		}
++
++		break;
++
++	    case JS_EVENT_BUTTON:
++		if (js_ev.number > 15)
++		    break;
++
++		if (js_ev.value)
++                {
++                    if (js_ev.number == 6 || js_ev.number == 7)
++                        Settings.FrameAdvance++;
++                    else if (js_ev.number == 4)
++                    {
++	                    char def [PATH_MAX];
++	                    char filename [PATH_MAX];
++	                    char drive [_MAX_DRIVE];
++	                    char dir [_MAX_DIR];
++	                    char ext [_MAX_EXT];
++	
++	                    _splitpath (Memory.ROMFilename, drive, dir, def, ext);
++	                    sprintf (filename, "%s%s%s.%03d",
++	                             S9xGetSnapshotDirectory (), SLASH_STR, def,
++	                             js_ss_slot);
++			    S9xFreezeGame (filename);
++                            S9xInfoMessage ("Joypad savestate OK");
++                    }
++                    else if (js_ev.number == 5)
++                    {
++	                    char def [PATH_MAX];
++	                    char filename [PATH_MAX];
++	                    char drive [_MAX_DRIVE];
++	                    char dir [_MAX_DIR];
++	                    char ext [_MAX_EXT];
++	
++	                    _splitpath (Memory.ROMFilename, drive, dir, def, ext);
++	                    sprintf (filename, "%s%s%s.%03d",
++	                             S9xGetSnapshotDirectory (), SLASH_STR, def,
++	                             js_ss_slot);
++	                    if (S9xUnfreezeGame (filename))
++	                    {
++	                        S9xInfoMessage ("Joypad loadstate OK");
++	                    }
++
++                    }
++                    else
++		        joypads [i] |= js_map_button [i][js_ev.number];
++                }
++		else
++		    joypads [i] &= ~js_map_button [i][js_ev.number];
++
++		break;
++	    }
+ 	}
++    }
+ #endif
+ }
+ 
++#else // DEHACKED_JOYPAD
+ void ReadJoysticks ()
+ {
+ #ifdef JSIOCGVERSION
+@@ -773,7 +1003,7 @@
+ 		    break;	
+ 		}
+ 
+-		if (js_ev.number == 1)
++		else if (js_ev.number == 1)
+ 		{
+ 		    if (js_ev.value < -16384)
+ 		    {
+@@ -791,7 +1021,7 @@
+ 		    joypads [i] &= ~SNES_DOWN_MASK;
+ 		    break;	
+ 		}
+-
++//		else printf("Movement on unknown joystick axis %d\n", js_ev.number);
+ 		break;
+ 
+ 	    case JS_EVENT_BUTTON:
+@@ -799,7 +1029,14 @@
+ 		    break;
+ 
+ 		if (js_ev.value)
+-		    joypads [i] |= js_map_button [i][js_ev.number];
++		{
++/*                    if (js_ev.number == 6 || js_ev.number == 7)
++                        Settings.FrameAdvance = 1;
++                    else if (js_ev.number == 10)
++			Settings.Paused = !Settings.Paused, ::FromPause=1;
++		    else*/
++		        joypads [i] |= js_map_button [i][js_ev.number];
++		}
+ 		else
+ 		    joypads [i] &= ~js_map_button [i][js_ev.number];
+ 
+@@ -809,16 +1046,25 @@
+     }
+ #endif
+ }
++
++#endif // DEHACKED_JOYPAD
++
++
+ #endif // defined (JOYSTICK_SUPPORT)
+ 
++const char *GetHomeDirectory ()
++{
++    return (getenv ("HOME"));
++}
++
+ START_EXTERN_C
+ char* osd_GetPackDir()
+ {
+   static char filename[_MAX_PATH];
+   memset(filename, 0, _MAX_PATH);
+   
+-  if(strlen(S9xGetDirectory(PATCH_DIR))!=0)
+-    strcpy (filename, S9xGetDirectory(PATCH_DIR));
++  if(strlen(S9xGetSnapshotDirectory())!=0)
++    strcpy (filename, S9xGetSnapshotDirectory());
+   else
+   {
+     char dir [_MAX_DIR + 1];
+@@ -861,102 +1107,100 @@
+ }
+ END_EXTERN_C
+ 
+-const char *S9xGetDirectory (enum s9x_getdirtype dirtype)
++const char *S9xGetSnapshotDirectory ()
+ {
+-    static char filename [PATH_MAX+1];
+-    const char *s, *b;
+-    bool md=false;
+-
+-    switch(dirtype){
+-      default:
+-      case DEFAULT_DIR:     s=base_dir; md=true; break;
+-      case HOME_DIR:        s=getenv("HOME"); break;
+-      case ROM_DIR:         s=rom_dir; break;
+-      case SNAPSHOT_DIR:    s=snapshot_dir; break;
+-      case SRAM_DIR:        s=sram_dir; break;
+-	  case BIOS_DIR:        s=sram_dir; break;
+-      case SCREENSHOT_DIR:  s=screenshot_dir; break;
+-      case SPC_DIR:         s=spc_dir; break;
+-      case PATCH_DIR:       s=patch_dir; break;
+-      case ROMFILENAME_DIR:
+-        strcpy(filename, Memory.ROMFilename);
+-        for(int i=strlen(filename); i>=0; i--){
+-            if(filename[i]==SLASH_CHAR){
+-                filename[i]='\0';
+-                break;
+-            }
+-        }
+-        return filename;
+-    }
+-
+-    b=NULL;
+-    if(dirtype!=HOME_DIR){
+-        if(s[0]==SLASH_CHAR){
+-            b=NULL;
+-        } else if(s[0]=='~' && s[1]==SLASH_CHAR){
+-            b=getenv("HOME");
+-            md=true;
+-            s+=2;
+-        } else if(s[0]=='.' && s[1]==SLASH_CHAR){
+-            b=NULL;
+-        } else if(dirtype!=DEFAULT_DIR){
+-            b=S9xGetDirectory(DEFAULT_DIR);
+-            md=true;
+-        } else {
+-            b=NULL;
+-        }
+-    }
+-
+-    if(b==filename){
+-        int l=strlen(filename);
+-        snprintf(filename+l, sizeof(filename)-l, SLASH_STR "%s", s);
+-    } else if(b){
+-        snprintf(filename, sizeof(filename), "%s" SLASH_STR "%s", b, s);
+-    } else {
+-        snprintf(filename, sizeof(filename), "%s", s);
+-    }
+-    if(md){
+-        if(mkdir(filename, 0777)==0)
+-            chown(filename, getuid (), getgid ());
++    static char filename [PATH_MAX];
++    const char *snapshot;
++    
++    if (!(snapshot = getenv ("SNES9X_SNAPSHOT_DIR")) &&
++	!(snapshot = getenv ("SNES96_SNAPSHOT_DIR")))
++    {
++	const char *home = GetHomeDirectory ();
++	strcpy (filename, home);
++	strcat (filename, SLASH_STR);
++	strcat (filename, ".snes96_snapshots");
++	mkdir (filename, 0777);
++	chown (filename, getuid (), getgid ());
+     }
++    else
++	return (snapshot);
+ 
+-    return filename;
++    return (filename);
+ }
+ 
+-const char *S9xGetFilename (const char *ex, enum s9x_getdirtype dirtype)
++const char *S9xGetFilename (const char *ex)
+ {
+     static char filename [PATH_MAX + 1];
+-    char dir [_MAX_DIR + 1];
+     char drive [_MAX_DRIVE + 1];
++    char dir [_MAX_DIR + 1];
+     char fname [_MAX_FNAME + 1];
+     char ext [_MAX_EXT + 1];
++
+     _splitpath (Memory.ROMFilename, drive, dir, fname, ext);
+-    snprintf(filename, sizeof(filename), "%s" SLASH_STR "%s%s",
+-             S9xGetDirectory(dirtype), fname, ex);
++    strcpy (filename, S9xGetSnapshotDirectory ());
++    strcat (filename, SLASH_STR);
++    strcat (filename, fname);
++    strcat (filename, ex);
++
+     return (filename);
+ }
+ 
+-const char *S9xGetFilenameInc (const char *e, enum s9x_getdirtype dirtype)
++const char *S9xGetFilenameInc (const char *e)
+ {
+-    static char filename [PATH_MAX + 1];
+-    char dir [_MAX_DIR + 1];
++    static char filename [_MAX_PATH + 1];
+     char drive [_MAX_DRIVE + 1];
++    char dir [_MAX_DIR + 1];
+     char fname [_MAX_FNAME + 1];
+     char ext [_MAX_EXT + 1];
+-    unsigned int i=0;
++    char *ptr;
+     struct stat buf;
+-    const char *d;
+ 
+-    _splitpath (Memory.ROMFilename, drive, dir, fname, ext);
+-    d=S9xGetDirectory(dirtype);
+-    do {
+-        snprintf(filename, sizeof(filename), inc_format, d, fname, i, e);
+-        i++;
+-    } while(stat(filename, &buf)==0 && i!=0);
++    if (strlen (S9xGetSnapshotDirectory()))
++    {
++        _splitpath (Memory.ROMFilename, drive, dir, fname, ext);
++        strcpy (filename, S9xGetSnapshotDirectory());
++        strcat (filename, "/");
++        strcat (filename, fname);
++        ptr = filename + strlen (filename);
++        strcat (filename, "00/");
++        strcat (filename, e);
++    }
++    else
++    {
++        _splitpath (Memory.ROMFilename, drive, dir, fname, ext);
++        strcat (fname, "00/");
++        _makepath (filename, drive, dir, fname, e);
++        ptr = strstr (filename, "00/");
++    }
++
++    do
++    {
++        if (++*(ptr + 2) > '9')
++        {
++            *(ptr + 2) = '0';
++            if (++*(ptr + 1) > '9')
++            {
++                *(ptr + 1) = '0';
++                if (++*ptr > '9')
++                    break;
++            }
++        }
++    } while( stat(filename, &buf) == 0 );
+ 
+     return (filename);
+ }
+ 
++const char *S9xGetROMDirectory ()
++{
++    const char *roms;
++    
++    if (!(roms = getenv ("SNES9X_ROM_DIR")) &&
++	!(roms = getenv ("SNES96_ROM_DIR")))
++	return ("." SLASH_STR "roms");
++    else
++	return (roms);
++}
++
+ const char *S9xBasename (const char *f)
+ {
+     const char *p;
+@@ -981,7 +1225,7 @@
+     const char *filename;
+ 
+     S9xSetSoundMute (TRUE);
+-    filename = S9xSelectFilename (def, S9xGetDirectory (SNAPSHOT_DIR), "s96", title);
++    filename = S9xSelectFilename (def, S9xGetSnapshotDirectory (), "s96", title);
+     S9xSetSoundMute (FALSE);
+     return (filename);
+ }
+@@ -999,13 +1243,13 @@
+ 	(*dir == '.' && (*(dir + 1) == '/'
+         )))
+     {
+-	strncpy (filename, fname, PATH_MAX);
++	strcpy (filename, fname);
+ 	if (!*ext)
+ 	    strcat (filename, ".s96");
+     }
+     else
+     {
+-	strcpy (filename, S9xGetDirectory (SNAPSHOT_DIR));
++	strcpy (filename, S9xGetSnapshotDirectory ());
+ 	strcat (filename, SLASH_STR);
+ 	strcat (filename, fname);
+ 	if (!*ext)
+@@ -1061,7 +1305,10 @@
+ 
+ bool8 S9xDeinitUpdate (int Width, int Height)
+ {
++    S9xLuaGui((uint16*)GFX.Screen,GFX.Pitch/2, Width, Height);
+     S9xPutImage (Width, Height);
++    if (!Settings.SoundSync)
++    	S9xGenerateSound();
+     return (TRUE);
+ }
+ 
+@@ -1108,47 +1355,45 @@
+     }
+ }
+ 
+-void _splitpath(const char *path, char *drive, char *dir, char *fname, char *ext)
++void _splitpath (const char *path, char *drive, char *dir, char *fname,
++		 char *ext)
+ {
+-  *drive = 0;
++    *drive = 0;
+ 
+-  char *slash = strrchr(path, SLASH_CHAR);
+-  char *dot = strrchr(path, '.');
++    char *slash = strrchr (path, '/');
++    if (!slash)
++	slash = strrchr (path, '\\');
+ 
+-  if (dot && slash && dot < slash)
+-  {
+-    dot = 0;
+-  }
++    char *dot = strrchr (path, '.');
+ 
+-  if (!slash)
+-  {
+-    *dir = 0;
+-    strcpy(fname, path);
+-    if (dot)
+-    {
+-      fname[dot - path] = 0;
+-      strcpy(ext, dot + 1);
+-    }
+-    else
+-    {
+-      *ext = 0;
+-    }
+-  }
+-  else
+-  {
+-    strcpy(dir, path);
+-    dir[slash - path] = 0;
+-    strcpy(fname, slash + 1);
+-    if (dot)
++    if (dot && slash && dot < slash)
++	dot = NULL;
++
++    if (!slash)
+     {
+-      fname[(dot - slash) - 1] = 0;
+-      strcpy(ext, dot + 1);
++	strcpy (dir, "");
++	strcpy (fname, path);
++        if (dot)
++        {
++	    *(fname + (dot - path)) = 0;
++	    strcpy (ext, dot + 1);
++        }
++	else
++	    strcpy (ext, "");
+     }
+     else
+     {
+-      *ext = 0;
++	strcpy (dir, path);
++	*(dir + (slash - path)) = 0;
++	strcpy (fname, slash + 1);
++        if (dot)
++	{
++	    *(fname + (dot - slash) - 1) = 0;
++    	    strcpy (ext, dot + 1);
++	}
++	else
++	    strcpy (ext, "");
+     }
+-  }
+ }
+ 
+ void S9xToggleSoundChannel (int c)
+@@ -1162,10 +1407,8 @@
+ 
+ static void SoundTrigger ()
+ {
+-#ifndef NOSOUND
+     if (Settings.APUEnabled && !so.mute_sound)
+ 	S9xProcessSound (NULL);
+-#endif
+ }
+ 
+ void StopTimer ()
+@@ -1176,12 +1419,13 @@
+     timeout.it_interval.tv_usec = 0;
+     timeout.it_value.tv_sec = 0;
+     timeout.it_value.tv_usec = 0;
+-    if (setitimer (ITIMER_REAL, &timeout, NULL) < 0)
+-	perror ("setitimer");
++//    if (setitimer (ITIMER_REAL, &timeout, NULL) < 0)
++//	perror ("setitimer");
+ }
+ 
+ void InitTimer ()
+ {
++    return;
+     struct itimerval timeout;
+     struct sigaction sa;
+     
+@@ -1218,6 +1462,9 @@
+ 
+ void S9xSyncSpeed ()
+ {
++    IPPU.RenderThisFrame = TRUE;
++    if (dumpstreams == 1 && !Settings.HighSpeedSeek)
++    	return;
+ #ifdef _NETPLAY_SUPPORT
+     if (Settings.NetPlay)
+     {
+@@ -1234,6 +1481,8 @@
+ 	    IPPU.RenderThisFrame = TRUE;
+ 	    IPPU.SkippedFrames = 0;
+ 	}
++	// Don't skip frames. EVER.
++	/*
+ 	else
+ 	{
+ 	    if (IPPU.SkippedFrames < 10)
+@@ -1247,6 +1496,7 @@
+ 		IPPU.SkippedFrames = 0;
+ 	    }
+ 	}
++	*/
+     }
+     else
+ #endif
+@@ -1260,10 +1510,11 @@
+     }
+ #endif
+ 
+-    if (Settings.TurboMode)
++    if (Settings.TurboMode || Settings.HighSpeedSeek)
+     {
+-        if(++IPPU.FrameSkip >= Settings.TurboSkipFrames)
+-        {
++//        if(++IPPU.FrameSkip >= Settings.TurboSkipFrames || !Settings.HighSpeedSeek)
++       if (IPPU.SkippedFrames >= Settings.TurboSkipFrames && !Settings.HighSpeedSeek) 
++       {
+             IPPU.FrameSkip = 0;
+             IPPU.SkippedFrames = 0;
+             IPPU.RenderThisFrame = TRUE;
+@@ -1272,7 +1523,11 @@
+         {
+             ++IPPU.SkippedFrames;
+             IPPU.RenderThisFrame = FALSE;
++            Logger_NextFrame();
++            FromPause = 1;
+         }
++        if (Settings.HighSpeedSeek > 0)
++        	Settings.HighSpeedSeek--;
+         return;
+     }
+     
+@@ -1288,6 +1543,9 @@
+ 
+     CHECK_SOUND(); S9xProcessEvents(FALSE);
+ 
++    if (S9xLuaSpeed() > 0)
++    	return;
++
+     while (gettimeofday (&now, NULL) < 0) ;
+     
+     /* If there is no known "next" frame, initialize it now */
+@@ -1300,30 +1558,48 @@
+     unsigned limit = Settings.SkipFrames == AUTO_FRAMERATE
+                      ? (timercmp(&next1, &now, <) ? 10 : 1)
+                      : Settings.SkipFrames;
+-    
+-    IPPU.RenderThisFrame = ++IPPU.SkippedFrames >= limit;
+-    if(IPPU.RenderThisFrame)
+-    {
+-        IPPU.SkippedFrames = 0;
+-    }
+-    else
+-    {
+-        /* If we were behind the schedule, check how much it is */
+-        if(timercmp(&next1, &now, <))
+-        {
+-            unsigned lag =
+-                (now.tv_sec - next1.tv_sec) * 1000000
+-               + now.tv_usec - next1.tv_usec;
+-            if(lag >= 1000000)
+-            {
+-                /* More than a second behind means probably
+-                 * pause. The next line prevents the magic
+-                 * fast-forward effect.
+-                 */
+-                next1 = now;
+-            }
+-        }
+-    }
++
++
++
++
++      if (FromPause)
++      {
++      	next1 = now;
++      	FromPause = 0;
++      }
++      else
++      {
++            // Unforseen events, such as SIGSTOP, severe system lag, etc
++            unsigned lag = (now.tv_sec - next1.tv_sec) * 1000000 + now.tv_usec - next1.tv_usec;
++
++            // I'm using 0.25 of a second instead of 1.00
++//            if (lag >= 250000)
++//               next1 = now;
++      
++      }
++//    IPPU.RenderThisFrame = ++IPPU.SkippedFrames >= limit;
++//    if(IPPU.RenderThisFrame)
++//    {
++//        IPPU.SkippedFrames = 0;
++//    }
++//    else
++//    {
++//        /* If we were behind the schedule, check how much it is */
++//        if(timercmp(&next1, &now, <))
++//        {
++//            unsigned lag =
++//                (now.tv_sec - next1.tv_sec) * 1000000
++//               + now.tv_usec - next1.tv_usec;
++//            if(lag >= 1000000)
++//            {
++//                /* More than a second behind means probably
++//                 * pause. The next line prevents the magic
++//                 * fast-forward effect.
++//                 */
++//                next1 = now;
++//            }
++//        }
++//    }
+     
+     /* Delay until we're completed this frame */
+ 
+@@ -1593,13 +1869,8 @@
+     /* SUN version */
+     int i;
+ 
+-#if defined(CONFIGURABLE_SOUND_DEVICE)
+-    if ((so.sound_fd = open (sound_device, O_WRONLY)) < 0)
+-        return (FALSE);
+-#else
+     if ((so.sound_fd = open ("/dev/audio", O_WRONLY)) < 0)
+-        return (FALSE);
+-#endif
++	return (FALSE);
+ 
+     audio_info_t audio;
+ 
+@@ -1654,24 +1925,33 @@
+ {
+     /* Linux version (OSS) */
+     int J, K;
+-    so.stereo = stereo;
+-    so.playback_rate = Rates[mode & 0x07];
+-    so.sixteen_bit = TRUE;
+ 
+-    if (!Settings.Mute) {
+-#if defined(CONFIGURABLE_SOUND_DEVICE)
+-    if ((so.sound_fd = open (sound_device, O_WRONLY | O_NONBLOCK)) < 0)
++    if (Settings.Mute)
+     {
+-    perror (sound_device);
+-    return (FALSE);
++
++	// Do all sound setup without opening /dev/dsp
++	so.sixteen_bit = true;
++	so.stereo = true;
++        so.playback_rate = Rates[mode & 0x07];
++    S9xSetPlaybackRate (so.playback_rate);
++
++    if (buffer_size == 0)
++	buffer_size = BufferSizes [mode & 7];
++
++    if (buffer_size > MAX_BUFFER_SIZE / 4)
++	buffer_size = MAX_BUFFER_SIZE / 4;
++    if (so.sixteen_bit)
++	buffer_size *= 2;
++    if (so.stereo)
++	buffer_size *= 2;
++        return TRUE;
+     }
+-#else
+-    if ((so.sound_fd = open ("/dev/dsp", O_WRONLY | O_NONBLOCK)) < 0)
++
++    if ((so.sound_fd = open ("/dev/dsp", O_NONBLOCK|O_WRONLY)) < 0)
+     {
+-    perror ("/dev/dsp");
+-    return (FALSE);
++	perror ("/dev/dsp");
++	return (FALSE);
+     }
+-#endif
+ 
+ #ifdef MMAP_SOUND 
+    if (ioctl (so.sound_fd, SNDCTL_DSP_GETCAPS, &J) < 0)
+@@ -1712,19 +1992,25 @@
+ 	    return (FALSE);
+ 	}
+     }
++    else
++	so.sixteen_bit = TRUE;
+ 
++    so.stereo = stereo;
+     if (ioctl (so.sound_fd, SNDCTL_DSP_STEREO, &so.stereo) < 0)
+     {
+ 	perror ("ioctl SNDCTL_DSP_STEREO");
+ 	return (FALSE);
+     }
+     
++    so.playback_rate = Rates[mode & 0x07];
+     if (ioctl (so.sound_fd, SNDCTL_DSP_SPEED, &so.playback_rate) < 0)
+     {
+ 	perror ("ioctl SNDCTL_DSP_SPEED");
+ 	return (FALSE);
+     }
+ 
++    S9xSetPlaybackRate (so.playback_rate);
++
+     if (buffer_size == 0)
+ 	buffer_size = BufferSizes [mode & 7];
+ 
+@@ -1761,9 +2047,7 @@
+     printf ("Rate: %d, Buffer size: %d, 16-bit: %s, Stereo: %s, Encoded: %s\n",
+ 	    so.playback_rate, so.buffer_size, so.sixteen_bit ? "yes" : "no",
+ 	    so.stereo ? "yes" : "no", so.encoded ? "yes" : "no");
+-    } // Settings.Mute
+ 
+-    S9xSetPlaybackRate (so.playback_rate);
+     return (TRUE);
+ }
+ #endif
+@@ -1808,7 +2092,6 @@
+ void *S9xProcessSound (void *)
+ {
+     /* No sound version */
+-	return (NULL);
+ }
+ #endif
+ 
+@@ -1817,6 +2100,7 @@
+ {
+     /* Linux and Sun versions */
+     
++/* Mass comment-out!
+     int bytes_so_far = so.sixteen_bit ? (so.samples_mixed_so_far << 1) :
+ 				        so.samples_mixed_so_far;
+     if (Settings.SoundSync == 2)
+@@ -1890,12 +2174,23 @@
+ 	pthread_mutex_unlock (&mutex);
+     else
+ #endif    
+-//    if (pending_signal)
+-    if (1)
++    if (pending_signal)
+     {
+ 	S9xProcessSound (NULL);
+ 	pending_signal = FALSE;
+     }
++    
++    */
++	uint8 Buf[262144];
++	unsigned N = so.playback_rate * Settings.FrameTime / 1000000;
++	if (so.stereo) N *= 2;
++	S9xMixSamplesO(Buf, N, 0);
++	if (so.sixteen_bit) N *= 2;
++	
++	if (!Settings.Mute)
++	    write(so.sound_fd, Buf, N);
++	
++	AudioLogger(Buf, N);
+ }
+ 
+ void *S9xProcessSound (void *)
+@@ -1904,8 +2199,8 @@
+     
+     /* If threads in use, this is to loop indefinitely */
+     /* If not, this will be called by timer */
+-    if (Settings.Mute)
+-        return NULL;
++    S9xGenerateSound();
++    return NULL;
+ #ifdef __linux
+     audio_buf_info info;
+ 
+@@ -2023,7 +2318,8 @@
+ 	    }
+ 	    if(I == 0) break;
+ 	    
+-            I = write (so.sound_fd, (char *) Buf + byte_offset, I);
++            if (!Settings.Mute)
++                I = write (so.sound_fd, (char *) Buf + byte_offset, I);
+             if (I > 0)
+             {
+                 bytes_to_write -= I;
+@@ -2043,7 +2339,7 @@
+ #endif
+ 
+ #ifdef __sun
+-    if (!Settings.ThreadSound)
++    if (!Settings.ThreadSound && !Settings.Mute)
+ 	write (so.sound_fd, NULL, 0);
+ #endif
+ 
+@@ -2157,6 +2453,7 @@
+     Settings.FrameTimeNTSC = get_config_int("Graphics", "FrameTimeNTSC", 16667);
+     Settings.FrameTime = Settings.FrameTimeNTSC;
+     Settings.Transparency = get_config_int("Graphics", "Transparency", FALSE);
++//    Settings.SixteenBit = get_config_int("Graphics", "HiColor", FALSE);
+     Settings.SupportHiRes = get_config_int("Graphics", "Hi-ResSupport", FALSE);
+     i = get_config_int("Graphics", "CPUCycles", 100);
+     Settings.H_Max = (i * SNES_CYCLES_PER_SCANLINE) / i;
+@@ -2216,7 +2513,7 @@
+ 
+     Memory.FreeSDD1Data ();
+ 
+-    strcpy (filename, S9xGetDirectory (PATCH_DIR));
++    strcpy (filename, S9xGetSnapshotDirectory ());
+ 
+     Settings.SDD1Pack=FALSE;
+     if (strncmp (Memory.ROMName, "Star Ocean", 10) == 0){
+@@ -2342,6 +2639,136 @@
+     }
+ }
+ 
++
++
++
++// New additions from the heavy "improvement"
++
++const char *inc_format="%03d";
++
++const char *S9xGetFilename (const char *ex, enum s9x_getdirtype dirtype)
++{
++    static char filename [PATH_MAX + 1];
++    char dir [_MAX_DIR + 1];
++    char drive [_MAX_DRIVE + 1];
++    char fname [_MAX_FNAME + 1];
++    char ext [_MAX_EXT + 1];
++    _splitpath (Memory.ROMFilename, drive, dir, fname, ext);
++    snprintf(filename, sizeof(filename), "%s" SLASH_STR "%s%s",
++             S9xGetDirectory(dirtype), fname, ex);
++    return (filename);
++}
++
++const char *S9xGetFilenameInc (const char *e, enum s9x_getdirtype dirtype)
++{
++    static char filename [PATH_MAX + 1];
++    char dir [_MAX_DIR + 1];
++    char drive [_MAX_DRIVE + 1];
++    char fname [_MAX_FNAME + 1];
++    char ext [_MAX_EXT + 1];
++    unsigned int i=0;
++    struct stat buf;
++    const char *d;
++
++    _splitpath (Memory.ROMFilename, drive, dir, fname, ext);
++    d=S9xGetDirectory(dirtype);
++    do {
++        snprintf(filename, sizeof(filename), inc_format, d, fname, i, e);
++        i++;
++    } while(stat(filename, &buf)==0 && i!=0);
++
++    return (filename);
++}
++
++
++const char *base_dir="~" SLASH_STR ".snes96_snapshots";
++const char *snapshot_dir=base_dir;
++const char *sram_dir=base_dir;
++const char *screenshot_dir=base_dir;
++const char *spc_dir=base_dir;
++const char *patch_dir=base_dir;
++const char *rom_dir="." SLASH_STR "roms";
++
++
++const char *S9xGetDirectory (enum s9x_getdirtype dirtype)
++{
++    static char filename [PATH_MAX+1];
++    const char *s, *b;
++    bool md=false;
++
++    switch(dirtype){
++      default:
++      case DEFAULT_DIR:     s=base_dir; md=true; break;
++      case HOME_DIR:        s=getenv("HOME"); break;
++      case ROM_DIR:         s=rom_dir; break;
++      case SNAPSHOT_DIR:    s=snapshot_dir; break;
++      case SRAM_DIR:        s=sram_dir; break;
++	  case BIOS_DIR:        s=sram_dir; break;
++      case SCREENSHOT_DIR:  s=screenshot_dir; break;
++      case SPC_DIR:         s=spc_dir; break;
++      case PATCH_DIR:       s=patch_dir; break;
++      case ROMFILENAME_DIR:
++        strcpy(filename, Memory.ROMFilename);
++        for(int i=strlen(filename); i>=0; i--){
++            if(filename[i]==SLASH_CHAR){
++                filename[i]='\0';
++                break;
++            }
++        }
++        return filename;
++    }
++
++    b=NULL;
++    if(dirtype!=HOME_DIR){
++        if(s[0]==SLASH_CHAR){
++            b=NULL;
++        } else if(s[0]=='~' && s[1]==SLASH_CHAR){
++            b=getenv("HOME");
++            md=true;
++            s+=2;
++        } else if(s[0]=='.' && s[1]==SLASH_CHAR){
++            b=NULL;
++        } else if(dirtype!=DEFAULT_DIR){
++            b=S9xGetDirectory(DEFAULT_DIR);
++            md=true;
++        } else {
++            b=NULL;
++        }
++    }
++
++    if(b==filename){
++        int l=strlen(filename);
++        snprintf(filename+l, sizeof(filename)-l, SLASH_STR "%s", s);
++    } else if(b){
++        snprintf(filename, sizeof(filename), "%s" SLASH_STR "%s", b, s);
++    } else {
++        snprintf(filename, sizeof(filename), "%s", s);
++    }
++    if(md){
++        if(mkdir(filename, 0777)==0)
++            chown(filename, getuid (), getgid ());
++    }
++
++    return filename;
++}
++
++
++char *S9xGetFreezeFilename(int slot) {
++                   char def [PATH_MAX];
++                   char filename [PATH_MAX];
++                   char drive [_MAX_DRIVE];
++                   char dir [_MAX_DIR];
++                   char ext [_MAX_EXT];
++                   _splitpath (Memory.ROMFilename, drive, dir, def, ext);
++                   sprintf (filename, "%s%s%s.%03d",
++                            S9xGetDirectory (SNAPSHOT_DIR), SLASH_STR, def,
++                            slot);
++
++	return strdup(filename);
++}
++
++#include "conffile.h"
++
+ ConfigFile::secvec_t keymaps;
+ 
+ typedef std::pair<std::string,std::string> strpair_t;
+@@ -2474,4 +2901,3 @@
+         free(s);
+     }
+ }
+-
+diff -rdu snes9x-improvement11-beta15/unix/x11.cpp snes9x-improvement11-beta15-lua0.05/unix/x11.cpp
+--- snes9x-improvement11-beta15/unix/x11.cpp	Fri Jan 18 15:48:26 2008
++++ snes9x-improvement11-beta15-lua0.05/unix/x11.cpp	Thu Feb 14 11:06:12 2008
+@@ -86,9 +86,6 @@
+   Super NES and Super Nintendo Entertainment System are trademarks of
+   Nintendo Co., Limited and its subsidiary companies.
+ *******************************************************************************/
+-
+-
+-
+ #include <stdlib.h>
+ #include <ctype.h>
+ #include <string.h>
+@@ -99,6 +96,10 @@
+ #include <fcntl.h>
+ #include <unistd.h>
+ #include <errno.h>
++#include <sys/select.h>
++
++extern fd_set waitfds;
++extern int maxwaitfds;
+ 
+ #include "snes9x.h"
+ #include "memmap.h"
+@@ -110,8 +111,9 @@
+ #include "apu.h"
+ #include "soundux.h"
+ #include "x11.h"
+-#include "movie.h"
+ #include "spc7110.h"
++#include "logger.h"
++#include "s9xlua.h"
+ 
+ #if 0
+ #define QT_CLEAN_NAMESPACE
+@@ -155,11 +157,15 @@
+ void S9xSwitchToFullScreen (bool8 enable);
+ 
+ #ifdef USE_VIDMODE_EXTENSION
++#if defined (__cplusplus) || defined (c_plusplus)
+ #include <X11/extensions/xf86vmode.h>
++#endif
+ 
+ #define ALL_DEVICE_EVENTS 0
+ #endif
+ 
++//extern int FromPause;
++
+ typedef struct 
+ {
+     bool8		full_screen_available;
+@@ -192,6 +198,7 @@
+ 
+ GUIData GUI;
+ extern uint32 joypads [5];
++extern int FromPause;
+ 
+ #if 0
+ QApplication *app;
+@@ -223,7 +230,6 @@
+ 		  uint8 *dstPtr, uint32 dstPitch, 
+ 		  uint32 dstWidth, uint32 dstHeight, int width, int height);
+ 
+-
+ START_EXTERN_C
+ uint8 snes9x_clear_change_log = 0;
+ END_EXTERN_C
+@@ -301,6 +307,10 @@
+ 	S9xOpenGLInit ();
+ #endif
+ 
++    FD_SET( ConnectionNumber(GUI.display), &waitfds);
++    if (ConnectionNumber(GUI.display) > maxwaitfds)
++       maxwaitfds = ConnectionNumber(GUI.display);
++
+     XVisualInfo plate;
+     XVisualInfo *matches;
+     int count;
+@@ -327,6 +337,7 @@
+     if (GUI.depth >= 15 && !Settings.ForceNoTransparency)
+     {
+ 	Settings.Transparency = TRUE;
++//	Settings.SixteenBit = TRUE;
+     }
+ 
+     GUI.pseudo = matches[0].c_class == PseudoColor ||
+@@ -389,6 +400,7 @@
+     if (Settings.OpenGLEnable || Settings.AIDOShmId)
+     {
+ 	S9xSetRenderPixelFormat (RGB555);
++//        Settings.SixteenBit = TRUE;
+         Settings.Transparency = TRUE;
+     }
+ #endif
+@@ -512,7 +524,7 @@
+ 
+     static XColor bg;
+     static XColor fg;
+-    static char data [8] = { 0,0,0,0,0,0,0,0 };
++    static char data [8] = { 0x01 };
+ 
+     Pixmap bitmap = XCreateBitmapFromData (GUI.display, GUI.window, data, 8, 8);
+     GUI.point_cursor = XCreatePixmapCursor (GUI.display, bitmap, bitmap, &fg, &bg, 0, 0);
+@@ -745,6 +757,23 @@
+ 
+     int h = IMAGE_HEIGHT;
+ 
++    if (!(true))
++    {
++	if (GUI.image_needs_scaling || GUI.depth != 8)
++	{
++	    GFX.Screen = (uint8 *) (GUI.to_free [tf++] = malloc (IMAGE_WIDTH * h));
++	    GFX.Pitch = IMAGE_WIDTH;
++	}
++	else
++	{
++	    GFX.Screen = (uint8 *) GUI.image->data;
++	    GFX.Pitch = GUI.image->bytes_per_line;
++	}
++	GFX.SubScreen = NULL;
++	GFX.ZBuffer = (uint8 *) (GUI.to_free [tf++] = malloc (GFX.Pitch * h));
++	GFX.SubZBuffer = NULL;
++    }
++    else
+     if (GUI.depth == 8)
+     {
+ 	if (GUI.interpolate)
+@@ -804,7 +833,7 @@
+ 	memset (GUI.delta_screen, 0xff, GFX.Pitch * h);
+     if (GUI.interpolated_screen)
+ 	ZeroMemory (GUI.interpolated_screen, 512 * 478 * 2);
+-    if (GUI.interpolate)
++    if ((true) && GUI.interpolate)
+     {
+ 	// Offset the rendering of the SNES image by at least one pixel because
+ 	// Kreed's interpolation routines read one pixel beyond the bounds of
+@@ -905,7 +934,8 @@
+ #endif
+ }
+ 
+-const char *S9xChooseMovieFilename(bool8 read_only)
++#include "movie.h"
++static const char *S9xChooseMovieFilename(bool8 read_only)
+ {
+     char def [PATH_MAX + 1];
+     char title [PATH_MAX + 1];
+@@ -919,7 +949,7 @@
+     const char *filename;
+ 
+     S9xSetSoundMute (TRUE);
+-    filename = S9xSelectFilename (def, S9xGetDirectory (SPC_DIR), "smv", title);
++    filename = S9xSelectFilename (def, S9xGetSnapshotDirectory (), "smv", title);
+     S9xSetSoundMute (FALSE);
+     return (filename);
+ }
+@@ -987,8 +1017,11 @@
+         WRITE_MOVIE_ASK,
+         LOAD_MOVIE_ASK,
+         STOP_MOVIE,
+-        
+-        FUNC_LAST = STOP_MOVIE /* update this to match the last token */
++        READONLY_MOVIE_TOGGLE,
++        FRAMEADVANCE,
++        SEEK,
++        LUA_CONTROL,
++        FUNC_LAST = SEEK /* update this to match the last token */
+     };
+     static const char* GetFuncName(functiontype func)
+     {
+@@ -1027,6 +1060,10 @@
+             case WRITE_MOVIE_ASK: return         "WRITE_MOVIE_ASK";
+             case LOAD_MOVIE_ASK: return          "LOAD_MOVIE_ASK";
+             case STOP_MOVIE: return              "STOP_MOVIE";
++            case READONLY_MOVIE_TOGGLE: return   "READONLY_MOVIE_TOGGLE";
++            case FRAMEADVANCE: return            "FRAMEADVANCE";
++            case SEEK: return                    "SEEK";
++            case LUA_CONTROL: return             "LUA_CONTROL";
+             default: return "unknown";
+         }
+     }
+@@ -1233,7 +1270,7 @@
+         Define(FRAMESKIP_INC, 0,       XK_equal, XK_plus);
+         Define(FRAMESKIP_DEC, 0,       XK_minus);
+         // pause
+-        Define(PAUSE, 0,               XK_Pause, XK_Break, XK_Scroll_Lock);
++        Define(PAUSE, 0,               XK_Pause, XK_Break, XK_g);
+         // misc functions
+         Define(DGA_FULLSCREEN, 0,      Alt(XK_Return));
+         Define(SCREENSHOT, 0,          XK_Print);
+@@ -1245,8 +1282,11 @@
+         Define(TOGGLE_TRANSP, 0,       XK_9);
+         Define(TOGGLE_CLIPWIN, 0,      XK_BackSpace);
+         Define(TOGGLE_CONTROLLER, 0,   XK_7);
+-        Define(TOGGLE_INTERPSOUND, 0,  XK_bracketleft, Alt(XK_8));
+-        Define(TOGGLE_SYNCSOUND, 0,    XK_bracketright, Alt(XK_9));
++// I'm claiming these in the name of Frame Advance
++//        Define(TOGGLE_INTERPSOUND, 0,  XK_bracketleft, Alt(XK_8));
++//        Define(TOGGLE_SYNCSOUND, 0,    XK_bracketright, Alt(XK_9));
++        Define(TOGGLE_INTERPSOUND, 0,  Alt(XK_8));
++        Define(TOGGLE_SYNCSOUND, 0,    Alt(XK_9));
+         Define(TOGGLE_MODE7INTERP, 0,  Shift(XK_9));
+         Define(TURBO_ENABLE, 0,        XK_Tab);
+         Define(SUPERSCOPE_TURBO, 0,    XK_grave, XK_asciitilde, XK_numbersign);
+@@ -1257,7 +1297,15 @@
+         Define(WRITE_MOVIE_ASK, 0,     Shift(XK_1));
+         Define(LOAD_MOVIE_ASK, 0,      Shift(XK_2));
+         Define(STOP_MOVIE, 0,          Shift(XK_3));
+-        
++        Define(READONLY_MOVIE_TOGGLE,0,Shift(XK_4));   
++#ifdef BRUSHY
++	Define(FRAMEADVANCE,0,XK_f);
++	Define(PAUSE,0,XK_g);
++#else
++	Define(FRAMEADVANCE, 0, XK_backslash, XK_bracketleft, XK_bracketright);
++#endif
++	Define(SEEK,	0, Shift(XK_backslash));
++	Define(LUA_CONTROL, 0, Ctrl(XK_l));
+         VerifySetup();
+     }
+ public:
+@@ -1287,6 +1335,12 @@
+     }
+ } KBSetup;
+ 
++int pauseatstart=0;
++
++#ifndef unlikely
++#define unlikely(x) __builtin_expect((x), 1==0)
++#endif
++
+ void S9xProcessEvents (bool8 block)
+ {
+ #ifdef USE_AIDO
+@@ -1297,6 +1351,17 @@
+     }
+ #endif
+ 
++    if (unlikely(autodemo[0]))
++    {
++    	S9xMovieOpen(autodemo, true,0);
++    	printf("Autodemo loading.\n");
++    	autodemo[0] = 0;
++    }
++    if (unlikely(pauseatstart))
++    {
++        Settings.Paused = 1;
++        pauseatstart = 0;
++    }
+     while (block || CheckForPendingXEvents (GUI.display))
+     {
+         XEvent event;
+@@ -1371,7 +1436,7 @@
+ 
+                     _splitpath (Memory.ROMFilename, drive, dir, def, ext);
+                     sprintf (filename, "%s%s%s.%03d",
+-                             S9xGetDirectory (SNAPSHOT_DIR), SLASH_STR, def,
++                             S9xGetSnapshotDirectory (), SLASH_STR, def,
+                              func.param);
+                     sprintf (GUI.info_string, "%s.%03d saved", def, func.param);
+                     S9xInfoMessage (GUI.info_string);
+@@ -1398,7 +1463,7 @@
+ 
+                     _splitpath (Memory.ROMFilename, drive, dir, def, ext);
+                     sprintf (filename, "%s%s%s.%03d",
+-                             S9xGetDirectory (SNAPSHOT_DIR), SLASH_STR, def,
++                             S9xGetSnapshotDirectory (), SLASH_STR, def,
+                              func.param);
+                     if (S9xUnfreezeGame (filename))
+                     {
+@@ -1410,7 +1475,7 @@
+                         static char *digits = "t123456789";
+                         _splitpath (Memory.ROMFilename, drive, dir, def, ext);
+                         sprintf (filename, "%s%s%s.zs%c",
+-                                 S9xGetDirectory (SNAPSHOT_DIR), SLASH_STR, 
++                                 S9xGetSnapshotDirectory (), SLASH_STR, 
+                                  def, digits [func.param]);
+                         if (S9xUnfreezeGame (filename))
+                         {
+@@ -1461,7 +1526,7 @@
+ 
+                     _splitpath (Memory.ROMFilename, drive, dir, def, ext);
+                     strcpy (ext, "spc");
+-                    _makepath (filename, drive, S9xGetDirectory (SPC_DIR), 
++                    _makepath (filename, drive, S9xGetSnapshotDirectory (), 
+                                def, ext);
+                     if (S9xSPCDump (filename))
+                         sprintf (GUI.info_string, "%s.%s saved", def, ext);
+@@ -1554,6 +1619,7 @@
+                     if(event.type != KeyPress) break;
+                     
+                     Settings.Paused ^= 1;
++                    FromPause = 1;
+                     S9xDisplayStateChange ("Pause", Settings.Paused);
+                     
+                     break;
+@@ -1620,6 +1686,7 @@
+                 {
+                     if(event.type != KeyPress) break;
+                     
++                    if ((true))
+                     {
+                         Settings.Transparency = !Settings.Transparency;
+                         S9xDisplayStateChange ("Transparency effects", 
+@@ -1680,6 +1747,7 @@
+                 case KeyboardSetup::TURBO_ENABLE:
+                 {
+                     Settings.TurboMode = event.type == KeyPress;
++                    FromPause = 1;
+                     break;
+                 }
+                 case KeyboardSetup::SUPERSCOPE_TURBO:
+@@ -1712,16 +1780,45 @@
+                 }
+                 case KeyboardSetup::WRITE_MOVIE_ASK:
+                 {
+-                    if(event.type != KeyPress) break;
++                    char temp[128];
+ 
++                    if(event.type != KeyPress) break;
++                    FromPause = 1;
++                    int Reset = 0;
++                    
++                    resetq:
++                    printf("From reset? (yes/no/cancel): ");
++                    fflush(stdout);
++                    
++                    fgets(temp, 127, stdin);
++                    if (temp[0] == 'y' || temp[0] == 'Y')
++                    	Reset = 1;
++                    else if (temp[0] == 'n' || temp[0] == 'N')
++                    	Reset = 0;
++                    else if (temp[0] == 'c' || temp[0] == 'C')
++                    	break;
++                    else
++                    	goto resetq;
++                    
++                    int numplayers;
++                    playersq:
++                    printf("Number of players (1/2/3/4/5/cancel): ");
++                    fflush(stdout);
++                    fgets(temp, 127, stdin);
++                    if (temp[0] == 'c' || temp[0] == 'C')
++                    	break;
++                    else
++                    	numplayers = atoi(temp);
++                    if (numplayers < 1 || numplayers > 5)
++                    	goto playersq;
++                    
+                     wchar_t name[MOVIE_MAX_METADATA] = {0};
+                     if(S9xMovieActive()) S9xMovieStop(FALSE);
+                     S9xMovieCreate(S9xChooseMovieFilename(FALSE),
+-                                   0x1F,
+-                                   //MOVIE_OPT_FROM_SNAPSHOT
++                                   (1 << numplayers)-1 ,
++                                   (!Reset) ? MOVIE_OPT_FROM_SNAPSHOT : 
+                                    MOVIE_OPT_FROM_RESET
+-                                   ,
+-                                   name,0);
++                                   , NULL,0);
+                     break;
+                 }
+                 case KeyboardSetup::LOAD_MOVIE_ASK:
+@@ -1729,7 +1826,7 @@
+                     if(event.type != KeyPress) break;
+ 
+                     if(S9xMovieActive()) S9xMovieStop(FALSE);
+-                    S9xMovieOpen(S9xChooseMovieFilename(TRUE), FALSE, 0);
++                    S9xMovieOpen(S9xChooseMovieFilename(TRUE), FALSE,0);
+                     break;
+                 }
+                 case KeyboardSetup::STOP_MOVIE:
+@@ -1739,11 +1836,49 @@
+                     if(S9xMovieActive()) S9xMovieStop(FALSE);
+                     break;
+                 }
+-
++                case KeyboardSetup::READONLY_MOVIE_TOGGLE:
++                {
++                	// I'll get to it later
++                	break;
++                
++                }
++		case KeyboardSetup::FRAMEADVANCE:
++		{
++			if (event.type != KeyPress) break;
++			Settings.FrameAdvance=1;
++			break;
++		}
+                 /* Do not put a "default" case here, or you'll
+                  * miss the compiler warning about unhandled
+                  * enumeration values
+                  */
++                case KeyboardSetup::SEEK:
++                {
++			if (event.type != KeyPress) break;
++                	char input[64];
++                	int skipframes;
++                	fprintf(stderr, "Seek to what frame (current: %d)? ", Logger_FrameCounter());
++                	fgets(input, sizeof(input), stdin);
++                	Settings.HighSpeedSeek = atoi(input) - Logger_FrameCounter();
++                	FromPause = 1;
++			break;
++                }
++                case KeyboardSetup::LUA_CONTROL:
++                {
++                    if(event.type != KeyPress) break;
++                	S9xLuaStop();
++                	fprintf(stderr, "Filename to load: ");
++                	char buffer[1024];
++                	buffer[0] = 0;
++                	FromPause = 1;
++                	fgets(buffer,sizeof(buffer), stdin);
++                	while (buffer[strlen(buffer)-1] == '\n' || buffer[strlen(buffer)-1] == '\r')
++                		buffer[strlen(buffer)-1] = 0;
++
++			if (strlen(buffer) > 0)
++				S9xLoadLuaCode(buffer);
++                }
++
+             }
+             
+             break;
+@@ -1813,7 +1948,7 @@
+     height = snes_height;
+     cheight = (height>SNES_HEIGHT_EXTENDED)?SNES_HEIGHT_EXTENDED*2:SNES_HEIGHT_EXTENDED;
+     
+-    if (GUI.interpolate)
++    if (GUI.interpolate && (true))
+     {
+ 	if (snes_width == 512 && snes_height > 240 && GUI.interpolate != 5)
+ 	{
+@@ -1935,27 +2070,44 @@
+ 	}
+     }
+ 
+-    if ((GUI.depth != 15 && GUI.depth != 16) ||
+-	(GUI.image_needs_scaling && GUI.interpolate != 5))
++    if (((true) && GUI.depth != 15 && GUI.depth != 16) ||
++	(!(true) && (!GUI.pseudo || GUI.depth != 8)) ||
++	(GUI.image_needs_scaling && !((true) && GUI.interpolate == 5)))
+     {
+ 	done = TRUE;
+ 	switch (GUI.depth)
+ 	{
+ 	case 8:
++	    if ((true))
+ 		Convert16To8 (width, height);
++	    else
++		Scale8 (width, height);
+ 	    break;
+ 
+ 	case 15:
+ 	case 16:
++	    if (!(true))
++		Convert8To16 (width, height);
++	    else
+ 		Scale16 (width, height);
+ 	    break;
+ 
+ 	case 32:
+ 	case 24:
++	    if ((true))
++	    {
+ 		if (GUI.image->bits_per_pixel == 32)
+ 		    Convert16To24 (width, height);
+ 		else
+ 		    Convert16To24Packed (width, height);
++	    }
++	    else
++	    {
++		if (GUI.image->bits_per_pixel == 32)
++		    Convert8To24 (width, height);
++		else
++		    Convert8To24Packed (width, height);
++	    }
+ 	    break;
+ 	}
+     }
+@@ -1989,9 +2141,6 @@
+     }
+ #endif
+ 
+-    GUI.last_snes_width = snes_width;
+-    GUI.last_snes_height = snes_height;
+-
+ #ifdef USE_DGA_EXTENSION
+     if (!XF86.is_full_screen)
+     {
+@@ -2016,6 +2165,9 @@
+     }
+ #endif
+ 
++    GUI.last_snes_width = snes_width;
++    GUI.last_snes_height = snes_height;
++    VideoLogger(GUI.image_date, snes_width, snes_height, GUI.depth);
+ 
+     if (GUI.box.x != GUI.old_box.x || GUI.box.y != GUI.old_box.y ||
+ 	GUI.box.width != GUI.old_box.width || GUI.box.height != GUI.old_box.height)
+@@ -2146,6 +2298,8 @@
+     else
+     if (GUI.pseudo)
+     {
++	if ((true))
++	{
+ 	    for (i = 0; i < 256; i++)
+ 	    {
+ 		GUI.colors[i].flags = DoRed | DoGreen | DoBlue;
+@@ -2153,6 +2307,19 @@
+ 		GUI.colors[i].green = GUI.fixed_colours[i].green << 11;
+ 		GUI.colors[i].blue = GUI.fixed_colours[i].blue << 11;
+ 	    }
++	}
++	else
++	{
++	    uint16 Brightness = (IPPU.MaxBrightness) * 140;
++	    
++	    for (i = 0; i < 256; i++)
++	    {
++		GUI.colors[i].flags = DoRed | DoGreen | DoBlue;
++		GUI.colors[i].red = ((PPU.CGDATA[i] >> 0) & 0x1F) * Brightness;
++		GUI.colors[i].green = ((PPU.CGDATA[i] >> 5) & 0x1F) * Brightness;
++		GUI.colors[i].blue = ((PPU.CGDATA[i] >> 10) & 0x1F) * Brightness;
++	    }
++	}
+ 	XStoreColors (GUI.display, GUI.cmap, GUI.colors, 256);
+     }
+ }
+@@ -2162,6 +2329,8 @@
+ {
+     static char path [PATH_MAX];
+     char buffer [PATH_MAX];
++
++    FromPause = 1;
+     
+     XAutoRepeatOn (GUI.display);
+ 
+@@ -2802,14 +2971,11 @@
+     //XAutoRepeatOff (GUI.display);
+ }
+ 
+-void S9xExtraUsage ()
+-{
+-}
+-
+ void S9xParseDisplayArg (char **argv, int &ind, int)
+ {
+     if (strncasecmp (argv [ind], "-y", 2) == 0)
+     {
++//	Settings.SixteenBit = TRUE;
+         Settings.SupportHiRes = TRUE;
+         Settings.ForceTransparency = TRUE;
+ 	switch (argv[ind][2])
+@@ -2825,6 +2991,7 @@
+     else
+     if (strncasecmp (argv [ind], "-GUI.interpolate", 12) == 0)
+     {
++//	Settings.SixteenBit = TRUE;
+         Settings.SupportHiRes = TRUE;
+         Settings.ForceTransparency = TRUE;
+ 	switch (argv[ind][12])
+@@ -2862,6 +3029,10 @@
+ 	S9xUsage ();
+ }
+ 
++void S9xExtraUsage ()
++{
++}
++
+ int S9xMinCommandLineArgs ()
+ {
+     return (2);
+@@ -3228,6 +3399,10 @@
+ 	XUngrabKeyboard (GUI.display, CurrentTime);
+ }
+ #endif
++
++
++
++// Addons!
+ 
+ #include "conffile.h"
+ typedef std::pair<std::string,std::string> strpair_t;

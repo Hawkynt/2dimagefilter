@@ -1,0 +1,1412 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>IPOL: Linear Methods for Image Interpolation</title>
+
+<meta name="language" content="en">
+
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+
+<link rel="stylesheet" href="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/style.css" type="text/css">
+<link rel="stylesheet" href="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/local.css" type="text/css">
+
+<script src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/jwplayer.js" type="text/javascript"></script>
+
+<meta name="author" content="Pascal Getreuer">
+<meta name="description" content="">
+<meta name="date" content="2011-09-27">
+<meta name="keywords" content="fourier transform, image interpolation">
+<link rel="bookmark" href="http://dx.doi.org/10.5201/ipol.2011.g_lmii">
+<meta name="json_metadata" content="{
+&quot;title&quot;:
+    &quot;Linear Methods for Image Interpolation&quot;,
+&quot;authors&quot;:
+    [
+        {&quot;first&quot;:&quot;Pascal&quot;, &quot;last&quot;:&quot;Getreuer&quot;}
+	],
+&quot;date&quot;:
+    &quot;2011-09-27&quot;,
+&quot;doi&quot;:
+    &quot;10.5201/ipol.2011.g_lmii&quot;,
+&quot;url&quot;:
+    &quot;http://www.ipol.im/pub/art/2011/g_lmii/&quot;,
+&quot;url_pdf&quot;:
+    &quot;http://www.ipol.im/pub/art/2011/g_lmii//article.pdf&quot;,
+&quot;url_pdf_lr&quot;:
+    &quot;http://www.ipol.im/pub/art/2011/g_lmii//article_lr.pdf&quot;,
+&quot;url_software&quot;:
+    &quot;http://www.ipol.im/pub/art/2011/g_lmii//&quot;,
+&quot;keywords&quot;:
+    &quot;fourier transform, image interpolation&quot;,
+&quot;description&quot;:
+    &quot;&quot;,
+&quot;journal&quot;:
+    &quot;Image Processing On Line&quot;,
+&quot;issn&quot;:
+    &quot;2105-1232&quot;,
+&quot;volume&quot;:
+    &quot;2011&quot;
+}">
+<meta name="citation_title" content="Linear Methods for Image Interpolation">
+<meta name="citation_author" content="Pascal Getreuer">
+<meta name="citation_date" content="2011/09/27">
+<meta name="citation_journal_title" content="Image Processing On Line">
+<meta name="citation_issn" content="2105-1232">
+<meta name="citation_issue" content="2011">
+<meta name="citation_doi" content="10.5201/ipol.2011.g_lmii">
+<meta name="citation_language" content="en">
+<meta name="citation_keywords" content="fourier transform, image interpolation">
+<meta name="citation_description" content="">
+<meta name="citation_abstract_html_url" content="http://www.ipol.im/pub/art/2011/g_lmii/">
+<meta name="DC.Title" content="Linear Methods for Image Interpolation">
+<meta name="DC.Creator.PersonalName" content="Pascal Getreuer">
+<meta name="DC.Date.Created" content="2011-09-27">
+<meta name="DC.Issued" content="2011/09/27">
+<meta name="DC.IsPartOf" content="Image Processing On Line">
+<meta name="DC.IsPartOf.ISSN" content="2105-1232">
+<meta name="DC.IsPartOf.URI" content="http://www.ipol.im/">
+<meta name="DC.IsPartOf.DOI" content="10.5201/ipol">
+<meta name="DC.Source" content="Image Processing On Line">
+<meta name="DC.Source.ISSN" content="2105-1232">
+<meta name="DC.Source.URI" content="http://www.ipol.im/">
+<meta name="DC.Source.DOI" content="10.5201/ipol">
+<meta name="DC.Source.Issue" content="2011">
+<meta name="DC.Source.Issue.URI" content="http://www.ipol.im/pub/art/2011">
+<meta name="DC.Source.Issue.DOI" content="10.5201/ipol.2011">
+<meta name="DC.Identifier" content="ipol.2011.g_lmii">
+<meta name="DC.Identifier.DOI" content="10.5201/ipol.2011.g_lmii">
+<meta name="DC.Identifier.URI" content="http://www.ipol.im/pub/art/2011/g_lmii/">
+<meta name="DC.Language" content="en">
+<meta name="DC.Rights" content="see http://www.ipol.im/meta/copyright/">
+<meta name="DC.Subject" content="fourier transform, image interpolation">
+<meta name="DC.Description" content="">
+<meta name="DC.Type" content="Text.Serial.Journal">
+<meta name="DC.Type.ArticleType" content="Articles">
+<link href="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/mylocal.css" rel="stylesheet" title="mylocal style" type="text/css">
+
+
+
+<link rel="icon" href="http://www.ipol.im/favicon.ico" type="image/x-icon">
+<link rel="icon" href="http://www.ipol.im/favicon.png" type="image/png">
+
+</head>
+<body><script src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/ikiwiki.js" type="text/javascript" charset="utf-8"></script>
+<script src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/toggle.js" type="text/javascript" charset="utf-8"></script><style type="text/css">div.toggleable { display: none; }</style>
+
+<div class="pageheader">
+  <div id="header">
+    <div id="motto">
+      <a href="http://www.ipol.im/">Image Processing On Line</a>
+    </div> <!-- #motto -->
+    <div id="menu" class="noprint">
+      <form action="http://www.google.com/cse" id="search">
+	<ul>
+	  <li><a href="http://www.ipol.im/">HOME</a></li>
+	  <li><a href="http://www.ipol.im/meta/">ABOUT</a></li>
+	  <li><a href="http://www.ipol.im/pub/art/">ARTICLES</a></li>
+	  <li><a href="http://www.ipol.im/pub/pre/">PREPRINTS</a></li>
+	  <li><a href="http://www.ipol.im/news/">NEWS</a></li>
+	  <li class="search">
+	    <input name="cx" value="016691498998454533855:WMX-109950614" type="hidden">
+	    <input name="ie" value="UTF-8" type="hidden">
+	    <input value="SEARCH" type="submit">
+	    <input name="q" size="16" id="searchbox" type="text">
+	  </li>
+	</ul>
+      </form>
+    </div> <!-- #menu -->
+  </div> <!-- #header -->
+</div> <!-- .pageheader -->
+
+
+<div id="main">
+<div id="pagetitle">
+Linear Methods for Image Interpolation
+</div> <!-- #pagetitle -->
+<div id="content">
+<!-- JSON metadata -->
+
+<!-- google scholar metadata -->
+
+<!-- DCMI metadata -->
+
+<!-- CrossRef 2xml input -->
+<!-- TODO: build from JSON -->
+<!--
+2xml:/doi_batch/body/journal/!= ==============
+2xml:/doi_batch/body/journal/journal_article/@publication_type=full_text
+2xml:/doi_batch/body/journal/journal_article/titles/title=Linear Methods for Image Interpolation
+2xml:/doi_batch/body/journal/journal_article/contributors/person_name/@contributor_role=author
+2xml:/doi_batch/body/journal/journal_article/contributors/person_name/@sequence=first
+2xml:/doi_batch/body/journal/journal_article/contributors/person_name/given_name=Pascal
+2xml:/doi_batch/body/journal/journal_article/contributors/person_name/surname=Getreuer
+2xml:/doi_batch/body/journal/journal_article/publication_date/@media_type=online
+2xml:/doi_batch/body/journal/journal_article/publication_date/month=09
+2xml:/doi_batch/body/journal/journal_article/publication_date/day=27
+2xml:/doi_batch/body/journal/journal_article/publication_date/year=2011
+2xml:/doi_batch/body/journal/journal_article/doi_data/doi=10.5201/ipol.2011.g_lmii
+2xml:/doi_batch/body/journal/journal_article/doi_data/resource=http://www.ipol.im/pub/art/2011/g_lmii/
+-->
+
+<div id="pageauthor">
+Pascal Getreuer
+</div>
+
+<ul id="xlinks" class="noprint, article" style="padding-left: 2em; margin-left:-2em;
+  padding-right:1000em; margin-right:-1000em">
+  <li class="article"><a href="http://www.ipol.im/pub/art/2011/g_lmii/">article</a></li>
+  <li class="demo"><a href="http://demo.ipol.im/demo/g_linear_methods_for_image_interpolation/">demo</a></li>
+  <li class="archive"><a href="http://demo.ipol.im/demo/g_linear_methods_for_image_interpolation/archive">archive</a></li>
+</ul>
+
+<div id="status" class="published" style="padding-left: 2em; margin-left:-2em;
+  padding-right:1000em; margin-right:-1000em">
+  <div class="biblio">
+    <div class="bibtex">→ BibTeX
+      <pre>@article{ipol.2011.g_lmii,
+    title   = {{Linear Methods for Image Interpolation}},
+    author  = {Getreuer, Pascal},
+    journal = {{Image Processing On Line}},
+    volume  = {2011},
+    year    = {2011},
+    doi     = {10.5201/ipol.2011.g_lmii},
+}
+% if your bibliography style doesn't support doi fields:
+    note    = {\url{http://dx.doi.org/10.5201/ipol.2011.g_lmii}}</pre>
+    </div>
+    <dl>
+      <dt>published</dt>
+      <dd>2011-09-27 </dd>
+      <dt>reference</dt>
+      <dd>Getreuer, Pascal.
+      “Linear Methods for Image Interpolation.”
+      <a href="http://dx.doi.org/10.5201/ipol" style="font-style: italic">Image Processing On Line</a> 
+      <a href="http://dx.doi.org/10.5201/ipol.2011">2011</a> (2011). 
+      <a href="http://dx.doi.org/10.5201/ipol.2011.g_lmii">http://dx.doi.org/10.5201/ipol.2011.g_lmii</a></dd>
+    </dl>
+  </div>
+</div>
+
+<p>
+
+<em>Communicated by</em> Gabriele Facciolo<br>
+
+
+<em>Demo edited by</em> Pascal Getreuer
+
+</p>
+
+<div class="toc">
+<ol>
+	<li class="L1"><a href="#index1h1">Overview</a>
+	</li>
+	<li class="L1"><a href="#index2h1">References</a>
+	</li>
+	<li class="L1"><a href="#index3h1">Online Demo</a>
+	</li>
+	<li class="L1"><a href="#index4h1">Notations</a>
+	</li>
+	<li class="L1"><a href="#index5h1">Interpolation Kernels</a>
+	</li>
+	<li class="L1"><a href="#index6h1">Two-Step Interpolation</a>
+	</li>
+	<li class="L1"><a href="#index7h1">Interpolation Properties</a>
+	</li>
+	<li class="L1"><a href="#index8h1">Kernel Normalization</a>
+	</li>
+	<li class="L1"><a href="#index9h1">Nearest Neighbor</a>
+	</li>
+	<li class="L1"><a href="#index10h1">Bilinear</a>
+	</li>
+	<li class="L1"><a href="#index11h1">Bicubic</a>
+	</li>
+	<li class="L1"><a href="#index12h1">Sinc</a>
+	</li>
+	<li class="L1"><a href="#index13h1">Windowed Sinc Approximations</a>
+	</li>
+	<li class="L1"><a href="#index14h1">Splines</a>
+	</li>
+	<li class="L1"><a href="#index15h1">Radial Basis Functions</a>
+	</li>
+	<li class="L1"><a href="#index16h1">Methodology</a>
+	</li>
+	<li class="L1"><a href="#index17h1">Algorithm</a>
+	</li>
+	<li class="L1"><a href="#index18h1">Implementation</a>
+	</li>
+	<li class="L1"><a href="#index19h1">Examples</a>
+	</li>
+</ol>
+</div>
+
+<ul>
+<li><a href="http://www.getreuer.info/">Pascal Getreuer</a>
+<a href="mailto:pascal.getreuer@cmla.ens-cachan.fr"><code>pascal.getreuer@cmla.ens-cachan.fr</code></a>,
+CMLA, ENS Cachan</li>
+</ul>
+
+<p><style>
+span.m {font-family:serif;}
+span.mi {position:relative;top:4pt}
+img {border:0px}
+</style></p>
+
+<h1><a name="index1h1"></a>Overview</h1>
+
+<p>Given input image <span class="m"><em>v</em></span> with uniformly-sampled pixels <span class="m"><em>v</em><sub><em>m</em>,<em>n</em></sub></span>, the goal of interpolation is to find a function <span class="m"><em>u</em>(<em>x</em>,<em>y</em>)</span> satisfying</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/6bb847b16f73cfc729b06913cad8e28a.png" alt="v_{m,n} = u(m,n) \quad \text{for all $m,n\in\mathbb{Z}$}" class="teximg"></p>
+
+<p>such that <span class="m"><em>u</em></span> approximates the underlying function from which <span class="m"><em>v</em></span> was sampled.  Another way to interpret this is <span class="m"><em>v</em></span> was created by subsampling, and interpolation attempts to invert this process.</p>
+
+<p>We discuss linear methods for interpolation, including nearest 
+neighbor, bilinear, bicubic, splines, and sinc interpolation.  We focus 
+on separable interpolation, so most of what is said applies to 
+one-dimensional interpolation as well as <em>N</em>-dimensional separable interpolation.</p>
+
+<h1><a name="index2h1"></a>References</h1>
+
+<ol>
+<li><a name="ref_shannon48"></a>C.E. Shannon, <a href="http://cm.bell-labs.com/cm/ms/what/shannonday/shannon1948.pdf">“A Mathematical Theory of Communication,“</a> Bell System Technical Journal, vol. 27, pp. 379–423, 623–656, 1948.</li>
+<li><a name="ref_strang73"></a>G. Strang and G. Fix, “A Fourier analysis
+ of the finite element variational method,” Constructive Aspects of 
+Functional Analysis, Edizioni Cremonese, Rome, pp. 795–840, 1973.</li>
+<li><a name="ref_keys81"></a>R. Keys,  <a href="http://dx.doi.org/10.1109/TASSP.1981.1163711">“Cubic Convolution Interpolation for Digital Image Processing,”</a> IEEE Trans. Acoustics, Speech, and Signal Processing, 29(6), 1981.</li>
+<li><a name="ref_aldroubi92"></a>A. Aldroubi, M. Unser, and M. Eden, <a href="http://dx.doi.org/10.1016/0165-1684%2892%2990030-Z">“Cardinal spline filters: stability and convergence to the ideal sinc interpolator,”</a> Signal Processing, vol. 28, no. 2, pp. 127–138, 1992.</li>
+<li><a name="ref_schaum93"></a>A. Schaum, <a href="http://dx.doi.org/10.1006/cgip.1993.1035">“Theory and design of local interpolators,”</a> CVGIP: Graph. Models Image Processing, vol.&nbsp;55, no.&nbsp;6, pp.&nbsp;464–481, 1993.</li>
+<li><a name="ref_unser99"></a>M. Unser,  <a href="http://dx.doi.org/10.1109/79.799930">“Splines: A Perfect Fit for Signal/Image Processing,”</a> IEEE Signal Processing Magazine, 16(6), pp. 22–38, 1999.</li>
+<li><a name="ref_thevenaz00"></a>P. Thévenaz, T. Blu, and M. Unser, “Interpolation Revisited,” IEEE Trans. Medical Imaging, vol. 19, no. 7, pp. 739–758, 2000. </li>
+<li><a name="ref_blu01"></a>T. Blu, P. Thévenaz, and M. Unser,  <a href="http://dx.doi.org/10.1109/83.931101">“MOMS: Maximal-Order Interpolation of Minimal Support,”</a>  IEEE Trans. Image Processing, vol.&nbsp;10, no.&nbsp;7, pp.&nbsp;1069–1080, 2001.</li>
+<li><a name="ref_meijering02"></a>E. Meijering,  <a href="http://dx.doi.org/10.1109/5.993400">“A Chronology of Interpolation: From Ancient Astronomy to Modern Signal and Image Processing,”</a> In Proceedings of the IEEE, 90, pp. 319–342, 2002.</li>
+<li><a name="ref_malgouyres02"></a>F. Malgouyres and F. Guichard,  <a href="http://dx.doi.org/10.1137/S0036142999362286">“Edge direction preserving image zooming: A mathematical and numerical analysis,”</a> SIAM J. Numerical Analysis, 39(1), pp. 1–37, 2002.</li>
+<li><a name="ref_fornberg11"></a>B. Fornberg, E. Larsson, N. Flyer, <a href="http://dx.doi.org/10.1137/09076756X">“Stable computations with Gaussian radial basis functions,”</a> SIAM J. Sci. Comput. 33, pp.&nbsp;869–892, 2011.</li>
+<li><a name="ref_ffmpeg"></a>FFmpeg, <a href="http://www.ffmpeg.org/">http://www.ffmpeg.org</a>.</li>
+</ol>
+
+<h1><a name="index3h1"></a>Online Demo</h1>
+
+<p>An <a href="http://www.ipol.im/pub/demo/g_linear_methods_for_image_interpolation/">online demo</a>
+of this algorithm is available.</p>
+
+<h1><a name="index4h1"></a>Notations</h1>
+
+<p>We use the following normalization of the Fourier transform,</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/46a51b0f38caf3dbdd927bc9b1a3a887.png" alt="\hat{f}(\xi) = \int_{-\infty}^\infty f(x) \mathrm{e}^{-2\pi i x \xi} \, dx," class="teximg"></p>
+
+<p>the transform of a function <span class="m"><em>f</em></span> is denoted by hat.  We will also use the bilateral Z-transform.   The Z-transform of a sequence <span class="m"><em>c</em><sub><em>n</em></sub></span> is</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/c8a08adfa32d60f389a027ecb403d97f.png" alt="c(z) := \sum_{n=-\infty}^\infty c_n z^{-n}." class="teximg"></p>
+
+<p>We denote the sequence with a subscript <span class="m"><em>c</em><sub><em>n</em></sub></span> and its Z-transform as 
+<span class="m"><em>c</em>(<em>z</em>)</span>.</p>
+
+<h1><a name="index5h1"></a>Interpolation Kernels</h1>
+
+<p>Linear interpolation can be abstractly described as a linear operator <span class="m"><em>Z</em></span> mapping samples <span class="m"><em>v</em></span> to a function <span class="m"><em>u</em> := <em>Z</em>(<em>v</em>)</span>.  We define two properties on <span class="m"><em>Z</em></span>.</p>
+
+<ol>
+<li><p>Let <span class="m"><em>S</em><sub><em>k</em>,<em>l</em></sub></span> denote shifting, <span class="m"><em>S</em><sub><em>k</em>,<em>l</em></sub>(<em>v</em>)(<em>m</em>,<em>n</em>)&nbsp;:= <em>v</em><sub><em>m</em>−<em>k</em>,<em>n</em>−<em>l</em></sub></span>.  <span class="m"><em>Z</em></span> is said to be <em>shift-invariant</em> if for every <span class="m"><em>v</em></span> and <span class="m">(<em>k</em>,&nbsp;<em>l</em>)</span>,<br>
+<span style="margin-top:3pt"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/0e035c62460d8205dd7ca8318bb216e9.png" alt="Z\bigl(S_{k,l}(v)\bigr)(x,y) 
+= Z(v)(x - k, y - l)." class="teximg"></span></p></li>
+<li><p>Let <span class="m"><em>v</em><sup><em>N</em></sup></span> denote the restriction of <span class="m"><em>v</em></span> to the set <span class="m">{−<em>N</em>,…,+<em>N</em>}<sup>2</sup></span>, then <span class="m"><em>Z</em></span> is said to be <em>local</em> if for every <span class="m"><em>v</em></span> and <span class="m">(<em>x</em>,&nbsp;<em>y</em>)</span>,<br>
+<span style="margin-top:3pt"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/676c625a2f8b8390619968e89c5ec97f.png" alt="Z(v)(x,y) = \lim_{N\rightarrow\infty} Z(v^N)(x,y)." class="teximg"></span></p></li>
+</ol>
+
+<p>If <span class="m"><em>Z</em></span> is a linear, shift-invariant, local operator from <span class="mi"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/2103cdc05bac2023d42f3bc7c6617de6.png" alt="\ell^\infty(\mathbb{Z}^2)" class="teximg"></span> to <span class="mi"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/6b42630963e7b1abeb7e2982c8e9027a.png" alt="L^\infty(\mathbb{R}^2)" class="teximg"></span>, then there exists a unique function <span class="m"><em>K</em>&nbsp;∈&nbsp;<em>L</em><sup>1</sup></span> called the <em>interpolation kernel</em> such that <span class="m"><em>Z</em>(<em>v</em>)</span> can be written as a convolution&nbsp;<a href="#ref_malgouyres02">[10]</a>:</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/b874862fe46a64d3ca5ce4668d7aaafa.png" alt="Z(v)(x,y) = \sum_{m,n\in\mathbb{Z}} v_{m,n} K(x-m,y-n)." class="teximg"></p>
+
+<p>The conditions for this result are mild and are satisfied by most linear interpolation methods of practical interest.</p>
+
+<p>The properties of the kernel <span class="m"><em>K</em></span>, like symmetry, regularity, and moments, imply properties of the interpolation.  For four-fold rotational symmetry, <span class="m"><em>K</em></span> is usually designed as a tensor product <span class="m"><em>K</em>(<em>x</em>,<em>y</em>)&nbsp;= <em>K</em><sub>1</sub>(<em>x</em>)<em>K</em><sub>1</sub>(<em>y</em>)</span>, where <span class="m"><em>K</em><sub>1</sub></span>
+ is a symmetric function.  Such a kernel also has the benefit that the 
+interpolation is separable, the interpolation can be decomposed into 
+one-dimensional interpolations along each dimension. </p>
+
+<p>Similarly in three (or higher) dimensions, it is convenient to use a separable kernel <span class="m"><em>K</em>(<em>x</em>,<em>y</em>,<em>z</em>)&nbsp;= <em>K</em><sub>1</sub>(<em>x</em>)<em>K</em><sub>1</sub>(<em>y</em>)<em>K</em><sub>1</sub>(<em>z</em>)</span>
+ so that the interpolation decomposes into one-dimensional 
+interpolations.  More generally, one can use different one-dimensional 
+kernels along different dimensions, <span class="m"><em>K</em>(<em>x</em>,<em>y</em>,<em>z</em>)&nbsp;= <em>K</em><sub>1</sub>(<em>x</em>)<em>K</em><sub>2</sub>(<em>y</em>)<em>K</em><sub>3</sub>(<em>z</em>)</span>.
+  For instance, it may be more appropriate to use a different kernel for
+ the temporal dimension than for the spatial dimensions in video 
+interpolation.</p>
+
+<p>In order to have the interpolant agree with the known samples <span class="m"><em>Z</em>(<em>v</em>)(<em>m</em>,<em>n</em>)&nbsp;= <em>v</em><sub><em>m</em>,<em>n</em></sub></span>, it is easy to see that the requirements are <span class="m"><em>K</em>(<em>m</em>,<em>n</em>)&nbsp;= 0</span> for all integer <span class="m"><em>m</em></span> and <span class="m"><em>n</em></span>, except at the origin where <span class="m"><em>K</em>(0,0)&nbsp;= 1</span>.  <em>K</em> is said to be an <em>interpolating</em> function if it satisfies these requirements.</p>
+
+<h1><a name="index6h1"></a>Two-Step Interpolation</h1>
+
+<p>That <span class="m"><em>K</em></span> must be interpolating can be an inconvenient restriction.  It complicates the problem of finding a kernel <span class="m"><em>K</em></span>
+ that also satisfies other design objectives.  It can also be an 
+obstacle computationally.  In some cases such as spline interpolation, <span class="m"><em>K</em></span>
+ has infinite support, yet the interpolant can be expressed as a linear 
+combination of compact support functions (the B-splines).</p>
+
+<p>Suppose that one dimensional data <span class="m"><em>f</em><sub><em>m</em></sub></span> is to be interpolated.  An alternative approach is to begin with a basis function <span class="m"><em>φ</em>(<em>t</em>)</span> and then express the interpolant as a linear combination of <span class="m">{<em>φ</em>(<em>t</em>&nbsp;− <em>n</em>)}</span>,</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/15f8073fbb1b4bf4f37b95d6fa236af3.png" alt="u(t) = \sum_{n\in\mathbb{Z}} c_n \varphi(t - n)" class="teximg"></p>
+
+<p>where the coefficients <span class="m"><em>c</em><sub><em>n</em></sub></span> are selected such that </p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/ae1f6ba9b11450d34d3cb4f43b81181c.png" alt="f_m = \sum_{n\in\mathbb{Z}} c_n \varphi(m - n)." class="teximg"></p>
+
+<p>That is, interpolation is a two-step procedure: first, we solve for the coefficients <span class="m"><em>c</em><sub><em>n</em></sub></span> and second, the interpolant is constructed as
+<span class="m">∑<em>c</em><sub><em>n</em></sub><em>φ</em>(<em>t</em>&nbsp;− <em>n</em>)</span>.  </p>
+
+<p>To solve for the coefficients, notice that <span class="m"><em>f</em><sub><em>m</em></sub>&nbsp;= ∑<em>c</em><sub><em>n</em></sub><em>φ</em>(<em>m</em>&nbsp;− <em>n</em>)</span> is equivalent to a discrete convolution <span class="m"><em>f</em><sub><em>m</em></sub>&nbsp;= (<em>c</em>&nbsp;∗ <em>p</em>)<sub><em>m</em></sub></span> where <span class="m"><em>p</em><sub><em>m</em></sub>&nbsp;= <em>φ</em>(<em>m</em>)</span>. This suggests solving for <span class="m"><em>c</em><sub><em>n</em></sub></span> under the Z-transform as</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/5e19be482bd3f76a9f57ecd4511d574f.png" alt="
+f(z) = c(z) p(z) \quad
+\Rightarrow \quad c(z) = \frac{1}{p(z)} f(z)." class="teximg"></p>
+
+<p>Let <span class="m">(<em>p</em>)<sup>−1</sup></span> deonte the convolution inverse of <span class="m"><em>p</em></span>, which is the sequence such that <span class="m"><em>p</em>&nbsp;∗&nbsp;(<em>p</em>)<sup>−1</sup>&nbsp;= δ</span> where <span class="m">δ</span> is the unit impulse (<span class="m">δ<sub>0</sub>&nbsp;:= 1</span> and <span class="m">δ<sub><em>m</em></sub>&nbsp;:= 0</span> otherwise).  Using <span class="m">(<em>p</em>)<sup>−1</sup></span> we obtain <span class="m"><em>c</em><sub><em>n</em></sub></span> by “prefiltering” as</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/97db2f9d0506938cd97f3eba002fd367.png" alt="c = (p)^{-1} * f." class="teximg"></p>
+
+<p>A unique convolution inverse exists in many practical cases of interest&nbsp;<a href="#ref_thevenaz00">[7]</a>.  If it exists and <span class="m"><em>φ</em></span> is real and symmetric, then <span class="m">(<em>p</em>)<sup>−1</sup></span>
+ can be factored into pairs of recursive (infinite impulse response) 
+filters, allowing for an efficient in-place calculation.  Finally, the 
+interpolant is obtained as <span class="m">∑<em>c</em><sub><em>n</em></sub><em>φ</em>(<em>t</em>&nbsp;−&nbsp;<em>n</em>)</span>.</p>
+
+<p>It is possible to express this two-step interpolation procedure in terms of an interpolation kernel,</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/3891857dee30a926bfadde3f291d506a.png" alt="
+\begin{aligned}
+u(t) &amp;= \sum_{n\in\mathbb{Z}} \bigl((p)^{-1} * f\bigr)_n \varphi(t - n) \\
+u(t) &amp;= \sum_{m\in\mathbb{Z}} f_m \sum_{n\in\mathbb{Z}} (p)^{-1}_{n - m} \varphi(t - n) \\
+u(t) &amp;= \sum_{m\in\mathbb{Z}} f_m K_1(t - m), \quad
+K_1(t) = \sum_{n\in\mathbb{Z}} (p)^{-1}_n \varphi(t - n).
+\end{aligned}" class="teximg"></p>
+
+<p>For example, the following figures illustrate this relationship for cubic and septic (7th) B-spline interpolation where <span class="m"><em>φ</em></span> are the cubic and septic B-splines.  In both cases, <span class="m"><em>φ</em></span> is not an interpolating function, but prefiltering with <span class="m">(<i>p</i>)<sup>−1</sup></span> yields a kernel <i>K</i><sub>1</sub> that is interpolating.</p>
+
+<table style="text-align:center">
+<tbody><tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/prefiltb3.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/760x222-prefiltb3.png" class="img" width="760" height="222"></a></td></tr>
+<tr><td><i>Two-step interpolation where <span class="m"><i>φ</i></span> is the cubic B-spline.</i></td></tr>
+</tbody></table>
+
+<table style="text-align:center">
+<tbody><tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/prefiltb7.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/760x222-prefiltb7.png" class="img" width="760" height="222"></a></td></tr>
+<tr><td><i>Two-step interpolation where <span class="m"><i>φ</i></span> is
+the septic B-spline.</i></td></tr>
+</tbody></table>
+
+<h1><a name="index7h1"></a>Interpolation Properties</h1>
+
+<p>An interpolation method <span class="m"><em>Z</em></span> has <em>approximation order</em> <span class="m"><em>J</em></span> if
+it reproduces polynomials up to degree <span class="m">(<em>J</em>&nbsp;− 1)</span>.</p>
+
+<p>Let <span class="m"><em>Z</em></span> and <span class="m"><em>K</em><sub>1</sub></span> be defined from a function <span class="m"><em>φ</em></span> as in the previous section.  The <em>Strang–Fix conditions</em>&nbsp;<a href="#ref_strang73">[2]</a> provide the following equivalent conditions to determine the approximation order.</p>
+
+<ol>
+<li><span class="m"><em>Z</em></span> has approximation order <span class="m"><em>J</em></span>,</li>
+<li><span class="mi"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/c2e0659380cd8295022058184fed320f.png" alt="\Hat{\varphi}(0) = 1, \quad 
+\Hat{\varphi}^{(j)}(2\pi k) = 0 \quad \forall k\in\mathbb{Z}_*, j = 0, \ldots, J-1," class="teximg"></span></li>
+<li><span class="mi" style="top:8pt"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/2489263bdb686f3d033416e87efb9af9.png" alt="\sum_{k\in\mathbb{Z}}
+(x - k)^j \varphi(x - k) = \mu_j \quad \forall x\in\mathbb{R}, j = 0, \ldots, J-1." class="teximg"></span></li>
+</ol>
+
+<p>where <span class="mi"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/911f7abfff7fac0c5c71a4e8936f958d.png" alt="\Hat{\varphi}^{(j)}" class="teximg"></span> denotes the <em>j</em>th derivative of <span class="mi"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/35232b48b8d9b2be9307005e357b39d3.png" alt="\Hat{\varphi}" class="teximg"></span> and <span class="mi"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/9c71f5c9183978a0c2f04545e95d8d9b.png" alt="\mathbb{Z}_* := \mathbb{Z}\backslash \{0\}" class="teximg"></span>.  Aside from approximation order, another property of interest is the <span class="m"><em>L</em><sup>2</sup></span> interpolation error.  Let <span class="mi"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/51b5f71d4cf9d21a3eb4589cdec1edca.png" alt="f \in L^2(\mathbb{R})" class="teximg"></span> and define <span class="m"><em>f</em><sub><em>δ</em></sub>(t)&nbsp;= ∑<em>f</em>(<em>δn</em>)<em>K</em><sub>1</sub>(<em>t</em>&nbsp;− <em>n</em>)</span> for <span class="m"><em>δ</em>&nbsp;&gt; 0</span>.  The interpolation error is approximately</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/5671f14143c4b04860c123ab0bb191bf.png" alt="
+\begin{aligned}
+\lVert f - f_\delta\rVert_{L^2}^2 &amp;\approx
+\int \lvert f(\xi)\rvert^2 E_\mathrm{int}(\xi \delta) \,d\xi, \\
+E_\mathrm{int}(\xi) &amp;:=
+\frac{\bigl\lvert \sum_{k\in\mathbb{Z}_*} \hat{\varphi}(\xi + k)\bigr\rvert^2
++ \sum_{k\in\mathbb{Z}_*} \lvert\hat{\varphi}(\xi + k)\rvert^2}
+{\bigl\lvert \sum_{k\in\mathbb{Z}} \hat{\varphi}(\xi + k)\bigr\rvert^2}.
+\end{aligned}" class="teximg"></p>
+
+<p>This approximation is exact for bandlimited functions.  Otherwise, it is equal to the average <span class="m"><em>L</em><sup>2</sup></span> error over all translations of <span class="m"><em>f</em></span>.  The function <span class="m"><em>E</em><sub>int</sub></span> is called the <em>interpolation error kernel</em>, and it can be interpreted as predicting the error made in interpolating 
+<span class="m">sin(2<em>πξt</em>)</span>.  Asymptotically as <span class="m"><em>δ</em>&nbsp;→ 0</span>,</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/e4831ec5534557814b6d3a55f31619c3.png" alt="\lVert f - f_\delta\rVert_{L^2} \sim
+C_\mathrm{int} \delta^J \lVert f^{(J)} \rVert_{L^2}." class="teximg"></p>
+
+<p>The decay of the error is dominated by the approximation order <span class="m"><em>J</em></span>.  When comparing methods of the same approximation order, the constant <span class="m"><em>C</em><sub>int</sub></span> is also of interest&nbsp;<a href="#ref_thevenaz00">[7]</a>.</p>
+
+<h1><a name="index8h1"></a>Kernel Normalization</h1>
+
+<p>A basic and desirable quality of an interpolation method is that it reproduces constants, which is equivalent to</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/e9bdd3a156c2ae84deedf7ba180fc92b.png" alt="\sum_{n\in\mathbb{Z}} K_1(t - n) = 1 \quad \text{for all $t\in\mathbb{R}$.}" class="teximg"></p>
+
+<p>If the kernel does not reproduce constants, it can be the normalized to fix this as</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/8cb0ffa2a7014d53aa6153b727438c6a.png" alt="\tilde{K}_1(t) = \frac{K_1(t)}
+{\sum_{m\in\mathbb{Z}} K_1(t - m)}" class="teximg"></p>
+
+<p>provided that the denominator does not vanish.  Normalization ensures that the interpolation weights sum to 1.
+Interpolation with the normalized kernel reproduces constants: suppose <span class="m"><em>f</em><sub><em>n</em></sub>&nbsp;= <em>c</em></span>, then</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/fb8b2335202b7f45c479a65d8a32cbca.png" alt="u(t) = \sum_{n\in\mathbb{Z}} c \Tilde{K}_1(t-n)
+= \frac{\sum_{n\in\mathbb{Z}} c K_1(t-n)}
+{\sum_{m\in\mathbb{Z}} K_1(t-m)} = c." class="teximg"></p>
+
+<h1><a name="index9h1"></a>Nearest Neighbor</h1>
+
+<p>The most widely used methods for image interpolation are nearest neighbor, bilinear, and bicubic interpolation.</p>
+
+<table style="text-align:center">
+<tbody><tr><td>Nearest Neighbor</td>
+<td>Bilinear</td>
+<td>Bicubic</td></tr>
+<tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/nearest.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/200x150-nearest.png" class="img" width="200" height="150"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/bilinear.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/200x150-bilinear.png" class="img" width="200" height="150"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/bicubic.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/200x150-bicubic.png" class="img" width="200" height="150"></a></td></tr>
+<tr><td colspan="3"><i>Nearest neighbor, bilinear, and bicubic applied to the same
+uniformly-spaced input data.</i></td></tr>
+</tbody></table>
+
+<p>The nearest neighbor interpolation of <span class="m"><em>v</em></span> is the piecewise constant function</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/dd964fd961271863f715f547e1352395.png" alt="u(x,y) = v_{[x],[y]}" class="teximg"></p>
+
+<p>where <span class="m">[⋅]</span> denotes rounding to the nearest integer.  That is, <span class="m"><em>u</em>(<em>x</em>,<em>y</em>)</span> is defined as the value of the input sample that is closest to <span class="m">(<em>x</em>,<em>y</em>)</span>.
+  For this reason, nearest neighbor interpolation is sometimes called 
+“pixel duplication.” The interpolation kernel for nearest neighbor is</p>
+
+<div style="float:right"><a href="http://www.ipol.im/pub/art/2011/g_lmii/k-nearest.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/k-nearest.png" class="img" width="166" height="114"></a></div>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/5e2c78e71d054b1afe3d8dbe938d3a5e.png" alt="K(x,y) = K_1(x) K_1(y), \quad
+K_1(t) = 
+\begin{cases}
+1 &amp; \text{if $-\tfrac{1}{2} \le t &lt; \tfrac{1}{2}$,} \\
+0 &amp; \text{otherwise.}
+\end{cases}" class="teximg"> </p>
+
+<p>The nearest neighbor idea can be applied to very general kinds of 
+data, to any set of samples that has a notion of distance between sample
+ locations.  The interpolant is constant within the Voronoi cell around 
+each sample location.</p>
+
+<table style="text-align:center">
+<tbody><tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/nnvoronoi.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/220x220-nnvoronoi.png" class="img" width="220" height="220"></a></td></tr>
+<tr><td><i>Nearest neighbor scattered data interpolation.</i></td></tr>
+</tbody></table>
+
+<h1><a name="index10h1"></a>Bilinear</h1>
+
+<p>The bilinear interpolation of <span class="m"><em>v</em></span> is the continuous function</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/9cdedb6b9830b579373b9c2e68bd8d43.png" alt="\begin{aligned}
+\begin{array}{@{}r@{}r@{\,\,}r@{}l@{}}
+u(x,y) &amp;\,\,\,= (1 - \langle x\rangle) (1 - \langle y\rangle)
+\,v_{\lfloor x \rfloor,\lfloor y \rfloor}
+\,\,{+}\,\,&amp; \langle x\rangle (1 - \langle y\rangle)
+\,v_{\lfloor x \rfloor+1,\lfloor y \rfloor}\\
+&amp;{+}\,\,
+(1 - \langle x\rangle) \langle y\rangle \,v_{\lfloor x \rfloor,\lfloor y \rfloor+1}
+\,\,{+}\,\,&amp; \langle x\rangle \langle y\rangle
+\,v_{\lfloor x \rfloor+1,\lfloor y \rfloor+1} &amp; , \end{array}
+\end{aligned}" class="teximg"></p>
+
+<div style="float:right"><a href="http://www.ipol.im/pub/art/2011/g_lmii/k-bilinear.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/k-bilinear.png" class="img" width="163" height="112"></a></div>
+
+<p>where <span class="m">⌊⋅⌋</span> denotes the floor function and <span class="mi"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/e59a344684a5d0aaed3d417af80663a6.png" alt="\langle x\rangle := x - \lfloor x \rfloor" class="teximg"></span> is the fractional part.  The interpolation kernel is</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/3117a8f7b20ad51d991879d0209538f6.png" alt="K(x,y) = K_1(x) K_1(y), \quad
+K_1(t) = (1 - \lvert t \rvert )^+," class="teximg"></p>
+
+<p>where <span class="m">(⋅)<sup>+</sup></span> denotes positive part.</p>
+
+<p>Within each cell <span class="m">[<em>m</em>,<em>m</em>+1]×[<em>n</em>,<em>n</em>+1]</span>, the interpolation is a convex combination of the samples located at the cell corners 
+<span class="m"><em>v</em><sub><em>m</em>,<em>n</em></sub></span>,
+<span class="m"><em>v</em><sub><em>m</em>+1,<em>n</em></sub></span>, <span class="m"><em>v</em><sub><em>m</em>,<em>n</em>+1</sub></span>,
+<span class="m"><em>v</em><sub><em>m</em>+1,<em>n</em>+1</sub></span>.  Because this combination is convex, the interpolation
+is bounded between <span class="m">min&nbsp;<em>v</em></span> and <span class="m">max&nbsp;<em>v</em></span>
+and does not produce overshoot artifacts.  Bilinear interpolation reproduces affine functions: if 
+<span class="m"><em>v</em><sub><em>m</em>,<em>n</em></sub>&nbsp;= <em>am</em>&nbsp;+ <em>bn</em>&nbsp;+ <em>c</em></span> then 
+<span class="m"><em>u</em>(<em>x</em>,<em>y</em>)&nbsp;= <em>ax</em>&nbsp;+ <em>by</em>&nbsp;+ <em>c</em></span>.</p>
+
+<p>Bilinear interpolation is arguably the simplest possible separable 
+method that produces a continuous function.  It is extremely efficient 
+and on many platforms available in hardware, making it practical for 
+realtime applications.</p>
+
+<p>A closely related method to bilinear interpolation is linear 
+interpolation.  Given a triangulation of the sample locations, each 
+triangle is interpolated by the affine function that satisfies the data 
+at the triangle vertices.</p>
+
+<h1><a name="index11h1"></a>Bicubic</h1>
+
+<table style="margin:0px;float:right;padding-left:4pt;width:225px;text-align:center">
+<tbody><tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/k-bicubic.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/162x108-k-bicubic.png" class="img" width="162" height="108"></a></td></tr>
+<tr><td><i>Cubic interpolation kernel.</i></td></tr>
+<tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/bicubicsurf.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/225x118-bicubicsurf.png" class="img" width="225" height="118"></a></td></tr>
+<tr><td><i>Surface plot of</i> <span class="m"><i>K</i><sub>1</sub>(<i>x</i>)<i>K</i><sub>1</sub>(<i>y</i>)</span><i>.  Yellow circles indicate local maxima.</i></td></tr>
+</tbody></table>
+
+<p>Bicubic interpolation <a href="#ref_keys81">[3]</a> uses the interpolation kernel</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/2ba5973e41d6a3c622eb2b1429b480f9.png" alt="K_1(t) = 
+\begin{cases}
+(\alpha+2)\lvert t \rvert^3 - (\alpha+3) \lvert t \rvert^2 + 1 &amp; 
+\text{if $\lvert t \rvert \le 1$,} \\
+\alpha\lvert t \rvert^3 - 5\alpha\lvert t \rvert^2  + 8\alpha\lvert t \rvert - 4\alpha
+&amp; \text{if $1 &lt; \lvert t \rvert &lt; 2$,} \\
+0 &amp; \text{otherwise,}
+\end{cases}" class="teximg"></p>
+
+<p>where <span class="m"><em>α</em></span> is a free parameter.  This function is derived by finding a piecewise
+cubic polynomial with knots at the integers that is required to be symmetric, <span class="m"><em>C</em><sup>1</sup></span> continuous, and have support in <span class="m">−2&lt;<em>t</em>&lt;2</span>.  These conditions
+leave one remaining degree of freedom represented by <span class="m"><em>α</em></span>.  For any value of <span class="m"><em>α</em></span>, <span class="m"><em>K</em><sub>1</sub></span> has extremal points at <span class="m"><em>t</em>&nbsp;= 0</span> and <span class="m">±4/3</span>.</p>
+
+<p>The values <span class="m">−1</span>, <span class="m">−0.75</span>, and 
+<span class="m">−0.5</span> have been proposed for <span class="m"><em>α</em></span>,
+motivated by various notions of optimality <a href="#ref_meijering02">[9]</a>.  The choice <span class="m"><em>α</em>&nbsp;= −0.5</span> is particularly
+compelling.  Bicubic interpolation is third-order accurate with <span class="m"><em>α</em>&nbsp;= −0.5</span>
+and only first-order accurate for any other <span class="m"><em>α</em></span>.  Furthermore,
+<span class="m"><em>α</em>&nbsp;= −0.5</span> is optimal in a sense of
+matching the sinc kernel and is also optimal in terms of <span class="m"><em>E</em><sub>int</sub></span>.
+All examples and comparisons with bicubic here use <span class="m"><em>α</em>&nbsp;= −0.5</span>.</p>
+
+<div style="clear:both"></div>
+
+<table style="text-align:center">
+<tbody><tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/kernels-std.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/680x303-kernels-std.png" class="img" width="680" height="303"></a></td></tr>
+<tr><td><i>Comparison of the nearest neighbor, bilinear, and bicubic kernels and the sinc.</i></td></tr>
+</tbody></table>
+
+<h1><a name="index12h1"></a>Sinc</h1>
+
+<table style="margin:0px;float:right;padding-left:4pt;width:277px;text-align:center">
+<tbody><tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/k-sinc.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/277x97-k-sinc.png" class="img" width="277" height="97"></a></td></tr>
+<tr><td><i>The sinc function.</i></td></tr>
+<tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/sinc.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/225x118-sinc.png" class="img" width="225" height="118"></a></td></tr>
+<tr><td><i>Surface plot of</i> <span class="m">sinc(<i>x</i>)sinc(<i>y</i>)</span>.  <i>Yellow circles indicate local maxima.</i></td></tr>
+</tbody></table>
+
+<p>The Whittaker–Shannon interpolation&nbsp;<a href="#ref_shannon48">[1]</a> of <span class="m"><em>v</em></span> is</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/d1713305b2bc6bc5fafb1dd5bf275b8a.png" alt="
+u(x,y) = \sum_{m,n\in\mathbb{Z}} 
+v_{m,n} \operatorname{sinc}(x-m)\operatorname{sinc}(y-n)" class="teximg"> </p>
+
+<p>where <span class="m">sinc(<em>t</em>)&nbsp;:= sin(<em>πt</em>)/(<em>πt</em>)</span> for <span class="m"><em>t</em>&nbsp;≠ 0</span>
+and <span class="m">sinc(0)&nbsp;:= 1</span> is the interpolation kernel.  The interpolation is such that <span class="m"><em>u</em></span> is <i>bandlimited</i>, that is, its Fourier transform is zero for frequencies outside of 
+<span class="m">[−½,½]</span>.  This interpolation is also often called 
+“sinc interpolation” or “Fourier zero-padding.”  The extremal points of 
+the sinc kernel are solutions of the equation <span class="m"><em>πt</em>&nbsp;= tan(<em>πt</em>)</span>, which include <span class="m"><em>t</em>&nbsp;≈ 0, ±1.4303, ±2.4590, ±3.4709, ±4.4774</span>.</p>
+
+<p>The powerful property of sinc interpolation is that it is exact for bandlimited functions, that is, if <span class="m"><em>v</em><sub><em>m</em>,<em>n</em></sub>&nbsp;= <em>f</em>(<em>m</em>,<em>n</em>)</span> with</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/a2a6950a910c2c61fc795273244b50e0.png" alt="
+\iint f(x,y) \mathrm{e}^{-2\pi i(x\xi + y\eta)} \,dx\,dy
+= 0 \quad \text{for all $|\xi|$ or $|\eta| \ge \tfrac{1}{2}$,}
+" class="teximg"></p>
+
+<p>then the interpolation reproduces <span class="m"><em>f</em></span>.  <a class="toggle" href="#pub-art-2011-g-lmii.shannonproof">Proof</a></p>
+
+<div style="display: none;" class="toggleable" id="pub-art-2011-g-lmii.shannonproof">
+
+<p>We can verify this result for <span class="m"><em>f</em>∈<em>L</em><sup>1</sup></span> from two Fourier properties: first, the Fourier transform of <span class="m">sinc</span> is the rectangular pulse</p>
+
+<p><a href="http://www.ipol.im/pub/art/2011/g_lmii/fsinc.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/376x46-fsinc.png" alt="\int \Indic_{{|\xi|&lt; 1/2}} \mathrm{e}^{2\pi i t\xi} \,dt
+= \frac{\mathrm{e}^{\pi i t} - \mathrm{e}^{-\pi i t}}{2\pi i t}
+= \frac{\sin \pi t}{\pi t}," class="img" width="376" height="46"></a></p>
+
+<p>and second, the Poisson formula</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/c3f8354df668d6f31a41883f03d45fdb.png" alt="\sum_{m,n\in\mathbb{Z}} f(m,n) \mathrm{e}^{-2\pi i (m\xi + n\eta)}
+= \sum_{m,n\in\mathbb{Z}} \hat{f}(\xi - m, \eta - n)." class="teximg"></p>
+
+<p>Applying these two properties, the Fourier transform of the interpolant is </p>
+
+<p><a href="http://www.ipol.im/pub/art/2011/g_lmii/wseq.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/577x226-wseq.png" alt="\begin{aligned}
+\hat{u}(\xi,\eta)
+&amp;= \iint \sum&lt;em&gt;{m,n\in\mathbb{Z}} f(m,n)
+\operatorname{sinc}(x-m)\operatorname{sinc}(y-n) 
+\mathrm{e}^{-2\pi i (x\xi + y\eta)} \,dx \, dy \
+&amp;= \sum&lt;/em&gt;{m,n\in\mathbb{Z}} f(m,n) \iint
+\operatorname{sinc}(x-m)\operatorname{sinc}(y-n) 
+\mathrm{e}^{-2\pi i (x\xi + y\eta)} \,dx \, dy \
+&amp;= \Indic&lt;em&gt;{{|\xi| &lt; 1/2}}
+\Indic&lt;/em&gt;{{|\eta| &lt; 1/2}} 
+\sum&lt;em&gt;{m,n\in\mathbb{Z}} f(m,n) \mathrm{e}^{-2\pi i (m\xi + n\eta)} \
+&amp;= \Indic&lt;/em&gt;{{|\xi| &lt; 1/2}}
+\Indic&lt;em&gt;{{|\eta| &lt; 1/2}} 
+\sum&lt;/em&gt;{m,n\in\mathbb{Z}} \hat{f}(\xi - n,\eta - m).
+\end{aligned}" class="img" width="577" height="226"></a></p>
+
+<p>In the second equality, the sum-integral interchange is justified by dominated convergence.  The final quantity is equal to <img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/99ad34a799ade3363f833fa1ddd0417c.png" alt="\hat{f}(\xi,\eta)" class="teximg"> if <img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/6219f4a61f4c6217da7c9bd4da236139.png" alt="\hat{f}" class="teximg"> is zero outside of the region <span class="m">[−½,½]×[−½,½]</span>.</p>
+
+</div>
+
+<p>In some ways, sinc interpolation is the ultimate interpolation.  It 
+is exact for bandlimited functions, so the method is very accurate on 
+smooth data.  Additionally, Fourier zero-padding avoids staircase 
+artifacts, it is effective in reconstructing features at different 
+orientations.  Under an aliasing condition&nbsp;<a href="#ref_malgouyres02">[10]</a>, Fourier interpolation reproduces cylindrical functions <span class="m"><em>f</em>(<em>x</em>,<em>y</em>)&nbsp;= <em>h</em>(<em>αx</em>&nbsp;+ <em>βy</em>)</span>.</p>
+
+<p>The disadvantage of sinc interpolation is that in aliased images it 
+produces significant ripple artifacts (Gibbs phenomenon) in the vicinity
+ of image edges.  This is because <span class="m">sinc(<em>x</em>)</span> decays slowly, at a rate of 
+<span class="m">1/<em>x</em></span>, so the damage from meeting an edge 
+is spread throughout the image.  Moreover, bandlimitedness can be a 
+distorted view of reality.  Thévenaz et al.&nbsp;<a href="#ref_thevenaz00">[7]</a>
+ give the following amusing example: consider the air/matter interface 
+of a patient in a CT scan, then according to classical physics, this is 
+an abrupt discontinuity and cannot be expressed as a bandlimited 
+function.  Antialias filtering is not possible on physical matter, and 
+any attempt to do so would probably be harmful to the patient.</p>
+
+<table style="text-align:center">
+<tbody><tr><td>Nearest Neighbor</td>
+<td>Bilinear</td>
+<td>Bicubic</td>
+<td>Lanczos-3</td>
+<td>Cubic B-Spline</td>
+<td>Sinc</td></tr>
+<tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/s-nearest.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/128x184-s-nearest.png" class="img" width="128" height="184"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/s-bilinear.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/128x184-s-bilinear.png" class="img" width="128" height="184"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/s-bicubic.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/128x184-s-bicubic.png" class="img" width="128" height="184"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/s-lanczos3.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/128x184-s-lanczos3.png" class="img" width="128" height="184"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/s-cubicspline.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/128x184-s-cubicspline.png" class="img" width="128" height="184"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/s-fourier.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/128x184-s-fourier.png" class="img" width="128" height="184"></a></td></tr>
+<tr><td colspan="6"><i>Linear interpolation of a step edge: a balance between staircase artifacts and ripples.</i></td></tr>
+</tbody></table>
+
+<h1><a name="index13h1"></a>Windowed Sinc Approximations</h1>
+
+<table style="margin:0px;float:right;padding-left:4pt;width:277px;text-align:center">
+<tbody><tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/k-lanczos3.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/193x72-k-lanczos3.png" class="img" width="193" height="72"></a></td></tr>
+<tr><td><i>The Lanczos-3 kernel.</i></td></tr>
+<tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/lanczos3.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/225x118-lanczos3.png" class="img" width="225" height="118"></a></td></tr>
+<tr><td><i>Surface plot of the Lanczos-3 kernel.  Yellow circles indicate local maxima.</i></td></tr>
+</tbody></table>
+
+<p>A solution to limiting the ripple artifacts of the sinc kernel is to approximate it with a compactly-supported function</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/8eed729c03d9ccf3eeb2a2f7ca2adc30.png" alt="K_1(t) = w(t) \operatorname{sinc}(t)," class="teximg"></p>
+
+<p>where <span class="m"><em>w</em></span> is a <em>window function</em>.  A popular choice in image processing is the Lanczos window,</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/b3d773cfc930b7d863f671c288975068.png" alt="w(t) = 
+\begin{cases}
+\operatorname{sinc}(t/n) &amp; \text{if $\lvert t\rvert &lt; n$}, \\
+0 &amp; \text{otherwise,}
+\end{cases}" class="teximg"></p>
+
+<p>where <span class="m"><em>n</em></span> is a positive integer usually
+ set to 2 or 3.  The Lanczos kernels do not reproduce constants exactly,
+ but can be normalized to fix this as described in the section on Kernel
+ Normalization.  There are many other possibilities for the window, for 
+example  Hamming, Kaiser, and Dolph–Chebyshev windows to name a few, 
+each making different tradeoffs in frequency characteristics.</p>
+
+<div style="clear:both"></div>
+
+<table style="text-align:center">
+<tbody><tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/kernels-lanczos.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/680x302-kernels-lanczos.png" class="img" width="680" height="302"></a></td></tr>
+<tr><td><i>Comparison of the normalized Lanczos kernels and the sinc.</i></td></tr>
+</tbody></table>
+
+<div style="float:right;text-align:center;background:white"><a href="http://www.ipol.im/pub/art/2011/g_lmii/bspline3.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/bspline3.png" class="img" width="258" height="110"></a><br><i>The cubic B-spline.</i></div>
+
+<h1><a name="index14h1"></a>Splines</h1>
+
+<p>Define the B-splines,</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/bf1d20c36c1a392fc8ff5a7bcc241099.png" alt="
+\beta^j(t) = \tfrac{1}{j!}
+\sum_{k=0}^{j+1} 
+{j+1 \choose k} (-1)^k 
+\bigl( (t + \tfrac{j+1}{2} - k)^+ \bigr)^j." class="teximg"></p>
+
+<p>The B-spline functions are optimal in the sense that, among all 
+piecewise polynomials with uniformly spaced knots, the B-splines have 
+the maximal approximation order and are maximally continuous for a given
+ support.</p>
+
+<p>The B-spline <span class="m"><em>β</em><sup><em>J</em>−1</sup></span> has approximation order <span class="m"><em>J</em></span>.
+For <span class="m"><em>J</em>&nbsp;&gt; 2</span>, <span class="m"><em>β</em><sup><em>J</em>−1</sup></span> is not interpolating, so prefilting must be applied as described in the section on Two-Step Interpolation where <span class="m"><em>β</em><sup><em>J</em>−1</sup></span> takes the role of <span class="m"><em>φ</em></span>.</p>
+
+<p>As <span class="m"><em>J</em>→∞</span>, B-spline interpolation converges to Whittaker–Shannon interpolation in a strong sense: the associated interpolation kernel <span class="m"><em>K</em><sub>1</sub></span> converges to the sinc both in the spatial and Fourier domains in <span class="m"><em>L</em><sup><em>p</em></sup></span> for any <span class="m">1&nbsp;≤&nbsp;<em>p</em>&nbsp;&lt;&nbsp;∞</span>, see <a href="#ref_aldroubi92">[4]</a>, <a href="#ref_unser">[6]</a>.  This convergence is illustrated in the figure below with <span class="m"><em>K</em><sub>1</sub></span> and its Fourier transform for degrees 1, 3, 5, and 7.</p>
+
+<table style="text-align:center">
+<tbody><tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/kernels-bspline.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/680x303-kernels-bspline.png" class="img" width="680" height="303"></a></td></tr>
+<tr><td><i>Comparison of the B-spline interpolation kernels and the sinc.</i></td></tr>
+</tbody></table>
+
+<p>Aside from the B-splines, there are numerous other piecewise 
+polynomial methods for interpolation in the literature.  One example is 
+the class of Maximum Order and Minimal Support (Moms) functions 
+introduced by Blu, Thévenaz, and Unser <a href="#ref_blu01">[8]</a>, which are linear combinations of <span class="m"><em>β</em><sup><em>J</em>−1</sup></span> and its derivatives,</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/ac201fc79ac9d1217d92ac349240f913.png" alt="\varphi(t) = 
+\sum_{k=0}^{J-1} c_k \frac{d^k}{dt^k} \beta^{J-1}(t)." class="teximg"></p>
+
+<p>The B-splines are a special case within the class of Moms.  The B-splines are the Moms with maximum regularity, they are <span class="m">(<em>J</em>&nbsp;− 2)</span> times continuously differentiable.</p>
+
+<p>Within the Moms, the “o-Moms functions” are the Moms defined by minimizing the quantity</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/a2e79e87d1a5ed9db6486a80a2e71208.png" alt="\frac{1}{J!} \sqrt{\sum_{k\in\mathbb{Z}_*} \lvert
+\hat{\varphi}^{(J)}(k)\rvert^2}." class="teximg"></p>
+
+<p>The o-Moms functions have the same approximation order and support as the B-splines, but the <span class="m"><em>C</em><sub>int</sub></span> constant is smaller.  So compared to the B-splines, the advantage of o-Moms is that they have lower asymptotic <span class="m"><em>L</em><sup>2</sup></span> interpolation error.  On the other hand, o-Moms are less regular than the B-splines.</p>
+
+<p>The splines proposed by Schaum&nbsp;<a href="#ref_schaum93">[5]</a> 
+are also within the class of Moms.  Schaum splines have the property 
+that they are interpolating, so prefiltering is not needed.  However, 
+for a given support size, the approximation constant <span class="m"><em>C</em><sub>int</sub></span> is worse than with the o-Moms of the same support.</p>
+
+<p>The first few even-order o-Moms are </p>
+
+<table><tbody><tr>
+<td>Order <span class="m"><i>J</i></span></td><td style="width:15px">&nbsp;</td>
+<td><span class="m"><i>φ</i>(<i>t</i>)</span></td></tr>
+<tr><td style="text-align:center">2</td><td>&nbsp;</td>
+<td><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/16c3e2d2a37a0422a6bed569df7d4ed2.png" alt="\beta^1(t)" class="teximg"></td></tr>
+<tr><td style="text-align:center">4</td><td>&nbsp;</td>
+<td><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/3f98fb715e3c9156d2b4c673ed5bb0b6.png" alt="(1 + \tfrac{1}{42}\tfrac{d^2}{dx^2})\beta^3(t)" class="teximg"></td></tr>
+<tr><td style="text-align:center">6</td><td>&nbsp;</td>
+<td><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/829a525011b313b2c75ce9e10caef52d.png" alt="(1 + \tfrac{1}{33}\tfrac{d^2}{dx^2} + \tfrac{1}{7920}\tfrac{d^4}{dx^4})\beta^5(t)" class="teximg"></td></tr>
+<tr><td style="text-align:center">8</td><td>&nbsp;</td>
+<td><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/b5e811f836a173cd4f52803de9498710.png" alt="(1 + \tfrac{1}{30}\tfrac{d^2}{dx^2} + \tfrac{1}{4680}\tfrac{d^4}{dx^4} + \tfrac{1}{3603600}\tfrac{d^6}{dx^6})\beta^7(t)" class="teximg"></td></tr>
+<tr><td style="text-align:center">10</td><td>&nbsp;</td>
+<td><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/0b574da921b22c132c5bd180d6d88444.png" alt="(1 + \tfrac{2}{57}\tfrac{d^2}{dx^2} + \tfrac{7}{25840}\tfrac{d^4}{dx^4} + \tfrac{1}{1627920}\tfrac{d^6}{dx^6} + \tfrac{1}{3047466240}\tfrac{d^8}{dx^8})\beta^9(t)" class="teximg"></td></tr>
+<tr><td style="text-align:center">12</td><td>&nbsp;</td>
+<td><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/bbac63514c61a6868be05a4b28b1a2af.png" alt="(1 + \tfrac{5}{138}\tfrac{d^2}{dx^2} + \tfrac{1}{3220}\tfrac{d^4}{dx^4} + \tfrac{1}{1101240}\tfrac{d^6}{dx^6} + \tfrac{1}{1078334208}\tfrac{d^8}{dx^8} + \tfrac{1}{4151586700800}\tfrac{d^{10}}{dx^{10}})\beta^{11}(t)" class="teximg"></td></tr>
+</tbody></table>
+
+<p>A note on numbering: Usually, with a piecewise polynomial method, its approximation order is <span class="m"><em>L</em></span> but its highest degree is <span class="m">(<em>L</em>&nbsp;−&nbsp;1)</span>.  We refer to methods by degree, for instance “o-Moms&nbsp;3” and “<em>β</em><sup>3</sup>” are methods that are locally cubic polynomial and have approximation order 4.</p>
+
+<h1><a name="index15h1"></a>Radial Basis Functions</h1>
+
+<p>A radial basis function (RBF) is a function <span class="m"><em>φ</em></span> such that </p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/556c651c9980f91eae29ff6ae96ddd31.png" alt="\varphi(x,y) = \varphi(r), \quad r := \sqrt{x^2 + y^2}." class="teximg"></p>
+
+<p>RBF interpolation is useful for scattered data interpolation.  Let <span class="m">(<em>x</em><sub><em>n</em></sub>,<em>y</em><sub><em>n</em></sub>)</span> denote the location of the <span class="m"><em>n</em></span>th sample, then the interpolant is</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/54da0de405a47d85c9aa781c70edf131.png" alt="u(x,y) = \sum_n c_n \varphi(x - x_n, y - y_n)," class="teximg"></p>
+
+<p>where the coefficients <span class="m"><em>c</em><sub><em>n</em></sub></span> are solved such that <span class="m"><em>u</em>(<em>x</em><sub><em>n</em></sub>,<em>y</em><sub><em>n</em></sub>)&nbsp;=&nbsp;<em>v</em><sub><em>n</em></sub></span>.  If the samples are uniformly spaced, then the <span class="m"><em>c</em><sub><em>n</em></sub></span> can be found as described in the section on Two-Step Interpolation.</p>
+
+<p>Popular choices for <span class="m"><em>φ</em></span> include</p>
+
+<table style="background: none; margin: 0px">
+<tbody><tr><td>•</td><td>Thin plate splines</td><td><span class="m"><i>φ</i>(<i>r</i>)&nbsp;= 
+|<i>εr</i>|<sup><i>n</i></sup>log|<i>εr</i>|</span>, <span class="m"><i>n</i></span> even</td></tr>
+<tr><td>•</td><td>Bessel</td><td><span class="m"><i>φ</i>(<i>r</i>)&nbsp;= 
+J<sub>0</sub>(<i>εr</i>)</span></td></tr>
+<tr><td>•</td><td>Gaussian</td><td><span class="m"><i>φ</i>(<i>r</i>)&nbsp;= exp(−(<i>εr</i>)<sup>2</sup>)</span></td></tr>
+<tr><td>•</td><td>Multiquadric</td><td><span class="m"><i>φ</i>(<i>r</i>)&nbsp;= (1&nbsp;+ (<i>εr</i>)<sup>2</sup>)<sup>½</sup></span></td></tr>
+<tr><td>•</td><td>Inverse multiquadric</td><td><span class="m"><i>φ</i>(<i>r</i>)&nbsp;= (1&nbsp;+ (<i>εr</i>)<sup>2</sup>)<sup>−½</sup></span></td></tr>
+<tr><td>•</td><td>Inverse quadratic</td><td><span class="m"><i>φ</i>(<i>r</i>)&nbsp;= (1&nbsp;+ (<i>εr</i>)<sup>2</sup>)<sup>−1</sup></span></td></tr>
+</tbody></table>
+
+<p>where <span class="m"><em>ε</em></span> is a positive parameter controlling the shape.  A challenging problem is that smaller <span class="m"><em>ε</em></span> improves interpolation quality but worsens the numerical conditioning of solving the <span class="m"><em>c</em><sub><em>n</em></sub></span>.  A topic of interest beyond the scope of this article is RBF interpolation in the limit <span class="m"><em>ε</em>&nbsp;→&nbsp;0</span>.  For example, <a href="#ref_fornberg11">[11]</a> investigates numerically stable interpolation for small <span class="m"><em>ε</em></span> with Gaussian <span class="m"><em>φ</em></span>.</p>
+
+<h1><a name="index16h1"></a>Methodology</h1>
+
+<h2><a name="index1h2"></a>Boundary handling</h2>
+
+<p>A technicality is how to handle the image boundaries.  The 
+interpolation formulas may refer to samples that are outside of the 
+domain of definition, especially when interpolating at points near or on
+ the image boundaries.</p>
+
+<p>The usual approach is to extrapolate (pad) the input image.  Several methods for doing this are</p>
+
+<ul>
+<li>Constant extension, <em>…aaaabcdeeee…</em></li>
+<li>Half-sample symmetric extension, <em>…cbaabcdeedc…</em></li>
+<li>Whole-sample symmetric extension, <em>…dcbabcdedcb…</em></li>
+</ul>
+
+<h2><a name="index2h2"></a>Image scaling</h2>
+
+<p>Suppose <span class="m"><em>v</em></span> is an <span class="m"><em>M</em>×<em>N</em></span> image with samples <span class="m"><em>v</em><sub><em>m</em>,<em>n</em></sub></span>, <span><em>m</em>&nbsp;= 0,…<em>M</em>&nbsp;−&nbsp;1, <em>n</em>&nbsp;= 0,…<em>N</em>&nbsp;−&nbsp;1</span>, which are located on the integer grid <img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/54633ae3b501ff1a48d0826d5a8573e8.png" alt="\mathbb{Z}^2" class="teximg">.</p>
+
+<p>For scaling <span class="m"><em>v</em></span> by a (possibly non-integer) factor <span class="m"><em>d</em></span>, a choice for where to resample the function <span class="m"><em>u</em></span> is on a <i>top-left-anchored</i> grid of points</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/1dad77f725c833955c333825e7612c2e.png" alt="(\tfrac{1}{d}m', \tfrac{1}{d}n'), 
+\quad m' = 0, \ldots, M'-1, \; n' = 0, \ldots, N'-1," class="teximg"></p>
+
+<p>with <span class="m"><em>M</em>&nbsp;′&nbsp;= [<em>dM</em>]</span>, <span class="m"><em>N</em>&nbsp;′&nbsp;= [<em>dN</em>]</span>, where 
+<span class="m">[⋅]</span> is a rounding convention.</p>
+
+<table style="text-align:center" padding="5">
+<tbody><tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/grid-tl.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/551x189-grid-tl.png" class="img" width="551" height="189"></a></td></tr>
+<tr><td><i>Example top-left-anchored grids.  Open circles denote input samples and filled circles denote interpolation samples.</i></td></tr>
+</tbody></table>
+
+<p>Another choice is the <i>centered</i> grid of points</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/9142736687295a4657701478677246c9.png" alt="(\tfrac{1}{d}m' + s_{d,M,M'},
+\tfrac{1}{d}n' + s_{d,N,N'}), \quad m' = 0, \ldots,
+M'-1, \; n' = 0, \ldots, N'-1," class="teximg"></p>
+
+<p>where <span class="m"><em>s</em><sub><em>r</em>,<em>M</em>,<em>M</em>&nbsp;′</sub>&nbsp;= (1/<em>d</em>&nbsp;−
+1&nbsp;+ <em>M</em>&nbsp;− <em>M</em>&nbsp;′&nbsp;/<em>d</em>)/2</span>.  If <span class="m"><em>d</em></span> is integer, the offsets simplify to
+<span class="m"><em>s</em>&nbsp;= (1/<em>d</em>&nbsp;− 1)/2</span>.  Although more complicated, the centered grid has 
+the advantage that interpolation with a symmetric kernel on this grid commutes with flipping the image.</p>
+
+<table style="text-align:center" padding="5">
+<tbody><tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/grid-c.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/549x186-grid-c.png" class="img" width="549" height="186"></a></td></tr>
+<tr><td><i>Example centered grids.  Open circles denote input samples and filled circles denote interpolation samples.</i></td></tr>
+</tbody></table>
+
+<p>For an odd integer scale factor and interpolation with a symmetric 
+kernel, the two grids are related in a simple way through adding and 
+removing border samples.  Interpolation performed on the 
+top-left-anchored grid is converted to an interpolation on the centered 
+grid by removing <span class="m">(<em>d</em>&nbsp;− 1)/2</span> rows and
+ columns from the bottom and right borders and extrapolating (according 
+to the boundary extension) the same number of rows and columns on the 
+top and left.  </p>
+
+<h2><a name="index3h2"></a>Domain mapping</h2>
+
+<p>Aside from changing image resolution, another application is to 
+deform or map the domain of the image.  That is, the mapped coordinates <span class="m">(<em>x'</em>,<em>y'</em>)</span> are related to the original coordinates <span class="m">(<em>x</em>,<em>y</em>)</span> by</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/5a682be27516ef48810766ba03852b87.png" alt="x = f(x',y'), \quad y = g(x',y')." class="teximg"></p>
+
+<p>Let <span class="m"><em>u</em>(<em>x</em>,<em>y</em>)</span> be an interpolation of <span class="m"><em>v</em></span>, then the deformed image is obtained by resampling as</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/4d120fad848cf99e0494dec6b719760d.png" alt="\Tilde{v}_{m,n} = u\bigl(f(m,n),g(m,n)\bigr)." class="teximg"></p>
+
+<p>For example, two simple mappings are</p>
+
+<ul>
+<li>Sub-pixel translation<br>
+<img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/552629ac23c48adccef00cb17f96d12e.png" alt="
+\begin{aligned}
+x &amp;= x' - \Delta x \\
+y &amp;= y' - \Delta y
+\end{aligned}" class="teximg"></li>
+<li>Rotation<br>
+<img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/b79267dc09f281251a102680a20f9a1a.png" alt="
+\begin{aligned}
+x &amp;= x' \cos\theta - y' \sin\theta \\
+y &amp;= x' \sin\theta + y' \cos\theta
+\end{aligned}" class="teximg"></li>
+</ul>
+
+<p>Other applications include parallax correction, lens distortion correction, image registration, and texture mapping.</p>
+
+<h1><a name="index17h1"></a>Algorithm</h1>
+
+<p>Linear interpolation amounts to evaluating the sum</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/721640737d20f06a9d6b3fe87cc93fd4.png" alt="
+u(x,y) = \sum_{m,n\in\mathbb{Z}} v_{m,n} K(x-m,y-n).
+" class="teximg"></p>
+
+<p>Choices of algorithms to do this efficiently depend on <span class="m"><em>K</em></span> and the sampling locations.  Keep in mind that the sum is conceptually over the infinite integer grid, so <span class="m"><em>v</em><sub><em>m</em>,<em>n</em></sub></span> should be replaced with an appropriate boundary extension when <span class="m"><em>m</em>,<em>n</em></span> is beyond the domain of the image.</p>
+
+<h2><a name="index4h2"></a>Nearest neighbor, bilinear, and bicubic</h2>
+
+<p>Suppose the interpolation method has a separable kernel <span class="m"><em>K</em>(<em>x</em>,<em>y</em>)&nbsp;=
+<em>K</em><sub>1</sub>(<em>x</em>)<em>K</em><sub>1</sub>(<em>y</em>)</span> with compact support, 
+<span class="m"><em>K</em><sub>1</sub>(<em>x</em>)&nbsp;= 0</span> for <span class="m"><em>x</em>&nbsp;≥&nbsp;<em>R</em></span>.  Then interpolation at point <span class="m">(<em>x</em>,<em>y</em>)</span> can be implemented as</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/4cc49204cd55d9f1729746d0e9e164b8.png" alt="
+\begin{aligned}
+m_0 &amp;= \lceil x - R \rceil, \; n_0 = \lceil y - R \rceil, \; L = \lceil 2R \rceil, \\
+u(x,y) &amp;= \sum_{m=m_0}^{m_0+L-1} \sum_{n=n_0}^{n_0+L-1} v_{m,n} K_1(x-m)K_1(y-n),
+\end{aligned}
+" class="teximg"></p>
+
+<p>where there are <span class="m"><em>L</em>×<em>L</em></span> nonzero terms in the sum.  The values of <span class="m"><em>K</em><sub>1</sub></span> can be reused so that <span class="m"><em>K</em><sub>1</sub></span> only needs to be evaluated for only <span class="m">2<em>L</em></span> different arguments.</p>
+
+<p>For image scaling, it is possible to interpolate more efficiently by 
+exploiting the separable structure of the sampling points.  Let <span class="m"><em>v</em><sub><em>m</em>,<em>n</em></sub></span>, <span class="m"><em>m</em>&nbsp;= 0,…, <em>M</em>&nbsp;−&nbsp;1</span>, <span class="m"><em>n</em>&nbsp;= 0,…, <em>N</em>&nbsp;−&nbsp;1</span> be the given image, which is to be interpolated on the grid of points <span class="m">(<em>x</em><sub><em>m</em>′</sub>,<em>y</em><sub><em>n</em>′</sub>)</span> for <span class="m"><em>m</em>′&nbsp;= 0,…, <em>M</em>&nbsp;′&nbsp;−&nbsp;1</span>, <span class="m"><em>n</em>′&nbsp;= 0,…, <em>N</em>&nbsp;′&nbsp;−&nbsp;1</span>.  Interpolation is performed by first interpolating along the <span class="m"><em>y</em></span> direction,</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/7c323c7bf097ac7bcddd9fff12c72015.png" alt="
+\begin{aligned}
+w_{m,n'} &amp;= \sum_{n=n_0}^{n_0+L-1} v_{m,n} K_1(y_{n'} - n), \; n_0 = \lceil y_{n'} - R \rceil,
+\end{aligned}
+" class="teximg"></p>
+
+<p>for <span class="m"><em>m</em>&nbsp;= 0,…, <em>M</em>&nbsp;−&nbsp;1</span>, <span class="m"><em>n</em>′&nbsp;= 0,…, <em>N</em>&nbsp;′&nbsp;−&nbsp;1</span>, and then along the <span class="m"><em>x</em></span> direction,</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/04ed2e11e0dd6efa4cc24581a5a8562a.png" alt="
+\begin{aligned}
+u(x_{m'},y_{n'}) &amp;= \sum_{m=m_0}^{m_0+L-1} w_{m,n'} K_1(x_{m'} - m), \; m_0 = \lceil x_{m'} - R \rceil,
+\end{aligned}
+" class="teximg"></p>
+
+<p>for <span class="m"><em>m</em>′&nbsp;= 0,…, <em>M</em>&nbsp;′&nbsp;−&nbsp;1</span>, <span class="m"><em>n</em>′&nbsp;= 0,…, <em>N</em>&nbsp;′&nbsp;−&nbsp;1</span>.  </p>
+
+<p>An efficient way to implement the one dimensional interpolations is to express them as multiplication with a sparse matrix:</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/e212e8e14ca0ca41d818eb8587ed1c90.png" alt="
+\begin{aligned}
+w_{m,n'} &amp;= \sum_{n=1}^N A_{n',n} v_{m,n}, \\
+u(x_{m'},y_{n'}) &amp;= \sum_{m=1}^M B_{m',m} w_{m,n'}.
+\end{aligned}
+" class="teximg"></p>
+
+<p><span class="m"><em>A</em></span> is a sparse matrix of size <span class="m"><em>N</em>&nbsp;′&nbsp;×&nbsp;<em>N</em></span> and 
+<span class="m"><em>B</em></span> is a sparse matrix of size <span class="m"><em>M</em>&nbsp;′&nbsp;×&nbsp;<em>M</em></span>.  Away from the boundaries, the matrix entries are</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/37687c4987bcf469d37c5c20c62a5c6a.png" alt="
+A_{n',n} = K_1(y_{n'} - n), \quad
+B_{m',m} = K_1(x_{m'} - m)." class="teximg"></p>
+
+<p>Near the boundaries, the matrix entries need to be adjusted according to the boundary extension.  Define</p>
+
+<table>
+<tbody><tr><td>Half-sample symmetric</td>
+<td><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/ad3ac65f6834e5a94d4690c299a12ec1.png" alt="\mathcal{E}(n) = 
+\min\bigl\{ n \,\,\operatorname{mod}\,\, 2N, \, (2N-1-n) \,\,\operatorname{mod}\,\, 2N\bigr\}," class="teximg"></td></tr>
+<tr><td>Whole-sample symmetric&nbsp;&nbsp;&nbsp;</td>
+<td><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/5cae6f400bb9cb06ee6b5c8e4eb2d65b.png" alt="\mathcal{E}(n) = 
+\min\bigl\{ n \,\,\operatorname{mod}\,\, 2N-2, \, (2N-2-n) \,\,\operatorname{mod}\,\, 2N-2\bigr\}," class="teximg"></td></tr>
+<tr><td>Constant extension</td>
+<td><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/486748cbb91f2c9a8b641133c8f56f23.png" alt="\mathcal{E}(n) = 
+\begin{cases}
+0 &amp; \text{if $n &lt; 0$,} \\
+n &amp; \text{if $0 \le n \le N-1$,} \\
+N-1 &amp; \text{if $N-1 &lt; n$,}
+\end{cases}" class="teximg"></td></tr>
+</tbody></table>
+
+<p>then the matrix entries near the boundaries are computed as</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/18266632d92d094a9c67082f8d5568dd.png" alt="
+A_{n',n} = \sum_{k\in\mathcal{E}^{-1}(n)} K_1(y_{n'} - k)," class="teximg"></p>
+
+<p>and similarly for <span class="m"><em>B</em></span>.  This sparse matrix approach is used by the libswscale library in FFmpeg&nbsp;<a href="#ref_ffmpeg">[12]</a> for scaling video frames.  It is especially well-suited for video, as <span class="m"><em>A</em></span> and <span class="m"><em>B</em></span> only need to be constructed once to interpolate any number of frames.</p>
+
+<p>If the interpolation locations are uniformly spaced with a rational period, <span class="m"><em>t</em><sub><em>n</em>′</sub>&nbsp;= <em>t</em><sub>0</sub>&nbsp;+ <em>n</em>′⋅<em>a</em>/<em>b</em></span>, then another approach is to compute one-dimensional interpolation through convolution.  Given <span class="m"><em>n</em>′</span>, let <span class="m"><em>s</em>&nbsp;= <em>b</em>⌊<em>n</em>′/<em>b</em>⌋</span> and <span class="m"><em>r</em></span> be such that <span class="m"><em>n</em>′&nbsp;= <em>bs</em> + <em>r</em></span>, then</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/c438e868f1602287709afa04a8260a37.png" alt="
+\begin{aligned}
+\sum_n f_n K_1(t_{n'} - n) 
+= \sum_n f_n K_1(t_0 + r\tfrac{a}{b} + as - n) &amp;= (f * h^r)_{as}, \\
+h^r_n &amp;= K_1(t_0 + r\tfrac{a}{b} + n).
+\end{aligned}
+" class="teximg"></p>
+
+<h2><a name="index5h2"></a>Lanczos</h2>
+
+<p>Interpolation with the Lanczos kernels does not exactly reproduce 
+constants.  To fix this, the Lanczos kernels should be normalized as 
+described in the section on Kernel Normalization.  </p>
+
+<p>Kernel normalization can be incorporated efficiently into the 
+algorithms discussed in the previous section.  For the interpolation of a
+ single point <span class="m">(<em>x</em>,<em>y</em>)</span>, the normalized interpolation is </p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/24837fb66d76a0992aef573de04f9073.png" alt="
+\begin{aligned}
+u(x,y) &amp;= \frac{\sum_{m,n} v_{m,n} K_1(x-m)K_1(y-n)}
+{\sum_{m,n} K_1(x-m)K_1(y-n)}.
+\end{aligned}
+" class="teximg"></p>
+
+<p>For the sparse matrix approach, kernel normalization is achieved by 
+scaling each matrix row so that it sums to one.  Similarly for the 
+convolution approach, <span class="m"><em>h</em><sup><em>r</em></sup></span> should be scaled so that it sums to one.</p>
+
+<h2><a name="index6h2"></a>Splines</h2>
+
+<p>For spline methods, implementation is as described in the section on 
+Two-Step Interpolation.  The method is determined by the choice of basis
+ function <span class="m"><em>φ</em></span>, for example, <span class="m"><em>φ</em></span> may be a B-spline or an o-Moms function.</p>
+
+<p>Given a basis function <span class="m"><em>φ</em></span>, define <span class="m"><em>p</em><sub><em>m</em></sub>&nbsp;= <em>φ</em>(<em>m</em>)</span>.  For the prefiltering step, the convolution inverse <span class="m">(<em>p</em>)<sup>−1</sup></span> is needed.  We look first at the cubic B-spline as an example.  For the cubic B-spline, <span class="m"><em>p</em>(<em>z</em>)&nbsp;= (z&nbsp;+ 4&nbsp;+ <em>z</em><sup>−1</sup>)/6</span> and</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/fe9f1c74c824d06da68ee0976028c136.png" alt="\frac{6}{z + 4 + z^{-1}} =
+6\frac{1}{1 - rz^{-1}} \frac{-r}{1 - rz}" class="teximg"></p>
+
+<p>where <span class="m"><em>r</em>&nbsp;= 3<sup>½</sup>&nbsp;− 2</span>.  The first factor corresponds to the first-order causal recursive filter</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/8e5a603a48831122012d0c805ab44297.png" alt="c'_n = f_n + r c'_{n-1}, \quad n = 1,\ldots,N-1." class="teximg"></p>
+
+<p>The left endpoint <span class="m"><em>c</em>'<sub>0</sub></span> can be computed depending on the boundary extension,</p>
+
+<table>
+<tbody><tr><td>Half-sample symmetric</td>
+<td><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/3b5b1c2d2ddfc74a6390606e9e94d66f.png" alt="c'_0 = 
+f_0 + r \sum_{n=0}^\infty r^n f_n," class="teximg"></td></tr>
+<tr><td>Whole-sample symmetric&nbsp;&nbsp;&nbsp;</td>
+<td><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/278dcfe320230c4b26643d8fe1694ef3.png" alt="c'_0 = 
+\sum_{n=0}^\infty r^n f_n." class="teximg"></td></tr>
+</tbody></table>
+
+<p>Since <span class="m">|<em>r</em>|&nbsp;&lt;&nbsp;1</span>, the terms of the sum are decaying, so in practice we only evaluate as many terms as are needed for the desired accuracy.</p>
+
+<p>The second factor corresponds to the first-order anti-causal recursive filter</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/56749f3615e82c70260cada01639190f.png" alt="c''_n = r(c''_{n+1} - c'_{n}), \quad n = N-2,\ldots,0." class="teximg"></p>
+
+<p>The right endpoint <span class="m"><em>c</em>''<sub><em>N</em>−1</sub></span> can be computed according to the boundary extension as</p>
+
+<table>
+<tbody><tr><td>Half-sample symmetric</td>
+<td><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/b44567b0d538177a32533aa1ce0a57d3.png" alt="c''_{N-1} = \frac{r}{r-1} c'_{N-1}," class="teximg"></td></tr>
+<tr><td>Whole-sample symmetric&nbsp;&nbsp;&nbsp;</td>
+<td><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/36779ddc3540f32cd421c6fd0e0a9c89.png" alt="c''_{N-1} = 
+\frac{r}{r^2-1} (c'_{N-1} + r c'_{N-2})." class="teximg"></td></tr>
+</tbody></table>
+
+<p>Finally, the constant scale factor is applied <span class="m"><em>c</em><sub><em>n</em></sub>&nbsp;=&nbsp;6<em>c</em>''<sub><em>n</em></sub></span>.
+  The cost of prefiltering is linear in the number of pixels.  
+Prefiltering can be computed in-place so that the prefiltered values 
+overwrite the memory used by the input.  For prefiltering in 
+two-dimensions, the image is first prefiltered along each column, then 
+the column-prefiltered image is prefiltered along each row.</p>
+
+<p>More generally, if <span class="m"><em>φ</em></span> is symmetric and compactly supported, then <span class="m"><em>p</em>(<em>z</em>)</span> has the form</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/eed86bceee86d796f1d58093febfb158.png" alt="
+\begin{aligned}
+p(z) &amp;= a_0 + \sum_{j=1}^J a_j (z^j + z^{-j}) \\
+p(z) &amp;= a_J z^{-J} \prod_{j=1}^J (z - r_j)(z - \tfrac{1}{r_j})
+\end{aligned}
+" class="teximg"></p>
+
+<p>where the <span class="m"><em>r</em><sub><em>j</em></sub></span> and <span class="m">1/<em>r</em><sub><em>j</em></sub></span> are the roots of the polynomial <span class="m"><em>z</em><sup>−<em>J</em></sup><em>p</em>(<em>z</em>)</span>.  We enumerate the roots so that <span class="m">|<em>r</em><sub><em>j</em></sub>|&nbsp;&lt;&nbsp;1</span>. The Z-transform of <span class="m">(<em>p</em>)<sup>−1</sup></span> is</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/a57b7e74886ba2d3e03f801ac4b6d3f2.png" alt="
+\begin{aligned}
+\frac{1}{p(z)} &amp;= \frac{1}{a_J} \prod_{j=1}^J 
+\frac{1}{1 - r_j z^{-1}} 
+\frac{-r_j}{1 - r_j z}.
+\end{aligned}
+" class="teximg"></p>
+
+<p>Therefore, prefiltering can be performed as a cascade of first-order 
+recursive filters using the same algorithm as for the cubic B-spline.  
+The table below lists the roots and the constant scale factor for 
+several B-splines and o-Moms.</p>
+
+<table cellspacing="0">
+<tbody><tr><td valign="top">
+<table cellspacing="0">
+<tbody><tr><th>Method&nbsp;&nbsp;</th>
+<th>&nbsp;&nbsp;<span class="m">1/<i>a<sub>J</sub></i></span>&nbsp;&nbsp;</th>
+<th><span class="m"><i>r<sub>j</sub></i></span></th></tr>
+<tr><td style="border-top:1px solid #CCC" valign="top"><span class="m"><i>β</i><sup>2</sup></span></td>
+<td style="border-top:1px solid #CCC" valign="top">8</td>
+<td style="border-top:1px solid #CCC" valign="top"><span class="m">−3&nbsp;+ 8<sup>½</sup></span></td></tr>
+<tr><td style="border-top:1px solid #CCC" valign="top"><span class="m"><i>β</i><sup>3</sup></span></td>
+<td style="border-top:1px solid #CCC" valign="top">3!</td>
+<td style="border-top:1px solid #CCC" valign="top"><span class="m">3<sup>½</sup>&nbsp;− 2</span></td></tr>
+<tr><td style="border-top:1px solid #CCC" valign="top"><span class="m"><i>β</i><sup>5</sup></span></td>
+<td style="border-top:1px solid #CCC" valign="top">5!</td>
+<td style="border-top:1px solid #CCC" valign="top">−4.309628820326465×10<sup>−2</sup>,<br>
+−4.305753470999738×10<sup>−1</sup></td></tr>
+<tr><td style="border-top:1px solid #CCC" valign="top"><span class="m"><i>β</i><sup>7</sup></span></td>
+<td style="border-top:1px solid #CCC" valign="top">7!</td>
+<td style="border-top:1px solid #CCC" valign="top">−9.148694809608277×10<sup>−3</sup>,<br>
+−1.225546151923267×10<sup>−1</sup>,<br>
+−5.352804307964382×10<sup>−1</sup></td></tr>
+<tr><td style="border-top:1px solid #CCC" valign="top"><span class="m"><i>β</i><sup>9</sup></span></td>
+<td style="border-top:1px solid #CCC" valign="top">9!</td>
+<td style="border-top:1px solid #CCC" valign="top">
+−2.121306903180818×10<sup>−3</sup>,<br>
+−4.322260854048175×10<sup>−2</sup>,<br>
+−2.017505201931532×10<sup>−1</sup>,<br>
+−6.079973891686259×10<sup>−1</sup>
+</td></tr>
+<tr><td style="border-top:1px solid #CCC" valign="top"><span class="m"><i>β</i><sup>11</sup></span></td>
+<td style="border-top:1px solid #CCC" valign="top">11!</td>
+<td style="border-top:1px solid #CCC" valign="top">
+−5.105575344465021×10<sup>−4</sup>,<br>
+−1.666962736623466×10<sup>−2</sup>,<br>
+−8.975959979371331×10<sup>−2</sup>,<br>
+−2.721803492947859×10<sup>−1</sup>,<br>
+−6.612660689007345×10<sup>−1</sup></td></tr>
+</tbody></table>
+
+<p></p></td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td valign="top"><p></p>
+
+<table cellspacing="0">
+<tbody><tr><th>Method&nbsp;&nbsp;</th>
+<th>&nbsp;&nbsp;<span class="m">1/<i>a<sub>J</sub></i></span>&nbsp;&nbsp;</th>
+<th><span class="m"><i>r<sub>j</sub></i></span></th></tr>
+<tr><td style="border-top:1px solid #CCC" valign="top"><span class="m">o-Moms 3</span></td>
+<td style="border-top:1px solid #CCC" valign="top">21/4</td>
+<td style="border-top:1px solid #CCC" valign="top"><span class="m">(105<sup>½</sup>&nbsp;− 13)/8</span></td></tr>
+<tr><td style="border-top:1px solid #CCC" valign="top"><span class="m">o-Moms 5&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
+<td style="border-top:1px solid #CCC" valign="top">7920/107&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="border-top:1px solid #CCC" valign="top">
+−7.092571896868541×10<sup>−2</sup>,<br> 
+−4.758127100084396×10<sup>−1</sup></td>
+</tr>
+<tr><td style="border-top:1px solid #CCC" valign="top"><span class="m">o-Moms 7&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
+<td style="border-top:1px solid #CCC" valign="top">675675/346&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="border-top:1px solid #CCC" valign="top">
+−1.976842538386140×10<sup>−2</sup>,<br> 
+−1.557007746773578×10<sup>−1</sup>,<br> 
+−5.685376180022930×10<sup>−1</sup></td>
+</tr>
+</tbody></table>
+
+<p></p></td></tr>
+</tbody></table><p></p>
+
+<p>Once the image has been prefiltered <span class="m"><em>c</em>&nbsp;= (<em>p</em>)<sup>−1</sup>&nbsp;∗&nbsp;<em>v</em></span>, interpolation at a point
+<span class="m">(<em>x</em>,<em>y</em>)</span> is computed as</p>
+
+<p><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/a9ce49e204d016bdb1b8364a2f172ea3.png" alt="u(x,y) = \sum_{m,n\in\mathbb{Z}} c_{m,n} \varphi(x - m)\varphi(y - n)." class="teximg"></p>
+
+<p>This second step is essentially the same formula as in the section on
+ nearest neighbor, bilinear, and bicubic, and the same algorithms can be
+ used to perform this step.  The only differences are that the 
+prefiltered image <span class="m"><em>c</em></span> is used in place of <span class="m"><em>v</em></span> and <span class="m"><em>φ</em></span> is used in place of <span class="m"><em>K</em><sub>1</sub></span>.</p>
+
+<h2><a name="index7h2"></a>Sinc</h2>
+
+<p>For sinc interpolation with an integer scale factor, interpolation 
+can be implemented using the fast Fourier transform (FFT).  This 
+approach follows from observing that the sinc interpolant is the unique 
+image that is bandlimited and agrees with the input data.</p>
+
+<p>The input image is first padded to twice its size in each dimension 
+with half-symmetric extension and transformed with the FFT.  The 
+interpolation is then constructed in the Fourier domain by copying the 
+transform coefficients of the padded input image for the lower 
+frequencies and filling zeros for the higher frequencies.  The final 
+interpolation is obtained by inverse FFT and removal of the symmetric 
+padding.  For real-valued input data, some computational savings can be 
+made by using a real-to-complex FFT and complex-to-real inverse FFT to 
+exploit the complex conjugate redundancy in the transform.  The 
+complexity of the interpolation is <span class="m"><em>O</em>(<em>N</em> log&nbsp;<em>N</em>)</span> for <span class="m"><em>N</em></span> output pixels.</p>
+
+<h1><a name="index18h1"></a>Implementation</h1>
+
+<p>This software is distributed under the terms of the simplified BSD license.</p>
+
+<ul>
+<li>source code <a href="http://www.ipol.im/pub/art/2011/g_lmii/src.zip">zip</a> <a href="http://www.ipol.im/pub/art/2011/g_lmii/src.tar.gz">tar.gz</a></li>
+<li><a href="http://www.ipol.im/pub/art/2011/g_lmii/srcdoc/">online documentation</a></li>
+</ul>
+
+<p>Fourier transforms are implemented using the FFTW library.
+Please see the <code>readme.html</code> file or the online documentation for details.</p>
+
+<h1><a name="index19h1"></a>Examples</h1>
+
+<h2><a name="index8h2"></a>Scaling smooth data</h2>
+
+<p>The smooth function <span class="m">cos((<em>x</em><sup>2</sup>&nbsp;+&nbsp;<em>y</em><sup>2</sup>)/10)</span> is sampled on the grid <span class="m">{0.5,1.5,…,15.5}×{-15.5,-14.5,…,15.5}</span>
+ and interpolated on the centered grid with scale factor 4.  The figure 
+below compares the interpolation result using various linear methods, 
+along with the root mean squared errors (RMSE) between the interpolation
+ and the exact image.</p>
+
+<table style="text-align:center" cellspacing="5px">
+<tbody><tr><td>Exact</td>
+<td>Nearest<br>RMSE 59.2</td>
+<td>Bilinear<br>RMSE 47.2</td>
+<td>Bicubic<br>RMSE 39.0</td>
+<td valign="bottom">Lancoz 2<br>RMSE 38.8</td>
+<td valign="bottom">Lancoz 3<br>RMSE 33.8</td>
+<td valign="bottom">Lanczos 4<br>RMSE 31.9</td>
+<td>Sinc<br><b>RMSE 27.2</b></td></tr>
+<tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-exact.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-exact.png" class="img" width="64" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-nearest.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-nearest.png" class="img" width="64" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-bilinear.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-bilinear.png" class="img" width="64" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-bicubic.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-bicubic.png" class="img" width="64" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-lanczos2.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-lanczos2.png" class="img" width="64" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-lanczos3.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-lanczos3.png" class="img" width="64" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-lanczos4.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-lanczos4.png" class="img" width="64" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-fourier.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-fourier.png" class="img" width="64" height="128"></a></td>
+</tr><tr>
+<td><span class="m"><i>β</i><sup>3</sup></span><br>RMSE 33.7</td>
+<td valign="bottom">o-Moms 3<br>RMSE 31.8</td>
+<td><span class="m"><i>β</i><sup>5</sup></span><br>RMSE 30.9</td>
+<td valign="bottom">o-Moms 5<br>RMSE 30.4</td>
+<td><span class="m"><i>β</i><sup>7</sup></span><br>RMSE 29.7</td>
+<td valign="bottom">o-Moms 7<br>RMSE 29.4</td>
+<td><span class="m"><i>β</i><sup>9</sup></span><br>RMSE 29.0</td>
+<td><span class="m"><i>β</i><sup>11</sup></span><br>RMSE 28.5</td>
+</tr><tr>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-bspline3.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-bspline3.png" class="img" width="64" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-omoms3.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-omoms3.png" class="img" width="64" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-bspline5.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-bspline5.png" class="img" width="64" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-omoms5.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-omoms5.png" class="img" width="64" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-bspline7.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-bspline7.png" class="img" width="64" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-omoms7.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-omoms7.png" class="img" width="64" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-bspline9.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-bspline9.png" class="img" width="64" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-bspline11.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/64x128-smooth-bspline11.png" class="img" width="64" height="128"></a></td></tr>
+</tbody></table>
+
+<p>For this example, higher-order methods tend to perform better.  The 
+o-Moms perform slightly better than the B-splines of the same order.  
+Sinc interpolation yields the best result.</p>
+
+<h2><a name="index9h2"></a>Scaling piecewise smooth data</h2>
+
+<p>We repeat the previous experiment with piecewise smooth data.  The 
+image is discontinuous at the edges, so the bandlimited hypothesis of 
+sinc interpolation is severely violated.  Sinc interpolation and other 
+higher-order methods produce strong artifacts near edges.  The bicubic 
+and Lanczos-2 interpolations have the lowest RMSE in this case.</p>
+
+<table style="text-align:center" cellspacing="5px">
+<tbody><tr><td>Exact</td>
+<td>Nearest<br>RMSE 32.2</td>
+<td>Bilinear<br>RMSE 25.6</td>
+<td>Bicubic<br><b>RMSE 24.5</b></td>
+<td valign="bottom">Lancoz 2<br><b>RMSE 24.5</b></td>
+<td valign="bottom">Lancoz 3<br>RMSE 24.8</td>
+<td valign="bottom">Lanczos 4<br>RMSE 25.1</td>
+<td>Sinc<br>RMSE 26.3</td></tr>
+<tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-exact.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-exact.png" class="img" width="88" height="88"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-nearest.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-nearest.png" class="img" width="88" height="88"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-bilinear.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-bilinear.png" class="img" width="88" height="88"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-bicubic.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-bicubic.png" class="img" width="88" height="88"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-lanczos2.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-lanczos2.png" class="img" width="88" height="88"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-lanczos3.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-lanczos3.png" class="img" width="88" height="88"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-lanczos4.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-lanczos4.png" class="img" width="88" height="88"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-fourier.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-fourier.png" class="img" width="88" height="88"></a></td>
+</tr><tr>
+<td><span class="m"><i>β</i><sup>3</sup></span><br>RMSE 24.7</td>
+<td valign="bottom">o-Moms 3<br>RMSE 24.9</td>
+<td><span class="m"><i>β</i><sup>5</sup></span><br>RMSE 25.1</td>
+<td valign="bottom">o-Moms 5<br>RMSE 25.2</td>
+<td><span class="m"><i>β</i><sup>7</sup></span><br>RMSE 25.4</td>
+<td valign="bottom">o-Moms 7<br>RMSE 25.5</td>
+<td><span class="m"><i>β</i><sup>9</sup></span><br>RMSE 25.6</td>
+<td><span class="m"><i>β</i><sup>11</sup></span><br>RMSE 25.7</td>
+</tr><tr>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-bspline3.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-bspline3.png" class="img" width="88" height="88"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-omoms3.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-omoms3.png" class="img" width="88" height="88"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-bspline5.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-bspline5.png" class="img" width="88" height="88"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-omoms5.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-omoms5.png" class="img" width="88" height="88"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-bspline7.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-bspline7.png" class="img" width="88" height="88"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-omoms7.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-omoms7.png" class="img" width="88" height="88"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-bspline9.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-bspline9.png" class="img" width="88" height="88"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-bspline11.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/88x88-ps-bspline11.png" class="img" width="88" height="88"></a></td></tr>
+</tbody></table>
+
+<h2><a name="index10h2"></a>Texture mapping</h2>
+
+<p>A 3D scene of a plane and a sphere is texture mapped with an image.  
+Texture mapping is an example of domain mapping, where in this case the 
+image domain is mapped to the projected plane and sphere surfaces.</p>
+
+<table style="text-align:center"><tbody><tr>
+<td>Texture</td>
+<td>Nearest</td>
+<td>Bicubic</td>
+</tr><tr>
+<td valign="top"><a href="http://www.ipol.im/pub/art/2011/g_lmii/einstein.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/128x128-einstein.png" class="img" width="128" height="128"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/map-nearest.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/256x256-map-nearest.png" class="img" width="256" height="256"></a></td>
+<td><a href="http://www.ipol.im/pub/art/2011/g_lmii/map-bicubic.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/256x256-map-bicubic.png" class="img" width="256" height="256"></a></td>
+</tr></tbody></table>
+
+This mapping is derived through <i>reverse ray tracing</i>.  For each 
+pixel of the rendering of the 3D scene, a ray of light is virtually 
+traced in reverse.   The light ray begins from the eye of the observer, 
+passes through a pixel of the screen, and continues into the 3D scene.  
+The ray may then intersect the plane or the sphere (or nothing, if the 
+ray continues into the background).  
+
+<table style="text-align:center">
+<tbody><tr><td><a href="http://www.ipol.im/pub/art/2011/g_lmii/raytrace.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/456x180-raytrace.png" class="img" width="456" height="180"></a></td></tr>
+<tr><td><i>Reverse ray tracing.  A ray of light is traced from the observer into the 3D scene.</i></td></tr>
+</tbody></table>
+
+<p>The ray's intersection point <span class="m">(<em>X</em>,<em>Y</em>,<em>Z</em>)</span> with the 3D scene determines the color of its pixel.  The plane is texture mapped as <span class="m"><em>x</em>&nbsp;= <em>X</em> mod&nbsp;<em>M</em></span>, <span class="m"><em>y</em>&nbsp;= <em>Z</em> mod&nbsp;<em>N</em></span>.  The sphere is texture mapped as <span class="m"><em>x</em>&nbsp;= <em>θ</em></span>, <span class="m"><em>y</em>&nbsp;= <em>φ</em></span>, where <span class="m"><em>θ</em></span> and <span class="m"><em>φ</em></span> are the spherical angles of the intersection.</p>
+
+<h2><a name="index11h2"></a>Image rotation</h2>
+
+<p>Image rotation is another application that for a general rotation 
+angle requires interpolation.  The choice of interpolation method 
+significantly affects the quality of the output image.  In this 
+experiment, an image is successively rotated by 5 degrees increments 
+using several linear methods.  The initial image is rotated by 5 
+degrees, then the rotated image is rotated by another 5 degrees, and so 
+on.  </p>
+
+<table style="text-align:center"><tbody><tr>
+<td style="width:100px">Nearest</td>
+<td style="width:100px">Bilinear</td>
+<td style="width:100px">Bicubic</td>
+<td style="width:100px"><span class="m"><i>β</i><sup>11</sup></span></td>
+</tr><tr>
+<td colspan="4"><a href="http://www.ipol.im/pub/art/2011/g_lmii/rot.gif"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/400x100-rot.gif" class="img" width="400" height="100"></a></td>
+</tr></tbody></table>
+
+<p>Rotation using nearest neighbor produces jagged artifacts along 
+edges.  Rotation with bilinear is much better but blurs the image.  
+Rotation with bicubic is sharper, but blurring is still noticeable.  
+Finally, the sharpest rotation among these results is with the 11th 
+order B-spline <span class="m"><i>β</i><sup>11</sup></span>. By interpolating with a high-order B-spline, it closely approximates rotation via sinc interpolation.  </p>
+
+<p style="font-size:80%">This material is based upon work supported by 
+the National Science Foundation under Award No.&nbsp;DMS-1004694.  Any 
+opinions, findings, and conclusions or recommendations expressed in this
+ material are those of the author(s) and do not necessarily reflect the 
+views of the National Science Foundation.  Work partially supported by 
+the MISS project of Centre National d'Etudes Spatiales, the Office of 
+Naval Research under grant N00014-97-1-0839 and by the European Research
+ Council, advanced grant “Twelve labours.”</p>
+
+<p><small><a class="toggle" href="#pub-art-2011-g-lmii.credits">image credits</a></small></p>
+
+<div style="display: none;" class="toggleable" id="pub-art-2011-g-lmii.credits">
+
+<p><a href="http://www.ipol.im/pub/art/2011/g_lmii/smooth-exact.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/30x60-smooth-exact.png" class="img" width="30" height="60"></a>
+Pascal Getreuer<br>
+<a href="http://www.ipol.im/pub/art/2011/g_lmii/ps-exact.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/60x60-ps-exact.png" class="img" width="60" height="60"></a>
+Pascal Getreuer<br>
+<a href="http://www.ipol.im/pub/art/2011/g_lmii/einstein.png"><img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/60x60-einstein.png" class="img" width="60" height="60"></a>
+Einstein standard test image</p>
+
+</div>
+
+</div> <!-- #content -->
+</div><!-- #main -->
+
+
+<div class="pagefooter">
+<div id="footer">
+<ul class="noprint">
+<li><a href="http://www.ipol.im/meta/feeds/">feeds &amp; twitter</a></li>
+<li><a href="http://www.ipol.im/meta/sitemap/" rel="sitemap">sitemap</a></li>
+<li><a href="http://www.ipol.im/meta/contact/">contact</a></li>
+<li><a href="http://www.ipol.im/meta/privacy/">privacy policy</a></li>
+<li>ISSN:&nbsp;<a href="http://www.worldcat.org/issn/2105-1232">2105-1232</a></li>
+<li>DOI:&nbsp;<a href="http://dx.doi.org/10.5201/ipol">10.5201/ipol</a></li>
+</ul><br>
+supported by
+<ul>
+<li><a href="http://www.cmla.ens-cachan.fr/">CMLA</a>,
+  <a href="http://www.ens-cachan.fr/">ENS Cachan</a></li>
+<li><a href="http://dmi.uib.es/">DMI</a>,
+  <a href="http://www.uib.es/">Universitat de les Illes Balears</a></li>
+<li><a href="http://www.fing.edu.uy/">Fing</a>,
+  <a href="http://www.universidad.edu.uy/">Universidad de la República</a></li>
+<li><a href="http://www.gandi.net/">Gandi.net</a></li>
+</ul><br>
+<ul>
+<li><a href="http://www.ipol.im/meta/copyright/" rel="copyright">©&nbsp;2009-2013,
+    IPOL Image Processing On Line &amp; the authors&nbsp;<img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/open-access.png" alt="Open Access">&nbsp;<img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/open-source.png" alt="Open Source">&nbsp;<img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/open-data.png" alt="Open Data">&nbsp;<img src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/ipol.png" alt="IPOL"></a></li>
+</ul>
+</div><!-- #footer -->
+</div><!-- .pagefooter -->
+
+<script type="text/javascript" src="IPOL%20%20Linear%20Methods%20for%20Image%20Interpolation_files/piwik.js"></script>
+<script type="text/javascript">
+if ("www.ipol.im" == window.location.hostname) {
+  try {
+    var piwikTracker = Piwik.getTracker("http://tools.ipol.im/piwik/piwik.php", 7);
+    piwikTracker.trackPageView();
+    piwikTracker.enableLinkTracking();
+  } catch( err ) {}
+}
+</script>
+<noscript>
+  <p><img src="http://tools.ipol.im/piwik/piwik.php?idsite=7&amp;idgoal=8&amp;rec=1" style="border:0" alt="" /></p>
+</noscript>
+
+
+
+
+</body></html>

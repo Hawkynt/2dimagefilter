@@ -1,0 +1,122 @@
+
+Mouse reset:
+------------
+  1: Set UART to 'broken line' state (set bit 6 of the LCR)
+  2: Clear the bits 0-1 of the MCR (clear RTS and DTR), wait a while
+  3: Reverse the bits again (set RTS and DTR)
+
+============================================================================
+
+Microsoft mode: 1200 bps, 7 data bits, 1 stop bit, no parity
+
+
+
+               1st byte        2nd byte         3rd byte
+          |---------------||---------------||---------------|
+          |0|1|L|R|Y|Y|X|X||0|0|X|X|X|X|X|X||0|0|Y|Y|Y|Y|Y|Y|
+          |---------------||---------------||---------------|
+               | | \ / \ /      \----|----/      \----|----/
+               | |  |   |            |                |
+               | |  |---|------------|--------|       |
+               | |      |----|       |        |       |
+               | |          / \ /----|----\  / \ /----|----\
+               | |         |---------------||---------------|
+               | |         | | | | | | | | || | | | | | | | |
+ Left Button --| |         |---------------||---------------|
+Right Button ----|            X increment      Y increment
+ (1 if pressed)
+
+The X and Y increment values are in 2's compliment signed char format.
+
+Microsoft mice sends 'M' after dropping and raising RTS.
+
+============================================================================
+
+Microsoft IntelliMouse: 1200 bps, 7 data bits, 1 stop bit, no parity
+
+
+
+               1st byte        2nd byte         3rd byte         4th byte
+          |---------------||---------------||---------------||---------------|
+          |0|1|L|R|Y|Y|X|X||0|0|X|X|X|X|X|X||0|0|Y|Y|Y|Y|Y|Y||0|0|0|M|0|0|0|0|
+          |---------------||---------------||---------------||---------------|
+               | | \ / \ /      \----|----/      \----|----/        | \-----/
+               | |  |   |            |                |             |    |
+               | |  |---|------------|--------|       |    Middle --|    |
+               | |      |----|       |        |       |    Button        |
+               | |          / \ /----|----\  / \ /----|----\             |
+               | |         |---------------||---------------|            |
+               | |         | | | | | | | | || | | | | | | | |          Wheel
+ Left Button --| |         |---------------||---------------|         Movement
+Right Button ----|            X increment      Y increment
+
+
+The X and Y increment values are in 2's compliment signed char format.
+
+============================================================================
+
+Mouse Systems mode: 1200 bps, 8 data bits, 1 stop bit, no parity
+
+               1st byte        2nd byte         3rd byte
+          |---------------||---------------||---------------|
+          |1|0|0|0|0|L|M|R||X|X|X|X|X|X|X|X||Y|Y|Y|Y|Y|Y|Y|Y|
+          |---------------||---------------||---------------|
+                     | | |  \------|------/  \------|------/
+                     | | |         |                |
+                     | | |         |                |
+                     | | |
+                     | | |    Xa increment     Ya increment
+                     | | |
+       Left Button --| | |
+     Middle Button ----| |
+      Right Button ------|
+       (0 if pressed)       4th byte         5th byte
+                       |---------------||---------------|
+                       |X|X|X|X|X|X|X|X||Y|Y|Y|Y|Y|Y|Y|Y|
+                       |---------------||---------------|
+                        \------|------/  \------|------/
+                               |                |
+
+                         Xb increment      Yb increment
+
+Note that the mouse systems mouse sends two independent bytes for
+each direction in each packet!
+
+Xa0-7 movement of the mouse in the X direction since last packet (+ right)
+Ya0-7 movement of the mouse in the Y direction since last packet (+ up   )
+Xb0-7 movement of the mouse in the X direction since Xa
+Yb0-7 movement of the mouse in the Y direction since Ya
+
+===========================================================================
+
+Logitech MouseMan mode: 1200 bps, 7 data bits, 1 stop bit, no parity
+
+  3 bytes (left or right button is pressed):
+  ------------------------------------------
+
+               1st byte        2nd byte         3rd byte
+          |---------------||---------------||---------------|
+          |0|1|L|R|Y|Y|X|X||0|0|X|X|X|X|X|X||0|0|Y|Y|Y|Y|Y|Y|
+          |---------------||---------------||---------------|
+               | | \ / \ /      \----|----/      \----|----/
+               | |  |   |            |                |
+               | |  |---|------------|--------|       |
+               | |      |----|       |        |       |
+               | |          / \ /----|----\  / \ /----|----\
+               | |         |---------------||---------------|
+               | |         | | | | | | | | || | | | | | | | |
+ Left Button --| |         |---------------||---------------|
+Right Button ----|            X increment      Y increment
+
+
+  The extra byte (when middle button is pressed):
+  -----------------------------------------------
+
+                                 4th byte
+                            |---------------|
+                            |0|0|M|0|0|0|0|0|
+                            |---------------|
+                                 |
+                            Middle button
+
+Logitech mice sends 'M3' after dropping and raising RTS.

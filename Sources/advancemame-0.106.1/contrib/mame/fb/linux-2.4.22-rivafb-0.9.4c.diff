@@ -1,0 +1,2887 @@
+diff -u --recursive --new-file linux-2.4.22/drivers/video/riva.ori/Makefile linux-2.4.22/drivers/video/riva/Makefile
+--- linux-2.4.22/drivers/video/riva.ori/Makefile	2003-09-23 17:49:13.000000000 +0200
++++ linux-2.4.22/drivers/video/riva/Makefile	2003-09-23 18:12:40.000000000 +0200
+@@ -9,7 +9,7 @@
+ 
+ O_TARGET := rivafb.o
+ 
+-obj-y    := fbdev.o riva_hw.o accel.o
++obj-y    := fbdev.o nv_setup.o riva_hw.o accel.o
+ obj-m    := $(O_TARGET)
+ 
+ include $(TOPDIR)/Rules.make
+diff -u --recursive --new-file linux-2.4.22/drivers/video/riva.ori/accel.c linux-2.4.22/drivers/video/riva/accel.c
+--- linux-2.4.22/drivers/video/riva.ori/accel.c	2003-09-23 17:49:13.000000000 +0200
++++ linux-2.4.22/drivers/video/riva/accel.c	2003-09-23 18:12:40.000000000 +0200
+@@ -253,7 +253,7 @@
+ 	putcs:		fbcon_riva8_putcs,
+ 	revc:		fbcon_riva8_revc,
+ 	clear_margins:	fbcon_riva8_clear_margins,
+-#endif	
++#endif
+ 	fontwidthmask:	FONTWIDTHRANGE(4, 16)
+ };
+ #endif
+diff -u --recursive --new-file linux-2.4.22/drivers/video/riva.ori/fbdev.c linux-2.4.22/drivers/video/riva/fbdev.c
+--- linux-2.4.22/drivers/video/riva.ori/fbdev.c	2003-09-23 17:49:13.000000000 +0200
++++ linux-2.4.22/drivers/video/riva/fbdev.c	2003-09-25 17:39:02.000000000 +0200
+@@ -1,12 +1,9 @@
+ /*
+- * linux/drivers/video/riva/fbdev.c
++ * linux/drivers/video/riva/fbdev.c - nVidia RIVA 128/TNT/TNT2 fb driver
+  *
+- * nVidia RIVA 128/TNT/TNT2/GeForce2/3 fb driver
+- *
+- * Maintained by Ani Joshi <ajoshi@kernel.crashing.org>
++ * Maintained by Ani Joshi <ajoshi@shell.unixbox.com>
+  *
+  * Copyright 1999-2000 Jeff Garzik
+- * Copyright 2000-2003 Ani Joshi
+  *
+  * Contributors:
+  *
+@@ -17,6 +14,10 @@
+  *
+  *	Jindrich Makovicka:  Accel code help, hw cursor, mtrr
+  *
++ *	Paul Richards:  Bug fixes, updates
++ *
++ *	Andrea Mazzoleni:  Updates
++ *
+  * Initial template from skeletonfb.c, created 28 Dec 1997 by Geert Uytterhoeven
+  * Includes riva_hw.c from nVidia, see copyright below.
+  * KGI code provided the basis for state storage, init, and mode switching.
+@@ -58,7 +59,7 @@
+ 
+ 
+ /* version number of this driver */
+-#define RIVAFB_VERSION "0.9.4"
++#define RIVAFB_VERSION "0.9.4c"
+ 
+ 
+ 
+@@ -127,101 +128,228 @@
+  *
+  * ------------------------------------------------------------------------- */
+ 
+-enum riva_chips {
+-	CH_RIVA_128 = 0,
+-	CH_RIVA_TNT,
+-	CH_RIVA_TNT2,
+-	CH_RIVA_UTNT2,	/* UTNT2 */
+-	CH_RIVA_VTNT2,	/* VTNT2 */
+-	CH_RIVA_UVTNT2,	/* VTNT2 */
+-	CH_RIVA_ITNT2,	/* ITNT2 */
+-	CH_GEFORCE_SDR,
+-	CH_GEFORCE_DDR,
+-	CH_QUADRO,
+-	CH_GEFORCE2_MX,
+-	CH_QUADRO2_MXR,
+-	CH_GEFORCE2_GTS,
+-	CH_GEFORCE2_ULTRA,
+-	CH_QUADRO2_PRO,
+-	CH_GEFORCE2_GO,
+-        CH_GEFORCE3,
+-        CH_GEFORCE3_1,
+-        CH_GEFORCE3_2,
+-        CH_QUADRO_DDC
+-};
+-
+-/* directly indexed by riva_chips enum, above */
+-static struct riva_chip_info {
+-	const char *name;
+-	unsigned arch_rev;
+-} riva_chip_info[] __devinitdata = {
+-	{ "RIVA-128", NV_ARCH_03 },
+-	{ "RIVA-TNT", NV_ARCH_04 },
+-	{ "RIVA-TNT2", NV_ARCH_04 },
+-	{ "RIVA-UTNT2", NV_ARCH_04 },
+-	{ "RIVA-VTNT2", NV_ARCH_04 },
+-	{ "RIVA-UVTNT2", NV_ARCH_04 },
+-	{ "RIVA-ITNT2", NV_ARCH_04 },
+-	{ "GeForce-SDR", NV_ARCH_10},
+-	{ "GeForce-DDR", NV_ARCH_10},
+-	{ "Quadro", NV_ARCH_10},
+-	{ "GeForce2-MX", NV_ARCH_10},
+-	{ "Quadro2-MXR", NV_ARCH_10},
+-	{ "GeForce2-GTS", NV_ARCH_10},
+-	{ "GeForce2-ULTRA", NV_ARCH_10},
+-	{ "Quadro2-PRO", NV_ARCH_10},
+-        { "GeForce2-Go", NV_ARCH_10},
+-        { "GeForce3", NV_ARCH_20}, 
+-        { "GeForce3 Ti 200", NV_ARCH_20},
+-        { "GeForce3 Ti 500", NV_ARCH_20},
+-        { "Quadro DDC", NV_ARCH_20}
+-};
+-
+ static struct pci_device_id rivafb_pci_tbl[] __devinitdata = {
+-	{ PCI_VENDOR_ID_NVIDIA_SGS, PCI_DEVICE_ID_NVIDIA_SGS_RIVA128,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_RIVA_128 },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_TNT,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_RIVA_TNT },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_TNT2,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_RIVA_TNT2 },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_UTNT2,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_RIVA_UTNT2 },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_VTNT2,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_RIVA_VTNT2 },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_UVTNT2,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_RIVA_VTNT2 },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_ITNT2,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_RIVA_ITNT2 },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_GEFORCE_SDR,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_GEFORCE_SDR },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_GEFORCE_DDR,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_GEFORCE_DDR },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_QUADRO,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_QUADRO },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_GEFORCE2_MX,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_GEFORCE2_MX },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_GEFORCE2_MX2,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_GEFORCE2_MX },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_QUADRO2_MXR,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_QUADRO2_MXR },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_GEFORCE2_GTS,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_GEFORCE2_GTS },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_GEFORCE2_GTS2,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_GEFORCE2_GTS },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_GEFORCE2_ULTRA,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_GEFORCE2_ULTRA },
+-	{ PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_QUADRO2_PRO,
+-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_QUADRO2_PRO },
+-        { PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_GEFORCE2_GO,
+-          PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_GEFORCE2_GO },
+-        { PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_GEFORCE3,
+-          PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_GEFORCE3 },
+-        { PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_GEFORCE3_1,
+-          PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_GEFORCE3_1 },
+-        { PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_GEFORCE3_2,
+-          PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_GEFORCE3_2 },
+-        { PCI_VENDOR_ID_NVIDIA, PCI_DEVICE_ID_NVIDIA_QUADRO_DDC,
+-          PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_QUADRO_DDC },
++	{ PCI_VENDOR_ID_NVIDIA_SGS, 0x0018, /* RIVA 128 */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_03 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0020, /* RIVA TNT [NV4] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_04 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0028, /* RIVA TNT2/TNT2 Pro [NV5] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_04 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0029, /* RIVA TNT2 Ultra [NV5] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_04 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x002A, /* Riva TnT2 [NV5] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_04 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x002B, /* Riva TnT2 [NV5] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_04 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x002C, /* Vanta/Vanta LT [NV6] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_04 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x002D, /* RIVA TNT2 Model 64/Model 64 Pro [NV5M64] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_04 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x002E, /* Vanta [NV6] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_04 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x002F, /* Vanta [NV6] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_04 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x00A0, /* Aladdin TNT2 [NV5] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_04 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0100, /* GeForce 256 SDR [NV10] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_10 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0101, /* GeForce 256 DDR [NV10DDR] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_10 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0103, /* Quadro [NV10GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_10 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0110, /* GeForce2 MX/MX 400 [NV11] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_10 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0111, /* GeForce2 MX 100 DDR/200 DDR [NV11DDR] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_10 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0112, /* GeForce2 Go [NV11] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_10 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0113, /* Quadro2 MXR/EX [NV11GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_10 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0150, /* GeForce2 GTS/Pro [NV15] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_10 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0151, /* NV15DDR [GeForce2 Ti] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_10 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0152, /* GeForce2 Ultra, Bladerunner [NV15BR] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_10 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0153, /* Quadro2 Pro [NV15GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_10 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0170, /* GeForce4 MX 460 [NV17] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0171, /* GeForce4 MX 440 [NV17] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0172, /* GeForce4 MX 420 [NV17] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0173, /* GeForce4 MX 440-SE */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0174, /* GeForce4 MX 440 Go [NV17] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0175, /* GeForce4 MX 420 Go [NV17] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0176, /* GeForce4 MX 420 Go 32M [NV17] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0177, /* GeForce4 MX 460 Go [NV17] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0178, /* Quadro4 500 XGL [NV17GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0179, /* GeForce4 MX 420 Go 64M [NV17] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x017A, /* Quadro4 200/400 [NV17GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x017B, /* Quadro4 550 XGL [NV17GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x017C, /* Quadro4 500 Go GL */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x017D, /* GeForce4 410 Go 16M [NV17] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0181, /* GeForce4 MX 440 AGP 8x [NV18] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0182, /* GeForce4 MX 440SE AGP 8x [NV18] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0183, /* GeForce4 MX 420 AGP 8x [NV18] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0186, /* GeForce4 448 Go [NV18] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0187, /* GeForce4 488 Go [NV18] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0188, /* Quadro4 580 XGL [NV18GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x018A, /* Quadro4 280 NVS AGP [NV18GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x018B, /* Quadro4 380 XGL [NV18GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x01A0, /* GeForce2 Integrated [NVCrush11] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_10 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x01F0, /* GeForce4 MX Integrated GPU [NV18] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0200, /* GeForce3 [NV20] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0201, /* GeForce3 Ti 200 [NV20] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0202, /* GeForce3 Ti 500 [NV20] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0203, /* Quadro4 500 DDC [NV20DCC] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0250, /* GeForce4 Ti 4600 [NV25] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0251, /* GeForce4 Ti 4400 [NV25] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0252, /* GeForce4 Ti [NV25] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0253, /* GeForce4 Ti 4200 [NV25] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0258, /* Quadro4 900 XGL [NV25GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0259, /* Quadro4 750 XGL [NV25GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x025B, /* Quadro4 700 XGL [NV25GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0280, /* GeForce4 Ti 4800 [NV28] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0281, /* GeForce4 Ti 4200 AGP 8x [NV28] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0282, /* GeForce4 Ti 4800 SE [NV28] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0286, /* GeForce4 4200 Go AGP 8x [NV28] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0288, /* Quadro4 980 XGL [NV28GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0289, /* Quadro4 780 XGL [NV28GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x028C, /* Quadro4 700 Go GL [NV28GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0300, /* GeForce FX [NV30] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0301, /* GeForce FX 5800 Ultra [NV30] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0302, /* GeForce FX 5800 [NV30] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0308, /* Quadro FX 2000 [NV30GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0309, /* Quadro FX 1000 [NV30GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0311, /* GeForce FX 5600 Ultra [NV31] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0312, /* GeForce FX 5600 [NV31] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0313, /* (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 }, 
++	{ PCI_VENDOR_ID_NVIDIA, 0x0314, /* GeForce FX 5600SE (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 }, 
++	{ PCI_VENDOR_ID_NVIDIA, 0x0316, /* NV31M (from nVidia site) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0317, /* NV31M Pro (from nVidia site) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0318, /* (from XFree 4.3) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0319, /* (from XFree 4.3) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x031A, /* GeForce FX Go5600 (from nVidia site) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x031B, /* GeForce FX Go5650 (from nVidia site) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x031C, /* Quadro FX Go700 (from nVidia site) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x031D, /* NV31GLM (from nVidia site) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x031E, /* NV31GLM Pro (from nVidia site) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x031F, /* NV31GLM Pro (from nVidia site) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0321, /* GeForce FX 5200 Ultra [NV34] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0322, /* GeForce FX 5200 [NV34] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0323, /* GeForce FX 5200SE (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0324, /* GeForce FX Go5200 (from nVidia site) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },	  
++	{ PCI_VENDOR_ID_NVIDIA, 0x0325, /* GeForce FX Go5250 (from nVidia site) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },	  	  
++	{ PCI_VENDOR_ID_NVIDIA, 0x0326, /* (From XFree 4.3) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0328, /* GeForce FX Go5200 32M/64M (from nVidia site) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },	  
++	{ PCI_VENDOR_ID_NVIDIA, 0x032A, /* (from XFree 4.3) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x032B, /* Quadro FX 500 [NV34GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x032D, /* GeForce FX Go5100 (from nVidia site) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },	  	  
++	{ PCI_VENDOR_ID_NVIDIA, 0x032E, /* (from XFree 4.3) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0330, /* GeForce FX 5900 Ultra [NV35] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0331, /* GeForce FX 5900 [NV35] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0332, /* (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0333, /* GeForce FX 5950 Ultra (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0334, /* (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0338, /* Quadro FX 3000 [NV35GL] */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0341, /* (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0342, /* (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0343, /* (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0347, /* (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0348, /* (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x0349, /* (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x034B, /* (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x034C, /* (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x034E, /* (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++	{ PCI_VENDOR_ID_NVIDIA, 0x034F, /* (from XFree 4.3.99.12) */
++	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_ARCH_20 },
++
+ 	{ 0, } /* terminate list */
+ };
+ MODULE_DEVICE_TABLE(pci, rivafb_pci_tbl);
+@@ -278,12 +406,14 @@
+ 
+ /* command line data, set in rivafb_setup() */
+ static char fontname[40] __initdata = { 0 };
+-static char noaccel __initdata = 0;
+-static char nomove = 0;
+-static char nohwcursor __initdata = 0;
+-static char noblink = 0;
++static int noaccel __initdata = 0;
++static int nomove = 0;
++static int nohwcursor __initdata = 0;
++static int noblink = 0;
++static int flatpanel __initdata = -1; /* Autodetect later */
++static int forceCRTC __initdata = -1;
+ #ifdef CONFIG_MTRR
+-static char nomtrr __initdata = 0;
++static int nomtrr __initdata = 0;
+ #endif
+ 
+ #ifndef MODULE
+@@ -445,7 +575,7 @@
+ 	if (rinfo->cursor->vbl_cnt && --rinfo->cursor->vbl_cnt == 0) {
+ 		rinfo->cursor->on ^= 1;
+ 		if (rinfo->cursor->on)
+-			*(rinfo->riva.CURSORPOS) = (rinfo->cursor->pos.x & 0xFFFF)
++			rinfo->riva.PRAMDAC[0x0000300/4] = (rinfo->cursor->pos.x & 0xFFFF)
+ 						   | (rinfo->cursor->pos.y << 16);
+ 		rinfo->riva.ShowHideCursor(&rinfo->riva, rinfo->cursor->on);
+ 		if (!noblink)
+@@ -646,7 +776,7 @@
+ 		if (c->last_move_delay <= 1) { /* rapid cursor movement */
+ 			c->vbl_cnt = CURSOR_SHOW_DELAY;
+ 		} else {
+-			*(rinfo->riva.CURSORPOS) = (x & 0xFFFF) | (y << 16);
++			rinfo->riva.PRAMDAC[0x0000300/4] = (x & 0xFFFF) | (y << 16);
+ 			rinfo->riva.ShowHideCursor(&rinfo->riva, 1);
+ 			if (!noblink) c->vbl_cnt = CURSOR_HIDE_DELAY;
+ 			c->on = 1;
+@@ -886,9 +1016,10 @@
+ 	hEnd = (hDisplaySize + video_mode->right_margin +
+ 		video_mode->hsync_len) / 8 - 1;
+ 	hTotal = (hDisplaySize + video_mode->right_margin +
+-		  video_mode->hsync_len + video_mode->left_margin) / 8 - 1;
++		  video_mode->hsync_len + video_mode->left_margin) / 8 - 5;
+ 	hBlankStart = hDisplay;
+-	hBlankEnd = hTotal;
++	hBlankEnd = hTotal + 4;
++
+ 	height = video_mode->yres_virtual;
+ 	vDisplay = video_mode->yres - 1;
+ 	vStart = video_mode->yres + video_mode->lower_margin - 1;
+@@ -897,28 +1028,12 @@
+ 	vTotal = video_mode->yres + video_mode->lower_margin +
+ 		 video_mode->vsync_len + video_mode->upper_margin + 2;
+ 	vBlankStart = vDisplay;
+-	vBlankEnd = vTotal;
++	vBlankEnd = vTotal + 1;
+ 	dotClock = 1000000000 / video_mode->pixclock;
+ 
+ 	memcpy(&newmode, &reg_template, sizeof(struct riva_regs));
+ 
+-	newmode.ext.screen = SetBitField(hBlankEnd,6:6,4:4)
+-                  | SetBitField(vBlankStart,10:10,3:3)
+-                  | SetBitField(vStart,10:10,2:2)
+-                  | SetBitField(vDisplay,10:10,1:1)
+-                  | SetBitField(vTotal,10:10,0:0);
+-    
+-    	newmode.ext.horiz  = SetBitField(hTotal,8:8,0:0)
+-                  | SetBitField(hDisplay,8:8,1:1)
+-                  | SetBitField(hBlankStart,8:8,2:2)
+-                  | SetBitField(hStart,8:8,3:3);
+-
+-    	newmode.ext.extra  = SetBitField(vTotal,11:11,0:0)
+-                    | SetBitField(vDisplay,11:11,2:2)
+-                    | SetBitField(vStart,11:11,4:4)
+-                    | SetBitField(vBlankStart,11:11,6:6);
+-
+-	if (rinfo->riva.flatPanel) {
++	if (rinfo->FlatPanel) {
+ 		vStart = vTotal - 3;
+ 		vEnd = vTotal - 2;
+ 		vBlankStart = vStart;
+@@ -927,14 +1042,13 @@
+ 		hBlankEnd = hTotal + 4;
+ 	}
+ 
+-	newmode.crtc[0x0] = Set8Bits (hTotal - 4);
++	newmode.crtc[0x0] = Set8Bits (hTotal); 
+ 	newmode.crtc[0x1] = Set8Bits (hDisplay);
+ 	newmode.crtc[0x2] = Set8Bits (hBlankStart);
+-	newmode.crtc[0x3] = SetBitField(hBlankEnd,4:0,4:0)
+-                | SetBit(7);
++	newmode.crtc[0x3] = SetBitField (hBlankEnd, 4: 0, 4:0) | SetBit (7);
+ 	newmode.crtc[0x4] = Set8Bits (hStart);
+ 	newmode.crtc[0x5] = SetBitField (hBlankEnd, 5: 5, 7:7)
+- 		| SetBitField (hEnd, 4: 0, 4:0);
++		| SetBitField (hEnd, 4: 0, 4:0);
+ 	newmode.crtc[0x6] = SetBitField (vTotal, 7: 0, 7:0);
+ 	newmode.crtc[0x7] = SetBitField (vTotal, 8: 8, 0:0)
+ 		| SetBitField (vDisplay, 8: 8, 1:1)
+@@ -946,41 +1060,70 @@
+ 		| SetBitField (vStart, 9: 9, 7:7);
+ 	newmode.crtc[0x9] = SetBitField (vBlankStart, 9: 9, 5:5)
+ 		| SetBit (6);
++	if ((video_mode->vmode & FB_VMODE_MASK) == FB_VMODE_DOUBLE)
++		newmode.crtc[0x9] |= 0x80;
+ 	newmode.crtc[0x10] = Set8Bits (vStart);
+ 	newmode.crtc[0x11] = SetBitField (vEnd, 3: 0, 3:0)
+ 		| SetBit (5);
+ 	newmode.crtc[0x12] = Set8Bits (vDisplay);
+-	newmode.crtc[0x13] = ((width / 8) * ((bpp + 1) / 8)) & 0xFF;
++	newmode.crtc[0x13] = (width / 8) * ((bpp + 1) / 8);
+ 	newmode.crtc[0x15] = Set8Bits (vBlankStart);
+ 	newmode.crtc[0x16] = Set8Bits (vBlankEnd);
+ 
++	newmode.ext.screen = SetBitField(hBlankEnd,6:6,4:4)
++		| SetBitField(vBlankStart,10:10,3:3)
++		| SetBitField(vStart,10:10,2:2)
++		| SetBitField(vDisplay,10:10,1:1)
++		| SetBitField(vTotal,10:10,0:0);
++	newmode.ext.horiz  = SetBitField(hTotal,8:8,0:0) 
++		| SetBitField(hDisplay,8:8,1:1)
++		| SetBitField(hBlankStart,8:8,2:2)
++		| SetBitField(hStart,8:8,3:3);
++	newmode.ext.extra  = SetBitField(vTotal,11:11,0:0)
++		| SetBitField(vDisplay,11:11,2:2)
++		| SetBitField(vStart,11:11,4:4)
++		| SetBitField(vBlankStart,11:11,6:6); 
++
++	/* CalcStateExt does this already */
++	/*
+ 	newmode.ext.bpp = bpp;
+ 	newmode.ext.width = width;
+ 	newmode.ext.height = height;
++	*/
++	newmode.ext.interlace = 0xff; /* interlace off */
++
++	if(rinfo->riva.Architecture >= NV_ARCH_10)
++		rinfo->riva.CURSOR = (U032 *)(rinfo->fb_base + rinfo->riva.CursorStart);
+ 
+ 	rinfo->riva.CalcStateExt(&rinfo->riva, &newmode.ext, bpp, width,
+-				  hDisplaySize, hDisplay, hStart, hEnd,
+-				  hTotal, height, vDisplay, vStart, vEnd,
+-				  vTotal, dotClock);
++				  hDisplaySize, height, dotClock,
++				  ((video_mode->vmode & FB_VMODE_MASK) == FB_VMODE_DOUBLE) ? V_DBLSCAN : 0);
+ 
+ 	newmode.ext.scale = rinfo->riva.PRAMDAC[0x00000848/4] & 0xfff000ff;
+-
+-	if (rinfo->riva.flatPanel) {
++	if(rinfo->FlatPanel == 1) {
+ 		newmode.ext.pixel |= (1 << 7);
+-		newmode.ext.scale |= (1 << 8);
++		newmode.ext.scale |= (1 << 8) ;
+ 	}
+-
+-	newmode.ext.vpll2 = rinfo->riva.PRAMDAC[0x00000520/4];
+-
+-#if defined(__powerpc__)
+-	/*
+-	 * XXX only Mac cards use second DAC for flat panel
+-	 */
+-	if (rinfo->riva.flatPanel) {
++	if(rinfo->SecondCRTC) {
++		newmode.ext.head  = rinfo->riva.PCRTC0[0x00000860/4] & ~0x00001000;
++		newmode.ext.head2 = rinfo->riva.PCRTC0[0x00002860/4] | 0x00001000;
++		newmode.ext.crtcOwner = 3;
+ 		newmode.ext.pllsel |= 0x20000800;
+ 		newmode.ext.vpll2 = newmode.ext.vpll;
++	} else if(rinfo->riva.twoHeads) {
++		newmode.ext.head  =  rinfo->riva.PCRTC0[0x00000860/4] | 0x00001000;
++		newmode.ext.head2 =  rinfo->riva.PCRTC0[0x00002860/4] & ~0x00001000;
++		newmode.ext.crtcOwner = 0;
++		newmode.ext.vpll2 = rinfo->riva.PRAMDAC0[0x00000520/4];
+ 	}
+-#endif
++
++	newmode.ext.cursorConfig = 0x02000100;
++	if ((video_mode->vmode & FB_VMODE_MASK) == FB_VMODE_DOUBLE)
++		newmode.ext.cursorConfig |= (1 << 4);
++
++	newmode.ext.vpllB = 0;
++	newmode.ext.vpll2B = 0;
++
+ 	rinfo->current_state = newmode;
+ 	riva_load_state(rinfo, &rinfo->current_state);
+ 
+@@ -1545,6 +1688,11 @@
+ 	    v.blue.msb_right =
+ 	    v.transp.offset = v.transp.length = v.transp.msb_right = 0;
+ 
++	/* INTERLACED isn't supported */
++	if ((v.vmode & FB_VMODE_MASK) == FB_VMODE_INTERLACED) {
++		v.vmode = (v.vmode & ~FB_VMODE_MASK) | FB_VMODE_NONINTERLACED; 
++	}
++
+ 	switch (v.activate & FB_ACTIVATE_MASK) {
+ 	case FB_ACTIVATE_TEST:
+ 		DPRINTK("EXIT - FB_ACTIVATE_TEST\n");
+@@ -1841,7 +1989,7 @@
+ 	if (rinfo->use_default_var)
+ 		/* We will use the modified default var */
+ 		rinfo->disp.var = rivafb_default_var;
+-
++	
+ 	return 0;
+ }
+ 
+@@ -1939,28 +2087,29 @@
+ 	/* jump to detailed timing block section */
+ 	block += 54;
+ 
+-        rinfo->clock = (block[0] + (block[1] << 8));
+-        rinfo->panel_xres = (block[2] + ((block[4] & 0xf0) << 4));
+-        rinfo->hblank = (block[3] + ((block[4] & 0x0f) << 8));
+-        rinfo->panel_yres = (block[5] + ((block[7] & 0xf0) << 4));
+-        rinfo->vblank = (block[6] + ((block[7] & 0x0f) << 8));
+-        rinfo->hOver_plus = (block[8] + ((block[11] & 0xc0) << 2));
+-        rinfo->hSync_width = (block[9] + ((block[11] & 0x30) << 4));
+-        rinfo->vOver_plus = ((block[10] >> 4) + ((block[11] & 0x0c) << 2));
+-        rinfo->vSync_width = ((block[10] & 0x0f) + ((block[11] & 0x03) << 4));
+-        rinfo->interlaced = ((block[17] & 0x80) >> 7);
+-        rinfo->synct = ((block[17] & 0x18) >> 3);
+-        rinfo->misc = ((block[17] & 0x06) >> 1);
+-        rinfo->hAct_high = rinfo->vAct_high = 0;
+-        if (rinfo->synct == 3) {
+-                if (rinfo->misc & 2)
+-                        rinfo->hAct_high = 1;
+-                if (rinfo->misc & 1)
+-                        rinfo->vAct_high = 1;
++	rinfo->clock = (block[0] + (block[1] << 8));
++	rinfo->panel_xres = (block[2] + ((block[4] & 0xf0) << 4));
++	rinfo->hblank = (block[3] + ((block[4] & 0x0f) << 8));
++	rinfo->panel_yres = (block[5] + ((block[7] & 0xf0) << 4));
++	rinfo->vblank = (block[6] + ((block[7] & 0x0f) << 8));
++	rinfo->hOver_plus = (block[8] + ((block[11] & 0xc0) << 2));
++	rinfo->hSync_width = (block[9] + ((block[11] & 0x30) << 4));
++	rinfo->vOver_plus = ((block[10] >> 4) + ((block[11] & 0x0c) << 2));
++	rinfo->vSync_width = ((block[10] & 0x0f) + ((block[11] & 0x03) << 4));
++	rinfo->interlaced = ((block[17] & 0x80) >> 7);
++	rinfo->synct = ((block[17] & 0x18) >> 3);
++	rinfo->misc = ((block[17] & 0x06) >> 1);
++	rinfo->hAct_high = rinfo->vAct_high = 0;
++	if (rinfo->synct == 3) {
++		if (rinfo->misc & 2)
++			rinfo->hAct_high = 1;
++		if (rinfo->misc & 1)
++			rinfo->vAct_high = 1;
+ 	}
+ 
+-	printk("rivafb: detected DFP panel size from EDID: %dx%d\n",
+-		rinfo->panel_xres, rinfo->panel_yres);
++	printk(KERN_INFO PFX
++			"detected DFP panel size from EDID: %dx%d\n", 
++			rinfo->panel_xres, rinfo->panel_yres);
+ 
+ 	rinfo->got_dfpinfo = 1;
+ 
+@@ -2020,7 +2169,8 @@
+ 	if (riva_dfp_parse_EDID(rinfo))
+ 		riva_update_default_var(rinfo);
+ 
+-	rinfo->riva.flatPanel = rinfo->got_dfpinfo;
++	if (rinfo->got_dfpinfo == 1) /* if user specified flatpanel, we respect that */
++		rinfo->FlatPanel = 1;
+ }
+ 
+ 
+@@ -2035,10 +2185,8 @@
+ 				     const struct pci_device_id *ent)
+ {
+ 	struct rivafb_info *rinfo;
+-	struct riva_chip_info *rci = &riva_chip_info[ent->driver_data];
+ 
+ 	assert(pd != NULL);
+-	assert(rci != NULL);
+ 
+ 	rinfo = kmalloc(sizeof(struct rivafb_info), GFP_KERNEL);
+ 	if (!rinfo)
+@@ -2046,9 +2194,22 @@
+ 
+ 	memset(rinfo, 0, sizeof(struct rivafb_info));
+ 
+-	rinfo->drvr_name = rci->name;
+-	rinfo->riva.Architecture = rci->arch_rev;
++	rinfo->riva.Architecture = ent->driver_data;
++	if (ent->driver_data == NV_ARCH_03)
++		rinfo->drvr_name = "Riva128";
++	else if (ent->driver_data == NV_ARCH_04)
++		rinfo->drvr_name = "RivaTNT";
++	else
++		rinfo->drvr_name = "GeForce";
+ 
++	rinfo->Chipset = (pd->vendor << 16) | pd->device;
++	printk(KERN_INFO PFX "nVidia device/chipset %X\n", rinfo->Chipset);
++	
++	rinfo->FlatPanel = flatpanel;
++	if (flatpanel == 1)
++		printk(KERN_INFO PFX "flatpanel support enabled\n");
++	rinfo->forceCRTC = forceCRTC;
++	
+ 	rinfo->pd = pd;
+ 	rinfo->base0_region_size = pci_resource_len(pd, 0);
+ 	rinfo->base1_region_size = pci_resource_len(pd, 1);
+@@ -2061,104 +2222,73 @@
+ 		cmd |= (PCI_COMMAND_IO | PCI_COMMAND_MEMORY);
+ 		pci_write_config_word(pd, PCI_COMMAND, cmd);
+ 	}
+- 
++	
+ 	rinfo->ctrl_base_phys = pci_resource_start(rinfo->pd, 0);
+ 	rinfo->fb_base_phys = pci_resource_start(rinfo->pd, 1);
+ 
++	if (!request_mem_region(rinfo->ctrl_base_phys,
++				rinfo->base0_region_size, "rivafb")) {
++		printk(KERN_ERR PFX "cannot reserve MMIO region\n");
++		goto err_out_kfree;
++	}
++
+ 	rinfo->ctrl_base = ioremap(rinfo->ctrl_base_phys,
+ 				   rinfo->base0_region_size);
+ 	if (!rinfo->ctrl_base) {
+ 		printk(KERN_ERR PFX "cannot ioremap MMIO base\n");
+-		goto err_out_free_base1;
++		goto err_out_free_base0;
+ 	}
+ 	
+ 	riva_get_EDID(rinfo);
+ 
+ 	riva_get_dfpinfo(rinfo);
+ 
+-	rinfo->riva.EnableIRQ = 0;
+-	rinfo->riva.PRAMDAC = (unsigned *)(rinfo->ctrl_base + 0x00680000);
+-	rinfo->riva.PFB = (unsigned *)(rinfo->ctrl_base + 0x00100000);
+-	rinfo->riva.PFIFO = (unsigned *)(rinfo->ctrl_base + 0x00002000);
+-	rinfo->riva.PGRAPH = (unsigned *)(rinfo->ctrl_base + 0x00400000);
+-	rinfo->riva.PEXTDEV = (unsigned *)(rinfo->ctrl_base + 0x00101000);
+-	rinfo->riva.PTIMER = (unsigned *)(rinfo->ctrl_base + 0x00009000);
+-	rinfo->riva.PMC = (unsigned *)(rinfo->ctrl_base + 0x00000000);
+-	rinfo->riva.FIFO = (unsigned *)(rinfo->ctrl_base + 0x00800000);
+-
+-	rinfo->riva.PCIO = (U008 *)(rinfo->ctrl_base + 0x00601000);
+-	rinfo->riva.PDIO = (U008 *)(rinfo->ctrl_base + 0x00681000);
+-	rinfo->riva.PVIO = (U008 *)(rinfo->ctrl_base + 0x000C0000);
+-
+-	rinfo->riva.IO = (MISCin(rinfo) & 0x01) ? 0x3D0 : 0x3B0;
+-
+-	if (rinfo->riva.Architecture == NV_ARCH_03) {
+-		/*
+-		 * We have to map the full BASE_1 aperture for Riva128's
+-		 * because they use the PRAMIN set in "framebuffer" space
++	switch (rinfo->riva.Architecture) {
++	case NV_ARCH_03:
++		/* Riva128's PRAMIN is in the "framebuffer" space
++		 * Since these cards were never made with more than 8 megabytes
++		 * we can safely allocate this seperately.
+ 		 */
+-		if (!request_mem_region(rinfo->fb_base_phys,
+-					rinfo->base1_region_size, "rivafb")) {
+-			printk(KERN_ERR PFX "cannot reserve FB region\n");
+-			goto err_out_free_base0;
+-		}
+-	
+-		rinfo->fb_base = ioremap(rinfo->fb_base_phys,
+-					 rinfo->base1_region_size);
+-		if (!rinfo->fb_base) {
+-			printk(KERN_ERR PFX "cannot ioremap FB base\n");
++		if (!request_mem_region(rinfo->fb_base_phys + 0x00C00000,
++					 0x00008000, "rivafb")) {
++			printk(KERN_ERR PFX "cannot reserve PRAMIN region\n");
+ 			goto err_out_iounmap_ctrl;
+ 		}
+-	}
+-
+-
+-	switch (rinfo->riva.Architecture) {
+-	case NV_ARCH_03:
+-		rinfo->riva.PRAMIN = (unsigned *)(rinfo->fb_base + 0x00C00000);
++		rinfo->riva.PRAMIN = ioremap(rinfo->fb_base_phys + 0x00C00000,
++				 0x00008000);
++		if (!rinfo->riva.PRAMIN) {
++			printk(KERN_ERR PFX "cannot ioremap PRAMIN region\n");
++			goto err_out_free_nv3_pramin;
++		}
+ 		break;
+ 	case NV_ARCH_04:
+ 	case NV_ARCH_10:
+ 	case NV_ARCH_20:
+-		rinfo->riva.PCRTC = (unsigned *)(rinfo->ctrl_base + 0x00600000);
++		rinfo->riva.PCRTC0 = (unsigned *)(rinfo->ctrl_base + 0x00600000);
+ 		rinfo->riva.PRAMIN = (unsigned *)(rinfo->ctrl_base + 0x00710000);
+ 		break;
+ 	}
+ 
+-#if defined(__powerpc__)
+-	/*
+-	 * XXX Mac cards use the second DAC for the panel
+-	 */
+-	if (rinfo->riva.flatPanel) {
+-		printk("rivafb: using second CRTC\n");
+-		rinfo->riva.PCIO = rinfo->riva.PCIO + 0x2000;
+-		rinfo->riva.PCRTC = rinfo->riva.PCRTC + 0x800;
+-		rinfo->riva.PRAMDAC = rinfo->riva.PRAMDAC + 0x800;
+-		rinfo->riva.PDIO = rinfo->riva.PDIO + 0x2000;
+-	}
+-#endif
++	riva_common_setup(rinfo);
+ 
+-	RivaGetConfig(&rinfo->riva);
++	if (rinfo->riva.Architecture == NV_ARCH_03) {
++		rinfo->riva.PCRTC = rinfo->riva.PCRTC0 = rinfo->riva.PGRAPH;
++	}
+ 
+ 	rinfo->ram_amount = rinfo->riva.RamAmountKBytes * 1024;
+ 	rinfo->dclk_max = rinfo->riva.MaxVClockFreqKHz * 1000;
+ 
+-	if (rinfo->riva.Architecture != NV_ARCH_03) {
+-		/*
+-		 * Now the _normal_ chipsets can just map the amount of
+-		 * real physical ram instead of the whole aperture
+-		 */
+-		if (!request_mem_region(rinfo->fb_base_phys,
+-					rinfo->ram_amount, "rivafb")) {
+-			printk(KERN_ERR PFX "cannot reserve FB region\n");
+-			goto err_out_free_base0;
+-		}
++	if (!request_mem_region(rinfo->fb_base_phys,
++				rinfo->ram_amount, "rivafb")) {
++		printk(KERN_ERR PFX "cannot reserve FB region\n");
++		goto err_out_iounmap_nv3_pramin;
++	}
+ 	
+-		rinfo->fb_base = ioremap(rinfo->fb_base_phys,
+-					 rinfo->ram_amount);
+-		if (!rinfo->fb_base) {
+-			printk(KERN_ERR PFX "cannot ioremap FB base\n");
+-			goto err_out_iounmap_ctrl;
+-		}
++	rinfo->fb_base = ioremap(rinfo->fb_base_phys,
++				 rinfo->ram_amount);
++	if (!rinfo->fb_base) {
++		printk(KERN_ERR PFX "cannot ioremap FB base\n");
++		goto err_out_free_base1;
+ 	}
+ 
+ #ifdef CONFIG_MTRR
+@@ -2215,10 +2345,16 @@
+ 	rivafb_exit_cursor(rinfo);
+ /* err_out_iounmap_fb: */
+ 	iounmap(rinfo->fb_base);
++err_out_free_base1:
++	release_mem_region(rinfo->fb_base_phys, rinfo->ram_amount);
++err_out_iounmap_nv3_pramin:
++	if (rinfo->riva.Architecture == NV_ARCH_03) 
++		iounmap((caddr_t)rinfo->riva.PRAMIN);
++err_out_free_nv3_pramin:
++	if (rinfo->riva.Architecture == NV_ARCH_03)
++		release_mem_region(rinfo->fb_base_phys + 0x00C00000, 0x00008000);
+ err_out_iounmap_ctrl:
+ 	iounmap(rinfo->ctrl_base);
+-err_out_free_base1:
+-	release_mem_region(rinfo->fb_base_phys, rinfo->base1_region_size);
+ err_out_free_base0:
+ 	release_mem_region(rinfo->ctrl_base_phys, rinfo->base0_region_size);
+ err_out_kfree:
+@@ -2256,6 +2392,11 @@
+ 	release_mem_region(board->fb_base_phys,
+ 			   board->ram_amount);
+ 
++	if (board->riva.Architecture == NV_ARCH_03) {
++		iounmap((caddr_t)board->riva.PRAMIN);
++		release_mem_region(board->fb_base_phys + 0x00C00000, 0x00008000);
++	}
++	
+ 	kfree(board);
+ 
+ 	pci_set_drvdata(pd, NULL);
+@@ -2301,6 +2442,16 @@
+ 		} else if (!strncmp(this_opt, "nomtrr", 6)) {
+ 			nomtrr = 1;
+ #endif
++		} else if (!strncmp(this_opt, "forceCRTC", 9)) {
++			char *p;
++			
++			p = this_opt + 9;
++			if (!*p || !*(++p)) continue; 
++			forceCRTC = *p - '0';
++			if (forceCRTC < 0 || forceCRTC > 1) 
++				forceCRTC = -1;
++		} else if (!strncmp(this_opt, "flatpanel", 9)) {
++			flatpanel = 1;
+ 		} else if (!strncmp(this_opt, "nohwcursor", 10)) {
+ 			nohwcursor = 1;
+ 		} else
+@@ -2334,6 +2485,7 @@
+ 	err = pci_module_init(&rivafb_driver);
+ 	if (err)
+ 		return err;
++	pci_register_driver(&rivafb_driver);
+ 	return 0;
+ }
+ 
+@@ -2357,6 +2509,11 @@
+ MODULE_PARM_DESC(nohwcursor, "Disables hardware cursor (0 or 1=disabled) (default=0)");
+ MODULE_PARM(noblink, "i");
+ MODULE_PARM_DESC(noblink, "Disables hardware cursor blinking (0 or 1=disabled) (default=0)");
++MODULE_PARM(flatpanel, "i");
++MODULE_PARM_DESC(flatpanel, "Enables experimental flat panel support for some chipsets. (0 or 1=enabled) (default=0)");
++MODULE_PARM(forceCRTC, "i");
++MODULE_PARM_DESC(forceCRTC, "Forces usage of a particular CRTC in case autodetection fails. (0 or 1) (default=autodetect)");
++
+ #ifdef CONFIG_MTRR
+ MODULE_PARM(nomtrr, "i");
+ MODULE_PARM_DESC(nomtrr, "Disables MTRR support (0 or 1=disabled) (default=0)");
+@@ -2364,5 +2521,5 @@
+ #endif /* MODULE */
+ 
+ MODULE_AUTHOR("Ani Joshi, maintainer");
+-MODULE_DESCRIPTION("Framebuffer driver for nVidia Riva 128, TNT, TNT2");
++MODULE_DESCRIPTION("Framebuffer driver for nVidia Riva 128, TNT, TNT2, and the GeForce series");
+ MODULE_LICENSE("GPL");
+diff -u --recursive --new-file linux-2.4.22/drivers/video/riva.ori/nv4ref.h linux-2.4.22/drivers/video/riva/nv4ref.h
+--- linux-2.4.22/drivers/video/riva.ori/nv4ref.h	2003-09-23 17:49:13.000000000 +0200
++++ linux-2.4.22/drivers/video/riva/nv4ref.h	2003-09-23 18:12:40.000000000 +0200
+@@ -41,7 +41,7 @@
+  * GPL licensing note -- nVidia is allowing a liberal interpretation of
+  * the documentation restriction above, to merely say that this nVidia's
+  * copyright and disclaimer should be included with all code derived
+- * from this source.  -- Jeff Garzik <jgarzik@pobox.com>, 01/Nov/99 
++ * from this source.  -- Jeff Garzik <jgarzik@mandrakesoft.com>, 01/Nov/99 
+  */
+ 
+  /***************************************************************************\
+diff -u --recursive --new-file linux-2.4.22/drivers/video/riva.ori/nv_setup.c linux-2.4.22/drivers/video/riva/nv_setup.c
+--- linux-2.4.22/drivers/video/riva.ori/nv_setup.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-2.4.22/drivers/video/riva/nv_setup.c	2003-09-24 21:11:26.000000000 +0200
+@@ -0,0 +1,250 @@
++/* $XConsortium: nv_driver.c /main/3 1996/10/28 05:13:37 kaleb $ */
++/*
++ * Copyright 1996-1997  David J. McKay
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a
++ * copy of this software and associated documentation files (the "Software"),
++ * to deal in the Software without restriction, including without limitation
++ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
++ * and/or sell copies of the Software, and to permit persons to whom the
++ * Software is furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
++ * DAVID J. MCKAY BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
++ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
++ * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++ * SOFTWARE.
++ */
++
++/*
++ * GPL licensing note -- nVidia is allowing a liberal interpretation of
++ * the documentation restriction above, to merely say that this nVidia's
++ * copyright and disclaimer should be included with all code derived
++ * from this source.  -- Jeff Garzik <jgarzik@mandrakesoft.com>, 01/Nov/99 
++ */
++
++/* Hacked together from mga driver and 3.3.4 NVIDIA driver by Jarno Paananen
++   <jpaana@s2.org> */
++
++/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/nv/nv_setup.c,v 1.18 2002/08/0
++5 20:47:06 mvojkovi Exp $ */
++
++#include <linux/delay.h>
++#include <linux/pci_ids.h>
++#include "rivafb.h"
++#include "nvreg.h"
++
++
++#ifndef CONFIG_PCI		/* sanity check */
++#error This driver requires PCI support.
++#endif
++
++#define PFX "rivafb: "
++
++static inline unsigned char MISCin(struct rivafb_info *rinfo)
++{
++	return (VGA_RD08(rinfo->riva.PVIO, 0x3cc));
++}
++
++static Bool 
++riva_is_connected(struct rivafb_info *rinfo, Bool second)
++{
++	volatile U032 *PRAMDAC = rinfo->riva.PRAMDAC0;
++	U032 reg52C, reg608;
++	Bool present;
++
++	if(second) PRAMDAC += 0x800;
++
++	reg52C = PRAMDAC[0x052C/4];
++	reg608 = PRAMDAC[0x0608/4];
++
++	PRAMDAC[0x0608/4] = reg608 & ~0x00010000;
++
++	PRAMDAC[0x052C/4] = reg52C & 0x0000FEEE;
++	mdelay(1); 
++	PRAMDAC[0x052C/4] |= 1;
++
++	rinfo->riva.PRAMDAC0[0x0610/4] = 0x94050140;
++	rinfo->riva.PRAMDAC0[0x0608/4] |= 0x00001000;
++
++	mdelay(1);
++
++	present = (PRAMDAC[0x0608/4] & (1 << 28)) ? TRUE : FALSE;
++
++	rinfo->riva.PRAMDAC0[0x0608/4] &= 0x0000EFFF;
++
++	PRAMDAC[0x052C/4] = reg52C;
++	PRAMDAC[0x0608/4] = reg608;
++
++	return present;
++}
++
++static void
++riva_override_CRTC(struct rivafb_info *rinfo)
++{
++	printk(KERN_INFO PFX
++		"Detected CRTC controller %i being used\n",
++		rinfo->SecondCRTC ? 1 : 0);
++
++	if(rinfo->forceCRTC != -1) {
++		printk(KERN_INFO PFX
++			"Forcing usage of CRTC %i\n", rinfo->forceCRTC);
++		rinfo->SecondCRTC = rinfo->forceCRTC;
++	}
++}
++
++static void
++riva_is_second(struct rivafb_info *rinfo)
++{
++	if(rinfo->FlatPanel == 1) {
++		switch(rinfo->Chipset & 0xffff) {
++		case 0x0174:
++		case 0x0175:
++		case 0x0176:
++		case 0x0177:
++		case 0x0179:
++		case 0x017C:
++		case 0x017D:
++		case 0x0186:
++		case 0x0187:
++		/* this might not be a good default for the chips below */
++		case 0x0286:
++		case 0x028C:
++		case 0x0316:
++		case 0x0317:
++		case 0x031A:
++		case 0x031B:
++		case 0x031C:
++		case 0x031D:
++		case 0x031E:
++		case 0x031F:
++		case 0x0326:
++		case 0x032E:
++			rinfo->SecondCRTC = TRUE;
++			break;
++		default:
++			rinfo->SecondCRTC = FALSE;
++			break;
++		}
++	} else {
++		if(riva_is_connected(rinfo, 0)) {
++			if(rinfo->riva.PRAMDAC0[0x0000052C/4] & 0x100)
++				rinfo->SecondCRTC = TRUE;
++			else
++				rinfo->SecondCRTC = FALSE;
++		} else 
++		if (riva_is_connected(rinfo, 1)) {
++			if(rinfo->riva.PRAMDAC0[0x0000252C/4] & 0x100)
++				rinfo->SecondCRTC = TRUE;
++			else
++				rinfo->SecondCRTC = FALSE;
++		} else /* default */
++			rinfo->SecondCRTC = FALSE;
++	}
++
++	riva_override_CRTC(rinfo);
++}
++
++void
++riva_common_setup(struct rivafb_info *rinfo)
++{
++	rinfo->riva.EnableIRQ = 0;
++	rinfo->riva.PRAMDAC0 = (unsigned *)(rinfo->ctrl_base + 0x00680000);
++	rinfo->riva.PFB = (unsigned *)(rinfo->ctrl_base + 0x00100000);
++	rinfo->riva.PFIFO = (unsigned *)(rinfo->ctrl_base + 0x00002000);
++	rinfo->riva.PGRAPH = (unsigned *)(rinfo->ctrl_base + 0x00400000);
++	rinfo->riva.PEXTDEV = (unsigned *)(rinfo->ctrl_base + 0x00101000);
++	rinfo->riva.PTIMER = (unsigned *)(rinfo->ctrl_base + 0x00009000);
++	rinfo->riva.PMC = (unsigned *)(rinfo->ctrl_base + 0x00000000);
++	rinfo->riva.FIFO = (unsigned *)(rinfo->ctrl_base + 0x00800000);
++	rinfo->riva.PCIO0 = (U008 *)(rinfo->ctrl_base + 0x00601000);
++	rinfo->riva.PDIO0 = (U008 *)(rinfo->ctrl_base + 0x00681000);
++	rinfo->riva.PVIO = (U008 *)(rinfo->ctrl_base + 0x000C0000);
++
++	rinfo->riva.IO = (MISCin(rinfo) & 0x01) ? 0x3D0 : 0x3B0;
++
++	if(rinfo->FlatPanel == -1) {
++		switch(rinfo->Chipset & 0xffff) {
++		case 0x0112:   /* known laptop chips */
++		case 0x0174:
++		case 0x0175:
++		case 0x0176:
++		case 0x0177:
++		case 0x0179:
++		case 0x017C:
++		case 0x017D:
++		case 0x0186:
++		case 0x0187:
++		case 0x0286:
++		case 0x028C:
++		case 0x0316:
++		case 0x0317:
++		case 0x031A:
++		case 0x031B:
++		case 0x031C:
++		case 0x031D:
++		case 0x031E:
++		case 0x031F:
++		case 0x0326:
++		case 0x032E:
++			printk(KERN_INFO PFX 
++				"On a laptop.  Assuming Digital Flat Panel\n");
++			rinfo->FlatPanel = 1;
++			break;
++		default:
++			break;
++		}
++	}
++	
++	switch (rinfo->Chipset & 0x0ff0) {
++	case 0x0110:
++		if ((rinfo->Chipset & 0xffff) == 0x0112)
++			rinfo->SecondCRTC = TRUE; 
++#if defined(__powerpc__)
++		if (rinfo->FlatPanel == 1)
++			rinfo->SecondCRTC = TRUE;
++#endif
++		riva_override_CRTC(rinfo);
++		break;
++	case 0x0170:
++	case 0x0180:
++	case 0x01F0:
++	case 0x0250:
++	case 0x0280:
++	case 0x0300:
++	case 0x0310:
++	case 0x0320:
++	case 0x0330:
++	case 0x0340:
++		riva_is_second(rinfo);
++		break;
++	default:
++		break;
++	}
++
++	if (rinfo->SecondCRTC) {
++		rinfo->riva.PCIO = rinfo->riva.PCIO0 + 0x2000;
++		rinfo->riva.PCRTC = rinfo->riva.PCRTC0 + 0x800;
++		rinfo->riva.PRAMDAC = rinfo->riva.PRAMDAC0 + 0x800;
++		rinfo->riva.PDIO = rinfo->riva.PDIO0 + 0x2000;
++	} else {
++		rinfo->riva.PCIO = rinfo->riva.PCIO0;
++		rinfo->riva.PCRTC = rinfo->riva.PCRTC0;
++		rinfo->riva.PRAMDAC = rinfo->riva.PRAMDAC0;
++		rinfo->riva.PDIO = rinfo->riva.PDIO0;
++	}
++
++	RivaGetConfig(&rinfo->riva, rinfo->Chipset);
++
++	if (rinfo->FlatPanel == -1) {
++		/* Fix me, need x86 DDC code */
++		rinfo->FlatPanel = 0;
++	}
++	rinfo->riva.flatPanel = (rinfo->FlatPanel > 0) ? TRUE : FALSE;
++}
++
+diff -u --recursive --new-file linux-2.4.22/drivers/video/riva.ori/riva_hw.c linux-2.4.22/drivers/video/riva/riva_hw.c
+--- linux-2.4.22/drivers/video/riva.ori/riva_hw.c	2003-09-23 17:49:13.000000000 +0200
++++ linux-2.4.22/drivers/video/riva/riva_hw.c	2003-09-24 21:23:10.000000000 +0200
+@@ -41,13 +41,16 @@
+  * GPL licensing note -- nVidia is allowing a liberal interpretation of
+  * the documentation restriction above, to merely say that this nVidia's
+  * copyright and disclaimer should be included with all code derived
+- * from this source.  -- Jeff Garzik <jgarzik@pobox.com>, 01/Nov/99 
++ * from this source.  -- Jeff Garzik <jgarzik@mandrakesoft.com>, 01/Nov/99 
+  */
+ 
+-/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/nv/riva_hw.c,v 1.8 2000/02/08 17:19:11 dawes Exp $ */
++/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/nv/riva_hw.c,v 1.47 2003/02/10 23:42:51 mvojkovi Exp $ */
+ 
++#include <linux/pci_ids.h>
++#include <linux/pci.h>
+ #include "riva_hw.h"
+ #include "riva_tbl.h"
++
+ /*
+  * This file is an OS-agnostic file used to make RIVA 128 and RIVA TNT
+  * operate identically (except TNT has more memory and better 3D quality.
+@@ -73,32 +76,39 @@
+ {
+     return ((chip->Rop->FifoFree < chip->FifoEmptyCount) || (chip->PGRAPH[0x00000700/4] & 0x01));
+ }
+-static void nv3LockUnlock
++
++static void vgaLockUnlock
+ (
+     RIVA_HW_INST *chip,
+-    int           LockUnlock
++    int           Lock
+ )
+ {
+-    VGA_WR08(chip->PVIO, 0x3C4, 0x06);
+-    VGA_WR08(chip->PVIO, 0x3C5, LockUnlock ? 0x99 : 0x57);
++    U008 cr11;
++    VGA_WR08(chip->PCIO, 0x3D4, 0x11);
++    cr11 = VGA_RD08(chip->PCIO, 0x3D5);
++    if(Lock) cr11 |= 0x80;
++    else cr11 &= ~0x80;
++    VGA_WR08(chip->PCIO, 0x3D5, cr11);
+ }
+-static void nv4LockUnlock
++static void nv3LockUnlock
+ (
+     RIVA_HW_INST *chip,
+-    int           LockUnlock
++    int           Lock
+ )
+ {
+-    VGA_WR08(chip->PCIO, 0x3D4, 0x1F);
+-    VGA_WR08(chip->PCIO, 0x3D5, LockUnlock ? 0x99 : 0x57);
++    VGA_WR08(chip->PVIO, 0x3C4, 0x06);
++    VGA_WR08(chip->PVIO, 0x3C5, Lock ? 0x99 : 0x57);
++    vgaLockUnlock(chip, Lock);
+ }
+-static void nv10LockUnlock
++static void nv4LockUnlock
+ (
+     RIVA_HW_INST *chip,
+-    int           LockUnlock
++    int           Lock
+ )
+ {
+     VGA_WR08(chip->PCIO, 0x3D4, 0x1F);
+-    VGA_WR08(chip->PCIO, 0x3D5, LockUnlock ? 0x99 : 0x57);
++    VGA_WR08(chip->PCIO, 0x3D5, Lock ? 0x99 : 0x57);
++    vgaLockUnlock(chip, Lock);
+ }
+ 
+ static int ShowHideCursor
+@@ -107,13 +117,13 @@
+     int           ShowHide
+ )
+ {
+-    int current;
+-    current                     =  chip->CurrentState->cursor1;
++    int cursor;
++    cursor                      =  chip->CurrentState->cursor1;
+     chip->CurrentState->cursor1 = (chip->CurrentState->cursor1 & 0xFE) |
+-	                          (ShowHide & 0x01);
++	                           (ShowHide & 0x01);
+     VGA_WR08(chip->PCIO, 0x3D4, 0x31);
+     VGA_WR08(chip->PCIO, 0x3D5, chip->CurrentState->cursor1);
+-    return (current & 0x01);
++    return (cursor & 0x01);
+ }
+ 
+ /****************************************************************************\
+@@ -604,7 +614,7 @@
+     nv3_sim_state sim_data;
+     unsigned int M, N, P, pll, MClk;
+     
+-    pll = chip->PRAMDAC[0x00000504/4];
++    pll = chip->PRAMDAC0[0x00000504/4];
+     M = (pll >> 0) & 0xFF; N = (pll >> 8) & 0xFF; P = (pll >> 16) & 0x0F;
+     MClk = (N * chip->CrystalFreqKHz / M) >> P;
+     sim_data.pix_bpp        = (char)pixelDepth;
+@@ -791,10 +801,10 @@
+     nv4_sim_state sim_data;
+     unsigned int M, N, P, pll, MClk, NVClk, cfg1;
+ 
+-    pll = chip->PRAMDAC[0x00000504/4];
++    pll = chip->PRAMDAC0[0x00000504/4];
+     M = (pll >> 0)  & 0xFF; N = (pll >> 8)  & 0xFF; P = (pll >> 16) & 0x0F;
+     MClk  = (N * chip->CrystalFreqKHz / M) >> P;
+-    pll = chip->PRAMDAC[0x00000500/4];
++    pll = chip->PRAMDAC0[0x00000500/4];
+     M = (pll >> 0)  & 0xFF; N = (pll >> 8)  & 0xFF; P = (pll >> 16) & 0x0F;
+     NVClk  = (N * chip->CrystalFreqKHz / M) >> P;
+     cfg1 = chip->PFB[0x00000204/4];
+@@ -1052,10 +1062,10 @@
+     nv10_sim_state sim_data;
+     unsigned int M, N, P, pll, MClk, NVClk, cfg1;
+ 
+-    pll = chip->PRAMDAC[0x00000504/4];
++    pll = chip->PRAMDAC0[0x00000504/4];
+     M = (pll >> 0)  & 0xFF; N = (pll >> 8)  & 0xFF; P = (pll >> 16) & 0x0F;
+     MClk  = (N * chip->CrystalFreqKHz / M) >> P;
+-    pll = chip->PRAMDAC[0x00000500/4];
++    pll = chip->PRAMDAC0[0x00000500/4];
+     M = (pll >> 0)  & 0xFF; N = (pll >> 8)  & 0xFF; P = (pll >> 16) & 0x0F;
+     NVClk  = (N * chip->CrystalFreqKHz / M) >> P;
+     cfg1 = chip->PFB[0x00000204/4];
+@@ -1081,6 +1091,59 @@
+     }
+ }
+ 
++static void nForceUpdateArbitrationSettings
++(
++    unsigned      VClk,
++    unsigned      pixelDepth,
++    unsigned     *burst,
++    unsigned     *lwm,
++    RIVA_HW_INST *chip
++)
++{
++    nv10_fifo_info fifo_data;
++    nv10_sim_state sim_data;
++    unsigned int M, N, P, pll, MClk, NVClk;
++    unsigned int uMClkPostDiv;
++    struct pci_dev *dev;
++
++    dev = pci_find_slot(0, 3);
++    pci_read_config_dword(dev, 0x6C, &uMClkPostDiv);
++    uMClkPostDiv = (uMClkPostDiv >> 8) & 0xf;
++
++    if(!uMClkPostDiv) uMClkPostDiv = 4; 
++    MClk = 400000 / uMClkPostDiv;
++
++    pll = chip->PRAMDAC0[0x00000500/4];
++    M = (pll >> 0)  & 0xFF; N = (pll >> 8)  & 0xFF; P = (pll >> 16) & 0x0F;
++    NVClk  = (N * chip->CrystalFreqKHz / M) >> P;
++    sim_data.pix_bpp        = (char)pixelDepth;
++    sim_data.enable_video   = 0;
++    sim_data.enable_mp      = 0;
++    
++    dev = pci_find_slot(0, 1);
++    pci_read_config_dword(dev, 0x7C, &sim_data.memory_type);
++    sim_data.memory_type    = (sim_data.memory_type >> 12) & 1;
++    
++    sim_data.memory_width   = 64;
++
++    sim_data.mem_latency    = 3;
++    sim_data.mem_aligned    = 1;
++    sim_data.mem_page_miss  = 10;
++    sim_data.gr_during_vid  = 0;
++    sim_data.pclk_khz       = VClk;
++    sim_data.mclk_khz       = MClk;
++    sim_data.nvclk_khz      = NVClk;
++    nv10CalcArbitration(&fifo_data, &sim_data);
++    if (fifo_data.valid)
++    {
++        int  b = fifo_data.graphics_burst_size >> 4;
++        *burst = 0;
++        while (b >>= 1) (*burst)++;
++        *lwm   = fifo_data.graphics_lwm >> 3;
++    }
++}
++
++
+ /****************************************************************************\
+ *                                                                            *
+ *                          RIVA Mode State Routines                          *
+@@ -1093,7 +1156,6 @@
+ static int CalcVClock
+ (
+     int           clockIn,
+-    int           double_scan,
+     int          *clockOut,
+     int          *mOut,
+     int          *nOut,
+@@ -1109,19 +1171,17 @@
+     DeltaOld = 0xFFFFFFFF;
+ 
+     VClk     = (unsigned)clockIn;
+-    if (double_scan)
+-        VClk *= 2;
+     
+-    if (chip->CrystalFreqKHz == 14318)
+-    {
+-        lowM  = 8;
+-        highM = 14 - (chip->Architecture == NV_ARCH_03);
+-    }
+-    else
++    if (chip->CrystalFreqKHz == 13500)
+     {
+         lowM  = 7;
+         highM = 13 - (chip->Architecture == NV_ARCH_03);
+     }                      
++    else
++    {
++        lowM  = 8;
++        highM = 14 - (chip->Architecture == NV_ARCH_03);
++    }
+ 
+     highP = 4 - (chip->Architecture == NV_ARCH_03);
+     for (P = 0; P <= highP; P ++)
+@@ -1131,19 +1191,21 @@
+         {
+             for (M = lowM; M <= highM; M++)
+             {
+-                N    = (VClk * M / chip->CrystalFreqKHz) << P;
+-                Freq = (chip->CrystalFreqKHz * N / M) >> P;
+-                if (Freq > VClk)
+-                    DeltaNew = Freq - VClk;
+-                else
+-                    DeltaNew = VClk - Freq;
+-                if (DeltaNew < DeltaOld)
+-                {
+-                    *mOut     = M;
+-                    *nOut     = N;
+-                    *pOut     = P;
+-                    *clockOut = Freq;
+-                    DeltaOld  = DeltaNew;
++                N    = (VClk << P) * M / chip->CrystalFreqKHz;
++                if(N <= 255) {
++                    Freq = (chip->CrystalFreqKHz * N / M) >> P;
++                    if (Freq > VClk)
++                        DeltaNew = Freq - VClk;
++                    else
++                        DeltaNew = VClk - Freq;
++                    if (DeltaNew < DeltaOld)
++                    {
++                        *mOut     = M;
++                        *nOut     = N;
++                        *pOut     = P;
++                        *clockOut = Freq;
++                        DeltaOld  = DeltaNew;
++                    }
+                 }
+             }
+         }
+@@ -1161,31 +1223,23 @@
+     int            bpp,
+     int            width,
+     int            hDisplaySize,
+-    int            hDisplay,
+-    int            hStart,
+-    int            hEnd,
+-    int            hTotal,
+     int            height,
+-    int            vDisplay,
+-    int            vStart,
+-    int            vEnd,
+-    int            vTotal,
+-    int            dotClock
++    int            dotClock,
++    int		   flags 
+ )
+ {
+     int pixelDepth, VClk, m, n, p;
+     /*
+      * Save mode parameters.
+      */
+-    state->bpp    = bpp;
++    state->bpp    = bpp;    /* this is not bitsPerPixel, it's 8,15,16,32 */
+     state->width  = width;
+     state->height = height;
+     /*
+      * Extended RIVA registers.
+      */
+     pixelDepth = (bpp + 1)/8;
+-    CalcVClock(dotClock, hDisplaySize < 512,  /* double scan? */
+-               &VClk, &m, &n, &p, chip);
++    CalcVClock(dotClock, &VClk, &m, &n, &p, chip);
+ 
+     switch (chip->Architecture)
+     {
+@@ -1197,6 +1251,8 @@
+                                          chip);
+             state->cursor0  = 0x00;
+             state->cursor1  = 0x78;
++	    if (flags & V_DBLSCAN)
++		state->cursor1 |= 2;
+             state->cursor2  = 0x00000000;
+             state->pllsel   = 0x10010100;
+             state->config   = ((width + 31)/32)
+@@ -1213,6 +1269,8 @@
+                                          chip);
+             state->cursor0  = 0x00;
+             state->cursor1  = 0xFC;
++	    if (flags & V_DBLSCAN)
++		state->cursor1 |= 2;
+             state->cursor2  = 0x00000000;
+             state->pllsel   = 0x10000700;
+             state->config   = 0x00001114;
+@@ -1220,38 +1278,43 @@
+             state->repaint1 = hDisplaySize < 1280 ? 0x04 : 0x00;
+             break;
+         case NV_ARCH_10:
+-	case NV_ARCH_20:
+-            nv10UpdateArbitrationSettings(VClk, 
++        case NV_ARCH_20:
++            if(((chip->Chipset & 0xffff) == 0x01A0) ||
++               ((chip->Chipset & 0xffff) == 0x01f0))
++            {
++                nForceUpdateArbitrationSettings(VClk,
++                                          pixelDepth * 8,
++                                         &(state->arbitration0),
++                                         &(state->arbitration1),
++                                          chip);
++            } else {
++                nv10UpdateArbitrationSettings(VClk, 
+                                           pixelDepth * 8, 
+                                          &(state->arbitration0),
+                                          &(state->arbitration1),
+                                           chip);
+-            state->cursor0  = 0x00;
+-            state->cursor1  = 0xFC;
+-            state->cursor2  = 0x00000000;
++            }
++            state->cursor0  = 0x80 | (chip->CursorStart >> 17);
++            state->cursor1  = (chip->CursorStart >> 11) << 2;
++	    state->cursor2  = chip->CursorStart >> 24;
++	    if (flags & V_DBLSCAN) 
++		state->cursor1 |= 2;
+             state->pllsel   = 0x10000700;
+             state->config   = chip->PFB[0x00000200/4];
+             state->general  = bpp == 16 ? 0x00101100 : 0x00100100;
+             state->repaint1 = hDisplaySize < 1280 ? 0x04 : 0x00;
+             break;
+     }
++
++    /* Paul Richards: below if block borks things in kernel for some reason */
++    /* if((bpp != 8) && (chip->Architecture != NV_ARCH_03)) 
++	state->general |= 0x00000030; */
++
+     state->vpll     = (p << 16) | (n << 8) | m;
+-    state->screen   = ((hTotal   & 0x040) >> 2)
+-                    | ((vDisplay & 0x400) >> 7)
+-                    | ((vStart   & 0x400) >> 8)
+-                    | ((vDisplay & 0x400) >> 9)
+-                    | ((vTotal   & 0x400) >> 10);
+     state->repaint0 = (((width/8)*pixelDepth) & 0x700) >> 3;
+-    state->horiz    = hTotal     < 260 ? 0x00 : 0x01;
+     state->pixel    = pixelDepth > 2   ? 3    : pixelDepth;
+-    state->offset0  =
+-    state->offset1  =
+-    state->offset2  =
+-    state->offset3  = 0;
+-    state->pitch0   =
+-    state->pitch1   =
+-    state->pitch2   =
+-    state->pitch3   = pixelDepth * width;
++    state->offset   = 0;
++    state->pitch    = pixelDepth * width;
+ }
+ /*
+  * Load fixed function state and pre-calculated/stored state.
+@@ -1282,18 +1345,10 @@
+     {
+         case NV_ARCH_04:
+             LOAD_FIXED_STATE(nv4,FIFO);
+-            chip->Tri03 = 0L;
+-            chip->Tri05 = (RivaTexturedTriangle05 *)&(chip->FIFO[0x0000E000/4]);
+             break;
+         case NV_ARCH_10:
+-	case NV_ARCH_20:
+-            /*
+-             * Initialize state for the RivaTriangle3D05 routines.
+-             */
+-            LOAD_FIXED_STATE(nv10tri05,PGRAPH);
++        case NV_ARCH_20:
+             LOAD_FIXED_STATE(nv10,FIFO);
+-            chip->Tri03 = 0L;
+-            chip->Tri05 = (RivaTexturedTriangle05 *)&(chip->FIFO[0x0000E000/4]);
+             break;
+     }
+ }
+@@ -1303,7 +1358,7 @@
+     RIVA_HW_STATE *state
+ )
+ {
+-    int i;
++    int i, format;
+ 
+     /*
+      * Load HW fixed function state.
+@@ -1326,31 +1381,28 @@
+                 case 16:
+                     LOAD_FIXED_STATE_15BPP(nv3,PRAMIN);
+                     LOAD_FIXED_STATE_15BPP(nv3,PGRAPH);
+-                    chip->Tri03 = (RivaTexturedTriangle03  *)&(chip->FIFO[0x0000E000/4]);
+                     break;
+                 case 24:
+                 case 32:
+                     LOAD_FIXED_STATE_32BPP(nv3,PRAMIN);
+                     LOAD_FIXED_STATE_32BPP(nv3,PGRAPH);
+-                    chip->Tri03 = 0L;
+                     break;
+                 case 8:
+                 default:
+                     LOAD_FIXED_STATE_8BPP(nv3,PRAMIN);
+                     LOAD_FIXED_STATE_8BPP(nv3,PGRAPH);
+-                    chip->Tri03 = 0L;
+                     break;
+             }
+             for (i = 0x00000; i < 0x00800; i++)
+                 chip->PRAMIN[0x00000502 + i] = (i << 12) | 0x03;
+-            chip->PGRAPH[0x00000630/4] = state->offset0;
+-            chip->PGRAPH[0x00000634/4] = state->offset1;
+-            chip->PGRAPH[0x00000638/4] = state->offset2;
+-            chip->PGRAPH[0x0000063C/4] = state->offset3;
+-            chip->PGRAPH[0x00000650/4] = state->pitch0;
+-            chip->PGRAPH[0x00000654/4] = state->pitch1;
+-            chip->PGRAPH[0x00000658/4] = state->pitch2;
+-            chip->PGRAPH[0x0000065C/4] = state->pitch3;
++            chip->PGRAPH[0x00000630/4] = state->offset;
++            chip->PGRAPH[0x00000634/4] = state->offset;
++            chip->PGRAPH[0x00000638/4] = state->offset;
++            chip->PGRAPH[0x0000063C/4] = state->offset;
++            chip->PGRAPH[0x00000650/4] = state->pitch;
++            chip->PGRAPH[0x00000654/4] = state->pitch;
++            chip->PGRAPH[0x00000658/4] = state->pitch;
++            chip->PGRAPH[0x0000065C/4] = state->pitch;
+             break;
+         case NV_ARCH_04:
+             /*
+@@ -1365,99 +1417,125 @@
+                 case 15:
+                     LOAD_FIXED_STATE_15BPP(nv4,PRAMIN);
+                     LOAD_FIXED_STATE_15BPP(nv4,PGRAPH);
+-                    chip->Tri03 = (RivaTexturedTriangle03  *)&(chip->FIFO[0x0000E000/4]);
+                     break;
+                 case 16:
+                     LOAD_FIXED_STATE_16BPP(nv4,PRAMIN);
+                     LOAD_FIXED_STATE_16BPP(nv4,PGRAPH);
+-                    chip->Tri03 = (RivaTexturedTriangle03  *)&(chip->FIFO[0x0000E000/4]);
+                     break;
+                 case 24:
+                 case 32:
+                     LOAD_FIXED_STATE_32BPP(nv4,PRAMIN);
+                     LOAD_FIXED_STATE_32BPP(nv4,PGRAPH);
+-                    chip->Tri03 = 0L;
+                     break;
+                 case 8:
+                 default:
+                     LOAD_FIXED_STATE_8BPP(nv4,PRAMIN);
+                     LOAD_FIXED_STATE_8BPP(nv4,PGRAPH);
+-                    chip->Tri03 = 0L;
+                     break;
+             }
+-            chip->PGRAPH[0x00000640/4] = state->offset0;
+-            chip->PGRAPH[0x00000644/4] = state->offset1;
+-            chip->PGRAPH[0x00000648/4] = state->offset2;
+-            chip->PGRAPH[0x0000064C/4] = state->offset3;
+-            chip->PGRAPH[0x00000670/4] = state->pitch0;
+-            chip->PGRAPH[0x00000674/4] = state->pitch1;
+-            chip->PGRAPH[0x00000678/4] = state->pitch2;
+-            chip->PGRAPH[0x0000067C/4] = state->pitch3;
++            chip->PGRAPH[0x00000640/4] = state->offset;
++            chip->PGRAPH[0x00000644/4] = state->offset;
++            chip->PGRAPH[0x00000648/4] = state->offset;
++            chip->PGRAPH[0x0000064C/4] = state->offset;
++            chip->PGRAPH[0x00000670/4] = state->pitch;
++            chip->PGRAPH[0x00000674/4] = state->pitch;
++            chip->PGRAPH[0x00000678/4] = state->pitch;
++            chip->PGRAPH[0x0000067C/4] = state->pitch;
+             break;
+         case NV_ARCH_10:
+-	case NV_ARCH_20:
++        case NV_ARCH_20:
++            if(chip->twoHeads) {
++               VGA_WR08(chip->PCIO, 0x03D4, 0x44);
++               VGA_WR08(chip->PCIO, 0x03D5, state->crtcOwner);
++               chip->LockUnlock(chip, 0);
++            }
++
+             LOAD_FIXED_STATE(nv10,PFIFO);
+             LOAD_FIXED_STATE(nv10,PRAMIN);
+             LOAD_FIXED_STATE(nv10,PGRAPH);
+             switch (state->bpp)
+             {
+                 case 15:
++                    format = 2;
+                     LOAD_FIXED_STATE_15BPP(nv10,PRAMIN);
+                     LOAD_FIXED_STATE_15BPP(nv10,PGRAPH);
+-                    chip->Tri03 = (RivaTexturedTriangle03  *)&(chip->FIFO[0x0000E000/4]);
+                     break;
+                 case 16:
++                    format = 5;
+                     LOAD_FIXED_STATE_16BPP(nv10,PRAMIN);
+                     LOAD_FIXED_STATE_16BPP(nv10,PGRAPH);
+-                    chip->Tri03 = (RivaTexturedTriangle03  *)&(chip->FIFO[0x0000E000/4]);
+                     break;
+-                case 24:
+                 case 32:
++                    format = 7;
+                     LOAD_FIXED_STATE_32BPP(nv10,PRAMIN);
+                     LOAD_FIXED_STATE_32BPP(nv10,PGRAPH);
+-                    chip->Tri03 = 0L;
+                     break;
+-                case 8:
+                 default:
++                    format = 1;
+                     LOAD_FIXED_STATE_8BPP(nv10,PRAMIN);
+                     LOAD_FIXED_STATE_8BPP(nv10,PGRAPH);
+-                    chip->Tri03 = 0L;
+                     break;
+             }
+ 
+-	    if (chip->Architecture == NV_ARCH_10) {
+-            	chip->PGRAPH[0x00000640/4] = state->offset0;
+-            	chip->PGRAPH[0x00000644/4] = state->offset1;
+-            	chip->PGRAPH[0x00000648/4] = state->offset2;
+-            	chip->PGRAPH[0x0000064C/4] = state->offset3;
+-            	chip->PGRAPH[0x00000670/4] = state->pitch0;
+-            	chip->PGRAPH[0x00000674/4] = state->pitch1;
+-            	chip->PGRAPH[0x00000678/4] = state->pitch2;
+-            	chip->PGRAPH[0x0000067C/4] = state->pitch3;
+-            	chip->PGRAPH[0x00000680/4] = state->pitch3;
++	    if(chip->Architecture == NV_ARCH_10) {
++                chip->PGRAPH[0x00000640/4] = state->offset;
++                chip->PGRAPH[0x00000644/4] = state->offset;
++                chip->PGRAPH[0x00000648/4] = state->offset;
++                chip->PGRAPH[0x0000064C/4] = state->offset;
++                chip->PGRAPH[0x00000670/4] = state->pitch;
++                chip->PGRAPH[0x00000674/4] = state->pitch;
++                chip->PGRAPH[0x00000678/4] = state->pitch;
++                chip->PGRAPH[0x0000067C/4] = state->pitch;
++                chip->PGRAPH[0x00000680/4] = state->pitch;
+ 	    } else {
+-		chip->PGRAPH[0x00000820/4] = state->offset0;
+-		chip->PGRAPH[0x00000824/4] = state->offset1;
+-		chip->PGRAPH[0x00000828/4] = state->offset2;
+-		chip->PGRAPH[0x0000082C/4] = state->offset3;
+-		chip->PGRAPH[0x00000850/4] = state->pitch0;
+-		chip->PGRAPH[0x00000854/4] = state->pitch1;
+-		chip->PGRAPH[0x00000858/4] = state->pitch2;
+-		chip->PGRAPH[0x0000085C/4] = state->pitch3;
+-		chip->PGRAPH[0x00000860/4] = state->pitch3;
+-		chip->PGRAPH[0x00000864/4] = state->pitch3;
+-		chip->PGRAPH[0x000009A4/4] = chip->PFB[0x00000200/4];
+-		chip->PGRAPH[0x000009A8/4] = chip->PFB[0x00000204/4];
++                chip->PGRAPH[0x00000864/4] = 0x01ffffff;
++                chip->PGRAPH[0x00000868/4] = 0x01ffffff;
++                chip->PGRAPH[0x0000086c/4] = 0x01ffffff;
++                chip->PGRAPH[0x00000870/4] = 0x01ffffff;
++
++                chip->PGRAPH[0x00000820/4] = state->offset;
++                chip->PGRAPH[0x00000824/4] = state->offset;
++                chip->PGRAPH[0x00000828/4] = state->offset;
++                chip->PGRAPH[0x0000082C/4] = state->offset;
++                chip->PGRAPH[0x00000850/4] = state->pitch;
++                chip->PGRAPH[0x00000854/4] = state->pitch;
++                chip->PGRAPH[0x00000858/4] = state->pitch;
++                chip->PGRAPH[0x0000085C/4] = state->pitch;
++                chip->PGRAPH[0x000009A4/4] = chip->PFB[0x00000200/4]; 
++                chip->PGRAPH[0x000009A8/4] = chip->PFB[0x00000204/4];
++
++                if((chip->Chipset & 0x0ff0) >= 0x0300) {
++                    if(!chip->flatPanel) {
++                       chip->PRAMDAC0[0x0578/4] = state->vpllB;
++                       chip->PRAMDAC0[0x057C/4] = state->vpll2B;
++                    }
++                    chip->PGRAPH[0x00000724/4] = format | (format << 5);
++                    chip->PGRAPH[0x0000008C/4] |= 1;
++                    chip->PGRAPH[0x00000890/4] |= 0x00040000;
++                }
+ 	    }
++            if(chip->twoHeads) {
++               chip->PCRTC0[0x00000860/4] = state->head;
++               chip->PCRTC0[0x00002860/4] = state->head2;
++            }
++            chip->PRAMDAC[0x00000404/4] |= (1 << 25);
+ 
+-	    chip->PFB[0x00000240/4] = 0;
+-	    chip->PFB[0x00000244/4] = 0;
+-	    chip->PFB[0x00000248/4] = 0;
+-	    chip->PFB[0x0000024C/4] = 0;
+-	    chip->PFB[0x00000250/4] = 0;
+-	    chip->PFB[0x00000244/4] = 0;
+-	    chip->PFB[0x00000248/4] = 0;
+-	    chip->PFB[0x0000024C/4] = 0;
++	    chip->PMC[0x00008704/4] = 1;
++	    chip->PMC[0x00008140/4] = 0;
++	    chip->PMC[0x00008920/4] = 0;
++	    chip->PMC[0x00008924/4] = 0;
++	    chip->PMC[0x00008908/4] = 0x01ffffff;
++	    chip->PMC[0x0000890C/4] = 0x01ffffff;
++            chip->PMC[0x00001588/4] = 0;
++
++            chip->PFB[0x00000240/4] = 0;
++            chip->PFB[0x00000250/4] = 0;
++            chip->PFB[0x00000260/4] = 0;
++            chip->PFB[0x00000270/4] = 0;
++            chip->PFB[0x00000280/4] = 0;
++            chip->PFB[0x00000290/4] = 0;
++            chip->PFB[0x000002A0/4] = 0;
++            chip->PFB[0x000002B0/4] = 0;
+ 
+             chip->PGRAPH[0x00000B00/4] = chip->PFB[0x00000240/4];
+             chip->PGRAPH[0x00000B04/4] = chip->PFB[0x00000244/4];
+@@ -1533,18 +1611,32 @@
+             for (i = 0; i < 4; i++)
+                 chip->PGRAPH[0x00000F54/4] = 0x00000000;
+ 
+-	    if (chip->flatPanel) {
+-		VGA_WR08(chip->PCIO, 0x3d4, 0x53);
+-		VGA_WR08(chip->PCIO, 0x3d5, 0);
+-		VGA_WR08(chip->PCIO, 0x3d4, 0x54);
+-		VGA_WR08(chip->PCIO, 0x3d5, 0);
+-		VGA_WR08(chip->PCIO, 0x3d4, 0x21);
+-		VGA_WR08(chip->PCIO, 0x3d5, 0xfa);
+-	    }
+-            break;
++            chip->PCRTC[0x00000810/4] = state->cursorConfig;
++
++            if(chip->flatPanel) {
++               if((chip->Chipset & 0x0ff0) == 0x0110) {
++                   chip->PRAMDAC[0x0528/4] = state->dither;
++               } else 
++               if((chip->Chipset & 0x0ff0) >= 0x0170) {
++                   chip->PRAMDAC[0x083C/4] = state->dither;
++               }
++
++
++               VGA_WR08(chip->PCIO, 0x03D4, 0x53);
++               VGA_WR08(chip->PCIO, 0x03D5, 0);
++               VGA_WR08(chip->PCIO, 0x03D4, 0x54);
++               VGA_WR08(chip->PCIO, 0x03D5, 0);
++               VGA_WR08(chip->PCIO, 0x03D4, 0x21);
++               VGA_WR08(chip->PCIO, 0x03D5, 0xfa);
++            }
++
++            VGA_WR08(chip->PCIO, 0x03D4, 0x41);
++            VGA_WR08(chip->PCIO, 0x03D5, state->extra);
+     }
++
+     LOAD_FIXED_STATE(Riva,FIFO);
+     UpdateFifoState(chip);
++
+     /*
+      * Load HW mode state.
+      */
+@@ -1566,25 +1658,26 @@
+     VGA_WR08(chip->PCIO, 0x03D5, state->cursor0);
+     VGA_WR08(chip->PCIO, 0x03D4, 0x31);
+     VGA_WR08(chip->PCIO, 0x03D5, state->cursor1);
+-    VGA_WR08(chip->PCIO, 0x03D4, 0x41);
+-    VGA_WR08(chip->PCIO, 0x03D5, state->extra);
+-
+-    if (!chip->flatPanel) {
+-        chip->PRAMDAC[0x00000508/4]  = state->vpll;
+-        chip->PRAMDAC[0x00000520/4]  = state->vpll2;
+-        chip->PRAMDAC[0x0000050C/4]  = state->pllsel;
++    VGA_WR08(chip->PCIO, 0x03D4, 0x2F);
++    VGA_WR08(chip->PCIO, 0x03D5, state->cursor2);
++    VGA_WR08(chip->PCIO, 0x03D4, 0x39);
++    VGA_WR08(chip->PCIO, 0x03D5, state->interlace);
++
++    if(!chip->flatPanel) {
++       chip->PRAMDAC0[0x00000508/4] = state->vpll;
++       chip->PRAMDAC0[0x0000050C/4] = state->pllsel;
++       if(chip->twoHeads)
++          chip->PRAMDAC0[0x00000520/4] = state->vpll2;
+     } else {
+-	chip->PRAMDAC[0x00000848/4]  = state->scale;
++       chip->PRAMDAC[0x00000848/4]  = state->scale;
+     }
+-    chip->PRAMDAC[0x00000300/4]  = state->cursor2;
+-    chip->PRAMDAC[0x00000508/4]  = state->vpll;
+-    chip->PRAMDAC[0x0000050C/4]  = state->pllsel;
+     chip->PRAMDAC[0x00000600/4]  = state->general;
++
+     /*
+      * Turn off VBlank enable and reset.
+      */
+-    *(chip->VBLANKENABLE) = 0;
+-    *(chip->VBLANK)       = chip->VBlankBit;
++    chip->PCRTC[0x00000140/4] = 0;
++    chip->PCRTC[0x00000100/4] = chip->VBlankBit;
+     /*
+      * Set interrupt enable.
+      */    
+@@ -1600,6 +1693,7 @@
+     /* Free count from first subchannel */
+     chip->FifoEmptyCount = chip->Rop->FifoFree; 
+ }
++
+ static void UnloadStateExt
+ (
+     RIVA_HW_INST  *chip,
+@@ -1627,47 +1721,50 @@
+     state->cursor0      = VGA_RD08(chip->PCIO, 0x03D5);
+     VGA_WR08(chip->PCIO, 0x03D4, 0x31);
+     state->cursor1      = VGA_RD08(chip->PCIO, 0x03D5);
+-    VGA_WR08(chip->PCIO, 0x03D4, 0x41);
+-    state->extra        = VGA_RD08(chip->PCIO, 0x03D5);
+-    state->cursor2      = chip->PRAMDAC[0x00000300/4];
+-    state->vpll         = chip->PRAMDAC[0x00000508/4];
+-    state->vpll2        = chip->PRAMDAC[0x00000520/4];
+-    state->pllsel       = chip->PRAMDAC[0x0000050C/4];
++    VGA_WR08(chip->PCIO, 0x03D4, 0x2F);
++    state->cursor2      = VGA_RD08(chip->PCIO, 0x03D5);
++    VGA_WR08(chip->PCIO, 0x03D4, 0x39);
++    state->interlace    = VGA_RD08(chip->PCIO, 0x03D5);
++    state->vpll         = chip->PRAMDAC0[0x00000508/4];
++    state->vpll2        = chip->PRAMDAC0[0x00000520/4];
++    state->vpllB        = chip->PRAMDAC0[0x00000578/4];
++    state->vpll2B       = chip->PRAMDAC0[0x0000057C/4];
++    state->pllsel       = chip->PRAMDAC0[0x0000050C/4];
+     state->general      = chip->PRAMDAC[0x00000600/4];
+-    state->scale	= chip->PRAMDAC[0x00000848/4];
++    state->scale        = chip->PRAMDAC[0x00000848/4];
+     state->config       = chip->PFB[0x00000200/4];
++
+     switch (chip->Architecture)
+     {
+         case NV_ARCH_03:
+-            state->offset0  = chip->PGRAPH[0x00000630/4];
+-            state->offset1  = chip->PGRAPH[0x00000634/4];
+-            state->offset2  = chip->PGRAPH[0x00000638/4];
+-            state->offset3  = chip->PGRAPH[0x0000063C/4];
+-            state->pitch0   = chip->PGRAPH[0x00000650/4];
+-            state->pitch1   = chip->PGRAPH[0x00000654/4];
+-            state->pitch2   = chip->PGRAPH[0x00000658/4];
+-            state->pitch3   = chip->PGRAPH[0x0000065C/4];
++            state->offset   = chip->PGRAPH[0x00000630/4];
++            state->pitch    = chip->PGRAPH[0x00000650/4];
+             break;
+         case NV_ARCH_04:
+-            state->offset0  = chip->PGRAPH[0x00000640/4];
+-            state->offset1  = chip->PGRAPH[0x00000644/4];
+-            state->offset2  = chip->PGRAPH[0x00000648/4];
+-            state->offset3  = chip->PGRAPH[0x0000064C/4];
+-            state->pitch0   = chip->PGRAPH[0x00000670/4];
+-            state->pitch1   = chip->PGRAPH[0x00000674/4];
+-            state->pitch2   = chip->PGRAPH[0x00000678/4];
+-            state->pitch3   = chip->PGRAPH[0x0000067C/4];
++            state->offset   = chip->PGRAPH[0x00000640/4];
++            state->pitch    = chip->PGRAPH[0x00000670/4];
+             break;
+         case NV_ARCH_10:
+-	case NV_ARCH_20:
+-            state->offset0  = chip->PGRAPH[0x00000640/4];
+-            state->offset1  = chip->PGRAPH[0x00000644/4];
+-            state->offset2  = chip->PGRAPH[0x00000648/4];
+-            state->offset3  = chip->PGRAPH[0x0000064C/4];
+-            state->pitch0   = chip->PGRAPH[0x00000670/4];
+-            state->pitch1   = chip->PGRAPH[0x00000674/4];
+-            state->pitch2   = chip->PGRAPH[0x00000678/4];
+-            state->pitch3   = chip->PGRAPH[0x0000067C/4];
++        case NV_ARCH_20:
++            state->offset   = chip->PGRAPH[0x00000640/4];
++            state->pitch    = chip->PGRAPH[0x00000670/4];
++            if(chip->twoHeads) {
++               state->head     = chip->PCRTC0[0x00000860/4];
++               state->head2    = chip->PCRTC0[0x00002860/4];
++               VGA_WR08(chip->PCIO, 0x03D4, 0x44);
++               state->crtcOwner = VGA_RD08(chip->PCIO, 0x03D5);
++            }
++            VGA_WR08(chip->PCIO, 0x03D4, 0x41);
++            state->extra = VGA_RD08(chip->PCIO, 0x03D5);
++            state->cursorConfig = chip->PCRTC[0x00000810/4];
++
++            if((chip->Chipset & 0x0ff0) == 0x0110) {
++               state->dither = chip->PRAMDAC[0x0528/4];
++            } else 
++            if((chip->Chipset & 0x0ff0) >= 0x0170) {
++               state->dither = chip->PRAMDAC[0x083C/4];
++            }
++
+             break;
+     }
+ }
+@@ -1677,6 +1774,15 @@
+     unsigned      start
+ )
+ {
++    chip->PCRTC[0x800/4] = start;
++}
++
++static void SetStartAddress3
++(
++    RIVA_HW_INST *chip,
++    unsigned      start
++)
++{
+     int offset = start >> 2;
+     int pan    = (start & 3) << 1;
+     unsigned char tmp;
+@@ -1703,99 +1809,6 @@
+     VGA_WR08(chip->PCIO, 0x3C0, 0x13);
+     VGA_WR08(chip->PCIO, 0x3C0, pan);
+ }
+-static void nv3SetSurfaces2D
+-(
+-    RIVA_HW_INST *chip,
+-    unsigned     surf0,
+-    unsigned     surf1
+-)
+-{
+-    RivaSurface *Surface = (RivaSurface *)&(chip->FIFO[0x0000E000/4]);
+-
+-    RIVA_FIFO_FREE(*chip,Tri03,5);
+-    chip->FIFO[0x00003800] = 0x80000003;
+-    Surface->Offset        = surf0;
+-    chip->FIFO[0x00003800] = 0x80000004;
+-    Surface->Offset        = surf1;
+-    chip->FIFO[0x00003800] = 0x80000013;
+-}
+-static void nv4SetSurfaces2D
+-(
+-    RIVA_HW_INST *chip,
+-    unsigned     surf0,
+-    unsigned     surf1
+-)
+-{
+-    RivaSurface *Surface = (RivaSurface *)&(chip->FIFO[0x0000E000/4]);
+-
+-    chip->FIFO[0x00003800] = 0x80000003;
+-    Surface->Offset        = surf0;
+-    chip->FIFO[0x00003800] = 0x80000004;
+-    Surface->Offset        = surf1;
+-    chip->FIFO[0x00003800] = 0x80000014;
+-}
+-static void nv10SetSurfaces2D
+-(
+-    RIVA_HW_INST *chip,
+-    unsigned     surf0,
+-    unsigned     surf1
+-)
+-{
+-    RivaSurface *Surface = (RivaSurface *)&(chip->FIFO[0x0000E000/4]);
+-
+-    chip->FIFO[0x00003800] = 0x80000003;
+-    Surface->Offset        = surf0;
+-    chip->FIFO[0x00003800] = 0x80000004;
+-    Surface->Offset        = surf1;
+-    chip->FIFO[0x00003800] = 0x80000014;
+-}
+-static void nv3SetSurfaces3D
+-(
+-    RIVA_HW_INST *chip,
+-    unsigned     surf0,
+-    unsigned     surf1
+-)
+-{
+-    RivaSurface *Surface = (RivaSurface *)&(chip->FIFO[0x0000E000/4]);
+-
+-    RIVA_FIFO_FREE(*chip,Tri03,5);
+-    chip->FIFO[0x00003800] = 0x80000005;
+-    Surface->Offset        = surf0;
+-    chip->FIFO[0x00003800] = 0x80000006;
+-    Surface->Offset        = surf1;
+-    chip->FIFO[0x00003800] = 0x80000013;
+-}
+-static void nv4SetSurfaces3D
+-(
+-    RIVA_HW_INST *chip,
+-    unsigned     surf0,
+-    unsigned     surf1
+-)
+-{
+-    RivaSurface *Surface = (RivaSurface *)&(chip->FIFO[0x0000E000/4]);
+-
+-    chip->FIFO[0x00003800] = 0x80000005;
+-    Surface->Offset        = surf0;
+-    chip->FIFO[0x00003800] = 0x80000006;
+-    Surface->Offset        = surf1;
+-    chip->FIFO[0x00003800] = 0x80000014;
+-}
+-static void nv10SetSurfaces3D
+-(
+-    RIVA_HW_INST *chip,
+-    unsigned     surf0,
+-    unsigned     surf1
+-)
+-{
+-    RivaSurface3D *Surfaces3D = (RivaSurface3D *)&(chip->FIFO[0x0000E000/4]);
+-
+-    RIVA_FIFO_FREE(*chip,Tri03,4);
+-    chip->FIFO[0x00003800]         = 0x80000007;
+-    Surfaces3D->RenderBufferOffset = surf0;
+-    Surfaces3D->ZBufferOffset      = surf1;
+-    chip->FIFO[0x00003800]         = 0x80000014;
+-}
+-
+ /****************************************************************************\
+ *                                                                            *
+ *                      Probe RIVA Chip Configuration                         *
+@@ -1857,11 +1870,8 @@
+                 break;
+         }
+     }        
+-    chip->CrystalFreqKHz   = (chip->PEXTDEV[0x00000000/4] & 0x00000020) ? 14318 : 13500;
++    chip->CrystalFreqKHz   = (chip->PEXTDEV[0x00000000/4] & 0x00000040) ? 14318 : 13500;
+     chip->CURSOR           = &(chip->PRAMIN[0x00008000/4 - 0x0800/4]);
+-    chip->CURSORPOS        = &(chip->PRAMDAC[0x0300/4]);
+-    chip->VBLANKENABLE     = &(chip->PGRAPH[0x0140/4]);
+-    chip->VBLANK           = &(chip->PGRAPH[0x0100/4]);
+     chip->VBlankBit        = 0x00000100;
+     chip->MaxVClockFreqKHz = 256000;
+     /*
+@@ -1872,9 +1882,7 @@
+     chip->CalcStateExt    = CalcStateExt;
+     chip->LoadStateExt    = LoadStateExt;
+     chip->UnloadStateExt  = UnloadStateExt;
+-    chip->SetStartAddress = SetStartAddress;
+-    chip->SetSurfaces2D   = nv3SetSurfaces2D;
+-    chip->SetSurfaces3D   = nv3SetSurfaces3D;
++    chip->SetStartAddress = SetStartAddress3;
+     chip->LockUnlock      = nv3LockUnlock;
+ }
+ static void nv4GetConfig
+@@ -1920,9 +1928,6 @@
+     }
+     chip->CrystalFreqKHz   = (chip->PEXTDEV[0x00000000/4] & 0x00000040) ? 14318 : 13500;
+     chip->CURSOR           = &(chip->PRAMIN[0x00010000/4 - 0x0800/4]);
+-    chip->CURSORPOS        = &(chip->PRAMDAC[0x0300/4]);
+-    chip->VBLANKENABLE     = &(chip->PCRTC[0x0140/4]);
+-    chip->VBLANK           = &(chip->PCRTC[0x0100/4]);
+     chip->VBlankBit        = 0x00000001;
+     chip->MaxVClockFreqKHz = 350000;
+     /*
+@@ -1934,23 +1939,37 @@
+     chip->LoadStateExt    = LoadStateExt;
+     chip->UnloadStateExt  = UnloadStateExt;
+     chip->SetStartAddress = SetStartAddress;
+-    chip->SetSurfaces2D   = nv4SetSurfaces2D;
+-    chip->SetSurfaces3D   = nv4SetSurfaces3D;
+     chip->LockUnlock      = nv4LockUnlock;
+ }
+ static void nv10GetConfig
+ (
+-    RIVA_HW_INST *chip
++    RIVA_HW_INST *chip,
++    unsigned int chipset    
+ )
+ {
+-#if defined(__BIG_ENDIAN)
+-    chip->PMC[0x00000004/4] = 0x01000001;
++    struct pci_dev* dev;
++    int amt;
++
++#ifdef __BIG_ENDIAN
++    /* turn on big endian register access */
++    if(!(chip->PMC[0x00000004/4] & 0x01000001))
++       chip->PMC[0x00000004/4] = 0x01000001;
+ #endif
++
+     /*
+      * Fill in chip configuration.
+      */
+-    switch ((chip->PFB[0x0000020C/4] >> 20) & 0x000000FF)
+-    {
++    if((chipset & 0xffff) == 0x01a0) {
++    	dev = pci_find_slot(0, 1);
++        pci_read_config_dword(dev, 0x7C, &amt);
++        chip->RamAmountKBytes = (((amt >> 6) & 31) + 1) * 1024;
++    } else if((chipset & 0xffff) == 0x01f0) {
++        dev = pci_find_slot(0, 1);
++        pci_read_config_dword(dev, 0x84, &amt);    	
++        chip->RamAmountKBytes = (((amt >> 4) & 127) + 1) * 1024;
++    } else {
++      switch ((chip->PFB[0x0000020C/4] >> 20) & 0x000000FF)
++      {
+         case 0x02:
+             chip->RamAmountKBytes = 1024 * 2;
+             break;
+@@ -1975,6 +1994,7 @@
+         default:
+             chip->RamAmountKBytes = 1024 * 16;
+             break;
++      }
+     }
+     switch ((chip->PFB[0x00000000/4] >> 3) & 0x00000003)
+     {
+@@ -1985,11 +2005,30 @@
+             chip->RamBandwidthKBytesPerSec = 1000000;
+             break;
+     }
+-    chip->CrystalFreqKHz   = (chip->PEXTDEV[0x00000000/4] & 0x00000040) ? 14318 : 13500;
+-    chip->CURSOR           = &(chip->PRAMIN[0x00010000/4 - 0x0800/4]);
+-    chip->CURSORPOS        = &(chip->PRAMDAC[0x0300/4]);
+-    chip->VBLANKENABLE     = &(chip->PCRTC[0x0140/4]);
+-    chip->VBLANK           = &(chip->PCRTC[0x0100/4]);
++
++    chip->CrystalFreqKHz = (chip->PEXTDEV[0x0000/4] & (1 << 6)) ? 14318 :
++                                                                  13500;    
++
++    switch (chipset & 0x0ff0) {
++    case 0x0170:
++    case 0x0180:
++    case 0x01F0:
++    case 0x0250:
++    case 0x0280:
++    case 0x0300:
++    case 0x0310:
++    case 0x0320:
++    case 0x0330:
++    case 0x0340:
++       if(chip->PEXTDEV[0x0000/4] & (1 << 22))
++           chip->CrystalFreqKHz = 27000;
++       break;
++    default:
++       break;
++    }
++
++    chip->CursorStart      = (chip->RamAmountKBytes - 128) * 1024;
++    chip->CURSOR           = NULL;  /* can't set this here */
+     chip->VBlankBit        = 0x00000001;
+     chip->MaxVClockFreqKHz = 350000;
+     /*
+@@ -2001,13 +2040,31 @@
+     chip->LoadStateExt    = LoadStateExt;
+     chip->UnloadStateExt  = UnloadStateExt;
+     chip->SetStartAddress = SetStartAddress;
+-    chip->SetSurfaces2D   = nv10SetSurfaces2D;
+-    chip->SetSurfaces3D   = nv10SetSurfaces3D;
+-    chip->LockUnlock      = nv10LockUnlock;
++    chip->LockUnlock      = nv4LockUnlock;
++
++    switch(chipset & 0x0ff0) {
++    case 0x0110:
++    case 0x0170:
++    case 0x0180:
++    case 0x01F0:
++    case 0x0250:
++    case 0x0280:
++    case 0x0300:
++    case 0x0310:
++    case 0x0320:
++    case 0x0330:
++    case 0x0340:
++        chip->twoHeads = TRUE;
++        break;
++    default:
++        chip->twoHeads = FALSE;
++        break;
++    }
+ }
+ int RivaGetConfig
+ (
+-    RIVA_HW_INST *chip
++   RIVA_HW_INST *chip,
++   unsigned int chipset
+ )
+ {
+     /*
+@@ -2026,12 +2083,13 @@
+             nv4GetConfig(chip);
+             break;
+         case NV_ARCH_10:
+-	case NV_ARCH_20:
+-            nv10GetConfig(chip);
++        case NV_ARCH_20:
++            nv10GetConfig(chip, chipset);
+             break;
+         default:
+             return (-1);
+     }
++    chip->Chipset = chipset;
+     /*
+      * Fill in FIFO pointers.
+      */
+@@ -2042,7 +2100,6 @@
+     chip->Blt    = (RivaScreenBlt           *)&(chip->FIFO[0x00008000/4]);
+     chip->Bitmap = (RivaBitmap              *)&(chip->FIFO[0x0000A000/4]);
+     chip->Line   = (RivaLine                *)&(chip->FIFO[0x0000C000/4]);
+-    chip->Tri03  = (RivaTexturedTriangle03  *)&(chip->FIFO[0x0000E000/4]);
+     return (0);
+ }
+ 
+diff -u --recursive --new-file linux-2.4.22/drivers/video/riva.ori/riva_hw.h linux-2.4.22/drivers/video/riva/riva_hw.h
+--- linux-2.4.22/drivers/video/riva.ori/riva_hw.h	2003-09-23 17:49:13.000000000 +0200
++++ linux-2.4.22/drivers/video/riva/riva_hw.h	2003-09-24 21:21:08.000000000 +0200
+@@ -41,14 +41,30 @@
+  * GPL licensing note -- nVidia is allowing a liberal interpretation of
+  * the documentation restriction above, to merely say that this nVidia's
+  * copyright and disclaimer should be included with all code derived
+- * from this source.  -- Jeff Garzik <jgarzik@pobox.com>, 01/Nov/99 
++ * from this source.  -- Jeff Garzik <jgarzik@mandrakesoft.com>, 01/Nov/99 
+  */
+ 
+-/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/nv/riva_hw.h,v 1.6 2000/02/08 17:19:12 dawes Exp $ */
++/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/nv/riva_hw.h,v 1.24 2003/02/10 23:42:51 mvojkovi Exp $ */
+ #ifndef __RIVA_HW_H__
+ #define __RIVA_HW_H__
+ #define RIVA_SW_VERSION 0x00010003
+ 
++#define V_DBLSCAN 0x1
++
++#ifndef Bool
++typedef int Bool;
++#endif
++
++#ifndef TRUE
++#define TRUE 1
++#endif
++#ifndef FALSE
++#define FALSE 0
++#endif
++#ifndef NULL
++#define NULL 0
++#endif
++
+ /*
+  * Typedefs to force certain sized values.
+  */
+@@ -99,7 +115,7 @@
+ #else
+     U016 FifoFree;
+     U016 Nop;
+-#endif 
++#endif
+     U032 reserved01[0x0BB];
+     U032 Rop3;
+ } RivaRop;
+@@ -259,74 +275,6 @@
+     U032 MonochromeData01E;
+ } RivaBitmap;
+ /*
+- * 3D textured, Z buffered triangle.
+- */
+-typedef volatile struct
+-{
+-    U032 reserved00[4];
+-#ifdef __BIG_ENDIAN
+-    U032 FifoFree;
+-#else
+-    U016 FifoFree;
+-    U016 Nop;
+-#endif    
+-    U032 reserved01[0x0BC];
+-    U032 TextureOffset;
+-    U032 TextureFormat;
+-    U032 TextureFilter;
+-    U032 FogColor;
+-/* This is a problem on LynxOS */
+-#ifdef Control
+-#undef Control
+-#endif
+-    U032 Control;
+-    U032 AlphaTest;
+-    U032 reserved02[0x339];
+-    U032 FogAndIndex;
+-    U032 Color;
+-    float ScreenX;
+-    float ScreenY;
+-    float ScreenZ;
+-    float EyeM;
+-    float TextureS;
+-    float TextureT;
+-} RivaTexturedTriangle03;
+-typedef volatile struct
+-{
+-    U032 reserved00[4];
+-#ifdef __BIG_ENDIAN
+-    U032 FifoFree;
+-#else
+-    U016 FifoFree;
+-    U016 Nop;
+-#endif    
+-    U032 reserved01[0x0BB];
+-    U032 ColorKey;
+-    U032 TextureOffset;
+-    U032 TextureFormat;
+-    U032 TextureFilter;
+-    U032 Blend;
+-/* This is a problem on LynxOS */
+-#ifdef Control
+-#undef Control
+-#endif
+-    U032 Control;
+-    U032 FogColor;
+-    U032 reserved02[0x39];
+-    struct
+-    {
+-        float ScreenX;
+-        float ScreenY;
+-        float ScreenZ;
+-        float EyeM;
+-        U032 Color;
+-        U032 Specular;
+-        float TextureS;
+-        float TextureT;
+-    } Vertex[16];
+-    U032 DrawTriangle3D;
+-} RivaTexturedTriangle05;
+-/*
+  * 2D line.
+  */
+ typedef volatile struct
+@@ -337,7 +285,7 @@
+ #else
+     U016 FifoFree;
+     U016 Nop[1];
+-#endif    
++#endif
+     U032 reserved01[0x0BC];
+     U032 Color;             /* source color               0304-0307*/
+     U032 Reserved02[0x03e];
+@@ -397,6 +345,9 @@
+ *                                                                           *
+ \***************************************************************************/
+ 
++#define FP_ENABLE  1
++#define FP_DITHER  2
++
+ struct _riva_hw_inst;
+ struct _riva_hw_state;
+ /*
+@@ -409,6 +360,7 @@
+      */
+     U032 Architecture;
+     U032 Version;
++    U032 Chipset;
+     U032 CrystalFreqKHz;
+     U032 RamAmountKBytes;
+     U032 MaxVClockFreqKHz;
+@@ -418,12 +370,15 @@
+     U032 VBlankBit;
+     U032 FifoFreeCount;
+     U032 FifoEmptyCount;
++    U032 CursorStart;
+     U032 flatPanel;
++    Bool twoHeads;
+     /*
+      * Non-FIFO registers.
+      */
++    volatile U032 *PCRTC0;
+     volatile U032 *PCRTC;
+-    volatile U032 *PRAMDAC;
++    volatile U032 *PRAMDAC0;
+     volatile U032 *PFB;
+     volatile U032 *PFIFO;
+     volatile U032 *PGRAPH;
+@@ -433,22 +388,20 @@
+     volatile U032 *PRAMIN;
+     volatile U032 *FIFO;
+     volatile U032 *CURSOR;
+-    volatile U032 *CURSORPOS;
+-    volatile U032 *VBLANKENABLE;
+-    volatile U032 *VBLANK;
++    volatile U008 *PCIO0;
+     volatile U008 *PCIO;
+     volatile U008 *PVIO;
++    volatile U008 *PDIO0;
+     volatile U008 *PDIO;
++    volatile U032 *PRAMDAC;
+     /*
+      * Common chip functions.
+      */
+     int  (*Busy)(struct _riva_hw_inst *);
+-    void (*CalcStateExt)(struct _riva_hw_inst *,struct _riva_hw_state *,int,int,int,int,int,int,int,int,int,int,int,int,int);
++    void (*CalcStateExt)(struct _riva_hw_inst *,struct _riva_hw_state *,int,int,int,int,int,int);
+     void (*LoadStateExt)(struct _riva_hw_inst *,struct _riva_hw_state *);
+     void (*UnloadStateExt)(struct _riva_hw_inst *,struct _riva_hw_state *);
+     void (*SetStartAddress)(struct _riva_hw_inst *,U032);
+-    void (*SetSurfaces2D)(struct _riva_hw_inst *,U032,U032);
+-    void (*SetSurfaces3D)(struct _riva_hw_inst *,U032,U032);
+     int  (*ShowHideCursor)(struct _riva_hw_inst *,int);
+     void (*LockUnlock)(struct _riva_hw_inst *, int);
+     /*
+@@ -465,8 +418,6 @@
+     RivaScreenBlt           *Blt;
+     RivaBitmap              *Bitmap;
+     RivaLine                *Line;
+-    RivaTexturedTriangle03  *Tri03;
+-    RivaTexturedTriangle05  *Tri05;
+ } RIVA_HW_INST;
+ /*
+  * Extended mode state information.
+@@ -476,10 +427,12 @@
+     U032 bpp;
+     U032 width;
+     U032 height;
++    U032 interlace;
+     U032 repaint0;
+     U032 repaint1;
+     U032 screen;
+     U032 scale;
++    U032 dither;
+     U032 extra;
+     U032 pixel;
+     U032 horiz;
+@@ -487,34 +440,34 @@
+     U032 arbitration1;
+     U032 vpll;
+     U032 vpll2;
++    U032 vpllB;
++    U032 vpll2B;
+     U032 pllsel;
+     U032 general;
++    U032 crtcOwner;
++    U032 head; 
++    U032 head2; 
+     U032 config;
++    U032 cursorConfig;	
+     U032 cursor0;
+     U032 cursor1;
+     U032 cursor2;
+-    U032 offset0;
+-    U032 offset1;
+-    U032 offset2;
+-    U032 offset3;
+-    U032 pitch0;
+-    U032 pitch1;
+-    U032 pitch2;
+-    U032 pitch3;
++    U032 offset;
++    U032 pitch;
+ } RIVA_HW_STATE;
+ /*
+  * External routines.
+  */
+-int RivaGetConfig(RIVA_HW_INST *);
++int RivaGetConfig(RIVA_HW_INST *, unsigned int);
+ /*
+  * FIFO Free Count. Should attempt to yield processor if RIVA is busy.
+  */
+ 
+-#define RIVA_FIFO_FREE(hwinst,hwptr,cnt)                           \
+-{                                                                  \
+-   while ((hwinst).FifoFreeCount < (cnt))                          \
+-	(hwinst).FifoFreeCount = (hwinst).hwptr->FifoFree >> 2;        \
+-   (hwinst).FifoFreeCount -= (cnt);                                \
++#define RIVA_FIFO_FREE(hwinst,hwptr,cnt)                            \
++{                                                                   \
++    while ((hwinst).FifoFreeCount < (cnt))                          \
++        (hwinst).FifoFreeCount = (hwinst).hwptr->FifoFree >> 2;     \
++    (hwinst).FifoFreeCount -= (cnt);                                \
+ }
+ #endif /* __RIVA_HW_H__ */
+ 
+diff -u --recursive --new-file linux-2.4.22/drivers/video/riva.ori/riva_tbl.h linux-2.4.22/drivers/video/riva/riva_tbl.h
+--- linux-2.4.22/drivers/video/riva.ori/riva_tbl.h	2003-09-23 17:49:13.000000000 +0200
++++ linux-2.4.22/drivers/video/riva/riva_tbl.h	2003-09-24 21:05:22.000000000 +0200
+@@ -41,10 +41,12 @@
+  * GPL licensing note -- nVidia is allowing a liberal interpretation of
+  * the documentation restriction above, to merely say that this nVidia's
+  * copyright and disclaimer should be included with all code derived
+- * from this source.  -- Jeff Garzik <jgarzik@pobox.com>, 01/Nov/99 
++ * from this source.  -- Jeff Garzik <jgarzik@mandrakesoft.com>, 01/Nov/99 
+  */
+ 
+-/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/nv/riva_tbl.h,v 1.5 2000/02/08 17:19:12 dawes Exp $ */
++/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/nv/riva_tbl.h,v 1.9 2002/01/30 01:35:03 mvojkovi Exp $ */
++
++
+ /*
+  * RIVA Fixed Functionality Init Tables.
+  */
+@@ -69,6 +71,7 @@
+     {0x00001800, 0x80000010},
+     {0x00002000, 0x80000011},
+     {0x00002800, 0x80000012},
++    {0x00003000, 0x80000016},
+     {0x00003800, 0x80000013}
+ };
+ static unsigned nv3TablePFIFO[][2] =
+@@ -174,6 +177,8 @@
+     {0x00000249, 0x00CC0346},
+     {0x0000024C, 0x80000013},
+     {0x0000024D, 0x00D70347},
++    {0x00000258, 0x80000016},
++    {0x00000259, 0x00CA034C},
+     {0x00000D05, 0x00000000},
+     {0x00000D06, 0x00000000},
+     {0x00000D07, 0x00000000},
+@@ -210,7 +215,10 @@
+     {0x00000D2C, 0x10830200},
+     {0x00000D2D, 0x00000000},
+     {0x00000D2E, 0x00000000},
+-    {0x00000D2F, 0x00000000} 
++    {0x00000D2F, 0x00000000},
++    {0x00000D31, 0x00000000},
++    {0x00000D32, 0x00000000},
++    {0x00000D33, 0x00000000}
+ };
+ static unsigned nv3TablePRAMIN_8BPP[][2] =
+ {
+@@ -222,7 +230,8 @@
+     {0x00000D10, 0x10118203},
+     {0x00000D14, 0x10110203},
+     {0x00000D18, 0x10110203},
+-    {0x00000D1C, 0x10419208}
++    {0x00000D1C, 0x10419208},
++    {0x00000D30, 0x10118203}
+ };
+ static unsigned nv3TablePRAMIN_15BPP[][2] =
+ {
+@@ -234,7 +243,8 @@
+     {0x00000D10, 0x10118200},
+     {0x00000D14, 0x10110200},
+     {0x00000D18, 0x10110200},
+-    {0x00000D1C, 0x10419208}
++    {0x00000D1C, 0x10419208},
++    {0x00000D30, 0x10118200}
+ };
+ static unsigned nv3TablePRAMIN_32BPP[][2] =
+ {
+@@ -246,7 +256,8 @@
+     {0x00000D10, 0x10118201},
+     {0x00000D14, 0x10110201},
+     {0x00000D18, 0x10110201},
+-    {0x00000D1C, 0x10419208}
++    {0x00000D1C, 0x10419208},
++    {0x00000D30, 0x10118201}
+ };
+ static unsigned nv4TableFIFO[][2] =
+ {
+@@ -370,6 +381,8 @@
+     {0x00000009, 0x80011149},
+     {0x0000000A, 0x80000015},
+     {0x0000000B, 0x8001114A},
++    {0x0000000C, 0x80000016},
++    {0x0000000D, 0x8001114F},
+     {0x00000020, 0x80000000},
+     {0x00000021, 0x80011142},
+     {0x00000022, 0x80000001},
+@@ -437,7 +450,10 @@
+     {0x00000537, 0x00000000},
+     {0x00000538, 0x0000005B},
+     {0x0000053A, 0x11401140},
+-    {0x0000053B, 0x00000000} 
++    {0x0000053B, 0x00000000},
++    {0x0000053C, 0x0300A01C},
++    {0x0000053E, 0x11401140},
++    {0x0000053F, 0x00000000}
+ };
+ static unsigned nv4TablePRAMIN_8BPP[][2] =
+ {
+@@ -452,7 +468,8 @@
+     {0x0000052D, 0x00000302},
+     {0x0000052E, 0x00000302},
+     {0x00000535, 0x00000000},
+-    {0x00000539, 0x00000000} 
++    {0x00000539, 0x00000000},
++    {0x0000053D, 0x00000302}
+ };
+ static unsigned nv4TablePRAMIN_15BPP[][2] =
+ {
+@@ -467,7 +484,8 @@
+     {0x0000052D, 0x00000902},
+     {0x0000052E, 0x00000902},
+     {0x00000535, 0x00000702},
+-    {0x00000539, 0x00000702} 
++    {0x00000539, 0x00000702},
++    {0x0000053D, 0x00000902}
+ };
+ static unsigned nv4TablePRAMIN_16BPP[][2] =
+ {
+@@ -482,7 +500,8 @@
+     {0x0000052D, 0x00000C02},
+     {0x0000052E, 0x00000C02},
+     {0x00000535, 0x00000702},
+-    {0x00000539, 0x00000702} 
++    {0x00000539, 0x00000702},
++    {0x0000053D, 0x00000C02}
+ };
+ static unsigned nv4TablePRAMIN_32BPP[][2] =
+ {
+@@ -497,7 +516,8 @@
+     {0x0000052D, 0x00000E02},
+     {0x0000052E, 0x00000E02},
+     {0x00000535, 0x00000E02},
+-    {0x00000539, 0x00000E02} 
++    {0x00000539, 0x00000E02},
++    {0x0000053D, 0x00000E02}
+ };
+ static unsigned nv10TableFIFO[][2] =
+ {
+@@ -622,180 +642,6 @@
+     {0x00000186, 0x000070E5},
+     {0x0000020C, 0x0E0D0D0D}
+ };
+-static unsigned nv10tri05TablePGRAPH[][2] =
+-{
+-    {(0x00000E00/4), 0x00000000},
+-    {(0x00000E04/4), 0x00000000},
+-    {(0x00000E08/4), 0x00000000},
+-    {(0x00000E0C/4), 0x00000000},
+-    {(0x00000E10/4), 0x00001000},
+-    {(0x00000E14/4), 0x00001000},
+-    {(0x00000E18/4), 0x4003ff80},
+-    {(0x00000E1C/4), 0x00000000},
+-    {(0x00000E20/4), 0x00000000},
+-    {(0x00000E24/4), 0x00000000},
+-    {(0x00000E28/4), 0x00000000},
+-    {(0x00000E2C/4), 0x00000000},
+-    {(0x00000E30/4), 0x00080008},
+-    {(0x00000E34/4), 0x00080008},
+-    {(0x00000E38/4), 0x00000000},
+-    {(0x00000E3C/4), 0x00000000},
+-    {(0x00000E40/4), 0x00000000},
+-    {(0x00000E44/4), 0x00000000},
+-    {(0x00000E48/4), 0x00000000},
+-    {(0x00000E4C/4), 0x00000000},
+-    {(0x00000E50/4), 0x00000000},
+-    {(0x00000E54/4), 0x00000000},
+-    {(0x00000E58/4), 0x00000000},
+-    {(0x00000E5C/4), 0x00000000},
+-    {(0x00000E60/4), 0x00000000},
+-    {(0x00000E64/4), 0x10000000},
+-    {(0x00000E68/4), 0x00000000},
+-    {(0x00000E6C/4), 0x00000000},
+-    {(0x00000E70/4), 0x00000000},
+-    {(0x00000E74/4), 0x00000000},
+-    {(0x00000E78/4), 0x00000000},
+-    {(0x00000E7C/4), 0x00000000},
+-    {(0x00000E80/4), 0x00000000},
+-    {(0x00000E84/4), 0x00000000},
+-    {(0x00000E88/4), 0x08000000},
+-    {(0x00000E8C/4), 0x00000000},
+-    {(0x00000E90/4), 0x00000000},
+-    {(0x00000E94/4), 0x00000000},
+-    {(0x00000E98/4), 0x00000000},
+-    {(0x00000E9C/4), 0x4B7FFFFF},
+-    {(0x00000EA0/4), 0x00000000},
+-    {(0x00000EA4/4), 0x00000000},
+-    {(0x00000EA8/4), 0x00000000},
+-    {(0x00000F00/4), 0x07FF0800},
+-    {(0x00000F04/4), 0x07FF0800},
+-    {(0x00000F08/4), 0x07FF0800},
+-    {(0x00000F0C/4), 0x07FF0800},
+-    {(0x00000F10/4), 0x07FF0800},
+-    {(0x00000F14/4), 0x07FF0800},
+-    {(0x00000F18/4), 0x07FF0800},
+-    {(0x00000F1C/4), 0x07FF0800},
+-    {(0x00000F20/4), 0x07FF0800},
+-    {(0x00000F24/4), 0x07FF0800},
+-    {(0x00000F28/4), 0x07FF0800},
+-    {(0x00000F2C/4), 0x07FF0800},
+-    {(0x00000F30/4), 0x07FF0800},
+-    {(0x00000F34/4), 0x07FF0800},
+-    {(0x00000F38/4), 0x07FF0800},
+-    {(0x00000F3C/4), 0x07FF0800},
+-    {(0x00000F40/4), 0x10000000},
+-    {(0x00000F44/4), 0x00000000},
+-    {(0x00000F50/4), 0x00006740},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F50/4), 0x00006750},
+-    {(0x00000F54/4), 0x40000000},
+-    {(0x00000F54/4), 0x40000000},
+-    {(0x00000F54/4), 0x40000000},
+-    {(0x00000F54/4), 0x40000000},
+-    {(0x00000F50/4), 0x00006760},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F50/4), 0x00006770},
+-    {(0x00000F54/4), 0xC5000000},
+-    {(0x00000F54/4), 0xC5000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F50/4), 0x00006780},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F50/4), 0x000067A0},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F50/4), 0x00006AB0},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F50/4), 0x00006AC0},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F50/4), 0x00006C10},
+-    {(0x00000F54/4), 0xBF800000},
+-    {(0x00000F50/4), 0x00007030},
+-    {(0x00000F54/4), 0x7149F2CA},
+-    {(0x00000F50/4), 0x00007040},
+-    {(0x00000F54/4), 0x7149F2CA},
+-    {(0x00000F50/4), 0x00007050},
+-    {(0x00000F54/4), 0x7149F2CA},
+-    {(0x00000F50/4), 0x00007060},
+-    {(0x00000F54/4), 0x7149F2CA},
+-    {(0x00000F50/4), 0x00007070},
+-    {(0x00000F54/4), 0x7149F2CA},
+-    {(0x00000F50/4), 0x00007080},
+-    {(0x00000F54/4), 0x7149F2CA},
+-    {(0x00000F50/4), 0x00007090},
+-    {(0x00000F54/4), 0x7149F2CA},
+-    {(0x00000F50/4), 0x000070A0},
+-    {(0x00000F54/4), 0x7149F2CA},
+-    {(0x00000F50/4), 0x00006A80},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F50/4), 0x00006AA0},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F50/4), 0x00000040},
+-    {(0x00000F54/4), 0x00000005},
+-    {(0x00000F50/4), 0x00006400},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F54/4), 0x4B7FFFFF},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F50/4), 0x00006410},
+-    {(0x00000F54/4), 0xC5000000},
+-    {(0x00000F54/4), 0xC5000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F50/4), 0x00006420},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F50/4), 0x00006430},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F50/4), 0x000064C0},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F54/4), 0x477FFFFF},
+-    {(0x00000F54/4), 0x3F800000},
+-    {(0x00000F50/4), 0x000064D0},
+-    {(0x00000F54/4), 0xC5000000},
+-    {(0x00000F54/4), 0xC5000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F50/4), 0x000064E0},
+-    {(0x00000F54/4), 0xC4FFF000},
+-    {(0x00000F54/4), 0xC4FFF000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F50/4), 0x000064F0},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F54/4), 0x00000000},
+-    {(0x00000F40/4), 0x30000000},
+-    {(0x00000F44/4), 0x00000004},
+-    {(0x00000F48/4), 0x10000000},
+-    {(0x00000F4C/4), 0x00000000}
+-};
+ static unsigned nv10TablePRAMIN[][2] =
+ {
+     {0x00000000, 0x80000010},
+@@ -810,6 +656,8 @@
+     {0x00000009, 0x80011149},
+     {0x0000000A, 0x80000015},
+     {0x0000000B, 0x8001114A},
++    {0x0000000C, 0x80000016},
++    {0x0000000D, 0x80011150},
+     {0x00000020, 0x80000000},
+     {0x00000021, 0x80011142},
+     {0x00000022, 0x80000001},
+@@ -831,9 +679,9 @@
+     {0x00000502, 0x00000002},
+     {0x00000503, 0x00000002},
+ #ifdef __BIG_ENDIAN
+-    {0x00000508, 0x01088043},
++    {0x00000508, 0x01088043}, 
+ #else
+-    {0x00000508, 0x01008043},
++    {0x00000508, 0x01008043}, 
+ #endif
+     {0x0000050A, 0x00000000},
+     {0x0000050B, 0x00000000},
+@@ -946,7 +794,7 @@
+     {0x0000052E, 0x00000902},
+     {0x00000535, 0x00000902},
+     {0x00000539, 0x00000902}, 
+-    {0x0000053D, 0x00000902}, 
++    {0x0000053D, 0x00000902},
+     {0x00000541, 0x00000902}
+ };
+ static unsigned nv10TablePRAMIN_16BPP[][2] =
+diff -u --recursive --new-file linux-2.4.22/drivers/video/riva.ori/rivafb.h linux-2.4.22/drivers/video/riva/rivafb.h
+--- linux-2.4.22/drivers/video/riva.ori/rivafb.h	2003-09-23 17:49:13.000000000 +0200
++++ linux-2.4.22/drivers/video/riva/rivafb.h	2003-09-24 21:21:08.000000000 +0200
+@@ -92,6 +92,12 @@
+ #ifdef CONFIG_MTRR
+ 	struct { int vram; int vram_valid; } mtrr;
+ #endif
++	unsigned int Chipset;
++	int forceCRTC;
++	Bool SecondCRTC;
++	int FlatPanel;
+ };
+ 
++void riva_common_setup(struct rivafb_info*);
++
+ #endif /* __RIVAFB_H */

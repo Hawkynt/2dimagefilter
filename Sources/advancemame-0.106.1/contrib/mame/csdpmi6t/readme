@@ -1,0 +1,34 @@
+This is a test release of the 4Mb page support in CWSDPMI.  This should be
+considered a WIP for CWSDPMI r6.  The primary reason for this set of changes
+is to decrease the DOS memory requirements for large memory space usage and
+to allow high performance access to large amounts of physical memory (up to
+2Gb).  This package contains the binary build for CWSDPMI.EXE and the
+files with source changes from r5.
+
+The 4Mb page support in this test release is not complete, and the program
+has had very minimal testing.  Known issues:
+ 1) 4Mb regions are treated as locked or non-pageable.  This means you 
+    cannot use virtual memory effectively with 4Mb pages.
+ 2) There is no way in this image to prevent using 4Mb pages.
+ 3) DPMI function 0x503 to resize memory is not supported if it requires the
+    memory zone to be moved in physical memory and it contains a 4Mb page.
+
+I have tested the distributed binary using over 780Mb of memory using 
+Alybadix and saw fast performance (compared to the old r5 image, which
+slowed substantially after 500Mb of memory usage).  I haven't tried nesting
+images or anything fancy.  If you don't have 256Mb of memory or more you
+probably don't want to mess with this test image!
+
+Long term issues:
+ 1) Should 4Mb pages be "paged" to disk like 4K pages?  This might take up to
+    several seconds just for the I/O to page-out/page-in a 4Mb page.
+ 2) If we don't allow paging of 4M pages, should this only be available when 
+    swapping is disabled?  Or in the ring 0 version?  
+ 3) Should some amount of memory be reserved for non-4M pages?  Worse case
+    example - system with 8Mb of memory (one 4Mb aligned page available).
+ 4) DPMI 1.0 extensions which handle "page" attributes won't work on 4Mb
+    pages; so trying to protect or decommit a page in the middle of a 4Mb
+    page is silently failed at best.
+
+If you have good luck or problems with this test image you can send me an
+email at sandmann@clio.rice.edu and tell me what you found.  Good luck.

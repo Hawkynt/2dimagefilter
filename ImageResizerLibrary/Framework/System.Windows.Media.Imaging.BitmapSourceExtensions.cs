@@ -25,16 +25,17 @@ namespace System.Windows.Media.Imaging {
     /// <summary>
     /// Converts the given BitmapSource into a Bitmap.
     /// </summary>
-    /// <param name="This">This BitmapSource.</param>
+    /// <param name="this">This BitmapSource.</param>
     /// <returns>The copy of the BitmapSource as a Bitmap-Instance.</returns>
-    public static Bitmap AsBitmap(this BitmapSource This) {
-      Contract.Requires(This != null);
+    public static Bitmap AsBitmap(this BitmapSource @this) {
+      Contract.Requires(@this != null);
       using (var memoryStream = new IO.MemoryStream()) {
         var bitmapEncoder = new BmpBitmapEncoder();
-        bitmapEncoder.Frames.Add(BitmapFrame.Create(This));
+        var bitmapFrame = BitmapFrame.Create(@this);
+        bitmapEncoder.Frames.Add(bitmapFrame);
         bitmapEncoder.Save(memoryStream);
         using (var temp = new Bitmap(memoryStream))
-          return (new Bitmap(temp));
+          return new Bitmap(temp);
       }
     }
   }

@@ -1,0 +1,176 @@
+; Installation file (.inf) for the CPN Tools mouse filter driver
+;
+; (c) Copyright 2002-2004 CPN Group, University of Aarhus 
+;
+
+[Version]
+Signature="$Windows NT$"
+Provider=%CPNGroup%
+ClassGUID={4D36E96F-E325-11CE-BFC1-08002BE10318}
+Class=Mouse
+CatalogFile=cpnmouse.cat
+DriverVer=09/05/2004,1.0.5.0
+
+[DestinationDirs]
+DefaultDestDir   = 12
+
+;
+; Driver information
+;
+
+[Manufacturer]
+%CPNGroup%   = CPNGroup.Mfg
+
+[CPNGroup.Mfg]
+%CPNGroup.DeviceDesc0% = ps2inst, *PNP0FAKE
+%CPNGroup.DeviceDesc1% = usbinst, HID\VID_046d&PID_c402
+%CPNGroup.DeviceDesc1% = usbinst, HID\VID_046d&PID_c000
+%CPNGroup.DeviceDesc1% = usbinst, HID\VID_046d&PID_c001
+%CPNGroup.DeviceDesc1% = usbinst, HID\VID_046d&PID_c00e
+%CPNGroup.DeviceDesc1% = usbinst, HID\VID_046d&PID_c016
+%CPNGroup.DeviceDesc1% = usbinst, HID\VID_0603&PID_6871
+%CPNGroup.DeviceDesc1% = usbinst, HID\VID_061c&PID_a700
+%CPNGroup.DeviceDesc2% = serinst, *PNP0F0C,SERENUM\PNP0F0C,SERIAL_MOUSE
+
+;
+; General installation section
+;
+
+[ps2inst]
+; perform port related actions from msmouse.inf
+Include=msmouse.inf
+Needs=Ps2_Inst
+
+AddReg=cpnmouse.AddReg
+; Copy the driver over
+CopyFiles=cpnmouse.CopyFiles
+
+[usbinst]
+; perform port related actions from msmouse.inf
+Include=msmouse.inf
+Needs=HID_Mouse_Inst.NT
+
+AddReg=cpnmouse.AddReg
+; Copy the driver over
+CopyFiles=cpnmouse.CopyFiles
+
+[serinst]
+; perform port related actions from msmouse.inf
+Include=msmouse.inf
+Needs=Ser_Inst
+
+AddReg=cpnmouse.AddReg
+; Copy the driver over
+CopyFiles=cpnmouse.CopyFiles
+
+[cpnmouse.AddReg]
+
+;
+; File sections
+;
+
+[cpnmouse.CopyFiles]
+cpnmouse.sys
+
+;
+; Service Installation
+;
+
+[ps2inst.Services]
+AddService = cpnmouse,  , cpnmouse_Service_Inst, cpnmouse_EventLog_Inst
+; Install the port driver and mouclass from msmouse.inf
+Include=msmouse.inf
+Needs=Ps2_Inst.Services
+
+[usbinst.Services]
+AddService = cpnmouse,  , cpnmouse_Service_Inst, cpnmouse_EventLog_Inst
+; Install the port driver and mouclass from msmouse.inf
+Include=msmouse.inf
+Needs=HID_Mouse_Inst.NT.Services
+
+[serinst.Services]
+AddService = cpnmouse,  , cpnmouse_Service_Inst, cpnmouse_EventLog_Inst
+; Install the port driver and mouclass from msmouse.inf
+Include=msmouse.inf
+Needs=Ser_Inst.Services
+
+[cpnmouse_Service_Inst]
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 0                  ; SERVICE_ERROR_IGNORE
+LoadOrderGroup = Pointer Port
+ServiceBinary  = %12%\cpnmouse.sys
+
+[cpnmouse_EventLog_Inst]
+AddReg = cpnmouse_EventLog_AddReg
+
+[cpnmouse_EventLog_AddReg]
+HKR,,EventMessageFile,0x00020000,"%SystemRoot%\System32\IoLogMsg.dll;%SystemRoot%\System32\drivers\cpnmouse.sys"
+HKR,,TypesSupported,0x00010001,7
+
+[ps2inst.HW]
+; Add the device upper filter
+AddReg = ps2inst.HW.AddReg
+
+; run the directives need by the port driver
+Include=msmouse.inf
+Needs=Ps2_Inst.HW
+
+[usbinst.HW]
+; Add the device upper filter
+AddReg = usbinst.HW.AddReg
+
+; run the directives need by the port driver
+Include=msmouse.inf
+Needs=HID_Mouse_Inst.NT.HW
+
+[serinst.HW]
+; Add the device upper filter
+AddReg = serinst.HW.AddReg
+
+; run the directives need by the port driver
+Include=msmouse.inf
+Needs=Ser_Inst.HW
+
+[ps2inst.HW.AddReg]
+HKR,,"UpperFilters",0x00010000,"cpnmouse"
+
+[usbinst.HW.AddReg]
+HKR,,"UpperFilters",0x00010000,"cpnmouse"
+
+[serinst.HW.AddReg]
+HKR,,"UpperFilters",0x00010000,"cpnmouse"
+
+;
+; Source file information
+;
+
+[SourceDisksNames.x86]
+1 = %DiskId1%,,,""
+
+[SourceDisksFiles]
+; Files for disk CPN Group, University of Aarhus Installation Disk #1 (Mouse)
+cpnmouse.sys = 1,,
+
+[Strings]
+
+;
+; Non-Localizable Strings
+;
+
+REG_SZ         = 0x00000000
+REG_MULTI_SZ   = 0x00010000
+REG_EXPAND_SZ  = 0x00020000
+REG_BINARY     = 0x00000001
+REG_DWORD      = 0x00010001
+SERVICEROOT    = "System\CurrentControlSet\Services"
+
+;
+; Localizable Strings
+;
+
+CPNGroup.DeviceDesc0 = "CPN Tools mouse filter driver PS/2"
+CPNGroup.DeviceDesc1 = "CPN Tools mouse filter driver USB"
+CPNGroup.DeviceDesc2 = "CPN Tools mouse filter driver serial"
+DiskId1 = "CPN Group, University of Aarhus Installation Disk #1 (Mouse)"
+CPNGroup = "CPN Group, University of Aarhus"

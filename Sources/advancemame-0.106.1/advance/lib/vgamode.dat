@@ -1,0 +1,100 @@
+/* Video modes computed with the advline utility */
+/**************************************************************************/
+/* pc_31.5 */
+
+/*
+format H 0.8 0.02 0.12 0.06
+format V 0.914286 0.0190476 0.00380952 0.0628571
+fixed horz clock 31469
+*/
+
+/* VGA text modes */
+"pc_31.5_vga_text40_8x8 12.5876 320 328 376 400 200 204 205 219 -hsync +vsync doublescan", /* H 31469 [Hz], V 71.847 [Hz] */
+"pc_31.5_vga_text40_9x8 14.161 360 368 422 450 200 204 205 219 -hsync +vsync doublescan", /* H 31469 [Hz], V 71.847 [Hz] */
+"pc_31.5_vga_text80_8x8 25.1752 640 656 752 800 200 204 205 219 -hsync +vsync doublescan", /* H 31469 [Hz], V 71.847 [Hz] */
+"pc_31.5_vga_text80_9x8 28.3221 720 738 846 900 200 204 205 219 -hsync +vsync doublescan", /* H 31469 [Hz], V 71.847 [Hz] */
+"pc_31.5_vga_text40_8x16 12.5876 320 328 376 400 400 408 410 437 -hsync +vsync", /* H 31469 [Hz], V 72.0114 [Hz] */
+"pc_31.5_vga_text40_9x16 14.161 360 368 422 450 400 408 410 437 -hsync +vsync", /* H 31469 [Hz], V 72.0114 [Hz] */
+"pc_31.5_vga_text80_8x16 25.1752 640 656 752 800 400 408 410 437 -hsync +vsync", /* H 31469 [Hz], V 72.0114 [Hz] */
+"pc_31.5_vga_text80_9x16 28.3221 720 738 846 900 400 408 410 437 -hsync +vsync", /* H 31469 [Hz], V 72.0114 [Hz] */
+
+/**************************************************************************/
+/* pal */
+
+/*
+format H 0.8125 0.0257812 0.0734375 0.0882813
+format V 0.9232 0.0096 0.0096 0.0576
+fixed horz clock 15625
+fixed vert clock 50
+*/
+
+/* VGA text modes */
+"pal_vga_text40_8x8 12.5938 320 508 568 806 200 247 250 312 -hsync -vsync", /* H 15625 [Hz], V 50.0801 [Hz] */
+"pal_vga_text40_9x8 12.5938 360 528 588 806 200 247 250 312 -hsync -vsync", /* H 15625 [Hz], V 50.0801 [Hz] */
+"pal_vga_text80_8x8 12.5938 640 668 728 806 200 247 250 312 -hsync -vsync", /* H 15625 [Hz], V 50.0801 [Hz] */
+"pal_vga_text80_9x8 14.1562 720 752 818 906 200 247 250 312 -hsync -vsync", /* H 15625 [Hz], V 50.0801 [Hz] */
+
+/**************************************************************************/
+/* ntsc */
+
+/*
+format H 0.828346 0.023622 0.0740157 0.0740157
+format V 0.92381 0.0114286 0.0114286 0.0533333
+fixed horz clock 15734
+fixed vert clock 59.94
+*/
+
+/* VGA text modes */
+"ntsc_vga_text40_8x8 12.5872 320 510 570 800 200 224 227 262 -hsync -vsync", /* H 15734 [Hz], V 60.0534 [Hz] */
+"ntsc_vga_text40_9x8 12.5872 360 530 590 800 200 224 227 262 -hsync -vsync", /* H 15734 [Hz], V 60.0534 [Hz] */
+"ntsc_vga_text80_8x8 12.5872 640 670 730 800 200 224 227 262 -hsync -vsync", /* H 15734 [Hz], V 60.0534 [Hz] */
+"ntsc_vga_text80_9x8 14.1606 720 754 820 900 200 224 227 262 -hsync -vsync", /* H 15734 [Hz], V 60.0534 [Hz] */
+
+/**************************************************************************/
+/* standard */
+
+/*
+format H 0.737421 0.0754717 0.0738994 0.113208
+format V 0.916168 0.011976 0.011976 0.0598802
+fixed horz clock 15720
+fixed vert clock 60
+*/
+
+/* VGA text modes */
+"standard_vga_text40_8x8 12.576 320 516 574 800 200 223 226 262 -hsync -vsync", /* H 15720 [Hz], V 60 [Hz] */
+"standard_vga_text40_9x8 12.576 360 536 594 800 200 223 226 262 -hsync -vsync", /* H 15720 [Hz], V 60 [Hz] */
+"standard_vga_text80_8x8 14.148 640 720 786 900 200 223 226 262 -hsync -vsync", /* H 15720 [Hz], V 60 [Hz] */
+"standard_vga_text80_9x8 25.1834 720 1072 1190 1602 200 223 226 262 -hsync -vsync", /* H 15720 [Hz], V 60 [Hz] */
+
+/**************************************************************************/
+/* extended */
+
+/*
+format H 0.792079 0.0115512 0.0643564 0.132013
+format V 0.920635 0.015873 0.010582 0.0529101
+fixed horz clock 16500
+fixed vert clock 53
+*/
+
+/* VGA text modes */
+"extended_vga_text40_8x8 12.573 320 470 520 762 200 248 251 311 -hsync -vsync", /* H 16500 [Hz], V 53.0547 [Hz] */
+"extended_vga_text40_9x8 12.573 360 490 540 762 200 248 251 311 -hsync -vsync", /* H 16500 [Hz], V 53.0547 [Hz] */
+"extended_vga_text80_8x8 14.157 640 670 724 858 200 248 251 311 -hsync -vsync", /* H 16500 [Hz], V 53.0547 [Hz] */
+"extended_vga_text80_9x8 25.179 720 982 1080 1526 200 248 251 311 -hsync -vsync", /* H 16500 [Hz], V 53.0547 [Hz] */
+
+/**************************************************************************/
+/* medium */
+
+/*
+format H 0.8 0.02 0.1 0.08
+format V 0.922156 0.00598802 0.011976 0.0598802
+fixed horz clock 25000
+fixed vert clock 60
+*/
+
+/* VGA text modes */
+"medium_vga_text40_8x8 12.6 320 372 422 504 200 295 300 417 -hsync -vsync", /* H 25000 [Hz], V 59.952 [Hz] */
+"medium_vga_text40_9x8 12.6 360 392 442 504 200 295 300 417 -hsync -vsync", /* H 25000 [Hz], V 59.952 [Hz] */
+"medium_vga_text80_8x8 25.15 640 742 844 1006 200 295 300 417 -hsync -vsync", /* H 25000 [Hz], V 59.952 [Hz] */
+"medium_vga_text80_9x8 25.15 720 782 884 1006 200 295 300 417 -hsync -vsync", /* H 25000 [Hz], V 59.952 [Hz] */
+

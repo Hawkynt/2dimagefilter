@@ -1,0 +1,31 @@
+--- drivers/video/radeonfb.c.ori	2003-07-25 17:01:15.000000000 +0200
++++ drivers/video/radeonfb.c	2003-07-25 16:56:23.000000000 +0200
+@@ -2510,12 +2510,10 @@
+ 	rinfo->hack_crtc_ext_cntl = newmode.crtc_ext_cntl;
+ 	rinfo->hack_crtc_v_sync_strt_wid = newmode.crtc_v_sync_strt_wid;
+ 
+ 	if (freq > rinfo->pll.ppll_max)
+ 		freq = rinfo->pll.ppll_max;
+-	if (freq*12 < rinfo->pll.ppll_min)
+-		freq = rinfo->pll.ppll_min / 12;
+ 
+ 	{
+ 		struct {
+ 			int divider;
+ 			int bitvalue;
+@@ -2537,10 +2535,15 @@
+ 			if (rinfo->pll_output_freq >= rinfo->pll.ppll_min  &&
+ 			    rinfo->pll_output_freq <= rinfo->pll.ppll_max)
+ 				break;
+ 		}
+ 
++		if (!post_div->divider) {
++			post_div = post_divs + 5;
++			rinfo->pll_output_freq = post_div->divider * freq;
++		}
++
+ 		rinfo->post_div = post_div->divider;
+ 		rinfo->fb_div = round_div(rinfo->pll.ref_div*rinfo->pll_output_freq,
+ 					  rinfo->pll.ref_clk);
+ 		newmode.ppll_ref_div = rinfo->pll.ref_div;
+ 		newmode.ppll_div_3 = rinfo->fb_div | (post_div->bitvalue << 16);

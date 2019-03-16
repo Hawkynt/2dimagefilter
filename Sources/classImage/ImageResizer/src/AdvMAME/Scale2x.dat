@@ -1,0 +1,20 @@
+/*
+  Andrea Mazzoleni's Scale2X 
+  Hawkynt modified it by using YUV-threshold comparison
+  and interpolation.
+  when setting YUV thresholds to 0 it runs like the original filter
+*/
+if (MLR && MUD) {
+  if (!MUL) {
+    P(0,0)=I2(1,1,1,3); 
+  };
+  if (!MUR) { 
+    P(1,0)=I2(1,1,1,5);
+  };
+  if (!MDL) { 
+    P(0,1)=I2(1,1,7,3); 
+  };
+  if (!MDR) { 
+    P(1,1)=I2(1,1,7,5); 
+  };
+}

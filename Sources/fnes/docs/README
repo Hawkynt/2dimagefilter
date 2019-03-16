@@ -1,0 +1,109 @@
+Introduction
+---
+
+FakeNES is a portable, Open Source NES emulator.  It uses the Allegro
+library for input, graphics, and sound across various platforms.
+
+It is distributed under the zlib/libpng license.
+
+
+Performance
+---
+
+FakeNES is written in 100% C language code.  This makes it very portable,
+but also very slow compared to many other NES/Famicom emulators.
+
+Do not expect FakeNES to run fast or even be playable on a 486 or Pentium.
+I recommend at least a 300 MHz processor for full speed.
+
+A 1 GHz+ processor may be required if you want special features like HQ2X.
+
+
+API support
+---
+
+OpenGL is supported, through AllegroGL.  For best results, disable any
+"enhancements" that your video drivers may force upon the program.
+
+OpenAL is also supported.
+
+
+Configuration
+---
+
+At this time, command-line options are not supported.
+
+However, you may supply the name of a file that you would like to load on
+the command-line (instead of loading it from the GUI).
+
+Under Windows, you can also drag and drop any supported file formats (such
+as .NES files) directly onto the program icon in Windows Explorer.
+
+
+Input
+---
+
+FakeNES supports two keyboard layouts, four joysticks, and a mouse.
+
+
+Expansion hardware
+---
+
+A great deal of in-cart expansion hardware ("mappers") are emulated, but
+extensive game compatibility is not something I strive for.
+
+The NES four player adapter ("Four Score") is supported.
+
+The NES light gun ("Zapper") is supported, and requires a mouse.
+
+
+Unicode
+---
+
+FakeNES is mostly, if not fully, Unicode(UTF-8) compliant, provided you are
+able to obtain a suitable font for your locale.
+
+
+Getting support
+---
+
+The SourceForge project page
+http://www.sourceforge.net/projects/fakenes
+
+The FakeWare IRC channel
+irc://irc.freenode.net/#fakeware
+
+
+Other documentation
+---
+
+If you need any help regarding building FakeNES from a Source Code package
+or CVS, please read the 'INSTALL' file in the 'docs' directory.
+
+There is also a FAQ on the website.
+
+
+Anything else
+---
+
+If you would like something else documented, please let me know.  You can
+contact me by E-mail at randilyn@users.sourceforge.net.
+
+
+In closing...
+---
+
+I would like to thank my fellow ZSNES developers, without them I would have
+never became interested in the world of emulation.
+
+I would also like to thank the current maintainer of SNEeSe (and forever
+best friend), TRAC, as well as the rest of the Silohware team, without them
+FakeNES would never have even been possible.
+
+A very special thanks goes out to Xodnizel, I don't think I need to say why.
+
+And finally I would like to thank everybody else who is (as Matt Conte so
+elegantly put it) still hacking around with the old piece of shit.
+
+
+- randi

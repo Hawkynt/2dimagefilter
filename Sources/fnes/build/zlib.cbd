@@ -1,0 +1,29 @@
+setstdout "${STDOUT_LOG}"
+setstderr "${STDERR_LOG}"
+
+@!call "${CC}" -E "${BUILD_DIR}/zlib.c ${CPPFLAGS}"
+
+do ifnret 0
+   setstdout ''
+   setstderr ''
+
+   echo 'you\'re missing zlib'
+   echo 'continuing on without it...'
+
+   uninvoke 0
+done
+
+setstdout ''
+setstderr ''
+
+# --
+
+SRCFILES += '${SRC_ETCDIR}/unzip.c '
+
+# --
+
+CFLAGS += ' -DUSE_ZLIB'
+
+# --
+
+LDFLAGS += ' -lz'

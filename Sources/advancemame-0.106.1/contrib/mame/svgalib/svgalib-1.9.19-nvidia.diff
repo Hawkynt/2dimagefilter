@@ -1,0 +1,12 @@
+diff -u --recursive svgalib-1.9.19/src/drivers/nv3.c svgalib-1.9.19-patched/src/drivers/nv3.c
+--- svgalib-1.9.19/src/drivers/nv3.c	2004-04-12 11:37:21.000000000 +0200
++++ svgalib-1.9.19-patched/src/drivers/nv3.c	2004-05-24 18:04:27.000000000 +0200
+@@ -812,7 +812,7 @@
+     for (P = 0; P <= P_MAX; P ++)
+     {
+         Freq = VClk << P;
+-        if ((Freq >= 128000) && (Freq <= MAXVCLOCK))
++        if ((Freq >= 128000 || P == P_MAX) && (Freq <= MAXVCLOCK))
+         {
+             for (M = M_MIN; M <= M_MAX; M++)
+             {

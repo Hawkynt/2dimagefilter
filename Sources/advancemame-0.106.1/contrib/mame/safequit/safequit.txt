@@ -1,0 +1,70 @@
+Quick guide to find safequit data
+
+OK, I tried to write this in a comprehensive manner, so I hope you all can 
+understand how this works.
+
+First, you need to know how to use MAME's cheat engine. I won't go through 
+teaching this as it's some basic knowledge. If you want to help, and don't 
+know how the cheat engine works, I suggest you to practice on it first.
+
+That being said, the safequit idea is to prevent to exit the game when you 
+are playing OR there is any credit inserted in the game. You need to find 
+addresses that signalize these conditions and use them under the two 
+conditions "zero_coin" and "demo_mode" (also called 'events').
+
+; <gamename>:
+; <event>:<cpu>:<address>:<action>:<mask>:<result>
+; [repeat the above as many times as necessary]
+
+Taking 1943 as an example, right from event.dat:
+
+; ******* 1943.c
+1943:
+1943j:
+1943kai:
+zero_coin:match:e312:00:ff:00
+demo_mode:match:e310:00:ff:00
+
+1943, 1943j and 1943kai all share the same addresses for "zero_coin" and 
+"demo_mode". Address 0xe312 stores the number of inserted (but not used) 
+coins while address 0xe310 has information about game in progress or demo 
+mode. Now let's interpret what the "zero_coin" line is asking AdvanceMAME 
+to do.
+
+Step 1: "On CPU 0 (1st argument), get the content of address 0xe312 (2nd 
+argument) and then perform an AND operation with the mask 0xff (4th argument)"
+Step 2: "The action code is 00 (3rd argument), this means: compare the 
+result of this operation with 0x00 (6th argument), if they DO match for one 
+second, then the condition is satisfied, meaning 'zero_coin' flag is set - 
+otherwise it's not set"
+
+Observe that all conditions must be TRUE for at least one second at same 
+time! If action code is 01, that means the same action, only the condition 
+will be satisfied if the result DO NOT match with last argument.
+
+Same thing applies for "demo_mode". Try to use only the necessary bits in 
+the mask (I have used 0xff in many games before, but now I try to follow 
+this idea). It may be necessary in some games to use more than one 
+condition for an event, like Mortal Kombat 3:
+
+mk3:
+zero_coin:match:00280354:00:ff:00
+demo_mode:match:0020c130:00:ff:00
+demo_mode:match:0020c2a6:00:ff:00
+
+Address 0x00280354 stores inserted but not used coins; address 0x0020c130 
+is for player 1 and address 0x0020c2a6 is for player 2; if contents of both 
+addresses are 0x00 then condition 'demo_mode' is satisfied.
+
+To activate the 2 flags that will show you if the conditions in 
+event.dat are being achieved, put in advmame.rc "misc_eventdebug
+yes". Remember that "demo_mode" must only be set after the "continue game" 
+time is over, and it must allow the players to enter their names in 
+highscore too. Only after being completely sure that the game is over, 
+should "demo_mode" signalize this condition is TRUE.
+
+Filipe Estima
+
+
+
+
