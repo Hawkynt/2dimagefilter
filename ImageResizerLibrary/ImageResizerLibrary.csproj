@@ -101,6 +101,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Framework\System.Windows.RectExtensions.cs" />
     <None Include="Imager\Image.Resizer.Loop.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Image.Resizer.Loop.cs</LastGenOutput>
