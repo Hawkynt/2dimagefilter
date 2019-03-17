@@ -19,8 +19,8 @@
  */
 #endregion
 
+using System;
 using System.ComponentModel;
-using System.Diagnostics.Contracts;
 using System.Drawing;
 using Imager;
 using Imager.Classes;
@@ -31,28 +31,27 @@ namespace Classes.ImageManipulators {
     private readonly WindowType _type;
 
     #region Implementation of IImageManipulator
-    public bool SupportsWidth => (true);
-    public bool SupportsHeight => (true);
-    public bool SupportsRepetitionCount => (false);
-    public bool SupportsGridCentering => (true);
-    public bool SupportsThresholds => (false);
-    public bool SupportsRadius => (true);
-    public bool ChangesResolution => (true);
-    public string Description => (ReflectionUtils.GetDescriptionForEnumValue(this._type));
+
+    public bool SupportsWidth => true;
+    public bool SupportsHeight => true;
+    public bool SupportsRepetitionCount => false;
+    public bool SupportsGridCentering => true;
+    public bool SupportsThresholds => false;
+    public bool SupportsRadius => true;
+    public bool ChangesResolution => true;
+    public string Description => ReflectionUtils.GetDescriptionForEnumValue(this._type);
 
     #endregion
 
-    public cImage Apply(cImage source, int width, int height, float radius, bool useCenteredGrid) {
-      Contract.Requires(source != null);
-      return (source.ApplyScaler(this._type, width, height, radius, useCenteredGrid, default(Rectangle?)));
-    }
+    public cImage Apply(cImage source, int width, int height, float radius, bool useCenteredGrid)
+      => source == null
+      ? throw new ArgumentNullException(nameof(source))
+      : source.ApplyScaler(this._type, width, height, radius, useCenteredGrid, default(Rectangle?))
+    ;
 
-    public RadiusResampler(WindowType type) {
-      this._type = type;
-    }
+    public RadiusResampler(WindowType type) => this._type = type;
 
-    public Kernels.FixedRadiusKernelInfo GetKernelMethodInfo(float radius) {
-      return (Windows.WINDOWS[this._type].WithRadius(radius));
-    }
+    public Kernels.FixedRadiusKernelInfo GetKernelMethodInfo(float radius) => Windows.WINDOWS[this._type].WithRadius(radius);
+
   }
 }

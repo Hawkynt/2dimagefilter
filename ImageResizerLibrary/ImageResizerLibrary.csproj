@@ -54,6 +54,7 @@
     <Compile Include="Framework\System.Drawing.BitmapExtensions.cs" />
     <Compile Include="Framework\System.StringExtensions.cs" />
     <Compile Include="Framework\System.Windows.Media.Imaging.BitmapSourceExtensions.cs" />
+    <Compile Include="Framework\System.Windows.Media.Imaging.WriteableBitmapExtensions.cs" />
     <Compile Include="Imager\cImage.cs" />
     <Compile Include="Imager\Classes\EnumDisplayNameAttribute.cs" />
     <Compile Include="Imager\Classes\FloatImage.cs" />

@@ -21,7 +21,7 @@
 using System.Diagnostics.Contracts;
 using System.Drawing;
 namespace System.Windows.Media.Imaging {
-  public static partial class BitmapSourceExtensions {
+  internal static partial class BitmapSourceExtensions {
     /// <summary>
     /// Converts the given BitmapSource into a Bitmap.
     /// </summary>

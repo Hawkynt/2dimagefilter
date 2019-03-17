@@ -144,15 +144,15 @@ namespace Imager.Classes {
     }
 
 #if NETFX_45
+
     /// <summary>
     /// Converts a given image into a floating point one.
     /// </summary>
     /// <param name="image">The image.</param>
     /// <param name="filterRegion">The filter region.</param>
     /// <returns></returns>
-    public static FloatImage FromImage(cImage image, Rect? filterRegion) {
-      return FromImage(image, filterRegion?.ToRectangle());
-    }
+    public static FloatImage FromImage(cImage image, Rect? filterRegion) => FromImage(image, filterRegion?.ToRectangle());
+
 #endif
 
     /// <summary>

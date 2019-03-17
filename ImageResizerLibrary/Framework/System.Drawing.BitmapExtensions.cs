@@ -24,7 +24,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media.Imaging;
 namespace System.Drawing {
-  public static partial class BitmapExtensions {
+  internal static partial class BitmapExtensions {
 
     #region nested types
 

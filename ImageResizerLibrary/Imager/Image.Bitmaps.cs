@@ -49,7 +49,7 @@ namespace Imager {
 
       // copy 64-bit as long as possible
       while (count > 1) {
-        *(long*)target = *(long*)source;
+        *(long*) target = *(long*) source;
         source += 2;
         target += 2;
         count -= 2;
@@ -60,103 +60,65 @@ namespace Imager {
         *target = *source;
     }
 
-    private static unsafe void _CopyPixels(int x, int y, int width, int height, object sourceData, int sourceStride, int sourceWidth, int sourceHeight, object targetData, int targetStride, int targetWidth, int targetHeight) {
-      // Normalized stride must be dword-sized (4 bytes).
-      // If it is an IntPtr, we know it's a Bitmap (stride is in bytes).
-      // If not, we know it's a cImage (stride is in dwords)
-      var sourceStrideNormalized = sourceStride;
-      var targetStrideNormalized = targetStride;
-      
-      if (sourceData is IntPtr) {
-          sourceStrideNormalized = sourceStride >> 2;
-      }
+    private static unsafe void _CopyPixels(int x, int y, int width, int height, sPixel[] sourceData, int sourceStride, int sourceWidth, int sourceHeight, IntPtr targetData, int targetStride, int targetWidth, int targetHeight) {
+      fixed (sPixel* source = sourceData)
+        _CopyPixels(x, y, width, height, (int*) source, sourceWidth, (int*) targetData.ToPointer(), targetWidth, sourceStride, targetStride >> 2);
+    }
 
-      if (targetData is IntPtr) {
-        targetStrideNormalized = targetStride >> 2;
-      }
+    private static unsafe void _CopyPixels(int x, int y, int width, int height, IntPtr sourceData, int sourceStride, int sourceWidth, int sourceHeight, sPixel[] targetData, int targetStride, int targetWidth, int targetHeight) {
+      fixed (sPixel* target = targetData)
+        _CopyPixels(x, y, width, height, (int*) sourceData.ToPointer(), sourceWidth, (int*) target, targetWidth, sourceStride >> 2, targetStride);
+    }
 
+#if NETFX_45
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    private static unsafe void _CopyPixels(int x, int y, int width, int height, int* source, int sourceWidth, int* target, int targetWidth, int sourceStrideNormalized, int targetStrideNormalized) {
       if (x == 0 && targetWidth == sourceWidth && sourceStrideNormalized == targetStrideNormalized) {
         // We can copy pixel data directly
         Parallel.ForEach(
           source: Partitioner.Create(y, y + height),
           localInit: () => 0,
           body:
-            (range, _, threadStorage) => {
-              var minY = range.Item1;
-              var maxY = range.Item2;
+          (range, _, threadStorage) => {
+            var minY = range.Item1;
+            var maxY = range.Item2;
 
-              if (sourceData is sPixel[]) {
-                fixed(sPixel* source = (sPixel[])sourceData) {
-                  var target = (IntPtr)targetData;
+            _CopyBlock(
+              source: source,
+              sourceOffset: (minY - y) * sourceStrideNormalized,
+              target: target,
+              targetOffset: minY * targetStrideNormalized,
+              count: (maxY - minY) * targetStrideNormalized
+            );
 
-                  _CopyBlock(
-                    source: (int*)source,
-                    sourceOffset: minY * sourceStrideNormalized,
-                    target: (int*)target.ToPointer(),
-                    targetOffset: (minY - y) * targetStrideNormalized,
-                    count: (maxY - minY) * sourceStrideNormalized
-                  );
-                }
-              } else if(targetData is sPixel[]) {
-                fixed(sPixel* target = (sPixel[])targetData) {
-                  var source = (IntPtr)sourceData;
-
-                  _CopyBlock(
-                    source: (int*)source.ToPointer(),
-                    sourceOffset: (minY - y) * sourceStrideNormalized,
-                    target: (int*)target,
-                    targetOffset: minY * targetStrideNormalized,
-                    count: (maxY - minY) * targetStrideNormalized
-                  );
-                }
-              }
-
-              return threadStorage;
-            },
+            return threadStorage;
+          },
           localFinally: _ => { }
         );
       } else {
-        // Unfortunately we should make some extra effor to copy the data
+        // Unfortunately we should make some extra effort to copy the data
         Parallel.ForEach(
           source: Partitioner.Create(y, y + height),
           localInit: () => 0,
           body:
-            (range, _, threadStorage) => {
-              var minY = range.Item1;
-              var maxY = range.Item2;
+          (range, _, threadStorage) => {
+            var minY = range.Item1;
+            var maxY = range.Item2;
 
-              if (sourceData is sPixel[]) {
-                fixed (sPixel* source = (sPixel[])sourceData) {
-                  var target = (IntPtr)targetData;
 
-                  for (int yLine = minY; yLine < maxY; yLine++) {
-                    _CopyBlock(
-                      source: (int*)source,
-                      sourceOffset: yLine * sourceStrideNormalized + x,
-                      target: (int*)target.ToPointer(),
-                      targetOffset: (yLine - y) * targetStrideNormalized,
-                      count: width
-                    );
-                  }
-                }
-              } else if (targetData is sPixel[]) {
-                fixed (sPixel* target = (sPixel[])targetData) {
-                  var source = (IntPtr)sourceData;
+            for (var yLine = minY; yLine < maxY; yLine++) {
+              _CopyBlock(
+                source: source,
+                sourceOffset: (yLine - y) * sourceStrideNormalized + x,
+                target: target,
+                targetOffset: targetStrideNormalized,
+                count: width
+              );
+            }
 
-                  for (int yLine = minY; yLine < maxY; yLine++) {
-                    _CopyBlock(
-                      source: (int*)source.ToPointer(),
-                      sourceOffset: (yLine - y) * sourceStrideNormalized + x,
-                      target: (int*)target,
-                      targetOffset: targetStrideNormalized,
-                      count: width
-                    );
-                  }
-                }
-              }
-
-              return threadStorage;
-            },
+            return threadStorage;
+          },
           localFinally: _ => { }
         );
       }
@@ -172,13 +134,13 @@ namespace Imager {
     /// <returns>
     /// The <see cref="Bitmap"/> instance
     /// </returns>
-    public unsafe Bitmap ToBitmap(int sx, int sy, int width, int height) {
+    public Bitmap ToBitmap(int sx, int sy, int width, int height) {
       var result = new Bitmap(width, height);
-      using(var data=result.LockForWrite()) {
+      using (var data = result.LockForWrite()) {
         var bitmapData = data.BitmapData;
-
         _CopyPixels(sx, sy, width, height, this._imageData, this._width, this._width, this._height, bitmapData.Scan0, bitmapData.Stride, bitmapData.Width, bitmapData.Height);
       }
+
       return result;
     }
 
@@ -193,17 +155,17 @@ namespace Imager {
     /// Initializes a new instance of the <see cref="cImage"/> class from a <see cref="Bitmap"/> instance.
     /// </summary>
     /// <param name="bitmap">The bitmap.</param>
-    public static unsafe cImage FromBitmap(Bitmap bitmap) {
+    public static cImage FromBitmap(Bitmap bitmap) {
       if (bitmap == null)
         return null;
 
       var result = new cImage(bitmap.Width, bitmap.Height);
 
-      using(var data=bitmap.LockForRead()) {
+      using (var data = bitmap.LockForRead()) {
         var bitmapData = data.BitmapData;
-
         _CopyPixels(0, 0, result._width, result._height, bitmapData.Scan0, bitmapData.Stride, bitmapData.Width, bitmapData.Height, result._imageData, result._width, result._width, result._height);
       }
+
       return result;
     }
 
@@ -221,16 +183,10 @@ namespace Imager {
     /// </returns>
     public BitmapSource ToBitmapSource(int sx, int sy, int width, int height) {
       var result = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
+      using (var data = result.LockData())
+        _CopyPixels(sx, sy, width, height, this._imageData, this._width, this._width, this._height, data.Bitmap.BackBuffer, data.Bitmap.BackBufferStride, data.Bitmap.PixelWidth, data.Bitmap.PixelHeight);
 
-      try {
-        result.Lock();
-
-        _CopyPixels(sx, sy, width, height, this._imageData, this._width, this._width, this._height, result.BackBuffer, result.BackBufferStride, result.PixelWidth, result.PixelHeight);
-      } finally {
-        result.Unlock();
-      }
-
-      return (result);
+      return result;
     }
 
     /// <summary>
@@ -265,15 +221,13 @@ namespace Imager {
 
       var writeableBitmap = new WriteableBitmap(finalSource);
 
-      try {
-        writeableBitmap.Lock();
+      using (var data = writeableBitmap.LockData())
+        _CopyPixels(0, 0, result._width, result._height, data.Bitmap.BackBuffer, data.Bitmap.BackBufferStride, data.Bitmap.PixelWidth, data.Bitmap.PixelHeight, result._imageData, result._width, result._width, result._height);
 
-        _CopyPixels(0, 0, result._width, result._height, writeableBitmap.BackBuffer, writeableBitmap.BackBufferStride, writeableBitmap.PixelWidth, writeableBitmap.PixelHeight, result._imageData, result._width, result._width, result._height);
-      } finally {
-        writeableBitmap.Unlock();
-      }
       return result;
     }
+
 #endif
+
   }
 }
