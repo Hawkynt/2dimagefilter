@@ -23,6 +23,9 @@ using System;
 using System.Drawing;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+#if NETFX_45
+using System.Windows;
+#endif
 
 namespace Imager {
   partial class cImage {
@@ -206,5 +209,11 @@ namespace Imager {
 
       return(result);
     }
+
+#if NETFX_45
+    private cImage _RunLoop(Rect? filterRegion, byte scaleX, byte scaleY, Action<PixelWorker<sPixel>> scaler) {
+      return _RunLoop(filterRegion?.ToRectangle(), scaleX, scaleY, scaler);
+    }
+#endif
   }
 }

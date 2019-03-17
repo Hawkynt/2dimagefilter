@@ -23,6 +23,9 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+#if NETFX_45
+using System.Windows;
+#endif
 using Classes;
 using Imager.Filters;
 using Imager.Interface;
@@ -98,6 +101,21 @@ namespace Imager {
 
       return (this._RunLoop(filterRegion, scaleX, scaleY, worker => scaler(worker, scaleX, scaleY, kernel)));
     }
+
+#if NETFX_45
+    /// <summary>
+    /// Applies the NQ pixel scaler.
+    /// </summary>
+    /// <param name="type">The type of scaler to use.</param>
+    /// <param name="mode">The mode.</param>
+    /// <param name="filterRegion">The filter region, if any.</param>
+    /// <returns>
+    /// The rescaled image.
+    /// </returns>
+    public cImage ApplyScaler(NqScalerType type, NqMode mode, Rect? filterRegion = null) {
+      return ApplyScaler(type, mode, filterRegion?.ToRectangle());
+    }
+#endif
 
     /// <summary>
     /// Gets the pixel scaler info.

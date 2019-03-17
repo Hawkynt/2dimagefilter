@@ -24,6 +24,9 @@ using Imager.Interface;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+#if NETFX_45
+using System.Windows;
+#endif
 
 namespace Imager {
   public partial class cImage {
@@ -70,6 +73,20 @@ namespace Imager {
       scaler(this.GetImageData(), result.GetImageData(), this.Width, this.Height, filterRegion.Value.Left, filterRegion.Value.Top, filterRegion.Value.Right, filterRegion.Value.Bottom);
       return (result);
     }
+
+#if NETFX_45
+    /// <summary>
+    /// Applies the XBR pixel scaler.
+    /// </summary>
+    /// <param name="type">The type of scaler to use.</param>
+    /// <param name="filterRegion">The filter region, if any.</param>
+    /// <returns>
+    /// The rescaled image.
+    /// </returns>
+    public cImage ApplyScaler(XbrzScalerType type, Rect? filterRegion = null) {
+      return ApplyScaler(type,  filterRegion?.ToRectangle());
+    }
+#endif
 
     /// <summary>
     /// Gets the pixel scaler info.

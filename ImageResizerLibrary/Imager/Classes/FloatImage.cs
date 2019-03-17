@@ -23,7 +23,9 @@ using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Threading.Tasks;
-
+#if NETFX_45
+using System.Windows;
+#endif
 using Imager.Interface;
 
 namespace Imager.Classes {
@@ -140,6 +142,18 @@ namespace Imager.Classes {
       );
       return (result);
     }
+
+#if NETFX_45
+    /// <summary>
+    /// Converts a given image into a floating point one.
+    /// </summary>
+    /// <param name="image">The image.</param>
+    /// <param name="filterRegion">The filter region.</param>
+    /// <returns></returns>
+    public static FloatImage FromImage(cImage image, Rect? filterRegion) {
+      return FromImage(image, filterRegion?.ToRectangle());
+    }
+#endif
 
     /// <summary>
     /// Converts this floating point image to a normal image.

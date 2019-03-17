@@ -24,6 +24,9 @@ using Imager.Interface;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+#if NETFX_45
+using System.Windows;
+#endif
 
 namespace Imager {
   /// <summary>
@@ -98,6 +101,20 @@ namespace Imager {
 
       return (this._RunLoop(filterRegion, scaleX, scaleY, w => scaler(w)));
     }
+
+#if NETFX_45
+    /// <summary>
+    /// Applies the pixel scaler without any parameters.
+    /// </summary>
+    /// <param name="type">The type of scaler to use.</param>
+    /// <param name="filterRegion">The filter region, if any.</param>
+    /// <returns>
+    /// The rescaled image.
+    /// </returns>
+    public cImage ApplyScaler(PixelScalerType type, Rect? filterRegion = null) {
+      return ApplyScaler(type, filterRegion?.ToRectangle());
+    }
+#endif
 
     /// <summary>
     /// Gets the parameterless pixel scaler info.

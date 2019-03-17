@@ -21,6 +21,7 @@
 
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
+using System.Drawing;
 using Imager;
 using Imager.Classes;
 
@@ -43,7 +44,7 @@ namespace Classes.ImageManipulators {
 
     public cImage Apply(cImage source, int width, int height, float radius, bool useCenteredGrid) {
       Contract.Requires(source != null);
-      return (source.ApplyScaler(this._type, width, height, radius, useCenteredGrid));
+      return (source.ApplyScaler(this._type, width, height, radius, useCenteredGrid, default(Rectangle?)));
     }
 
     public RadiusResampler(WindowType type) {

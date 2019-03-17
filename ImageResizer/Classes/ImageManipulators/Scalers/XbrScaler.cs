@@ -19,7 +19,7 @@
  */
 #endregion
 using System.Diagnostics.Contracts;
-
+using System.Drawing;
 using Imager;
 using Imager.Interface;
 
@@ -33,7 +33,7 @@ namespace Classes.ImageManipulators.Scalers {
     #region Implementation of AScaler
     public override cImage Apply(cImage source) {
       Contract.Requires(source != null);
-      return (source.ApplyScaler(this._type, this._allowAlphaBlending));
+      return (source.ApplyScaler(this._type, this._allowAlphaBlending, default(Rectangle?)));
     }
     public override byte ScaleFactorX => (this._scaleFactorX);
     public override byte ScaleFactorY => (this._scaleFactorY);
