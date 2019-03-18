@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -72,22 +72,18 @@ namespace Classes {
     /// </summary>
     /// <param name="engine">The engine.</param>
     /// <returns>A makro to repeat the script engine actions.</returns>
-    public static string SerializeState(ScriptEngine engine) {
-      Contract.Requires(engine != null);
-      var tasks = engine.Actions;
-      return (string.Join(Environment.NewLine, tasks.Select(_GetCommandTextForAction).Where(l => !string.IsNullOrWhiteSpace(l))));
-    }
+    public static string SerializeState(ScriptEngine engine) 
+      => string.Join(Environment.NewLine, engine.Actions.Select(_GetCommandTextForAction).Where(l => !string.IsNullOrWhiteSpace(l)))
+    ;
 
     /// <summary>
     /// Saves the script engine's tasks to a file.
     /// </summary>
     /// <param name="engine">The engine.</param>
     /// <param name="filename">The filename.</param>
-    public static void SaveToFile(ScriptEngine engine, string filename) {
-      Contract.Requires(engine != null);
-      Contract.Requires(filename != null);
-      File.WriteAllText(filename, SerializeState(engine));
-    }
+    public static void SaveToFile(ScriptEngine engine, string filename) 
+      => File.WriteAllText(filename, SerializeState(engine))
+    ;
 
     /// <summary>
     /// Loads from file.
@@ -126,12 +122,12 @@ namespace Classes {
     private static CLIExitCode _ParseScriptLine(string line, ScriptEngine engine) {
       Contract.Requires(engine != null);
       if (string.IsNullOrWhiteSpace(line))
-        return (CLIExitCode.OK);
+        return CLIExitCode.OK;
 
       var arguments = line.SplitWithQuotes(' ').ToArray();
       var length = arguments.Length;
       if (length < 1)
-        return (CLIExitCode.OK);
+        return CLIExitCode.OK;
 
       var i = 0;
       while (i < length) {
@@ -158,11 +154,11 @@ namespace Classes {
           #region /LOAD
           case LOAD_COMMAND_NAME: {
             if (length - i < 1) {
-              return (CLIExitCode.TooLessArguments);
+              return CLIExitCode.TooLessArguments;
             }
             var filename = arguments[i++];
             if (filename == null) {
-              return (CLIExitCode.FilenameMustNotBeNull);
+              return CLIExitCode.FilenameMustNotBeNull;
             }
 
             engine.AddWithoutExecution(new LoadFileCommand(filename));
@@ -173,25 +169,25 @@ namespace Classes {
           #region /RESIZE
           case RESIZE_COMMAND_NAME: {
             if (length - i < 2) {
-              return (CLIExitCode.TooLessArguments);
+              return CLIExitCode.TooLessArguments;
             }
             var dimensions = arguments[i++].Trim();
             var filterName = arguments[i++].Trim();
 
             var result = _ParseResizeCommand(engine, dimensions, filterName);
             if (result != CLIExitCode.OK)
-              return (result);
+              return result;
             break;
           }
           #endregion
           #region /SAVE
           case SAVE_COMMAND_NAME: {
             if (length - i < 1) {
-              return (CLIExitCode.TooLessArguments);
+              return CLIExitCode.TooLessArguments;
             }
             var filename = arguments[i++];
             if (filename == null) {
-              return (CLIExitCode.FilenameMustNotBeNull);
+              return CLIExitCode.FilenameMustNotBeNull;
             }
 
             engine.AddWithoutExecution(new SaveFileCommand(filename));
@@ -201,11 +197,11 @@ namespace Classes {
           #region /SCRIPT
           case SCRIPT_COMMAND_NAME: {
             if (length - i < 1) {
-              return (CLIExitCode.TooLessArguments);
+              return CLIExitCode.TooLessArguments;
             }
             var filename = arguments[i++];
             if (filename == null) {
-              return (CLIExitCode.FilenameMustNotBeNull);
+              return CLIExitCode.FilenameMustNotBeNull;
             }
 
             LoadFromFile(engine, filename);
@@ -213,11 +209,11 @@ namespace Classes {
           }
           #endregion
           default: {
-            return (CLIExitCode.UnknownParameter);
+            return CLIExitCode.UnknownParameter;
           }
         }
       }
-      return (CLIExitCode.OK);
+      return CLIExitCode.OK;
     }
 
 
@@ -235,7 +231,7 @@ namespace Classes {
 
       var match = _DIMENSIONS_REGEX.Match(dimensions);
       if (!match.Success)
-        return (CLIExitCode.InvalidTargetDimensions);
+        return CLIExitCode.InvalidTargetDimensions;
 
       var width = match.Groups["width"].Value;
       var height = match.Groups["height"].Value;
@@ -246,19 +242,19 @@ namespace Classes {
       word targetPercent = 0;
 
       if (!(string.IsNullOrWhiteSpace(width) || word.TryParse(width, out targetWidth)))
-        return (CLIExitCode.CouldNotParseDimensionsAsWord);
+        return CLIExitCode.CouldNotParseDimensionsAsWord;
 
       if (!(string.IsNullOrWhiteSpace(height) || word.TryParse(height, out targetHeight)))
-        return (CLIExitCode.CouldNotParseDimensionsAsWord);
+        return CLIExitCode.CouldNotParseDimensionsAsWord;
 
       if (!(string.IsNullOrWhiteSpace(percent) || word.TryParse(percent, out targetPercent)))
-        return (CLIExitCode.CouldNotParseDimensionsAsWord);
+        return CLIExitCode.CouldNotParseDimensionsAsWord;
 
       var useAspect = targetWidth == 0 || targetHeight == 0;
 
       var filterMatch = _FILTER_REGEX.Match(filterName);
       if (!filterMatch.Success)
-        return (CLIExitCode.InvalidFilterDescription);
+        return CLIExitCode.InvalidFilterDescription;
 
       var filterParams = filterMatch.Groups["params"].Value;
       filterName = filterMatch.Groups["filter"].Value;
@@ -274,14 +270,12 @@ namespace Classes {
         repeat = 1;
 
         // parse parameterlist, splitted with "," and assigned using "="
-        var parameters = (
-          from p in filterParams.Split(',')
+        var parameters = from p in filterParams.Split(',')
           let idx = p.IndexOf('=')
           where idx > 0
           let name = p.Substring(0, idx).Trim().ToLower()
           let value = p.Substring(idx + 1).Trim()
-          select new KeyValuePair<string, string>(name, value)
-        );
+          select new KeyValuePair<string, string>(name, value);
 
         #region supported parameter handling
         foreach (var pair in parameters) {
@@ -299,7 +293,7 @@ namespace Classes {
               else if (value == TRANSPARENT_BOUNDS_VALUE)
                 vbounds = OutOfBoundsMode.Transparent;
               else
-                return (CLIExitCode.InvalidOutOfBoundsMode);
+                return CLIExitCode.InvalidOutOfBoundsMode;
               break;
             }
             case HBOUNDS_PARAMETER_NAME: {
@@ -315,17 +309,17 @@ namespace Classes {
               else if (value == TRANSPARENT_BOUNDS_VALUE)
                 hbounds = OutOfBoundsMode.Transparent;
               else
-                return (CLIExitCode.InvalidOutOfBoundsMode);
+                return CLIExitCode.InvalidOutOfBoundsMode;
               break;
             }
             case RADIUS_PARAMETER_NAME: {
               if (!float.TryParse(pair.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out radius))
-                return (CLIExitCode.CouldNotParseParameterAsFloat);
+                return CLIExitCode.CouldNotParseParameterAsFloat;
               break;
             }
             case REPEAT_PARAMETER_NAME: {
               if (!byte.TryParse(pair.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out repeat))
-                return (CLIExitCode.CouldNotParseParameterAsByte);
+                return CLIExitCode.CouldNotParseParameterAsByte;
               break;
             }
             case CENTERED_GRID_PARAMETER_NAME: {
@@ -337,7 +331,7 @@ namespace Classes {
               break;
             }
             default: {
-              return (CLIExitCode.UnknownParameter);
+              return CLIExitCode.UnknownParameter;
             }
           }
         }
@@ -353,10 +347,10 @@ namespace Classes {
       ;
 
       if (manipulator == null)
-        return (CLIExitCode.UnknownFilter);
+        return CLIExitCode.UnknownFilter;
 
       engine.AddWithoutExecution(new ResizeCommand(true, manipulator, targetWidth, targetHeight, targetPercent, useAspect, hbounds, vbounds, repeat, useThresholds, useCenteredGrid, radius));
-      return (CLIExitCode.OK);
+      return CLIExitCode.OK;
     }
 
     /// <summary>
@@ -366,48 +360,45 @@ namespace Classes {
     /// <returns>The command text needed to reproduce the action.</returns>
     private static string _GetCommandTextForAction(IScriptAction action) {
       Contract.Requires(action != null);
-      var loadAction = action as LoadFileCommand;
-      if (loadAction != null)
-        return (string.Format(@"{0} ""{1}""", LOAD_COMMAND_NAME, loadAction.FileName));
+      switch (action) {
+        case LoadFileCommand loadAction:
+          return string.Format(@"{0} ""{1}""", LOAD_COMMAND_NAME, loadAction.FileName);
+        case SaveFileCommand saveAction:
+          return string.Format(@"{0} ""{1}""", SAVE_COMMAND_NAME, saveAction.FileName);
+        case ResizeCommand resizeAction: {
+          var manipulator = resizeAction.Manipulator;
+          string dimensions;
+          if (manipulator.SupportsWidth && manipulator.SupportsHeight)
+            dimensions = resizeAction.Percentage > 0 ? string.Format("{0}%", resizeAction.Percentage) : string.Format("{0}x{1}", resizeAction.Width, resizeAction.Height);
+          else if (manipulator.SupportsWidth)
+            dimensions = string.Format("w{0}", resizeAction.Width);
+          else if (manipulator.SupportsHeight)
+            dimensions = string.Format("h{0}", resizeAction.Height);
+          else
+            dimensions = "auto";
 
-      var saveAction = action as SaveFileCommand;
-      if (saveAction != null)
-        return (string.Format(@"{0} ""{1}""", SAVE_COMMAND_NAME, saveAction.FileName));
+          var parameters = new List<string> {
+            HBOUNDS_PARAMETER_NAME+"="+_ConvertOutOfBoundsModeToText(resizeAction.HorizontalBph),
+            VBOUNDS_PARAMETER_NAME+"="+_ConvertOutOfBoundsModeToText(resizeAction.VerticalBph),
+          };
 
-      var resizeAction = action as ResizeCommand;
-      if (resizeAction != null) {
-        var manipulator = resizeAction.Manipulator;
-        string dimensions;
-        if (manipulator.SupportsWidth && manipulator.SupportsHeight)
-          dimensions = resizeAction.Percentage > 0 ? string.Format("{0}%", resizeAction.Percentage) : string.Format("{0}x{1}", resizeAction.Width, resizeAction.Height);
-        else if (manipulator.SupportsWidth)
-          dimensions = string.Format("w{0}", resizeAction.Width);
-        else if (manipulator.SupportsHeight)
-          dimensions = string.Format("h{0}", resizeAction.Height);
-        else
-          dimensions = "auto";
+          if (manipulator.SupportsRepetitionCount && resizeAction.Count > 1)
+            parameters.Add(REPEAT_PARAMETER_NAME + "=" + resizeAction.Count.ToString(CultureInfo.InvariantCulture));
 
-        var parameters = new List<string> {
-          HBOUNDS_PARAMETER_NAME+"="+_ConvertOutOfBoundsModeToText(resizeAction.HorizontalBph),
-          VBOUNDS_PARAMETER_NAME+"="+_ConvertOutOfBoundsModeToText(resizeAction.VerticalBph),
-        };
+          if (manipulator.SupportsThresholds)
+            parameters.Add(THRESHOLDS_PARAMETER_NAME + "=" + (resizeAction.UseThresholds ? "1" : "0"));
 
-        if (manipulator.SupportsRepetitionCount && resizeAction.Count > 1)
-          parameters.Add(REPEAT_PARAMETER_NAME + "=" + resizeAction.Count.ToString(CultureInfo.InvariantCulture));
+          if (manipulator.SupportsGridCentering)
+            parameters.Add(CENTERED_GRID_PARAMETER_NAME + "=" + (resizeAction.UseCenteredGrid ? "1" : "0"));
 
-        if (manipulator.SupportsThresholds)
-          parameters.Add(THRESHOLDS_PARAMETER_NAME + "=" + (resizeAction.UseThresholds ? "1" : "0"));
+          if (manipulator.SupportsRadius)
+            parameters.Add(RADIUS_PARAMETER_NAME + "=" + resizeAction.Radius.ToString(CultureInfo.InvariantCulture));
 
-        if (manipulator.SupportsGridCentering)
-          parameters.Add(CENTERED_GRID_PARAMETER_NAME + "=" + (resizeAction.UseCenteredGrid ? "1" : "0"));
-
-        if (manipulator.SupportsRadius)
-          parameters.Add(RADIUS_PARAMETER_NAME + "=" + resizeAction.Radius.ToString(CultureInfo.InvariantCulture));
-
-        return (string.Format(@"{0} {1} ""{2}({3})""", RESIZE_COMMAND_NAME, dimensions, SupportedManipulators.MANIPULATORS.First(m => m.Value == manipulator).Key, string.Join(", ", parameters)));
+          return string.Format(@"{0} {1} ""{2}({3})""", RESIZE_COMMAND_NAME, dimensions, SupportedManipulators.MANIPULATORS.First(m => m.Value == manipulator).Key, string.Join(", ", parameters));
+        }
+        default:
+          return null;
       }
-
-      return (null);
     }
 
     /// <summary>
@@ -416,17 +407,20 @@ namespace Classes {
     /// <param name="mode">The mode.</param>
     /// <returns></returns>
     private static string _ConvertOutOfBoundsModeToText(OutOfBoundsMode mode) {
-      if (mode == OutOfBoundsMode.ConstantExtension)
-        return (CONST_BOUNDS_VALUE);
-      if (mode == OutOfBoundsMode.HalfSampleSymmetric)
-        return (HALF_BOUNDS_VALUE);
-      if (mode == OutOfBoundsMode.WholeSampleSymmetric)
-        return (WHOLE_BOUNDS_VALUE);
-      if (mode == OutOfBoundsMode.WrapAround)
-        return (WRAP_BOUNDS_VALUE);
-      if (mode == OutOfBoundsMode.Transparent)
-        return (TRANSPARENT_BOUNDS_VALUE);
-      throw new NotImplementedException();
+      switch (mode) {
+        case OutOfBoundsMode.ConstantExtension:
+          return CONST_BOUNDS_VALUE;
+        case OutOfBoundsMode.HalfSampleSymmetric:
+          return HALF_BOUNDS_VALUE;
+        case OutOfBoundsMode.WholeSampleSymmetric:
+          return WHOLE_BOUNDS_VALUE;
+        case OutOfBoundsMode.WrapAround:
+          return WRAP_BOUNDS_VALUE;
+        case OutOfBoundsMode.Transparent:
+          return TRANSPARENT_BOUNDS_VALUE;
+        default:
+          throw new NotImplementedException();
+      }
     }
 
   }

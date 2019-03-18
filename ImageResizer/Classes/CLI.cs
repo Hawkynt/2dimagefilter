@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -43,7 +44,7 @@ namespace Classes {
     /// <param name="arguments">The arguments.</param>
     public static CLIExitCode ParseCommandLineArguments(string[] arguments) {
       if (arguments == null || arguments.Length < 1)
-        return (CLIExitCode.OK);
+        return CLIExitCode.OK;
 
       var engine = new ScriptEngine();
       var line = string.Join(" ", arguments.Select(a => string.Format(@"""{0}""", a)));
@@ -56,7 +57,7 @@ namespace Classes {
         ScriptSerializer.LoadFromString(engine, line);
       } catch (ScriptSerializerException e) {
         _ShowHelp();
-        return (e.ErrorType);
+        return e.ErrorType;
       }
 
       // execute script
@@ -64,62 +65,55 @@ namespace Classes {
         engine.RepeatActions(_PreAction, _PostAction);
       } catch (Exception e) {
         Console.WriteLine(e.Message);
-        return (CLIExitCode.RuntimeError);
+        return CLIExitCode.RuntimeError;
       }
 
-      return (CLIExitCode.OK);
+      return CLIExitCode.OK;
     }
 
     private static void _PreAction(ScriptEngine engine, IScriptAction command) {
-      var loadCommand = command as LoadFileCommand;
-      if (loadCommand != null) {
-        Console.WriteLine("Loading from file " + loadCommand.FileName);
-        return;
+      switch (command) {
+        case LoadFileCommand loadCommand:
+          Console.WriteLine("Loading from file " + loadCommand.FileName);
+          return;
+        case SaveFileCommand saveCommand:
+          Console.WriteLine("Saving to file " + saveCommand.FileName);
+          break;
+        case ResizeCommand resizeCommand:
+          Console.WriteLine("Applying filter     : {0}", SupportedManipulators.MANIPULATORS.First(k => k.Value == resizeCommand.Manipulator).Key);
+          Console.WriteLine("  Target percentage : {0}", resizeCommand.Percentage == 0 ? "auto" : resizeCommand.Percentage + "%");
+          Console.WriteLine("  Target width      : {0}", resizeCommand.Width == 0 ? "auto" : resizeCommand.Width + "pixels");
+          Console.WriteLine("  Target height     : {0}", resizeCommand.Height == 0 ? "auto" : resizeCommand.Height + "pixels");
+          Console.WriteLine("  Hori. BPH         : {0}", resizeCommand.HorizontalBph);
+          Console.WriteLine("  Vert. BPH         : {0}", resizeCommand.VerticalBph);
+          Console.WriteLine("  Use Thresholds    : {0}", resizeCommand.UseThresholds);
+          Console.WriteLine("  Centered Grid     : {0}", resizeCommand.UseCenteredGrid);
+          Console.WriteLine("  Radius            : {0}", resizeCommand.Radius);
+          Console.WriteLine("  Repeat            : {0} times", resizeCommand.Count);
+          break;
       }
-
-      var saveCommand = command as SaveFileCommand;
-      if (saveCommand != null) {
-        Console.WriteLine("Saving to file " + saveCommand.FileName);
-      }
-
-      var resizeCommand = command as ResizeCommand;
-      if (resizeCommand != null) {
-        Console.WriteLine("Applying filter     : {0}", SupportedManipulators.MANIPULATORS.First(k => k.Value == resizeCommand.Manipulator).Key);
-        Console.WriteLine("  Target percentage : {0}", (resizeCommand.Percentage == 0 ? "auto" : resizeCommand.Percentage + "%"));
-        Console.WriteLine("  Target width      : {0}", (resizeCommand.Width == 0 ? "auto" : resizeCommand.Width + "pixels"));
-        Console.WriteLine("  Target height     : {0}", (resizeCommand.Height == 0 ? "auto" : resizeCommand.Height + "pixels"));
-        Console.WriteLine("  Hori. BPH         : {0}", resizeCommand.HorizontalBph);
-        Console.WriteLine("  Vert. BPH         : {0}", resizeCommand.VerticalBph);
-        Console.WriteLine("  Use Thresholds    : {0}", resizeCommand.UseThresholds);
-        Console.WriteLine("  Centered Grid     : {0}", resizeCommand.UseCenteredGrid);
-        Console.WriteLine("  Radius            : {0}", resizeCommand.Radius);
-        Console.WriteLine("  Repeat            : {0} times", resizeCommand.Count);
-      }
-
     }
 
     private static void _PostAction(ScriptEngine engine, IScriptAction command) {
-
-      var loadCommand = command as LoadFileCommand;
-      if (loadCommand != null) {
-        Console.WriteLine("  File   : {0} Bytes", new FileInfo(loadCommand.FileName).Length);
-        Console.WriteLine("  Width  : {0} Pixel", engine.SourceImage.Width);
-        Console.WriteLine("  Height : {0} Pixel", engine.SourceImage.Height);
-        Console.WriteLine("  Size   : {0:0.00} MegaPixel", (engine.SourceImage.Width * engine.SourceImage.Height / 1000000.0));
-        Console.WriteLine("  Type   : {0}", ImageCodecInfo.GetImageDecoders().First(d => d.FormatID == engine.GdiSource.RawFormat.Guid).FormatDescription);
-        Console.WriteLine("  Format : {0}", engine.GdiSource.PixelFormat);
-        return;
-      }
-
-      var saveCommand = command as SaveFileCommand;
-      if (saveCommand != null) {
-        var reloadedImage = Image.FromFile(saveCommand.FileName);
-        Console.WriteLine("  File   : {0} Bytes", new FileInfo(saveCommand.FileName).Length);
-        Console.WriteLine("  Width  : {0} Pixel", reloadedImage.Width);
-        Console.WriteLine("  Height : {0} Pixel", reloadedImage.Height);
-        Console.WriteLine("  Size   : {0:0.00} MegaPixel", (reloadedImage.Width * reloadedImage.Height / 1000000.0));
-        Console.WriteLine("  Type   : {0}", ImageCodecInfo.GetImageDecoders().First(d => d.FormatID == reloadedImage.RawFormat.Guid).FormatDescription);
-        Console.WriteLine("  Format : {0}", reloadedImage.PixelFormat);
+      switch (command) {
+        case LoadFileCommand loadCommand:
+          Console.WriteLine("  File   : {0} Bytes", new FileInfo(loadCommand.FileName).Length);
+          Console.WriteLine("  Width  : {0} Pixel", engine.SourceImage.Width);
+          Console.WriteLine("  Height : {0} Pixel", engine.SourceImage.Height);
+          Console.WriteLine("  Size   : {0:0.00} MegaPixel", engine.SourceImage.Width * engine.SourceImage.Height / 1000000.0);
+          Console.WriteLine("  Type   : {0}", ImageCodecInfo.GetImageDecoders().First(d => d.FormatID == engine.GdiSource.RawFormat.Guid).FormatDescription);
+          Console.WriteLine("  Format : {0}", engine.GdiSource.PixelFormat);
+          return;
+        case SaveFileCommand saveCommand: {
+          var reloadedImage = Image.FromFile(saveCommand.FileName);
+          Console.WriteLine("  File   : {0} Bytes", new FileInfo(saveCommand.FileName).Length);
+          Console.WriteLine("  Width  : {0} Pixel", reloadedImage.Width);
+          Console.WriteLine("  Height : {0} Pixel", reloadedImage.Height);
+          Console.WriteLine("  Size   : {0:0.00} MegaPixel", reloadedImage.Width * reloadedImage.Height / 1000000.0);
+          Console.WriteLine("  Type   : {0}", ImageCodecInfo.GetImageDecoders().First(d => d.FormatID == reloadedImage.RawFormat.Guid).FormatDescription);
+          Console.WriteLine("  Format : {0}", reloadedImage.PixelFormat);
+          break;
+        }
       }
     }
 
@@ -168,7 +162,7 @@ namespace Classes {
     /// <returns>A text representing the supported parameters.</returns>
     private static string _GetSupportedParameterStringFromManipulator(IImageManipulator manipulator) {
       if (manipulator == null)
-        return (null);
+        return null;
 
       var result = new List<string>();
 
@@ -190,7 +184,7 @@ namespace Classes {
       if (manipulator.SupportsGridCentering)
         result.Add(ScriptSerializer.CENTERED_GRID_PARAMETER_NAME);
 
-      return (result.Count < 1 ? null : " (" + string.Join(", ", result) + ")");
+      return result.Count < 1 ? null : " (" + string.Join(", ", result) + ")";
     }
 
     /// <summary>
@@ -203,38 +197,45 @@ namespace Classes {
       Contract.Requires(filename != null);
 
       if (image == null)
-        return (CLIExitCode.NothingToSave);
+        return CLIExitCode.NothingToSave;
 
-      var extension = Path.GetExtension(filename);
-      if (extension != null)
-        extension = extension.ToUpperInvariant();
+      var extension = Path.GetExtension(filename)?.ToUpperInvariant();
 
       try {
-        if (extension == ".JPG" || extension == ".JPEG") {
-          var codecs = ImageCodecInfo.GetImageEncoders();
-          codecs = codecs.Where(info => info != null && info.MimeType == "image/jpeg").ToArray();
-          if (codecs.Length <= 0) {
-            return (CLIExitCode.JpegNotSupportedOnThisPlatform);
-          }
-          Contract.Assume(Encoder.Quality != null);
-          image.Save(filename, codecs[0], new EncoderParameters {
-            Param = new[] {
-              new EncoderParameter(Encoder.Quality, (long)100)
+        switch (extension) {
+          case ".JPG":
+          case ".JPEG": {
+            var codecs = ImageCodecInfo.GetImageEncoders();
+            codecs = codecs.Where(info => info != null && info.MimeType == "image/jpeg").ToArray();
+            if (codecs.Length <= 0) {
+              return CLIExitCode.JpegNotSupportedOnThisPlatform;
             }
-          });
-        } else if (extension == ".BMP")
-          image.Save(filename, ImageFormat.Bmp);
-        else if (extension == ".GIF")
-          image.Save(filename, ImageFormat.Gif);
-        else if (extension == ".TIF")
-          image.Save(filename, ImageFormat.Tiff);
-        else
-          image.Save(filename, ImageFormat.Png);
+            Contract.Assume(Encoder.Quality != null);
+            image.Save(filename, codecs[0], new EncoderParameters {
+              Param = new[] {
+                new EncoderParameter(Encoder.Quality, (long)100)
+              }
+            });
+            break;
+          }
+          case ".BMP":
+            image.Save(filename, ImageFormat.Bmp);
+            break;
+          case ".GIF":
+            image.Save(filename, ImageFormat.Gif);
+            break;
+          case ".TIF":
+            image.Save(filename, ImageFormat.Tiff);
+            break;
+          default:
+            image.Save(filename, ImageFormat.Png);
+            break;
+        }
       } catch (Exception) {
-        return (CLIExitCode.ExceptionDuringImageWrite);
+        return CLIExitCode.ExceptionDuringImageWrite;
       }
 
-      return (CLIExitCode.OK);
+      return CLIExitCode.OK;
     }
 
   }

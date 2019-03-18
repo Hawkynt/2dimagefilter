@@ -1,14 +1,98 @@
-﻿
+﻿#region (c)2008-2019 Hawkynt
+/*
+ *  cImage 
+ *  Image filtering library 
+    Copyright (C) 2008-2019 Hawkynt
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#endregion
 using System;
-using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Diagnostics.Contracts;
 using Imager.Interface;
 
 namespace Imager {
+
+
   /// <summary>
   /// This class gets us fast access to a small window of pixels in the source and target images.
   /// </summary>
-  internal class PixelWorker<TColorStorage> {
+  public interface IPixelWorker<TColorStorage> {
+    int SourceX();
+    int SourceY();
+    int SourceHeight();
+
+    void IncrementX(int targetXIncrementor);
+
+    #region access source points
+    TColorStorage SourceM2M2();
+    TColorStorage SourceM1M2();
+    TColorStorage SourceP0M2();
+    TColorStorage SourceP1M2();
+    TColorStorage SourceP2M2();
+    TColorStorage SourceM2M1();
+    TColorStorage SourceM1M1();
+    TColorStorage SourceP0M1();
+    TColorStorage SourceP1M1();
+    TColorStorage SourceP2M1();
+    TColorStorage SourceM2P0();
+    TColorStorage SourceM1P0();
+    TColorStorage SourceP0P0();
+    TColorStorage SourceP1P0();
+    TColorStorage SourceP2P0();
+    TColorStorage SourceM2P1();
+    TColorStorage SourceM1P1();
+    TColorStorage SourceP0P1();
+    TColorStorage SourceP1P1();
+    TColorStorage SourceP2P1();
+    TColorStorage SourceM2P2();
+    TColorStorage SourceM1P2();
+    TColorStorage SourceP0P2();
+    TColorStorage SourceP1P2();
+    TColorStorage SourceP2P2();
+    #endregion
+
+    #region access target points
+    void TargetP0M1(TColorStorage value);
+    void TargetP1M1(TColorStorage value);
+    void TargetP2M1(TColorStorage value);
+    void TargetP3M1(TColorStorage value);
+    void TargetP0P0(TColorStorage value);
+    void TargetP1P0(TColorStorage value);
+    void TargetP2P0(TColorStorage value);
+    void TargetP3P0(TColorStorage value);
+    void TargetP0P1(TColorStorage value);
+    void TargetP1P1(TColorStorage value);
+    void TargetP2P1(TColorStorage value);
+    void TargetP3P1(TColorStorage value);
+    void TargetP0P2(TColorStorage value);
+    void TargetP1P2(TColorStorage value);
+    void TargetP2P2(TColorStorage value);
+    void TargetP3P2(TColorStorage value);
+    void TargetP0P3(TColorStorage value);
+    void TargetP1P3(TColorStorage value);
+    void TargetP2P3(TColorStorage value);
+    void TargetP3P3(TColorStorage value);
+    #endregion
+
+  }
+
+  /// <summary>
+  /// This class gets us fast access to a small window of pixels in the source and target images.
+  /// </summary>
+  internal class PixelWorker<TColorStorage>:IPixelWorker<TColorStorage> {
     private readonly Func<int, TColorStorage> _sourceImageGetter;
     private int _sourceX;
     private readonly int _sourceY;
@@ -86,8 +170,13 @@ namespace Imager {
       this._targetOffsetP3Y = targetStride *  3;          // for nx4 filters
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int SourceX() => this._sourceX;
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int SourceY() => this._sourceY;
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int SourceHeight() => this._sourceHeight;
 
     public void IncrementX(int targetXIncrementor){
@@ -102,141 +191,186 @@ namespace Imager {
     }
 
     #region access source points
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceM2M2()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetM2X() + this._sourceOffsetM2Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceM1M2()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetM1X() + this._sourceOffsetM2Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP0M2()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetM2Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP1M2()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetP1X() + this._sourceOffsetM2Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP2M2()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetP2X() + this._sourceOffsetM2Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceM2M1()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetM2X() + this._sourceOffsetM1Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceM1M1()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetM1X() + this._sourceOffsetM1Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP0M1()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetM1Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP1M1()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetP1X() + this._sourceOffsetM1Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP2M1()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetP2X() + this._sourceOffsetM1Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceM2P0()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetM2X())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceM1P0()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetM1X())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP0P0()
       => this._sourceImageGetter(this._sourceOffset)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP1P0()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetP1X())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP2P0()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetP2X())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceM2P1()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetM2X() + this._sourceOffsetP1Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceM1P1()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetM1X() + this._sourceOffsetP1Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP0P1()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetP1Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP1P1()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetP1X() + this._sourceOffsetP1Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP2P1()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetP2X() + this._sourceOffsetP1Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceM2P2()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetM2X() + this._sourceOffsetP2Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceM1P2()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetM1X() + this._sourceOffsetP2Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP0P2()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetP2Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP1P2()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetP1X() + this._sourceOffsetP2Y())
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage SourceP2P2()
       => this._sourceImageGetter(this._sourceOffset + this._sourceOffsetP2X() + this._sourceOffsetP2Y())
       ;
     #endregion
 
     #region access target points
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP0M1(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + this._targetOffsetM1Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP1M1(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 1 + this._targetOffsetM1Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP2M1(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 2 + this._targetOffsetM1Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP3M1(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 3 + this._targetOffsetM1Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP0P0(TColorStorage value)
       => this._targetImageSetter(this._targetOffset, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP1P0(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 1, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP2P0(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 2, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP3P0(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 3, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP0P1(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + this._targetOffsetP1Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP1P1(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 1 + this._targetOffsetP1Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP2P1(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 2 + this._targetOffsetP1Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP3P1(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 3 + this._targetOffsetP1Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP0P2(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + this._targetOffsetP2Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP1P2(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 1 + this._targetOffsetP2Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP2P2(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 2 + this._targetOffsetP2Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP3P2(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 3 + this._targetOffsetP2Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP0P3(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + this._targetOffsetP3Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP1P3(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 1 + this._targetOffsetP3Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP2P3(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 2 + this._targetOffsetP3Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP3P3(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 3 + this._targetOffsetP3Y, value)
       ;

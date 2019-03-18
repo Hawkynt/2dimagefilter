@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -35,8 +36,8 @@ namespace Classes {
     /// <returns>All values.</returns>
     public static IEnumerable<TEnumeration> GetEnumValues<TEnumeration>() where TEnumeration : struct {
       Contract.Requires(typeof(TEnumeration).IsEnum, "Only enums supported");
-      return (from TEnumeration i in Enum.GetValues(typeof(TEnumeration))
-              select i);
+      return from TEnumeration i in Enum.GetValues(typeof(TEnumeration))
+        select i;
     }
 
     /// <summary>
@@ -50,7 +51,7 @@ namespace Classes {
       var valueName = Enum.GetName(typeof(TEnumeration), value);
       var fieldInfo = typeof(TEnumeration).GetMember(valueName)[0];
       var descriptionAttribute = (DisplayNameAttribute)fieldInfo.GetCustomAttributes(typeof(DisplayNameAttribute), false).FirstOrDefault();
-      return (descriptionAttribute == null ? valueName : descriptionAttribute.DisplayName);
+      return descriptionAttribute == null ? valueName : descriptionAttribute.DisplayName;
     }
 
     /// <summary>
@@ -99,7 +100,7 @@ namespace Classes {
 
       // when there is no dot in the type name, just return the name
       if (lastDot < 0)
-        return (name);
+        return name;
 
       // otherwise return the last part of the name
       return name.Substring(lastDot + 1);

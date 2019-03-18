@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -29,13 +30,14 @@ namespace ImageResizer.UserControls {
   /// </summary>
   [DefaultEvent("Click")]
   public partial class ImageWithDetails : UserControl {
+
     #region props
 
     public new event EventHandler Click;
 
     [DefaultValue(PictureBoxSizeMode.Normal)]
     public PictureBoxSizeMode SizeMode {
-      get { return (this.pbImage.SizeMode); }
+      get => this.pbImage.SizeMode;
       set {
         this.pbImage.SizeMode = value;
         this._CenterPictureBox();
@@ -44,7 +46,7 @@ namespace ImageResizer.UserControls {
 
     [DefaultValue(null)]
     public Image Image {
-      get { return (this.pbImage.Image); }
+      get => this.pbImage.Image;
       set {
         this.pbImage.Image = value;
         this._CenterPictureBox();
@@ -62,18 +64,11 @@ namespace ImageResizer.UserControls {
     #endregion
 
     public ImageWithDetails() {
-      InitializeComponent();
+      this.InitializeComponent();
     }
 
-    protected void _EventWrapper(object sender, EventArgs args) {
-      this.OnClick(args);
-    }
-
-    protected new void OnClick(EventArgs e) {
-      var handler = this.Click;
-      if (handler != null)
-        handler(this, e);
-    }
+    protected void _EventWrapper(object sender, EventArgs args) => this.OnClick(args);
+    protected new void OnClick(EventArgs e) => this.Click?.Invoke(this, e);
 
     private void _CenterPictureBox() {
       var pictureBox = this.pbImage;
@@ -101,9 +96,6 @@ namespace ImageResizer.UserControls {
       panel.AutoScroll = image.Width > panel.Width || image.Height > panel.Height;
     }
 
-    private void pnImage_SizeChanged(object sender, EventArgs e) {
-      this._CenterPictureBox();
-    }
-
+    private void pnImage_SizeChanged(object sender, EventArgs e) => this._CenterPictureBox();
   }
 }

@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -73,8 +73,8 @@ namespace Imager {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static byte _Max(byte a, byte b, byte c) {
-      var d = (a > b ? a : b);
-      return (d > c ? d : c);
+      var d = a > b ? a : b;
+      return d > c ? d : c;
     }
 
     /// <summary>
@@ -88,8 +88,8 @@ namespace Imager {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static byte _Min(byte a, byte b, byte c) {
-      var d = (a < b ? a : b);
-      return (d < c ? d : c);
+      var d = a < b ? a : b;
+      return d < c ? d : c;
     }
 
     /// <summary>
@@ -252,10 +252,10 @@ namespace Imager {
         var factorG = byte.MaxValue / baseG;
         var factorB = byte.MaxValue / baseB;
         var useFactor = Math.Min(factorR, Math.Min(factorG, factorB));
-        baseR = (float)(Math.Floor((baseR * useFactor) / ColorExtractionFactor) * ColorExtractionFactor);
-        baseG = (float)(Math.Floor((baseG * useFactor) / ColorExtractionFactor) * ColorExtractionFactor);
-        baseB = (float)(Math.Floor((baseB * useFactor) / ColorExtractionFactor) * ColorExtractionFactor);
-        return (new sPixel((byte)baseR, (byte)baseG, (byte)baseB, this.Alpha));
+        baseR = (float)(Math.Floor(baseR * useFactor / ColorExtractionFactor) * ColorExtractionFactor);
+        baseG = (float)(Math.Floor(baseG * useFactor / ColorExtractionFactor) * ColorExtractionFactor);
+        baseB = (float)(Math.Floor(baseB * useFactor / ColorExtractionFactor) * ColorExtractionFactor);
+        return new sPixel((byte)baseR, (byte)baseG, (byte)baseB, this.Alpha);
       }
     }
 
@@ -266,7 +266,7 @@ namespace Imager {
         var blue = this.Blue;
         var color = this.ExtractColors;
         return
-          (new sPixel((byte)(color.Red - red), (byte)(color.Green - green), (byte)(color.Blue - blue), this.Alpha));
+          new sPixel((byte)(color.Red - red), (byte)(color.Green - green), (byte)(color.Blue - blue), this.Alpha);
       }
     }
 
@@ -303,11 +303,11 @@ namespace Imager {
     public byte u {
       get {
         return
-          (_CACHE_ALTERNATE_U.GetOrAdd(
+          _CACHE_ALTERNATE_U.GetOrAdd(
             this._argbBytes & _RGB_MASK,
             rgbBytes =>
               _TopClamp(
-                (_GetRed(rgbBytes) * 500000 + _GetGreen(rgbBytes) * 418688 + _GetBlue(rgbBytes) * 081312) / 1000000)));
+                (_GetRed(rgbBytes) * 500000 + _GetGreen(rgbBytes) * 418688 + _GetBlue(rgbBytes) * 081312) / 1000000));
       }
     }
 
@@ -318,11 +318,11 @@ namespace Imager {
     public byte v {
       get {
         return
-          (_CACHE_ALTERNATE_V.GetOrAdd(
+          _CACHE_ALTERNATE_V.GetOrAdd(
             this._argbBytes & _RGB_MASK,
             rgbBytes =>
               _TopClamp(
-                (_GetRed(rgbBytes) * 168736 + _GetGreen(rgbBytes) * 331264 + _GetBlue(rgbBytes) * 500000) / 1000000)));
+                (_GetRed(rgbBytes) * 168736 + _GetGreen(rgbBytes) * 331264 + _GetBlue(rgbBytes) * 500000) / 1000000));
       }
     }
 
@@ -333,9 +333,9 @@ namespace Imager {
     public byte Brightness {
       get {
         return
-          (_CACHE_BRIGHTNESS.GetOrAdd(
+          _CACHE_BRIGHTNESS.GetOrAdd(
             this._argbBytes & _RGB_MASK,
-            dwordC => (byte)((_GetRed(dwordC) * 3 + _GetGreen(dwordC) * 3 + _GetBlue(dwordC) * 2) >> 3)));
+            dwordC => (byte)((_GetRed(dwordC) * 3 + _GetGreen(dwordC) * 3 + _GetBlue(dwordC) * 2) >> 3));
       }
     }
 
@@ -345,7 +345,7 @@ namespace Imager {
     /// <value>The hue.</value>
     public byte Hue {
       get {
-        return (_CACHE_HUE.GetOrAdd(
+        return _CACHE_HUE.GetOrAdd(
           this._argbBytes & _RGB_MASK,
           rgbBytes => {
             float hue;
@@ -370,8 +370,8 @@ namespace Imager {
             while (hue >= 360)
               hue -= 360;
             const float conversionFactor = 256f / 360f;
-            return ((byte)(hue * conversionFactor));
-          }));
+            return (byte)(hue * conversionFactor);
+          });
       }
     }
 
@@ -427,12 +427,12 @@ namespace Imager {
     #region ctor
 
     public static sPixel FromFloat(float red, float green, float blue, float alpha = 1f) {
-      return (new sPixel(
+      return new sPixel(
         _FullClamp(red * 255 + .5f),
         _FullClamp(green * 255 + .5f),
         _FullClamp(blue * 255 + .5f),
         _FullClamp(alpha * 255 + .5f)
-        ));
+      );
     }
 
     /// <summary>
@@ -455,11 +455,11 @@ namespace Imager {
     /// <returns></returns>
     public static sPixel FromRGBA(int red, int green, int blue, int alpha = byte.MaxValue) {
       return
-        (new sPixel(
+        new sPixel(
           _FullClamp((float)red),
           _FullClamp((float)green),
           _FullClamp((float)blue),
-          _FullClamp((float)alpha)));
+          _FullClamp((float)alpha));
     }
 
     /// <summary>
@@ -563,7 +563,7 @@ namespace Imager {
       if (byte.MaxValue < (alpha = pixel.Alpha + pixel2.Alpha))
         alpha = byte.MaxValue;
 
-      return (new sPixel((byte)red, (byte)green, (byte)blue, (byte)alpha));
+      return new sPixel((byte)red, (byte)green, (byte)blue, (byte)alpha);
     }
 
     /// <summary>
@@ -583,7 +583,7 @@ namespace Imager {
       if (byte.MinValue > (alpha = pixel1.Alpha - pixel2.Alpha))
         alpha = byte.MinValue;
 
-      return (new sPixel((byte)red, (byte)green, (byte)blue, (byte)alpha));
+      return new sPixel((byte)red, (byte)green, (byte)blue, (byte)alpha);
     }
 
     /// <summary>
@@ -608,7 +608,7 @@ namespace Imager {
       if (byte.MaxValue < (blue = pixel.Blue + grey))
         blue = byte.MaxValue;
 
-      return (new sPixel((byte)red, (byte)green, (byte)blue, pixel.Alpha));
+      return new sPixel((byte)red, (byte)green, (byte)blue, pixel.Alpha);
     }
 
     /// <summary>
@@ -621,7 +621,7 @@ namespace Imager {
       var red = _FullClamp(pixel.Red * gamma);
       var green = _FullClamp(pixel.Green * gamma);
       var blue = _FullClamp(pixel.Blue * gamma);
-      return (new sPixel(red, green, blue, pixel.Alpha));
+      return new sPixel(red, green, blue, pixel.Alpha);
     }
 
     /// <summary>
@@ -639,7 +639,7 @@ namespace Imager {
       if (byte.MinValue > (blue = grey - pixel.Blue))
         blue = byte.MinValue;
 
-      return (new sPixel((byte)red, (byte)green, (byte)blue, pixel.Alpha));
+      return new sPixel((byte)red, (byte)green, (byte)blue, pixel.Alpha);
     }
 
     /// <summary>
@@ -657,7 +657,7 @@ namespace Imager {
       if (byte.MinValue > (blue = pixel.Blue - grey))
         blue = byte.MinValue;
 
-      return (new sPixel((byte)red, (byte)green, (byte)blue, pixel.Alpha));
+      return new sPixel((byte)red, (byte)green, (byte)blue, pixel.Alpha);
     }
 
     /// <summary>
@@ -707,7 +707,7 @@ namespace Imager {
     /// <returns>
     /// 	<c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
     /// </returns>
-    public override bool Equals(object o) => (o is sPixel) && (((sPixel)o)._argbBytes == this._argbBytes);
+    public override bool Equals(object o) => o is sPixel && ((sPixel)o)._argbBytes == this._argbBytes;
 
     /// <summary>
     /// Determines whether the specified <see cref="sPixel"/> is equal to this instance.
@@ -727,7 +727,7 @@ namespace Imager {
     /// </returns>
     public bool IsLike(sPixel pixel) {
       if (!AllowThresholds)
-        return (this == pixel);
+        return this == pixel;
 
       var delta = this.Luminance - pixel.Luminance;
       if (delta.Abs() > _LUMINANCE_TRIGGER)
@@ -738,7 +738,7 @@ namespace Imager {
         return false;
 
       delta = this.ChrominanceU - pixel.ChrominanceU;
-      return (delta.Abs() <= _CHROMA_U_TRIGGER);
+      return delta.Abs() <= _CHROMA_U_TRIGGER;
     }
 
     /// <summary>
@@ -756,11 +756,9 @@ namespace Imager {
     /// <param name="pixel">The pixel to differ to.</param>
     /// <returns>The absolute difference.</returns>
     public uint AbsDifference(sPixel pixel) {
-      return (
-        _LUMINANCE_TRIGGER * (this.Luminance - pixel.Luminance).Abs()
-        + _CHROMA_V_TRIGGER * (this.ChrominanceV - pixel.ChrominanceV).Abs()
-        + _CHROMA_U_TRIGGER * (this.ChrominanceU - pixel.ChrominanceU).Abs()
-      );
+      return _LUMINANCE_TRIGGER * (this.Luminance - pixel.Luminance).Abs()
+             + _CHROMA_V_TRIGGER * (this.ChrominanceV - pixel.ChrominanceV).Abs()
+             + _CHROMA_U_TRIGGER * (this.ChrominanceU - pixel.ChrominanceU).Abs();
     }
 
     #endregion
@@ -774,12 +772,12 @@ namespace Imager {
     /// <param name="pixel2">The second pixel instance.</param>
     /// <returns>A new instance with the interpolated color values.</returns>
     public static sPixel Interpolate(sPixel pixel1, sPixel pixel2) {
-      return (new sPixel(
+      return new sPixel(
         (byte)((pixel1.Red + pixel2.Red) >> 1),
         (byte)((pixel1.Green + pixel2.Green) >> 1),
         (byte)((pixel1.Blue + pixel2.Blue) >> 1),
         (byte)((pixel1.Alpha + pixel2.Alpha) >> 1)
-        ));
+      );
     }
 
     /// <summary>
@@ -790,12 +788,12 @@ namespace Imager {
     /// <param name="pixel3">The third pixel instance.</param>
     /// <returns>A new instance with the interpolated color values.</returns>
     public static sPixel Interpolate(sPixel pixel1, sPixel pixel2, sPixel pixel3) {
-      return (new sPixel(
+      return new sPixel(
         (byte)((pixel1.Red + pixel2.Red + pixel3.Red) / 3),
         (byte)((pixel1.Green + pixel2.Green + pixel3.Green) / 3),
         (byte)((pixel1.Blue + pixel2.Blue + pixel3.Blue) / 3),
         (byte)((pixel1.Alpha + pixel2.Alpha + pixel3.Alpha) / 3)
-        ));
+      );
     }
 
     /// <summary>
@@ -807,12 +805,12 @@ namespace Imager {
     /// <param name="pixel4">The fourth pixel instance.</param>
     /// <returns>A new instance with the interpolated color values.</returns>
     public static sPixel Interpolate(sPixel pixel1, sPixel pixel2, sPixel pixel3, sPixel pixel4) {
-      return (new sPixel(
+      return new sPixel(
         (byte)((pixel1.Red + pixel2.Red + pixel3.Red + pixel4.Red) >> 2),
         (byte)((pixel1.Green + pixel2.Green + pixel3.Green + pixel4.Green) >> 2),
         (byte)((pixel1.Blue + pixel2.Blue + pixel3.Blue + pixel4.Blue) >> 2),
         (byte)((pixel1.Alpha + pixel2.Alpha + pixel3.Alpha + pixel4.Alpha) >> 2)
-        ));
+      );
     }
 
     #endregion
@@ -829,12 +827,12 @@ namespace Imager {
     /// <returns>A new instance from the interpolated components.</returns>
     public static sPixel Interpolate(sPixel pixel1, sPixel pixel2, byte quantifier1, byte quantifier2) {
       var total = (ushort)(quantifier1 + quantifier2);
-      return (new sPixel(
+      return new sPixel(
         (byte)((pixel1.Red * quantifier1 + pixel2.Red * quantifier2) / total),
         (byte)((pixel1.Green * quantifier1 + pixel2.Green * quantifier2) / total),
         (byte)((pixel1.Blue * quantifier1 + pixel2.Blue * quantifier2) / total),
         (byte)((pixel1.Alpha * quantifier1 + pixel2.Alpha * quantifier2) / total)
-        ));
+      );
     }
 
     /// <summary>
@@ -847,12 +845,12 @@ namespace Imager {
     /// <returns>A new instance from the interpolated components.</returns>
     public static sPixel Interpolate(sPixel pixel1, sPixel pixel2, int quantifier1, int quantifier2) {
       var total = (uint)(quantifier1 + quantifier2);
-      return (new sPixel(
+      return new sPixel(
         (byte)((pixel1.Red * quantifier1 + pixel2.Red * quantifier2) / total),
         (byte)((pixel1.Green * quantifier1 + pixel2.Green * quantifier2) / total),
         (byte)((pixel1.Blue * quantifier1 + pixel2.Blue * quantifier2) / total),
         (byte)((pixel1.Alpha * quantifier1 + pixel2.Alpha * quantifier2) / total)
-        ));
+      );
     }
 
     /// <summary>
@@ -873,12 +871,12 @@ namespace Imager {
       byte quantifier2,
       byte quantifier3) {
       var total = (ushort)(quantifier1 + quantifier2 + quantifier3);
-      return (new sPixel(
+      return new sPixel(
         (byte)((pixel1.Red * quantifier1 + pixel2.Red * quantifier2 + pixel3.Red * quantifier3) / total),
         (byte)((pixel1.Green * quantifier1 + pixel2.Green * quantifier2 + pixel3.Green * quantifier3) / total),
         (byte)((pixel1.Blue * quantifier1 + pixel2.Blue * quantifier2 + pixel3.Blue * quantifier3) / total),
         (byte)((pixel1.Alpha * quantifier1 + pixel2.Alpha * quantifier2 + pixel3.Alpha * quantifier3) / total)
-        ));
+      );
     }
 
     /// <summary>
@@ -903,20 +901,20 @@ namespace Imager {
       byte quantifier3,
       byte quantifier4) {
       var total = (ushort)(quantifier1 + quantifier2 + quantifier3 + quantifier4);
-      return (new sPixel(
+      return new sPixel(
         (byte)
-          ((pixel1.Red * quantifier1 + pixel2.Red * quantifier2 + pixel3.Red * quantifier3 + pixel4.Red * quantifier4) /
-           total),
+        ((pixel1.Red * quantifier1 + pixel2.Red * quantifier2 + pixel3.Red * quantifier3 + pixel4.Red * quantifier4) /
+         total),
         (byte)
-          ((pixel1.Green * quantifier1 + pixel2.Green * quantifier2 + pixel3.Green * quantifier3 +
-            pixel4.Green * quantifier4) / total),
+        ((pixel1.Green * quantifier1 + pixel2.Green * quantifier2 + pixel3.Green * quantifier3 +
+          pixel4.Green * quantifier4) / total),
         (byte)
-          ((pixel1.Blue * quantifier1 + pixel2.Blue * quantifier2 + pixel3.Blue * quantifier3 +
-            pixel4.Blue * quantifier4) / total),
+        ((pixel1.Blue * quantifier1 + pixel2.Blue * quantifier2 + pixel3.Blue * quantifier3 +
+          pixel4.Blue * quantifier4) / total),
         (byte)
-          ((pixel1.Alpha * quantifier1 + pixel2.Alpha * quantifier2 + pixel3.Alpha * quantifier3 +
-            pixel4.Alpha * quantifier4) / total)
-        ));
+        ((pixel1.Alpha * quantifier1 + pixel2.Alpha * quantifier2 + pixel3.Alpha * quantifier3 +
+          pixel4.Alpha * quantifier4) / total)
+      );
     }
 
     #endregion

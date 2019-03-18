@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ namespace Imager.Filters {
     /// <summary>
     /// Bilinear Plus Original
     /// </summary>
-    public static void BilinearPlusOriginal(PixelWorker<sPixel>worker ) {
+    public static void BilinearPlusOriginal(IPixelWorker<sPixel>worker ) {
       var c00 = worker.SourceP0P0();
       var c01 = worker.SourceP1P0();
       var c10 = worker.SourceP0P1();
@@ -44,7 +44,7 @@ namespace Imager.Filters {
     /// <summary>
     /// Bilinear Plus
     /// </summary>
-    public static void BilinearPlus(PixelWorker<sPixel>worker ) {
+    public static void BilinearPlus(IPixelWorker<sPixel>worker ) {
       var c00 = worker.SourceP0P0();
       var c01 = worker.SourceP1P0();
       var c10 = worker.SourceP0P1();

@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
@@ -136,11 +137,11 @@ namespace Imager.Classes {
               ++i;
             }
           }
-          return (threadStorage);
+          return threadStorage;
         },
         _ => { }
       );
-      return (result);
+      return result;
     }
 
 #if NETFX_45
@@ -184,30 +185,30 @@ namespace Imager.Classes {
               ++i;
             }
           }
-          return (threadStorage);
+          return threadStorage;
         },
         _ => { }
       );
 
-      return (result);
+      return result;
     }
     #endregion
 
     #region get components
     public float Red(int x, int y) {
-      return (_GetValueFromPlane(this._redPlane, x, y, this._width, this._height, this._horizontalOutOfBoundsHandler, this._verticalOutOfBoundsHandler));
+      return _GetValueFromPlane(this._redPlane, x, y, this._width, this._height, this._horizontalOutOfBoundsHandler, this._verticalOutOfBoundsHandler);
     }
 
     public float Green(int x, int y) {
-      return (_GetValueFromPlane(this._greenPlane, x, y, this._width, this._height, this._horizontalOutOfBoundsHandler, this._verticalOutOfBoundsHandler));
+      return _GetValueFromPlane(this._greenPlane, x, y, this._width, this._height, this._horizontalOutOfBoundsHandler, this._verticalOutOfBoundsHandler);
     }
 
     public float Blue(int x, int y) {
-      return (_GetValueFromPlane(this._bluePlane, x, y, this._width, this._height, this._horizontalOutOfBoundsHandler, this._verticalOutOfBoundsHandler));
+      return _GetValueFromPlane(this._bluePlane, x, y, this._width, this._height, this._horizontalOutOfBoundsHandler, this._verticalOutOfBoundsHandler);
     }
 
     public float Alpha(int x, int y) {
-      return (_GetValueFromPlane(this._alphaPlane, x, y, this._width, this._height, this._horizontalOutOfBoundsHandler, this._verticalOutOfBoundsHandler));
+      return _GetValueFromPlane(this._alphaPlane, x, y, this._width, this._height, this._horizontalOutOfBoundsHandler, this._verticalOutOfBoundsHandler);
     }
     #endregion
 
@@ -219,7 +220,7 @@ namespace Imager.Classes {
       if (y < 0 || y >= height)
         y = verticalOutOfBoundsHandler(y, height, y < 0);
 
-      return (plane[y * width + x]);
+      return plane[y * width + x];
     }
     #endregion
 
@@ -233,7 +234,7 @@ namespace Imager.Classes {
     /// <param name="centeredGrid">if set to <c>true</c> using a centered grid; otherwise, using top-left aligned.</param>
     /// <returns>The resized image</returns>
     public FloatImage Resize(int destWidth, int destHeight, KernelType method, bool centeredGrid) {
-      return (this._Resize(destWidth, destHeight, Kernels.KERNELS[method], centeredGrid));
+      return this._Resize(destWidth, destHeight, Kernels.KERNELS[method], centeredGrid);
     }
 
     /// <summary>
@@ -245,7 +246,7 @@ namespace Imager.Classes {
     /// <param name="centeredGrid">if set to <c>true</c> using a centered grid; otherwise, using top-left aligned.</param>
     /// <returns>The resized image</returns>
     public FloatImage Resize(int destWidth, int destHeight, WindowType method, float radius, bool centeredGrid) {
-      return (this._Resize(destWidth, destHeight, Windows.WINDOWS[method].WithRadius(radius), centeredGrid));
+      return this._Resize(destWidth, destHeight, Windows.WINDOWS[method].WithRadius(radius), centeredGrid);
     }
 
     /*
@@ -292,7 +293,7 @@ namespace Imager.Classes {
         OutOfBoundsUtils.GetHandlerOrCrash(this.HorizontalOutOfBoundsMode),
         OutOfBoundsUtils.GetHandlerOrCrash(this.VerticalOutOfBoundsMode)
       );
-      return (result);
+      return result;
     }
 
     /// <summary>
@@ -403,14 +404,14 @@ namespace Imager.Classes {
       switch (outOfBoundsMode) {
         case OutOfBoundsMode.ConstantExtension:
         {
-          last = plane[offset + iEnd] = (alpha * (-plane[offset + iEnd] + (alpha - 1) * alpha * last))
+          last = plane[offset + iEnd] = alpha * (-plane[offset + iEnd] + (alpha - 1) * alpha * last)
             / ((alpha - 1) * (alpha * alpha - 1));
           break;
         }
         case OutOfBoundsMode.WholeSampleSymmetric:
         {
           plane[offset + iEnd] += alpha * last;
-          last = plane[offset + iEnd] = (alpha / (alpha * alpha - 1))
+          last = plane[offset + iEnd] = alpha / (alpha * alpha - 1)
             * (plane[offset + iEnd] + alpha * plane[offset + iEnd - stride]);
           break;
         }
@@ -457,7 +458,7 @@ namespace Imager.Classes {
       Contract.Requires(kernel != null);
 
       var kernelWidth = (int)Math.Ceiling(2 * kernelRadius);
-      var filterWidth = (srcWidth < kernelWidth) ? srcWidth : kernelWidth;
+      var filterWidth = srcWidth < kernelWidth ? srcWidth : kernelWidth;
       var filterCoeff = new float[filterWidth * destWidth];
       var filterPos = new short[destWidth];
 
@@ -508,7 +509,7 @@ namespace Imager.Classes {
         coeffIndex += filterWidth;
       }
 
-      return (result);
+      return result;
     }
 
     /// <summary>

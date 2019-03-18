@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ namespace Classes {
     /// The source image.
     /// </value>
     public cImage SourceImage {
-      get { return (this._sourceImage); }
+      get => this._sourceImage;
       private set {
         this._sourceImage = value;
         this._gdiSource?.Dispose();
@@ -68,7 +68,7 @@ namespace Classes {
     /// The target image.
     /// </value>
     public cImage TargetImage {
-      get { return (this._targetImage); }
+      get => this._targetImage;
       private set {
         this._targetImage = value;
         this._gdiTarget?.Dispose();
@@ -79,12 +79,12 @@ namespace Classes {
     /// <summary>
     /// Gets the GDI source.
     /// </summary>
-    public Bitmap GdiSource => (this._gdiSource ?? (this._gdiSource = this._sourceImage?.ToBitmap()));
+    public Bitmap GdiSource => this._gdiSource ?? (this._gdiSource = this._sourceImage?.ToBitmap());
 
     /// <summary>
     /// Gets the GDI target.
     /// </summary>
-    public Bitmap GdiTarget => (this._gdiTarget ?? (this._gdiTarget = this._targetImage?.ToBitmap()));
+    public Bitmap GdiTarget => this._gdiTarget ?? (this._gdiTarget = this._targetImage?.ToBitmap());
 
     /// <summary>
     /// Current list of actions.

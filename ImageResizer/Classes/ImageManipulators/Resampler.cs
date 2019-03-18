@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,28 +31,24 @@ namespace Classes.ImageManipulators {
     private readonly KernelType _type;
 
     #region Implementation of IImageManipulator
-    public bool SupportsWidth => (true);
-    public bool SupportsHeight => (true);
-    public bool SupportsRepetitionCount => (false);
-    public bool SupportsGridCentering => (true);
-    public bool SupportsThresholds => (false);
-    public bool SupportsRadius => (false);
-    public bool ChangesResolution => (true);
-    public string Description => (ReflectionUtils.GetDescriptionForEnumValue(this._type));
+    public bool SupportsWidth => true;
+    public bool SupportsHeight => true;
+    public bool SupportsRepetitionCount => false;
+    public bool SupportsGridCentering => true;
+    public bool SupportsThresholds => false;
+    public bool SupportsRadius => false;
+    public bool ChangesResolution => true;
+    public string Description => ReflectionUtils.GetDescriptionForEnumValue(this._type);
 
     #endregion
 
     public cImage Apply(cImage source, int width, int height, bool useCenteredGrid) {
       Contract.Requires(source != null);
-      return (source.ApplyScaler(this._type, width, height, useCenteredGrid, default(Rectangle?)));
+      return source.ApplyScaler(this._type, width, height, useCenteredGrid, default(Rectangle?));
     }
 
-    public Resampler(KernelType type) {
-      this._type = type;
-    }
+    public Resampler(KernelType type) => this._type = type;
+    public Kernels.FixedRadiusKernelInfo GetKernelMethodInfo() => Kernels.KERNELS[this._type];
 
-    public Kernels.FixedRadiusKernelInfo GetKernelMethodInfo() {
-      return (Kernels.KERNELS[this._type]);
-    }
   }
 }

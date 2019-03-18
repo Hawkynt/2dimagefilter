@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ namespace Imager.Filters {
     /// <summary>
     /// MAME's TV effect in 2x
     /// </summary>
-    public static void Tv2x(PixelWorker<sPixel> worker) {
+    public static void Tv2x(IPixelWorker<sPixel> worker) {
       var pixel = worker.SourceP0P0();
       var subPixel = pixel * _gamma58;
       worker.TargetP0P0(pixel);
@@ -39,7 +39,7 @@ namespace Imager.Filters {
     /// <summary>
     /// MAME's TV effect 3x
     /// </summary>
-    public static void Tv3x(PixelWorker<sPixel> worker) {
+    public static void Tv3x(IPixelWorker<sPixel> worker) {
       var pixel = worker.SourceP0P0();
       var subPixel = pixel * _gamma58;
       var subPixel2 = pixel * _gamma516;
@@ -57,7 +57,7 @@ namespace Imager.Filters {
     /// <summary>
     /// MAME's RGB 2x
     /// </summary>
-    public static void Rgb2x(PixelWorker<sPixel> worker) {
+    public static void Rgb2x(IPixelWorker<sPixel> worker) {
       var pixel = worker.SourceP0P0();
       worker.TargetP0P0(new sPixel(pixel.Red, 0, 0, pixel.Alpha));
       worker.TargetP1P0(new sPixel(0, pixel.Green, 0, pixel.Alpha));
@@ -68,7 +68,7 @@ namespace Imager.Filters {
     /// <summary>
     /// MAME's RGB 3x
     /// </summary>
-    public static void Rgb3x(PixelWorker<sPixel> worker) {
+    public static void Rgb3x(IPixelWorker<sPixel> worker) {
       var pixel = worker.SourceP0P0();
       worker.TargetP0P0(pixel);
       worker.TargetP1P0(new sPixel(0, pixel.Green, 0, pixel.Alpha));
@@ -84,7 +84,7 @@ namespace Imager.Filters {
     /// <summary>
     /// MAME's AdvInterp2x, very similar to Scale2x but uses interpolation, modified by Hawkynt to support thresholds
     /// </summary>
-    public static void AdvInterp2x(PixelWorker<sPixel> worker) {
+    public static void AdvInterp2x(IPixelWorker<sPixel> worker) {
       var c1 = worker.SourceP0M1();
       var c3 = worker.SourceM1P0();
       var c4 = worker.SourceP0P0();
@@ -111,7 +111,7 @@ namespace Imager.Filters {
     /// <summary>
     /// MAME's AdvInterp3x, very similar to Scale3x but uses interpolation, modified by Hawkynt to support thresholds
     /// </summary>
-    public static void AdvInterp3x(PixelWorker<sPixel> worker) {
+    public static void AdvInterp3x(IPixelWorker<sPixel> worker) {
       var c0 = worker.SourceM1M1();
       var c1 = worker.SourceP0M1();
       var c2 = worker.SourceP1M1();
@@ -138,8 +138,7 @@ namespace Imager.Filters {
         }
 
         if (
-          (c3.IsLike(c1) && c4.IsNotLike(c2)) &&
-          (c5.IsLike(c1) && c4.IsNotLike(c0))
+          c3.IsLike(c1) && c4.IsNotLike(c2) && c5.IsLike(c1) && c4.IsNotLike(c0)
           )
           e01 = sPixel.Interpolate(c1, c3, c5);
         else if (c3.IsLike(c1) && c4.IsNotLike(c2))
@@ -148,8 +147,7 @@ namespace Imager.Filters {
           e01 = sPixel.Interpolate(c5, c1);
 
         if (
-          (c3.IsLike(c1) && c4.IsNotLike(c6)) &&
-          (c3.IsLike(c7) && c4.IsNotLike(c0))
+          c3.IsLike(c1) && c4.IsNotLike(c6) && c3.IsLike(c7) && c4.IsNotLike(c0)
           )
           e10 = sPixel.Interpolate(c3, c1, c7);
         else if (c3.IsLike(c1) && c4.IsNotLike(c6))
@@ -158,8 +156,7 @@ namespace Imager.Filters {
           e10 = sPixel.Interpolate(c3, c7);
 
         if (
-          (c5.IsLike(c1) && c4.IsNotLike(c8)) &&
-          (c5.IsLike(c7) && c4.IsNotLike(c2))
+          c5.IsLike(c1) && c4.IsNotLike(c8) && c5.IsLike(c7) && c4.IsNotLike(c2)
           )
           e12 = sPixel.Interpolate(c5, c1, c7);
         else if (c5.IsLike(c1) && c4.IsNotLike(c8))
@@ -168,8 +165,7 @@ namespace Imager.Filters {
           e12 = sPixel.Interpolate(c5, c7);
 
         if (
-          (c3.IsLike(c7) && c4.IsNotLike(c8)) &&
-          (c5.IsLike(c7) && c4.IsNotLike(c6))
+          c3.IsLike(c7) && c4.IsNotLike(c8) && c5.IsLike(c7) && c4.IsNotLike(c6)
           )
           e21 = sPixel.Interpolate(c7, c3, c5);
         else if (c3.IsLike(c7) && c4.IsNotLike(c8))
@@ -191,7 +187,7 @@ namespace Imager.Filters {
     /// <summary>
     /// Andrea Mazzoleni's Scale2X modified by Hawkynt to support thresholds
     /// </summary>
-    public static void Scale2x(PixelWorker<sPixel> worker) {
+    public static void Scale2x(IPixelWorker<sPixel> worker) {
       var c1 = worker.SourceP0M1();
       var c3 = worker.SourceM1P0();
       var c4 = worker.SourceP0P0();
@@ -222,7 +218,7 @@ namespace Imager.Filters {
     /// <summary>
     /// Andrea Mazzoleni's Scale3X modified by Hawkynt to support thresholds
     /// </summary>
-    public static void Scale3x(PixelWorker<sPixel> worker) {
+    public static void Scale3x(IPixelWorker<sPixel> worker) {
       var c0 = worker.SourceM1M1();
       var c1 = worker.SourceP0M1();
       var c2 = worker.SourceP1M1();
@@ -245,8 +241,7 @@ namespace Imager.Filters {
           e22 = sPixel.Interpolate(c7, c5);
 
         if (
-          (c3.IsLike(c1) && c4.IsNotLike(c2)) &&
-          (c5.IsLike(c1) && c4.IsNotLike(c0))
+          c3.IsLike(c1) && c4.IsNotLike(c2) && c5.IsLike(c1) && c4.IsNotLike(c0)
           )
           e01 = sPixel.Interpolate(c1, c3, c5);
         else if (c3.IsLike(c1) && c4.IsNotLike(c2))
@@ -255,8 +250,7 @@ namespace Imager.Filters {
           e01 = sPixel.Interpolate(c5, c1);
 
         if (
-          (c3.IsLike(c1) && c4.IsNotLike(c6)) &&
-          (c3.IsLike(c7) && c4.IsNotLike(c0))
+          c3.IsLike(c1) && c4.IsNotLike(c6) && c3.IsLike(c7) && c4.IsNotLike(c0)
           )
           e10 = sPixel.Interpolate(c3, c1, c7);
         else if (c3.IsLike(c1) && c4.IsNotLike(c6))
@@ -265,8 +259,7 @@ namespace Imager.Filters {
           e10 = sPixel.Interpolate(c3, c7);
 
         if (
-          (c5.IsLike(c1) && c4.IsNotLike(c8)) &&
-          (c5.IsLike(c7) && c4.IsNotLike(c2))
+          c5.IsLike(c1) && c4.IsNotLike(c8) && c5.IsLike(c7) && c4.IsNotLike(c2)
           )
           e12 = sPixel.Interpolate(c5, c1, c7);
         else if (c5.IsLike(c1) && c4.IsNotLike(c8))
@@ -275,8 +268,7 @@ namespace Imager.Filters {
           e12 = sPixel.Interpolate(c5, c7);
 
         if (
-          (c3.IsLike(c7) && c4.IsNotLike(c8)) &&
-          (c5.IsLike(c7) && c4.IsNotLike(c6))
+          c3.IsLike(c7) && c4.IsNotLike(c8) && c5.IsLike(c7) && c4.IsNotLike(c6)
           )
           e21 = sPixel.Interpolate(c7, c3, c5);
         else if (c3.IsLike(c7) && c4.IsNotLike(c8))

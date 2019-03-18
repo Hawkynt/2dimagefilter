@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,17 +27,17 @@ namespace Imager.Filters {
     /// FNES' 2xSCL
     /// </summary>
     /// <param name="worker">The worker.</param>
-    public static void Do2XScl(PixelWorker<sPixel> worker) {
+    public static void Do2XScl(IPixelWorker<sPixel> worker) {
       var n = worker.SourceP0M1();
       var w = worker.SourceM1P0();
       var c = worker.SourceP0P0();
       var e = worker.SourceP1P0();
       var s = worker.SourceP0P1();
 
-      var p0 = (((w.IsLike(n)) && (n.IsNotLike(e)) && (w.IsNotLike(s))) ? w : c);
-      var p1 = (((n.IsLike(e)) && (n.IsNotLike(w)) && (e.IsNotLike(s))) ? e : c);
-      var p2 = (((w.IsLike(s)) && (w.IsNotLike(n)) && (s.IsNotLike(e))) ? w : c);
-      var p3 = (((s.IsLike(e)) && (w.IsNotLike(s)) && (n.IsNotLike(e))) ? e : c);
+      var p0 = w.IsLike(n) && n.IsNotLike(e) && w.IsNotLike(s) ? w : c;
+      var p1 = n.IsLike(e) && n.IsNotLike(w) && e.IsNotLike(s) ? e : c;
+      var p2 = w.IsLike(s) && w.IsNotLike(n) && s.IsNotLike(e) ? w : c;
+      var p3 = s.IsLike(e) && w.IsNotLike(s) && n.IsNotLike(e) ? e : c;
 
       worker.TargetP0P0(p0);
       worker.TargetP1P0(p1);
@@ -45,7 +45,7 @@ namespace Imager.Filters {
       worker.TargetP1P1(p3);
     }
 
-    public static void DoSuper2XScl(PixelWorker<sPixel> worker) {
+    public static void DoSuper2XScl(IPixelWorker<sPixel> worker) {
       var n = worker.SourceP0M1();
       var w = worker.SourceM1P0();
       var c = worker.SourceP0P0();
@@ -57,10 +57,10 @@ namespace Imager.Filters {
       var cw = _Mixpal(c, w);
       var ce = _Mixpal(c, e);
 
-      var p0 = (((w.IsLike(n)) && (n.IsNotLike(e)) && (w.IsNotLike(s))) ? wx : cw);
-      var p1 = (((n.IsLike(e)) && (n.IsNotLike(w)) && (e.IsNotLike(s))) ? ex : ce);
-      var p2 = (((w.IsLike(s)) && (w.IsNotLike(n)) && (s.IsNotLike(e))) ? wx : cw);
-      var p3 = (((s.IsLike(e)) && (w.IsNotLike(s)) && (n.IsNotLike(e))) ? ex : ce);
+      var p0 = w.IsLike(n) && n.IsNotLike(e) && w.IsNotLike(s) ? wx : cw;
+      var p1 = n.IsLike(e) && n.IsNotLike(w) && e.IsNotLike(s) ? ex : ce;
+      var p2 = w.IsLike(s) && w.IsNotLike(n) && s.IsNotLike(e) ? wx : cw;
+      var p3 = s.IsLike(e) && w.IsNotLike(s) && n.IsNotLike(e) ? ex : ce;
 
       worker.TargetP0P0(p0);
       worker.TargetP1P0(p1);
@@ -68,7 +68,7 @@ namespace Imager.Filters {
       worker.TargetP1P1(p3);
     }
 
-    public static void DoUltra2XScl(PixelWorker<sPixel> worker) {
+    public static void DoUltra2XScl(IPixelWorker<sPixel> worker) {
       var n = worker.SourceP0M1();
       var w = worker.SourceM1P0();
       var c = worker.SourceP0P0();
@@ -81,10 +81,10 @@ namespace Imager.Filters {
       var cw = _Mixpal(c, w);
       var ce = _Mixpal(c, e);
 
-      var p0 = (((w.IsLike(n)) && (n.IsNotLike(e)) && (w.IsNotLike(s))) ? wx : cw);
-      var p1 = (((n.IsLike(e)) && (n.IsNotLike(w)) && (e.IsNotLike(s))) ? ex : ce);
-      var p2 = (((w.IsLike(s)) && (w.IsNotLike(n)) && (s.IsNotLike(e))) ? wx : cw);
-      var p3 = (((s.IsLike(e)) && (w.IsNotLike(s)) && (n.IsNotLike(e))) ? ex : ce);
+      var p0 = w.IsLike(n) && n.IsNotLike(e) && w.IsNotLike(s) ? wx : cw;
+      var p1 = n.IsLike(e) && n.IsNotLike(w) && e.IsNotLike(s) ? ex : ce;
+      var p2 = w.IsLike(s) && w.IsNotLike(n) && s.IsNotLike(e) ? wx : cw;
+      var p3 = s.IsLike(e) && w.IsNotLike(s) && n.IsNotLike(e) ? ex : ce;
 
       p0 = _Unmix(p0, cx);
       p1 = _Unmix(p1, cx);
@@ -117,11 +117,11 @@ namespace Imager.Filters {
       var gb = c2.Green;
       var bb = c2.Blue;
 
-      var r = ((_ClampToByteRange((ra + (ra - rb))) + rb) >> 1);
-      var g = ((_ClampToByteRange((ga + (ga - gb))) + gb) >> 1);
-      var b = ((_ClampToByteRange((ba + (ba - bb))) + bb) >> 1);
+      var r = (_ClampToByteRange(ra + (ra - rb)) + rb) >> 1;
+      var g = (_ClampToByteRange(ga + (ga - gb)) + gb) >> 1;
+      var b = (_ClampToByteRange(ba + (ba - bb)) + bb) >> 1;
 
-      return (sPixel.FromRGBA(r, g, b, (c1.Alpha + c2.Alpha) >> 1));
+      return sPixel.FromRGBA(r, g, b, (c1.Alpha + c2.Alpha) >> 1);
     }
 
 #if NETFX_45

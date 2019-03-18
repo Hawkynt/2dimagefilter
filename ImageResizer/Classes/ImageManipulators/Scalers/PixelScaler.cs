@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,7 +18,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
-using System.Diagnostics.Contracts;
+
+
 using System.Drawing;
 using Imager;
 using Imager.Interface;
@@ -26,25 +27,20 @@ using Imager.Interface;
 namespace Classes.ImageManipulators.Scalers {
   internal class PixelScaler : AScaler {
     private readonly PixelScalerType _type;
-    private readonly byte _scaleFactorX;
-    private readonly byte _scaleFactorY;
 
     #region Implementation of AScaler
-    public override cImage Apply(cImage source) {
-      Contract.Requires(source != null);
-      return (source.ApplyScaler(this._type, default(Rectangle?)));
-    }
-    public override byte ScaleFactorX => (this._scaleFactorX);
-    public override byte ScaleFactorY => (this._scaleFactorY);
-    public override string Description => (ReflectionUtils.GetDescriptionForEnumValue(this._type));
+    public override cImage Apply(cImage source) => source.ApplyScaler(this._type, default(Rectangle?));
+    public override byte ScaleFactorX { get; }
+    public override byte ScaleFactorY { get; }
+    public override string Description => ReflectionUtils.GetDescriptionForEnumValue(this._type);
 
     #endregion
 
     public PixelScaler(PixelScalerType type) {
       var info = cImage.GetPixelScalerInfo(type);
       this._type = type;
-      this._scaleFactorX = info.Item1;
-      this._scaleFactorY = info.Item2;
+      this.ScaleFactorX = info.Item1;
+      this.ScaleFactorY = info.Item2;
     }
   }
 }

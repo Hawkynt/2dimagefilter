@@ -1,4 +1,24 @@
-﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+﻿#region (c)2008-2019 Hawkynt
+/*
+ *  cImage 
+ *  Image filtering library 
+    Copyright (C) 2008-2019 Hawkynt
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#endregion
+<#@ template debug="false" hostspecific="false" language="C#" #>
 <#@ assembly name="System.Core" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
@@ -13,17 +33,46 @@
   Func<int,string> GetLineDescription=v=>v<0?"M"+Math.Abs(v).ToString():"P"+v.ToString();
   Func<int,int,string> GetPointDescription=(x,y)=>GetLineDescription(x)+GetLineDescription(y);
 #>
-
 using System;
-using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Diagnostics.Contracts;
 using Imager.Interface;
 
 namespace Imager {
+
+
   /// <summary>
   /// This class gets us fast access to a small window of pixels in the source and target images.
   /// </summary>
-  internal class PixelWorker<TColorStorage> {
+  public interface IPixelWorker<TColorStorage> {
+    int SourceX();
+    int SourceY();
+    int SourceHeight();
+
+    void IncrementX(int targetXIncrementor);
+
+    #region access source points
+<# foreach(var y in sourceYRange) { #>
+<# foreach(var x in sourceXRange) { #>
+    TColorStorage Source<#=GetPointDescription(x,y)#>();
+<# } #>
+<# } #>
+    #endregion
+
+    #region access target points
+<# foreach(var y in targetYRange) { #>
+<# foreach(var x in targetXRange) { #>
+    void Target<#=GetPointDescription(x,y)#>(TColorStorage value);
+<# } #>
+<# } #>
+    #endregion
+
+  }
+
+  /// <summary>
+  /// This class gets us fast access to a small window of pixels in the source and target images.
+  /// </summary>
+  internal class PixelWorker<TColorStorage>:IPixelWorker<TColorStorage> {
     private readonly Func<int, TColorStorage> _sourceImageGetter;
     private int _sourceX;
     private readonly int _sourceY;
@@ -89,8 +138,13 @@ namespace Imager {
 <# } #>
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int SourceX() => this._sourceX;
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int SourceY() => this._sourceY;
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int SourceHeight() => this._sourceHeight;
 
     public void IncrementX(int targetXIncrementor){
@@ -110,6 +164,7 @@ namespace Imager {
     #region access source points
 <# foreach(var y in sourceYRange) { #>
 <# foreach(var x in sourceXRange) { #>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TColorStorage Source<#=GetPointDescription(x,y)#>()
       => this._sourceImageGetter(this._sourceOffset<#=x==0?string.Empty:" + this._sourceOffset"+GetLineDescription(x)+"X()"#><#=y==0?string.Empty:" + this._sourceOffset"+GetLineDescription(y)+"Y()"#>)
       ;
@@ -120,6 +175,7 @@ namespace Imager {
     #region access target points
 <# foreach(var y in targetYRange) { #>
 <# foreach(var x in targetXRange) { #>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Target<#=GetPointDescription(x,y)#>(TColorStorage value)
       => this._targetImageSetter(this._targetOffset<#=x==0?string.Empty:" + "+x#><#=y==0?string.Empty:" + this._targetOffset"+GetLineDescription(y)+"Y"#>, value)
       ;

@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ namespace Imager.Filters {
     /// <summary>
     /// body for HQ2x etc.
     /// </summary>
-    public static void ComplexFilter(PixelWorker<sPixel> worker, byte scaleX, byte scaleY, cImage.NqKernel kernel) {
+    public static void ComplexFilter(IPixelWorker<sPixel> worker, byte scaleX, byte scaleY, cImage.NqKernel kernel) {
       var c0 = worker.SourceM1M1();
       var c1 = worker.SourceP0M1();
       var c2 = worker.SourceP1M1();
@@ -36,21 +36,21 @@ namespace Imager.Filters {
       var c7 = worker.SourceP0P1();
       var c8 = worker.SourceP1P1();
       byte pattern = 0;
-      if ((c4.IsNotLike(c0)))
+      if (c4.IsNotLike(c0))
         pattern |= 1;
-      if ((c4.IsNotLike(c1)))
+      if (c4.IsNotLike(c1))
         pattern |= 2;
-      if ((c4.IsNotLike(c2)))
+      if (c4.IsNotLike(c2))
         pattern |= 4;
-      if ((c4.IsNotLike(c3)))
+      if (c4.IsNotLike(c3))
         pattern |= 8;
-      if ((c4.IsNotLike(c5)))
+      if (c4.IsNotLike(c5))
         pattern |= 16;
-      if ((c4.IsNotLike(c6)))
+      if (c4.IsNotLike(c6))
         pattern |= 32;
-      if ((c4.IsNotLike(c7)))
+      if (c4.IsNotLike(c7))
         pattern |= 64;
-      if ((c4.IsNotLike(c8)))
+      if (c4.IsNotLike(c8))
         pattern |= 128;
       kernel(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8, worker);
     } // end sub
@@ -58,7 +58,7 @@ namespace Imager.Filters {
     /// <summary>
     /// body for HQ2xBold etc. as seen in SNES9x
     /// </summary>
-    public static void ComplexFilterBold(PixelWorker<sPixel> worker, byte scaleX, byte scaleY, cImage.NqKernel kernel) {
+    public static void ComplexFilterBold(IPixelWorker<sPixel> worker, byte scaleX, byte scaleY, cImage.NqKernel kernel) {
       var c0 = worker.SourceM1M1();
       var c1 = worker.SourceP0M1();
       var c2 = worker.SourceP1M1();
@@ -92,21 +92,21 @@ namespace Imager.Filters {
         ) / 9);
       var dc4 = c4.Brightness > avgBrightness;
       byte pattern = 0;
-      if ((c4.IsNotLike(c0)) && ((brightness[0] > avgBrightness) != dc4))
+      if (c4.IsNotLike(c0) && brightness[0] > avgBrightness != dc4)
         pattern |= 1;
-      if ((c4.IsNotLike(c1)) && ((brightness[1] > avgBrightness) != dc4))
+      if (c4.IsNotLike(c1) && brightness[1] > avgBrightness != dc4)
         pattern |= 2;
-      if ((c4.IsNotLike(c2)) && ((brightness[2] > avgBrightness) != dc4))
+      if (c4.IsNotLike(c2) && brightness[2] > avgBrightness != dc4)
         pattern |= 4;
-      if ((c4.IsNotLike(c3)) && ((brightness[3] > avgBrightness) != dc4))
+      if (c4.IsNotLike(c3) && brightness[3] > avgBrightness != dc4)
         pattern |= 8;
-      if ((c4.IsNotLike(c5)) && ((brightness[5] > avgBrightness) != dc4))
+      if (c4.IsNotLike(c5) && brightness[5] > avgBrightness != dc4)
         pattern |= 16;
-      if ((c4.IsNotLike(c6)) && ((brightness[6] > avgBrightness) != dc4))
+      if (c4.IsNotLike(c6) && brightness[6] > avgBrightness != dc4)
         pattern |= 32;
-      if ((c4.IsNotLike(c7)) && ((brightness[7] > avgBrightness) != dc4))
+      if (c4.IsNotLike(c7) && brightness[7] > avgBrightness != dc4)
         pattern |= 64;
-      if ((c4.IsNotLike(c8)) && ((brightness[8] > avgBrightness) != dc4))
+      if (c4.IsNotLike(c8) && brightness[8] > avgBrightness != dc4)
         pattern |= 128;
       kernel(pattern, c0, c1, c2, c3, c4, c5, c6, c7, c8, worker);
     } // end sub
@@ -114,7 +114,7 @@ namespace Imager.Filters {
     /// <summary>
     /// body for HQ2xSmart etc. as seen in SNES9x
     /// </summary>
-    public static void ComplexFilterSmart(PixelWorker<sPixel> worker, byte scaleX, byte scaleY, cImage.NqKernel kernel) {
+    public static void ComplexFilterSmart(IPixelWorker<sPixel> worker, byte scaleX, byte scaleY, cImage.NqKernel kernel) {
       var c0 = worker.SourceM1M1();
       var c2 = worker.SourceP1M1();
       var c4 = worker.SourceP0P0();
@@ -130,7 +130,7 @@ namespace Imager.Filters {
     #region filter casepathes
 
     #region standard HQ2x casepath
-    public static void Hq2xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
+    public static void Hq2xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, IPixelWorker<sPixel> worker) {
       sPixel e01, e10, e11;
       var e00 = e01 = e10 = e11 = c4;
       switch (pattern) {
@@ -431,7 +431,7 @@ namespace Imager.Filters {
           e01 = sPixel.Interpolate(c4, c5, 3, 1);
           e10 = sPixel.Interpolate(c4, c7, 3, 1);
           e11 = sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 14, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 14, 1, 1);
         }
         break;
         case 56: {
@@ -451,15 +451,15 @@ namespace Imager.Filters {
         case 58: {
           e10 = sPixel.Interpolate(c4, c7, 3, 1);
           e11 = sPixel.Interpolate(c4, c7, c8, 2, 1, 1);
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 59: {
           e10 = sPixel.Interpolate(c4, c7, 3, 1);
           e11 = sPixel.Interpolate(c4, c7, c8, 2, 1, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 60: {
@@ -480,14 +480,14 @@ namespace Imager.Filters {
           e00 = sPixel.Interpolate(c4, c0, 3, 1);
           e10 = sPixel.Interpolate(c4, c7, 3, 1);
           e11 = sPixel.Interpolate(c4, c7, c8, 2, 1, 1);
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 63: {
           e10 = sPixel.Interpolate(c4, c7, 3, 1);
           e11 = sPixel.Interpolate(c4, c7, c8, 2, 1, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 14, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 14, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 64:
@@ -533,7 +533,7 @@ namespace Imager.Filters {
           e00 = sPixel.Interpolate(c4, c0, c1, 2, 1, 1);
           e01 = sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c5, c8, 2, 1, 1);
-          e10 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
         }
         break;
         case 73:
@@ -553,29 +553,29 @@ namespace Imager.Filters {
         case 107: {
           e01 = sPixel.Interpolate(c4, c2, c5, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c5, c8, 2, 1, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 75: {
           e01 = sPixel.Interpolate(c4, c2, c5, 2, 1, 1);
           e10 = sPixel.Interpolate(c4, c6, 3, 1);
           e11 = sPixel.Interpolate(c4, c5, c8, 2, 1, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 78: {
           e01 = sPixel.Interpolate(c4, c5, 3, 1);
           e11 = sPixel.Interpolate(c4, c5, c8, 2, 1, 1);
-          e10 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
         }
         break;
         case 79: {
           e01 = sPixel.Interpolate(c4, c5, 3, 1);
           e11 = sPixel.Interpolate(c4, c5, c8, 2, 1, 1);
-          e10 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 80:
@@ -583,22 +583,22 @@ namespace Imager.Filters {
           e00 = sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
           e01 = sPixel.Interpolate(c4, c1, c2, 2, 1, 1);
           e10 = sPixel.Interpolate(c4, c3, c6, 2, 1, 1);
-          e11 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 82:
         case 214: {
           e00 = sPixel.Interpolate(c4, c0, c3, 2, 1, 1);
           e10 = sPixel.Interpolate(c4, c3, c6, 2, 1, 1);
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 83: {
           e00 = sPixel.Interpolate(c4, c3, 3, 1);
           e10 = sPixel.Interpolate(c4, c3, c6, 2, 1, 1);
-          e11 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e11 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 84:
@@ -618,71 +618,71 @@ namespace Imager.Filters {
           e00 = sPixel.Interpolate(c4, c0, c3, 2, 1, 1);
           e10 = sPixel.Interpolate(c4, c3, c6, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c8, 3, 1);
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 87: {
           e00 = sPixel.Interpolate(c4, c3, 3, 1);
           e10 = sPixel.Interpolate(c4, c3, c6, 2, 1, 1);
-          e11 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 88:
         case 248: {
           e00 = sPixel.Interpolate(c4, c0, c1, 2, 1, 1);
           e01 = sPixel.Interpolate(c4, c1, c2, 2, 1, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 89: {
           e00 = sPixel.Interpolate(c4, c1, 3, 1);
           e01 = sPixel.Interpolate(c4, c1, c2, 2, 1, 1);
-          e10 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
         }
         break;
         case 90: {
-          e10 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 91: {
-          e10 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 92: {
           e00 = sPixel.Interpolate(c4, c0, c1, 2, 1, 1);
           e01 = sPixel.Interpolate(c4, c1, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
         }
         break;
         case 93: {
           e00 = sPixel.Interpolate(c4, c1, 3, 1);
           e01 = sPixel.Interpolate(c4, c1, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
         }
         break;
         case 94: {
-          e10 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 95: {
           e10 = sPixel.Interpolate(c4, c6, 3, 1);
           e11 = sPixel.Interpolate(c4, c8, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 96:
@@ -728,7 +728,7 @@ namespace Imager.Filters {
           e00 = sPixel.Interpolate(c4, c0, c1, 2, 1, 1);
           e01 = sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c5, c8, 2, 1, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
         }
         break;
         case 105:
@@ -748,21 +748,21 @@ namespace Imager.Filters {
           e00 = sPixel.Interpolate(c4, c0, 3, 1);
           e01 = sPixel.Interpolate(c4, c2, c5, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c5, c8, 2, 1, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
         }
         break;
         case 110: {
           e00 = sPixel.Interpolate(c4, c0, 3, 1);
           e01 = sPixel.Interpolate(c4, c5, 3, 1);
           e11 = sPixel.Interpolate(c4, c5, c8, 2, 1, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
         }
         break;
         case 111: {
           e01 = sPixel.Interpolate(c4, c5, 3, 1);
           e11 = sPixel.Interpolate(c4, c5, c8, 2, 1, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 14, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 14, 1, 1);
         }
         break;
         case 112:
@@ -781,15 +781,15 @@ namespace Imager.Filters {
         case 114: {
           e00 = sPixel.Interpolate(c4, c0, c3, 2, 1, 1);
           e10 = sPixel.Interpolate(c4, c3, 3, 1);
-          e11 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e11 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 115: {
           e00 = sPixel.Interpolate(c4, c3, 3, 1);
           e10 = sPixel.Interpolate(c4, c3, 3, 1);
-          e11 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e11 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 116:
@@ -797,14 +797,14 @@ namespace Imager.Filters {
           e00 = sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
           e01 = sPixel.Interpolate(c4, c1, 3, 1);
           e10 = sPixel.Interpolate(c4, c3, 3, 1);
-          e11 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
+          e11 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
         }
         break;
         case 118: {
           e00 = sPixel.Interpolate(c4, c0, c3, 2, 1, 1);
           e10 = sPixel.Interpolate(c4, c3, 3, 1);
           e11 = sPixel.Interpolate(c4, c8, 3, 1);
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 119: {
@@ -823,35 +823,35 @@ namespace Imager.Filters {
           e00 = sPixel.Interpolate(c4, c0, c1, 2, 1, 1);
           e01 = sPixel.Interpolate(c4, c1, c2, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c8, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
         }
         break;
         case 121: {
           e00 = sPixel.Interpolate(c4, c1, 3, 1);
           e01 = sPixel.Interpolate(c4, c1, c2, 2, 1, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e11 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
         }
         break;
         case 122: {
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e11 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 123: {
           e01 = sPixel.Interpolate(c4, c2, 3, 1);
           e11 = sPixel.Interpolate(c4, c8, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 124: {
           e00 = sPixel.Interpolate(c4, c0, c1, 2, 1, 1);
           e01 = sPixel.Interpolate(c4, c1, 3, 1);
           e11 = sPixel.Interpolate(c4, c8, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
         }
         break;
         case 125: {
@@ -869,15 +869,15 @@ namespace Imager.Filters {
         case 126: {
           e00 = sPixel.Interpolate(c4, c0, 3, 1);
           e11 = sPixel.Interpolate(c4, c8, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 127: {
           e11 = sPixel.Interpolate(c4, c8, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 14, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 14, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 144:
@@ -908,7 +908,7 @@ namespace Imager.Filters {
           e00 = sPixel.Interpolate(c4, c3, 3, 1);
           e10 = sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c7, 3, 1);
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 148:
@@ -939,7 +939,7 @@ namespace Imager.Filters {
           e00 = sPixel.Interpolate(c4, c3, 3, 1);
           e10 = sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c7, 3, 1);
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 14, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 14, 1, 1);
         }
         break;
         case 152: {
@@ -959,15 +959,15 @@ namespace Imager.Filters {
         case 154: {
           e10 = sPixel.Interpolate(c4, c6, c7, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c7, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 155: {
           e01 = sPixel.Interpolate(c4, c2, 3, 1);
           e10 = sPixel.Interpolate(c4, c6, c7, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c7, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 156: {
@@ -987,15 +987,15 @@ namespace Imager.Filters {
         case 158: {
           e10 = sPixel.Interpolate(c4, c6, c7, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c7, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 159: {
           e10 = sPixel.Interpolate(c4, c6, c7, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c7, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 14, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 14, 1, 1);
         }
         break;
         case 184: {
@@ -1015,8 +1015,8 @@ namespace Imager.Filters {
         case 186: {
           e10 = sPixel.Interpolate(c4, c7, 3, 1);
           e11 = sPixel.Interpolate(c4, c7, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 187: {
@@ -1060,8 +1060,8 @@ namespace Imager.Filters {
         case 191: {
           e10 = sPixel.Interpolate(c4, c7, 3, 1);
           e11 = sPixel.Interpolate(c4, c7, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 14, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 14, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 14, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 14, 1, 1);
         }
         break;
         case 192:
@@ -1120,28 +1120,28 @@ namespace Imager.Filters {
           e00 = sPixel.Interpolate(c4, c1, 3, 1);
           e01 = sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c5, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
         }
         break;
         case 202: {
           e01 = sPixel.Interpolate(c4, c2, c5, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c5, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
         }
         break;
         case 203: {
           e01 = sPixel.Interpolate(c4, c2, c5, 2, 1, 1);
           e10 = sPixel.Interpolate(c4, c6, 3, 1);
           e11 = sPixel.Interpolate(c4, c5, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 206: {
           e01 = sPixel.Interpolate(c4, c5, 3, 1);
           e11 = sPixel.Interpolate(c4, c5, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
         }
         break;
         case 207: {
@@ -1161,21 +1161,21 @@ namespace Imager.Filters {
           e00 = sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
           e01 = sPixel.Interpolate(c4, c1, c2, 2, 1, 1);
           e10 = sPixel.Interpolate(c4, c3, c6, 2, 1, 1);
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 210: {
           e00 = sPixel.Interpolate(c4, c0, c3, 2, 1, 1);
           e01 = sPixel.Interpolate(c4, c2, 3, 1);
           e10 = sPixel.Interpolate(c4, c3, c6, 2, 1, 1);
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 211: {
           e00 = sPixel.Interpolate(c4, c3, 3, 1);
           e01 = sPixel.Interpolate(c4, c2, 3, 1);
           e10 = sPixel.Interpolate(c4, c3, c6, 2, 1, 1);
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 212:
@@ -1194,43 +1194,43 @@ namespace Imager.Filters {
         case 215: {
           e00 = sPixel.Interpolate(c4, c3, 3, 1);
           e10 = sPixel.Interpolate(c4, c3, c6, 2, 1, 1);
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 14, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 14, 1, 1);
         }
         break;
         case 216: {
           e00 = sPixel.Interpolate(c4, c0, c1, 2, 1, 1);
           e01 = sPixel.Interpolate(c4, c1, c2, 2, 1, 1);
           e10 = sPixel.Interpolate(c4, c6, 3, 1);
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 217: {
           e00 = sPixel.Interpolate(c4, c1, 3, 1);
           e01 = sPixel.Interpolate(c4, c1, c2, 2, 1, 1);
           e10 = sPixel.Interpolate(c4, c6, 3, 1);
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 218: {
-          e10 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 219: {
           e01 = sPixel.Interpolate(c4, c2, 3, 1);
           e10 = sPixel.Interpolate(c4, c6, 3, 1);
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 220: {
           e00 = sPixel.Interpolate(c4, c0, c1, 2, 1, 1);
           e01 = sPixel.Interpolate(c4, c1, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 221: {
@@ -1248,15 +1248,15 @@ namespace Imager.Filters {
         case 222: {
           e00 = sPixel.Interpolate(c4, c0, 3, 1);
           e10 = sPixel.Interpolate(c4, c6, 3, 1);
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 223: {
           e10 = sPixel.Interpolate(c4, c6, 3, 1);
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 14, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 14, 1, 1);
         }
         break;
         case 224:
@@ -1315,21 +1315,21 @@ namespace Imager.Filters {
           e00 = sPixel.Interpolate(c4, c1, 3, 1);
           e01 = sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c5, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 14, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 14, 1, 1);
         }
         break;
         case 234: {
           e01 = sPixel.Interpolate(c4, c2, c5, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c5, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
         }
         break;
         case 235: {
           e01 = sPixel.Interpolate(c4, c2, c5, 2, 1, 1);
           e11 = sPixel.Interpolate(c4, c5, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 14, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 14, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 238: {
@@ -1347,8 +1347,8 @@ namespace Imager.Filters {
         case 239: {
           e01 = sPixel.Interpolate(c4, c5, 3, 1);
           e11 = sPixel.Interpolate(c4, c5, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 14, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 14, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 14, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 14, 1, 1);
         }
         break;
         case 240:
@@ -1367,8 +1367,8 @@ namespace Imager.Filters {
         case 242: {
           e00 = sPixel.Interpolate(c4, c0, c3, 2, 1, 1);
           e10 = sPixel.Interpolate(c4, c3, 3, 1);
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 243: {
@@ -1388,70 +1388,70 @@ namespace Imager.Filters {
           e00 = sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
           e01 = sPixel.Interpolate(c4, c1, 3, 1);
           e10 = sPixel.Interpolate(c4, c3, 3, 1);
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 14, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 14, 1, 1);
         }
         break;
         case 246: {
           e00 = sPixel.Interpolate(c4, c0, c3, 2, 1, 1);
           e10 = sPixel.Interpolate(c4, c3, 3, 1);
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 14, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 14, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 247: {
           e00 = sPixel.Interpolate(c4, c3, 3, 1);
           e10 = sPixel.Interpolate(c4, c3, 3, 1);
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 14, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 14, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 14, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 14, 1, 1);
         }
         break;
         case 249: {
           e00 = sPixel.Interpolate(c4, c1, 3, 1);
           e01 = sPixel.Interpolate(c4, c1, c2, 2, 1, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 14, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 14, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 250: {
           e00 = sPixel.Interpolate(c4, c0, 3, 1);
           e01 = sPixel.Interpolate(c4, c2, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 251: {
           e01 = sPixel.Interpolate(c4, c2, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 14, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 14, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 252: {
           e00 = sPixel.Interpolate(c4, c0, c1, 2, 1, 1);
           e01 = sPixel.Interpolate(c4, c1, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 14, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 14, 1, 1);
         }
         break;
         case 253: {
           e00 = sPixel.Interpolate(c4, c1, 3, 1);
           e01 = sPixel.Interpolate(c4, c1, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 14, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 14, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 14, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 14, 1, 1);
         }
         break;
         case 254: {
           e00 = sPixel.Interpolate(c4, c0, 3, 1);
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 14, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 14, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 255: {
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 14, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 14, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 14, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 14, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 14, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 14, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 14, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 14, 1, 1);
         }
         break;
         #endregion
@@ -1463,7 +1463,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard HQ2x3 casepath
-    public static void Hq2x3Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
+    public static void Hq2x3Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, IPixelWorker<sPixel> worker) {
       sPixel e01, e10, e11, e20, e21;
       var e00 = e01 = e10 = e11 = e20 = e21 = c4;
       switch (pattern) {
@@ -1868,7 +1868,7 @@ namespace Imager.Filters {
           e11 = sPixel.Interpolate(c4, c5, 13, 3);
           e20 = sPixel.Interpolate(c4, c7, 3, 1);
           e21 = sPixel.Interpolate(c4, c7, c5, 9, 4, 3);
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 13, 3)) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 13, 3) : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
         }
         break;
         case 47:
@@ -1878,7 +1878,7 @@ namespace Imager.Filters {
           e11 = sPixel.Interpolate(c4, c5, 13, 3);
           e20 = sPixel.Interpolate(c4, c7, 3, 1);
           e21 = sPixel.Interpolate(c4, c7, c5, 9, 4, 3);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
         }
         break;
         case 56: {
@@ -1904,8 +1904,8 @@ namespace Imager.Filters {
           e11 = c4;
           e20 = sPixel.Interpolate(c4, c7, 3, 1);
           e21 = sPixel.Interpolate(c4, c8, c7, 12, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 13, 3)) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 13, 3)) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 13, 3) : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 13, 3) : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 59: {
@@ -1915,10 +1915,10 @@ namespace Imager.Filters {
           if (c1.IsLike(c5)) {
             e01 = sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
           }
-          if ((c1.IsNotLike(c5) && c1.IsLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsLike(c3)) {
             e01 = sPixel.Interpolate(c4, c2, c1, 12, 3, 1);
           }
-          if ((c1.IsNotLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsNotLike(c3)) {
             e01 = sPixel.Interpolate(c4, c2, 13, 3);
           }
           if (c1.IsNotLike(c3)) {
@@ -1967,7 +1967,7 @@ namespace Imager.Filters {
           e10 = c4;
           e20 = sPixel.Interpolate(c4, c7, 3, 1);
           e21 = sPixel.Interpolate(c4, c8, c7, 12, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e11 = c4;
@@ -2098,14 +2098,14 @@ namespace Imager.Filters {
           e10 = c4;
           e11 = sPixel.Interpolate(c4, c5, 13, 3);
           e21 = sPixel.Interpolate(c4, c8, 13, 3);
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 13, 3)) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 13, 3)) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 13, 3) : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 13, 3) : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
         }
         break;
         case 79: {
           e11 = sPixel.Interpolate(c4, c5, 13, 3);
           e21 = sPixel.Interpolate(c4, c8, 13, 3);
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 13, 3)) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 13, 3) : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
           if (c1.IsNotLike(c3)) {
             e00 = c4;
             e01 = sPixel.Interpolate(c4, c5, 13, 3);
@@ -2158,8 +2158,8 @@ namespace Imager.Filters {
           e10 = sPixel.Interpolate(c4, c3, 13, 3);
           e11 = c4;
           e20 = sPixel.Interpolate(c4, c6, 13, 3);
-          e21 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 13, 3)) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 13, 3)) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 13, 3) : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 13, 3) : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 84:
@@ -2197,7 +2197,7 @@ namespace Imager.Filters {
         case 87: {
           e10 = sPixel.Interpolate(c4, c3, 13, 3);
           e20 = sPixel.Interpolate(c4, c6, 13, 3);
-          e21 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 13, 3)) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 13, 3) : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
           if (c1.IsNotLike(c5)) {
             e00 = sPixel.Interpolate(c4, c3, 13, 3);
             e01 = c4;
@@ -2234,17 +2234,17 @@ namespace Imager.Filters {
           e01 = sPixel.Interpolate(c4, c2, c1, 12, 3, 1);
           e10 = c4;
           e11 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 13, 3)) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
-          e21 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 13, 3)) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 13, 3) : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
+          e21 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 13, 3) : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
         }
         break;
         case 90: {
           e10 = c4;
           e11 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 13, 3)) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
-          e21 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 13, 3)) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 13, 3)) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 13, 3)) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 13, 3) : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
+          e21 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 13, 3) : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 13, 3) : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 13, 3) : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 91: {
@@ -2252,14 +2252,14 @@ namespace Imager.Filters {
           if (c1.IsLike(c5)) {
             e01 = sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
           }
-          if ((c1.IsNotLike(c5) && c1.IsLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsLike(c3)) {
             e01 = sPixel.Interpolate(c4, c2, c1, 12, 3, 1);
           }
-          if ((c1.IsNotLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsNotLike(c3)) {
             e01 = sPixel.Interpolate(c4, c2, 13, 3);
           }
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 13, 3)) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
-          e21 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 13, 3)) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 13, 3) : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
+          e21 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 13, 3) : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
           if (c1.IsNotLike(c3)) {
             e00 = c4;
             e10 = c4;
@@ -2274,8 +2274,8 @@ namespace Imager.Filters {
           e01 = sPixel.Interpolate(c4, c1, 3, 1);
           e10 = c4;
           e11 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 13, 3)) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
-          e21 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 13, 3)) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 13, 3) : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
+          e21 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 13, 3) : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
         }
         break;
         case 93: {
@@ -2283,8 +2283,8 @@ namespace Imager.Filters {
           e01 = sPixel.Interpolate(c4, c1, 3, 1);
           e10 = c4;
           e11 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 13, 3)) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
-          e21 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 13, 3)) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 13, 3) : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
+          e21 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 13, 3) : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
         }
         break;
         case 94: {
@@ -2292,14 +2292,14 @@ namespace Imager.Filters {
           if (c1.IsLike(c3)) {
             e00 = sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
           }
-          if ((c1.IsLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsLike(c5) && c1.IsNotLike(c3)) {
             e00 = sPixel.Interpolate(c4, c0, c1, 12, 3, 1);
           }
-          if ((c1.IsNotLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsNotLike(c3)) {
             e00 = sPixel.Interpolate(c4, c0, 13, 3);
           }
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 13, 3)) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
-          e21 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 13, 3)) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 13, 3) : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
+          e21 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 13, 3) : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e11 = c4;
@@ -2450,7 +2450,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c4, c3, c7, 6, 5, 5);
             e21 = sPixel.Interpolate(c4, c8, c7, 12, 3, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
         }
         break;
         case 112:
@@ -2474,8 +2474,8 @@ namespace Imager.Filters {
           e10 = sPixel.Interpolate(c4, c3, 13, 3);
           e11 = c4;
           e20 = sPixel.Interpolate(c4, c3, 13, 3);
-          e21 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 13, 3)) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 13, 3)) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 13, 3) : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 13, 3) : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 115: {
@@ -2483,8 +2483,8 @@ namespace Imager.Filters {
           e10 = sPixel.Interpolate(c4, c3, 13, 3);
           e11 = c4;
           e20 = sPixel.Interpolate(c4, c3, 13, 3);
-          e21 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 13, 3)) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 13, 3)) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 13, 3) : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 13, 3) : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 116:
@@ -2494,7 +2494,7 @@ namespace Imager.Filters {
           e10 = sPixel.Interpolate(c4, c3, 13, 3);
           e11 = c4;
           e20 = sPixel.Interpolate(c4, c3, 13, 3);
-          e21 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 13, 3)) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 13, 3) : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
         }
         break;
         case 118: {
@@ -2549,10 +2549,10 @@ namespace Imager.Filters {
           if (c7.IsLike(c5)) {
             e21 = sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
           }
-          if ((c7.IsNotLike(c5) && c7.IsLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsLike(c3)) {
             e21 = sPixel.Interpolate(c4, c8, c7, 12, 3, 1);
           }
-          if ((c7.IsNotLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsNotLike(c3)) {
             e21 = sPixel.Interpolate(c4, c8, 13, 3);
           }
           if (c7.IsNotLike(c3)) {
@@ -2569,10 +2569,10 @@ namespace Imager.Filters {
           if (c7.IsLike(c5)) {
             e21 = sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
           }
-          if ((c7.IsNotLike(c5) && c7.IsLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsLike(c3)) {
             e21 = sPixel.Interpolate(c4, c8, c7, 12, 3, 1);
           }
-          if ((c7.IsNotLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsNotLike(c3)) {
             e21 = sPixel.Interpolate(c4, c8, 13, 3);
           }
           if (c7.IsNotLike(c3)) {
@@ -2582,8 +2582,8 @@ namespace Imager.Filters {
             e10 = sPixel.Interpolate(c4, c3, 15, 1);
             e20 = sPixel.Interpolate(c4, c3, c7, 6, 5, 5);
           }
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 13, 3)) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 13, 3)) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 13, 3) : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 13, 3) : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 123: {
@@ -2661,10 +2661,10 @@ namespace Imager.Filters {
           if (c1.IsLike(c5)) {
             e01 = sPixel.Interpolate(c4, c1, c5, 6, 5, 5);
           }
-          if ((c1.IsNotLike(c5) && c1.IsLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsLike(c3)) {
             e01 = sPixel.Interpolate(c4, c1, 15, 1);
           }
-          if ((c1.IsNotLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsNotLike(c3)) {
             e01 = c4;
           }
           if (c7.IsNotLike(c3)) {
@@ -2681,7 +2681,7 @@ namespace Imager.Filters {
             e00 = sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
             e10 = sPixel.Interpolate(c4, c3, 15, 1);
           }
-          e11 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, 15, 1));
+          e11 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, 15, 1);
         }
         break;
         case 144:
@@ -2720,7 +2720,7 @@ namespace Imager.Filters {
           e11 = c4;
           e20 = sPixel.Interpolate(c4, c7, c3, 9, 4, 3);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 13, 3)) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 13, 3) : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 148:
@@ -2759,7 +2759,7 @@ namespace Imager.Filters {
           e11 = c4;
           e20 = sPixel.Interpolate(c4, c7, c3, 9, 4, 3);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 152: {
@@ -2785,8 +2785,8 @@ namespace Imager.Filters {
           e11 = c4;
           e20 = sPixel.Interpolate(c4, c6, c7, 12, 3, 1);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 13, 3)) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 13, 3)) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 13, 3) : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 13, 3) : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 155: {
@@ -2829,10 +2829,10 @@ namespace Imager.Filters {
           if (c1.IsLike(c3)) {
             e00 = sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
           }
-          if ((c1.IsLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsLike(c5) && c1.IsNotLike(c3)) {
             e00 = sPixel.Interpolate(c4, c0, c1, 12, 3, 1);
           }
-          if ((c1.IsNotLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsNotLike(c3)) {
             e00 = sPixel.Interpolate(c4, c0, 13, 3);
           }
           if (c1.IsNotLike(c5)) {
@@ -2855,7 +2855,7 @@ namespace Imager.Filters {
             e00 = sPixel.Interpolate(c4, c1, c3, 6, 5, 5);
             e10 = sPixel.Interpolate(c4, c3, 15, 1);
           }
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 184: {
@@ -2881,8 +2881,8 @@ namespace Imager.Filters {
           e11 = c4;
           e20 = sPixel.Interpolate(c4, c7, 3, 1);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 13, 3)) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 13, 3)) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 13, 3) : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 13, 3) : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 187: {
@@ -2940,8 +2940,8 @@ namespace Imager.Filters {
           e11 = c4;
           e20 = sPixel.Interpolate(c4, c7, 3, 1);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 192:
@@ -3015,7 +3015,7 @@ namespace Imager.Filters {
           e10 = c4;
           e11 = sPixel.Interpolate(c4, c5, 13, 3);
           e21 = sPixel.Interpolate(c4, c5, 13, 3);
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 13, 3)) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 13, 3) : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
         }
         break;
         case 202: {
@@ -3023,8 +3023,8 @@ namespace Imager.Filters {
           e10 = c4;
           e11 = sPixel.Interpolate(c4, c5, 13, 3);
           e21 = sPixel.Interpolate(c4, c5, 13, 3);
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 13, 3)) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 13, 3)) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 13, 3) : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 13, 3) : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
         }
         break;
         case 203: {
@@ -3047,8 +3047,8 @@ namespace Imager.Filters {
           e10 = c4;
           e11 = sPixel.Interpolate(c4, c5, 13, 3);
           e21 = sPixel.Interpolate(c4, c5, 13, 3);
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 13, 3)) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 13, 3)) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 13, 3) : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 13, 3) : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
         }
         break;
         case 207: {
@@ -3140,7 +3140,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c4, c6, c7, 12, 3, 1);
             e21 = sPixel.Interpolate(c4, c5, c7, 6, 5, 5);
           }
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 216: {
@@ -3178,10 +3178,10 @@ namespace Imager.Filters {
           if (c7.IsLike(c3)) {
             e20 = sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
           }
-          if ((c7.IsLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsLike(c5) && c7.IsNotLike(c3)) {
             e20 = sPixel.Interpolate(c4, c6, c7, 12, 3, 1);
           }
-          if ((c7.IsNotLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsNotLike(c3)) {
             e20 = sPixel.Interpolate(c4, c6, 13, 3);
           }
           if (c7.IsNotLike(c5)) {
@@ -3191,8 +3191,8 @@ namespace Imager.Filters {
             e11 = sPixel.Interpolate(c4, c5, 15, 1);
             e21 = sPixel.Interpolate(c4, c5, c7, 6, 5, 5);
           }
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 13, 3)) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 13, 3)) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 13, 3) : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 13, 3) : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 219: {
@@ -3223,10 +3223,10 @@ namespace Imager.Filters {
           if (c7.IsLike(c3)) {
             e20 = sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
           }
-          if ((c7.IsLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsLike(c5) && c7.IsNotLike(c3)) {
             e20 = sPixel.Interpolate(c4, c6, c7, 12, 3, 1);
           }
-          if ((c7.IsNotLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsNotLike(c3)) {
             e20 = sPixel.Interpolate(c4, c6, 13, 3);
           }
           if (c7.IsNotLike(c5)) {
@@ -3277,10 +3277,10 @@ namespace Imager.Filters {
           if (c1.IsLike(c3)) {
             e00 = sPixel.Interpolate(c4, c1, c3, 6, 5, 5);
           }
-          if ((c1.IsLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsLike(c5) && c1.IsNotLike(c3)) {
             e00 = sPixel.Interpolate(c4, c1, 15, 1);
           }
-          if ((c1.IsNotLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsNotLike(c3)) {
             e00 = c4;
           }
           if (c7.IsNotLike(c5)) {
@@ -3290,7 +3290,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c4, c6, c7, 12, 3, 1);
             e21 = sPixel.Interpolate(c4, c5, c7, 6, 5, 5);
           }
-          e10 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, 15, 1));
+          e10 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, 15, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e11 = c4;
@@ -3371,7 +3371,7 @@ namespace Imager.Filters {
           e10 = c4;
           e11 = sPixel.Interpolate(c4, c5, 13, 3);
           e21 = sPixel.Interpolate(c4, c5, 13, 3);
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
         }
         break;
         case 234: {
@@ -3386,14 +3386,14 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c4, c3, c7, 6, 5, 5);
             e21 = sPixel.Interpolate(c4, c5, c7, 12, 3, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 13, 3)) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 13, 3) : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
         }
         break;
         case 235: {
           e10 = c4;
           e11 = sPixel.Interpolate(c4, c5, 13, 3);
           e21 = sPixel.Interpolate(c4, c5, 13, 3);
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
           if (c1.IsNotLike(c3)) {
             e00 = c4;
             e01 = sPixel.Interpolate(c4, c2, 13, 3);
@@ -3423,8 +3423,8 @@ namespace Imager.Filters {
           e10 = c4;
           e11 = sPixel.Interpolate(c4, c5, 13, 3);
           e21 = sPixel.Interpolate(c4, c5, 13, 3);
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
         }
         break;
         case 240:
@@ -3455,7 +3455,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c4, c3, c7, 12, 3, 1);
             e21 = sPixel.Interpolate(c4, c5, c7, 6, 5, 5);
           }
-          e01 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 13, 3)) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e01 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 13, 3) : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 243: {
@@ -3480,14 +3480,14 @@ namespace Imager.Filters {
           e10 = sPixel.Interpolate(c4, c3, 13, 3);
           e11 = c4;
           e20 = sPixel.Interpolate(c4, c3, 13, 3);
-          e21 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
         }
         break;
         case 246: {
           e10 = sPixel.Interpolate(c4, c3, 13, 3);
           e11 = c4;
           e20 = sPixel.Interpolate(c4, c3, 13, 3);
-          e21 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
           if (c1.IsNotLike(c5)) {
             e00 = sPixel.Interpolate(c4, c0, 13, 3);
             e01 = c4;
@@ -3502,15 +3502,15 @@ namespace Imager.Filters {
           e10 = sPixel.Interpolate(c4, c3, 13, 3);
           e11 = c4;
           e20 = sPixel.Interpolate(c4, c3, 13, 3);
-          e21 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 249: {
           e00 = sPixel.Interpolate(c4, c1, 3, 1);
           e01 = sPixel.Interpolate(c4, c2, c1, 12, 3, 1);
           e10 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
           if (c7.IsNotLike(c5)) {
             e11 = c4;
             e21 = c4;
@@ -3543,10 +3543,10 @@ namespace Imager.Filters {
           if (c7.IsLike(c5)) {
             e21 = sPixel.Interpolate(c4, c5, c7, 6, 5, 5);
           }
-          if ((c7.IsNotLike(c5) && c7.IsLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsLike(c3)) {
             e21 = sPixel.Interpolate(c4, c7, 15, 1);
           }
-          if ((c7.IsNotLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsNotLike(c3)) {
             e21 = c4;
           }
           if (c7.IsNotLike(c3)) {
@@ -3556,7 +3556,7 @@ namespace Imager.Filters {
             e10 = sPixel.Interpolate(c4, c3, 15, 1);
             e20 = sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
           }
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, 15, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, 15, 1);
           if (c1.IsNotLike(c3)) {
             e00 = c4;
             e01 = sPixel.Interpolate(c4, c2, 13, 3);
@@ -3577,7 +3577,7 @@ namespace Imager.Filters {
             e10 = sPixel.Interpolate(c4, c3, 15, 1);
             e20 = sPixel.Interpolate(c4, c3, c7, 6, 5, 5);
           }
-          e21 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
         }
         break;
         case 253: {
@@ -3585,21 +3585,21 @@ namespace Imager.Filters {
           e01 = sPixel.Interpolate(c4, c1, 3, 1);
           e10 = c4;
           e11 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
-          e21 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
+          e21 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
         }
         break;
         case 254: {
           if (c7.IsLike(c3)) {
             e20 = sPixel.Interpolate(c4, c3, c7, 6, 5, 5);
           }
-          if ((c7.IsLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsLike(c5) && c7.IsNotLike(c3)) {
             e20 = sPixel.Interpolate(c4, c7, 15, 1);
           }
-          if ((c7.IsNotLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsNotLike(c3)) {
             e20 = c4;
           }
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, 15, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, 15, 1);
           if (c7.IsNotLike(c5)) {
             e11 = c4;
             e21 = c4;
@@ -3619,10 +3619,10 @@ namespace Imager.Filters {
         case 255: {
           e10 = c4;
           e11 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
-          e21 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
+          e21 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         #endregion
@@ -3636,7 +3636,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard HQ2x4 casepath
-    public static void Hq2x4Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
+    public static void Hq2x4Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, IPixelWorker<sPixel> worker) {
       sPixel e01, e10, e11, e20, e21, e30, e31;
       var e00 = e01 = e10 = e11 = e20 = e21 = e30 = e31 = c4;
       switch (pattern) {
@@ -4110,7 +4110,7 @@ namespace Imager.Filters {
           e21 = sPixel.Interpolate(c4, c5, c7, 11, 3, 2);
           e30 = sPixel.Interpolate(c4, c7, 5, 3);
           e31 = sPixel.Interpolate(c4, c7, c5, 9, 4, 3);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
         }
         break;
         case 56: {
@@ -4221,7 +4221,7 @@ namespace Imager.Filters {
           e21 = sPixel.Interpolate(c4, c8, 13, 3);
           e30 = sPixel.Interpolate(c4, c7, 5, 3);
           e31 = sPixel.Interpolate(c4, c8, c7, 5, 2, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e11 = c4;
@@ -4859,7 +4859,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c4, c3, 3, 1);
             e30 = sPixel.Interpolate(c7, c3, c4, 2, 1, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
         }
         break;
         case 112:
@@ -5127,7 +5127,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c4, c3, 3, 1);
             e30 = sPixel.Interpolate(c7, c3, c4, 2, 1, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e11 = c4;
@@ -5229,7 +5229,7 @@ namespace Imager.Filters {
           e21 = sPixel.Interpolate(c4, c7, 7, 1);
           e30 = sPixel.Interpolate(c4, c7, c3, 9, 4, 3);
           e31 = sPixel.Interpolate(c4, c7, 5, 3);
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 152: {
@@ -5347,7 +5347,7 @@ namespace Imager.Filters {
             e00 = sPixel.Interpolate(c1, c3, c4, 2, 1, 1);
             e10 = sPixel.Interpolate(c4, c3, 3, 1);
           }
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 184: {
@@ -5458,8 +5458,8 @@ namespace Imager.Filters {
           e21 = sPixel.Interpolate(c4, c7, 7, 1);
           e30 = sPixel.Interpolate(c4, c7, 5, 3);
           e31 = sPixel.Interpolate(c4, c7, 5, 3);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 192:
@@ -5711,7 +5711,7 @@ namespace Imager.Filters {
             e21 = sPixel.Interpolate(c4, c5, 3, 1);
             e31 = sPixel.Interpolate(c7, c4, c5, 2, 1, 1);
           }
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 216: {
@@ -5876,7 +5876,7 @@ namespace Imager.Filters {
             e00 = sPixel.Interpolate(c1, c3, c4, 2, 1, 1);
             e10 = sPixel.Interpolate(c4, c3, 3, 1);
           }
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 224:
@@ -5964,7 +5964,7 @@ namespace Imager.Filters {
           e20 = c4;
           e21 = sPixel.Interpolate(c4, c5, 3, 1);
           e31 = sPixel.Interpolate(c4, c5, 3, 1);
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
         }
         break;
         case 234: {
@@ -5994,7 +5994,7 @@ namespace Imager.Filters {
           e20 = c4;
           e21 = sPixel.Interpolate(c4, c5, 3, 1);
           e31 = sPixel.Interpolate(c4, c5, 3, 1);
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
           if (c1.IsNotLike(c3)) {
             e00 = c4;
             e10 = c4;
@@ -6028,8 +6028,8 @@ namespace Imager.Filters {
           e20 = c4;
           e21 = sPixel.Interpolate(c4, c5, 3, 1);
           e31 = sPixel.Interpolate(c4, c5, 3, 1);
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
         }
         break;
         case 240:
@@ -6097,7 +6097,7 @@ namespace Imager.Filters {
           e20 = sPixel.Interpolate(c4, c3, 3, 1);
           e21 = c4;
           e30 = sPixel.Interpolate(c4, c3, 3, 1);
-          e31 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
+          e31 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
         }
         break;
         case 246: {
@@ -6106,7 +6106,7 @@ namespace Imager.Filters {
           e20 = sPixel.Interpolate(c4, c3, 3, 1);
           e21 = c4;
           e30 = sPixel.Interpolate(c4, c3, 3, 1);
-          e31 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
+          e31 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e11 = c4;
@@ -6123,8 +6123,8 @@ namespace Imager.Filters {
           e20 = sPixel.Interpolate(c4, c3, 3, 1);
           e21 = c4;
           e30 = sPixel.Interpolate(c4, c3, 3, 1);
-          e31 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e31 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 249: {
@@ -6133,7 +6133,7 @@ namespace Imager.Filters {
           e10 = sPixel.Interpolate(c4, c1, 7, 1);
           e11 = sPixel.Interpolate(c4, c2, 13, 3);
           e20 = c4;
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
           if (c7.IsNotLike(c5)) {
             e21 = c4;
             e31 = c4;
@@ -6168,7 +6168,7 @@ namespace Imager.Filters {
           e01 = sPixel.Interpolate(c4, c2, 11, 5);
           e11 = sPixel.Interpolate(c4, c2, 13, 3);
           e20 = c4;
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
           if (c7.IsNotLike(c5)) {
             e21 = c4;
             e31 = c4;
@@ -6198,7 +6198,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c4, c3, 3, 1);
             e30 = sPixel.Interpolate(c7, c3, c4, 2, 1, 1);
           }
-          e31 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
+          e31 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
         }
         break;
         case 253: {
@@ -6208,8 +6208,8 @@ namespace Imager.Filters {
           e11 = sPixel.Interpolate(c4, c1, 7, 1);
           e20 = c4;
           e21 = c4;
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e31 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e31 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
         }
         break;
         case 254: {
@@ -6223,7 +6223,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c4, c3, 3, 1);
             e30 = sPixel.Interpolate(c7, c3, c4, 2, 1, 1);
           }
-          e31 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
+          e31 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e11 = c4;
@@ -6238,10 +6238,10 @@ namespace Imager.Filters {
           e11 = c4;
           e20 = c4;
           e21 = c4;
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e31 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e31 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         #endregion
@@ -6257,7 +6257,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard HQ3x casepath
-    public static void Hq3xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
+    public static void Hq3xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, IPixelWorker<sPixel> worker) {
       sPixel e01, e02, e10, e11, e12, e20, e21, e22;
       var e00 = e01 = e02 = e10 = e11 = e12 = e20 = e21 = e22 = c4;
       switch (pattern) {
@@ -6753,7 +6753,7 @@ namespace Imager.Filters {
           e20 = sPixel.Interpolate(c4, c7, 3, 1);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
           e22 = sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 47:
@@ -6766,7 +6766,7 @@ namespace Imager.Filters {
           e20 = sPixel.Interpolate(c4, c7, 3, 1);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
           e22 = sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 56: {
@@ -6801,8 +6801,8 @@ namespace Imager.Filters {
           e20 = sPixel.Interpolate(c4, c7, 3, 1);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
           e22 = sPixel.Interpolate(c4, c8, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 59: {
@@ -6820,7 +6820,7 @@ namespace Imager.Filters {
             e01 = sPixel.Interpolate(c4, c1, 7, 1);
             e10 = sPixel.Interpolate(c4, c3, 7, 1);
           }
-          e02 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e02 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 60: {
@@ -6872,7 +6872,7 @@ namespace Imager.Filters {
           e20 = sPixel.Interpolate(c4, c7, 3, 1);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
           e22 = sPixel.Interpolate(c4, c8, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e02 = c4;
             e12 = c4;
@@ -7033,8 +7033,8 @@ namespace Imager.Filters {
           e12 = sPixel.Interpolate(c4, c5, 3, 1);
           e21 = c4;
           e22 = sPixel.Interpolate(c4, c8, 3, 1);
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 79: {
@@ -7043,7 +7043,7 @@ namespace Imager.Filters {
           e12 = sPixel.Interpolate(c4, c5, 3, 1);
           e21 = c4;
           e22 = sPixel.Interpolate(c4, c8, 3, 1);
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
           if (c1.IsNotLike(c3)) {
             e00 = c4;
             e01 = c4;
@@ -7105,8 +7105,8 @@ namespace Imager.Filters {
           e12 = c4;
           e20 = sPixel.Interpolate(c4, c6, 3, 1);
           e21 = c4;
-          e22 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 84:
@@ -7153,7 +7153,7 @@ namespace Imager.Filters {
           e11 = c4;
           e20 = sPixel.Interpolate(c4, c6, 3, 1);
           e21 = c4;
-          e22 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e02 = c4;
@@ -7196,8 +7196,8 @@ namespace Imager.Filters {
           e11 = c4;
           e12 = c4;
           e21 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e22 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e22 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 90: {
@@ -7206,18 +7206,18 @@ namespace Imager.Filters {
           e11 = c4;
           e12 = c4;
           e21 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e22 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e22 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 91: {
           e11 = c4;
           e12 = c4;
           e21 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e22 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e22 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
           if (c1.IsNotLike(c3)) {
             e00 = c4;
             e01 = c4;
@@ -7227,7 +7227,7 @@ namespace Imager.Filters {
             e01 = sPixel.Interpolate(c4, c1, 7, 1);
             e10 = sPixel.Interpolate(c4, c3, 7, 1);
           }
-          e02 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e02 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 92: {
@@ -7238,8 +7238,8 @@ namespace Imager.Filters {
           e11 = c4;
           e12 = c4;
           e21 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e22 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e22 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 93: {
@@ -7250,17 +7250,17 @@ namespace Imager.Filters {
           e11 = c4;
           e12 = c4;
           e21 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e22 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e22 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 94: {
           e10 = c4;
           e11 = c4;
           e21 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e22 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e22 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e02 = c4;
@@ -7446,7 +7446,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c3, c7, c4, 7, 7, 2);
             e21 = sPixel.Interpolate(c4, c7, 7, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 112:
@@ -7477,8 +7477,8 @@ namespace Imager.Filters {
           e12 = c4;
           e20 = sPixel.Interpolate(c4, c3, 3, 1);
           e21 = c4;
-          e22 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 115: {
@@ -7489,8 +7489,8 @@ namespace Imager.Filters {
           e12 = c4;
           e20 = sPixel.Interpolate(c4, c3, 3, 1);
           e21 = c4;
-          e22 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 116:
@@ -7503,7 +7503,7 @@ namespace Imager.Filters {
           e12 = c4;
           e20 = sPixel.Interpolate(c4, c3, 3, 1);
           e21 = c4;
-          e22 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 118: {
@@ -7576,7 +7576,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c3, c7, c4, 7, 7, 2);
             e21 = sPixel.Interpolate(c4, c7, 7, 1);
           }
-          e22 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 122: {
@@ -7592,9 +7592,9 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c3, c7, c4, 7, 7, 2);
             e21 = sPixel.Interpolate(c4, c7, 7, 1);
           }
-          e22 = (c7.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c8, 3, 1)) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? sPixel.Interpolate(c4, c8, 3, 1) : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 123: {
@@ -7753,7 +7753,7 @@ namespace Imager.Filters {
           e20 = sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
           e22 = sPixel.Interpolate(c4, c7, 3, 1);
-          e02 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e02 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 148:
@@ -7801,7 +7801,7 @@ namespace Imager.Filters {
           e20 = sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
           e22 = sPixel.Interpolate(c4, c7, 3, 1);
-          e02 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e02 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 152: {
@@ -7836,8 +7836,8 @@ namespace Imager.Filters {
           e20 = sPixel.Interpolate(c4, c6, 3, 1);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
           e22 = sPixel.Interpolate(c4, c7, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 155: {
@@ -7888,7 +7888,7 @@ namespace Imager.Filters {
           e20 = sPixel.Interpolate(c4, c6, 3, 1);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
           e22 = sPixel.Interpolate(c4, c7, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e02 = c4;
@@ -7914,7 +7914,7 @@ namespace Imager.Filters {
             e00 = sPixel.Interpolate(c1, c3, c4, 7, 7, 2);
             e10 = sPixel.Interpolate(c4, c3, 7, 1);
           }
-          e02 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e02 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 184: {
@@ -7949,8 +7949,8 @@ namespace Imager.Filters {
           e20 = sPixel.Interpolate(c4, c7, 3, 1);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
           e22 = sPixel.Interpolate(c4, c7, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 187: {
@@ -8023,8 +8023,8 @@ namespace Imager.Filters {
           e20 = sPixel.Interpolate(c4, c7, 3, 1);
           e21 = sPixel.Interpolate(c4, c7, 3, 1);
           e22 = sPixel.Interpolate(c4, c7, 3, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 192:
@@ -8120,7 +8120,7 @@ namespace Imager.Filters {
           e12 = sPixel.Interpolate(c4, c5, 3, 1);
           e21 = c4;
           e22 = sPixel.Interpolate(c4, c5, 3, 1);
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
         }
         break;
         case 202: {
@@ -8131,8 +8131,8 @@ namespace Imager.Filters {
           e12 = sPixel.Interpolate(c4, c5, 3, 1);
           e21 = c4;
           e22 = sPixel.Interpolate(c4, c5, 3, 1);
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 203: {
@@ -8161,8 +8161,8 @@ namespace Imager.Filters {
           e12 = sPixel.Interpolate(c4, c5, 3, 1);
           e21 = c4;
           e22 = sPixel.Interpolate(c4, c5, 3, 1);
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 207: {
@@ -8273,7 +8273,7 @@ namespace Imager.Filters {
             e21 = sPixel.Interpolate(c4, c7, 7, 1);
             e22 = sPixel.Interpolate(c5, c7, c4, 7, 7, 2);
           }
-          e02 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e02 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 216: {
@@ -8316,7 +8316,7 @@ namespace Imager.Filters {
           e01 = c4;
           e10 = c4;
           e11 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
           if (c7.IsNotLike(c5)) {
             e12 = c4;
             e21 = c4;
@@ -8326,8 +8326,8 @@ namespace Imager.Filters {
             e21 = sPixel.Interpolate(c4, c7, 7, 1);
             e22 = sPixel.Interpolate(c5, c7, c4, 7, 7, 2);
           }
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 219: {
@@ -8360,7 +8360,7 @@ namespace Imager.Filters {
           e02 = sPixel.Interpolate(c4, c1, 3, 1);
           e10 = c4;
           e11 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c6, 3, 1)) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? sPixel.Interpolate(c4, c6, 3, 1) : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
           if (c7.IsNotLike(c5)) {
             e12 = c4;
             e21 = c4;
@@ -8534,7 +8534,7 @@ namespace Imager.Filters {
           e12 = sPixel.Interpolate(c4, c5, 3, 1);
           e21 = c4;
           e22 = sPixel.Interpolate(c4, c5, 3, 1);
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
         }
         break;
         case 234: {
@@ -8552,7 +8552,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c3, c7, c4, 7, 7, 2);
             e21 = sPixel.Interpolate(c4, c7, 7, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (sPixel.Interpolate(c4, c0, 3, 1)) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? sPixel.Interpolate(c4, c0, 3, 1) : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 235: {
@@ -8562,7 +8562,7 @@ namespace Imager.Filters {
           e12 = sPixel.Interpolate(c4, c5, 3, 1);
           e21 = c4;
           e22 = sPixel.Interpolate(c4, c5, 3, 1);
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
           if (c1.IsNotLike(c3)) {
             e00 = c4;
             e01 = c4;
@@ -8599,8 +8599,8 @@ namespace Imager.Filters {
           e12 = sPixel.Interpolate(c4, c5, 3, 1);
           e21 = c4;
           e22 = sPixel.Interpolate(c4, c5, 3, 1);
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 240:
@@ -8638,7 +8638,7 @@ namespace Imager.Filters {
             e21 = sPixel.Interpolate(c4, c7, 7, 1);
             e22 = sPixel.Interpolate(c5, c7, c4, 7, 7, 2);
           }
-          e02 = (c1.IsNotLike(c5)) ? (sPixel.Interpolate(c4, c2, 3, 1)) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e02 = c1.IsNotLike(c5) ? sPixel.Interpolate(c4, c2, 3, 1) : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 243: {
@@ -8670,7 +8670,7 @@ namespace Imager.Filters {
           e12 = c4;
           e20 = sPixel.Interpolate(c4, c3, 3, 1);
           e21 = c4;
-          e22 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 246: {
@@ -8680,7 +8680,7 @@ namespace Imager.Filters {
           e12 = c4;
           e20 = sPixel.Interpolate(c4, c3, 3, 1);
           e21 = c4;
-          e22 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e02 = c4;
@@ -8698,8 +8698,8 @@ namespace Imager.Filters {
           e12 = c4;
           e20 = sPixel.Interpolate(c4, c3, 3, 1);
           e21 = c4;
-          e22 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 249: {
@@ -8709,7 +8709,7 @@ namespace Imager.Filters {
           e10 = c4;
           e11 = c4;
           e21 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
           if (c7.IsNotLike(c5)) {
             e12 = c4;
             e22 = c4;
@@ -8783,7 +8783,7 @@ namespace Imager.Filters {
             e10 = sPixel.Interpolate(c4, c3, 7, 1);
             e20 = sPixel.Interpolate(c3, c7, c4, 7, 7, 2);
           }
-          e22 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 253: {
@@ -8794,8 +8794,8 @@ namespace Imager.Filters {
           e11 = c4;
           e12 = c4;
           e21 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e22 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e22 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 254: {
@@ -8832,10 +8832,10 @@ namespace Imager.Filters {
           e11 = c4;
           e12 = c4;
           e21 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e22 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e22 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         #endregion
@@ -8852,7 +8852,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard HQ4x casepath
-    public static void Hq4xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
+    public static void Hq4xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, IPixelWorker<sPixel> worker) {
       sPixel e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23, e30, e31, e32, e33;
       var e00 = e01 = e02 = e03 = e10 = e11 = e12 = e13 = e20 = e21 = e22 = e23 = e30 = e31 = e32 = e33 = c4;
       switch (pattern) {
@@ -9594,7 +9594,7 @@ namespace Imager.Filters {
           e31 = sPixel.Interpolate(c4, c7, 5, 3);
           e32 = sPixel.Interpolate(c4, c7, c5, 5, 2, 1);
           e33 = sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 56: {
@@ -9776,7 +9776,7 @@ namespace Imager.Filters {
           e31 = sPixel.Interpolate(c4, c7, 5, 3);
           e32 = sPixel.Interpolate(c4, c7, c8, 5, 2, 1);
           e33 = sPixel.Interpolate(c4, c8, 5, 3);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e02 = c4;
             e03 = c4;
@@ -10768,7 +10768,7 @@ namespace Imager.Filters {
             e30 = sPixel.Interpolate(c3, c7, 1, 1);
             e31 = sPixel.Interpolate(c4, c7, 1, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 112:
@@ -11183,7 +11183,7 @@ namespace Imager.Filters {
             e30 = sPixel.Interpolate(c3, c7, 1, 1);
             e31 = sPixel.Interpolate(c4, c7, 1, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e02 = c4;
             e03 = c4;
@@ -11341,7 +11341,7 @@ namespace Imager.Filters {
           e31 = sPixel.Interpolate(c4, c7, c3, 5, 2, 1);
           e32 = sPixel.Interpolate(c4, c7, 5, 3);
           e33 = sPixel.Interpolate(c4, c7, 5, 3);
-          e03 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e03 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 152: {
@@ -11532,7 +11532,7 @@ namespace Imager.Filters {
             e01 = sPixel.Interpolate(c1, c4, 1, 1);
             e10 = sPixel.Interpolate(c3, c4, 1, 1);
           }
-          e03 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e03 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 184: {
@@ -11715,8 +11715,8 @@ namespace Imager.Filters {
           e31 = sPixel.Interpolate(c4, c7, 5, 3);
           e32 = sPixel.Interpolate(c4, c7, 5, 3);
           e33 = sPixel.Interpolate(c4, c7, 5, 3);
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e03 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e03 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 192:
@@ -12119,7 +12119,7 @@ namespace Imager.Filters {
             e32 = sPixel.Interpolate(c4, c7, 1, 1);
             e33 = sPixel.Interpolate(c5, c7, 1, 1);
           }
-          e03 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e03 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 216: {
@@ -12368,7 +12368,7 @@ namespace Imager.Filters {
             e01 = sPixel.Interpolate(c1, c4, 1, 1);
             e10 = sPixel.Interpolate(c3, c4, 1, 1);
           }
-          e03 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e03 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 224:
@@ -12515,7 +12515,7 @@ namespace Imager.Filters {
           e31 = c4;
           e32 = sPixel.Interpolate(c4, c5, 7, 1);
           e33 = sPixel.Interpolate(c4, c5, 5, 3);
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
         }
         break;
         case 234: {
@@ -12563,7 +12563,7 @@ namespace Imager.Filters {
           e31 = c4;
           e32 = sPixel.Interpolate(c4, c5, 7, 1);
           e33 = sPixel.Interpolate(c4, c5, 5, 3);
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
           if (c1.IsNotLike(c3)) {
             e00 = c4;
             e01 = c4;
@@ -12618,8 +12618,8 @@ namespace Imager.Filters {
           e31 = c4;
           e32 = sPixel.Interpolate(c4, c5, 7, 1);
           e33 = sPixel.Interpolate(c4, c5, 5, 3);
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 240:
@@ -12728,7 +12728,7 @@ namespace Imager.Filters {
           e30 = sPixel.Interpolate(c4, c3, 5, 3);
           e31 = sPixel.Interpolate(c4, c3, 7, 1);
           e32 = c4;
-          e33 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e33 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 246: {
@@ -12744,7 +12744,7 @@ namespace Imager.Filters {
           e30 = sPixel.Interpolate(c4, c3, 5, 3);
           e31 = sPixel.Interpolate(c4, c3, 7, 1);
           e32 = c4;
-          e33 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e33 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e02 = c4;
             e03 = c4;
@@ -12771,8 +12771,8 @@ namespace Imager.Filters {
           e30 = sPixel.Interpolate(c4, c3, 5, 3);
           e31 = sPixel.Interpolate(c4, c3, 7, 1);
           e32 = c4;
-          e33 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e03 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e33 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e03 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 249: {
@@ -12788,7 +12788,7 @@ namespace Imager.Filters {
           e21 = c4;
           e22 = c4;
           e31 = c4;
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
           if (c7.IsNotLike(c5)) {
             e23 = c4;
             e32 = c4;
@@ -12841,7 +12841,7 @@ namespace Imager.Filters {
           e21 = c4;
           e22 = c4;
           e31 = c4;
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
           if (c7.IsNotLike(c5)) {
             e23 = c4;
             e32 = c4;
@@ -12884,7 +12884,7 @@ namespace Imager.Filters {
             e30 = sPixel.Interpolate(c3, c7, 1, 1);
             e31 = sPixel.Interpolate(c4, c7, 1, 1);
           }
-          e33 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e33 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 253: {
@@ -12902,8 +12902,8 @@ namespace Imager.Filters {
           e23 = c4;
           e31 = c4;
           e32 = c4;
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e33 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e33 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
         }
         break;
         case 254: {
@@ -12925,7 +12925,7 @@ namespace Imager.Filters {
             e30 = sPixel.Interpolate(c3, c7, 1, 1);
             e31 = sPixel.Interpolate(c4, c7, 1, 1);
           }
-          e33 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
+          e33 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e02 = c4;
             e03 = c4;
@@ -12950,10 +12950,10 @@ namespace Imager.Filters {
           e23 = c4;
           e31 = c4;
           e32 = c4;
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e33 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e03 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e33 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e03 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         #endregion
@@ -12977,7 +12977,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard LQ2x casepath
-    public static void Lq2xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
+    public static void Lq2xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, IPixelWorker<sPixel> worker) {
       sPixel e01, e10, e11;
       var e00 = e01 = e10 = e11 = c4;
       switch (pattern) {
@@ -13123,7 +13123,7 @@ namespace Imager.Filters {
           e01 = c0;
           e10 = c0;
           e11 = c0;
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 2, 1, 1);
         }
         break;
         case 11:
@@ -13135,7 +13135,7 @@ namespace Imager.Filters {
           e01 = c2;
           e10 = c2;
           e11 = c2;
-          e00 = (c1.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c1, c3, 2, 1, 1);
         }
         break;
         case 14:
@@ -13176,7 +13176,7 @@ namespace Imager.Filters {
           e00 = c0;
           e10 = c0;
           e11 = c0;
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 2, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 2, 1, 1);
         }
         break;
         case 19:
@@ -13209,16 +13209,16 @@ namespace Imager.Filters {
         case 26: {
           e10 = c0;
           e11 = c0;
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 2, 1, 1);
         }
         break;
         case 31:
         case 95: {
           e10 = c4;
           e11 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 42:
@@ -13253,7 +13253,7 @@ namespace Imager.Filters {
           e01 = c0;
           e10 = c0;
           e11 = c0;
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 6, 1, 1);
         }
         break;
         case 47:
@@ -13261,7 +13261,7 @@ namespace Imager.Filters {
           e01 = c4;
           e10 = c4;
           e11 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 14, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 14, 1, 1);
         }
         break;
         case 58:
@@ -13269,22 +13269,22 @@ namespace Imager.Filters {
         case 186: {
           e10 = c0;
           e11 = c0;
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 6, 1, 1);
         }
         break;
         case 59: {
           e10 = c2;
           e11 = c2;
-          e00 = (c1.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c1, c3, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c1, c5, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c1, c3, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c1, c5, 6, 1, 1);
         }
         break;
         case 63: {
           e10 = c4;
           e11 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 14, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 14, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 72:
@@ -13298,7 +13298,7 @@ namespace Imager.Filters {
           e00 = c0;
           e01 = c0;
           e11 = c0;
-          e10 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 2, 1, 1);
         }
         break;
         case 73:
@@ -13320,8 +13320,8 @@ namespace Imager.Filters {
         case 74: {
           e01 = c0;
           e11 = c0;
-          e10 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 2, 1, 1);
         }
         break;
         case 78:
@@ -13372,8 +13372,8 @@ namespace Imager.Filters {
         case 115: {
           e00 = c2;
           e10 = c2;
-          e11 = (c7.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c5, c7, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c1, c5, 6, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c5, c7, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c1, c5, 6, 1, 1);
         }
         break;
         case 84:
@@ -13406,8 +13406,8 @@ namespace Imager.Filters {
         case 87: {
           e00 = c3;
           e10 = c3;
-          e11 = (c7.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c5, c7, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c5, c7, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 2, 1, 1);
         }
         break;
         case 88:
@@ -13415,59 +13415,59 @@ namespace Imager.Filters {
         case 250: {
           e00 = c0;
           e01 = c0;
-          e10 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 2, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 2, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
         }
         break;
         case 89:
         case 93: {
           e00 = c1;
           e01 = c1;
-          e10 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 6, 1, 1);
         }
         break;
         case 90: {
-          e10 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 6, 1, 1);
         }
         break;
         case 91: {
-          e10 = (c7.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c5, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c1, c3, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c1, c5, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c5, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c1, c3, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c1, c5, 6, 1, 1);
         }
         break;
         case 92: {
           e00 = c0;
           e01 = c0;
-          e10 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 6, 1, 1);
         }
         break;
         case 94: {
-          e10 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 2, 1, 1);
         }
         break;
         case 107:
         case 123: {
           e01 = c2;
           e11 = c2;
-          e10 = (c7.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c1, c3, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c1, c3, 2, 1, 1);
         }
         break;
         case 111: {
           e01 = c4;
           e11 = c4;
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 14, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 14, 1, 1);
         }
         break;
         case 112:
@@ -13499,50 +13499,50 @@ namespace Imager.Filters {
         case 114: {
           e00 = c0;
           e10 = c0;
-          e11 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 6, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 6, 1, 1);
         }
         break;
         case 116: {
           e00 = c0;
           e01 = c0;
           e10 = c0;
-          e11 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 6, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 6, 1, 1);
         }
         break;
         case 117: {
           e00 = c1;
           e01 = c1;
           e10 = c1;
-          e11 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 6, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 6, 1, 1);
         }
         break;
         case 121: {
           e00 = c1;
           e01 = c1;
-          e10 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 2, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 2, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 6, 1, 1);
         }
         break;
         case 122: {
-          e10 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 2, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 2, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 6, 1, 1);
         }
         break;
         case 126: {
           e00 = c0;
           e11 = c0;
-          e10 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 2, 1, 1);
         }
         break;
         case 127: {
           e11 = c4;
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 14, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 14, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 146:
@@ -13566,7 +13566,7 @@ namespace Imager.Filters {
           e00 = c2;
           e10 = c2;
           e11 = c2;
-          e01 = (c1.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c1, c5, 6, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c1, c5, 6, 1, 1);
         }
         break;
         case 151:
@@ -13574,28 +13574,28 @@ namespace Imager.Filters {
           e00 = c3;
           e10 = c3;
           e11 = c3;
-          e01 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 14, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 14, 1, 1);
         }
         break;
         case 158: {
           e10 = c0;
           e11 = c0;
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 2, 1, 1);
         }
         break;
         case 159: {
           e10 = c4;
           e11 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 14, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 14, 1, 1);
         }
         break;
         case 191: {
           e10 = c4;
           e11 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 14, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 14, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 14, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 14, 1, 1);
         }
         break;
         case 200:
@@ -13619,49 +13619,49 @@ namespace Imager.Filters {
           e00 = c1;
           e01 = c1;
           e11 = c1;
-          e10 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 6, 1, 1);
         }
         break;
         case 211: {
           e00 = c2;
           e01 = c2;
           e10 = c2;
-          e11 = (c7.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c5, c7, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c5, c7, 2, 1, 1);
         }
         break;
         case 215: {
           e00 = c3;
           e10 = c3;
-          e11 = (c7.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c5, c7, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 14, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c5, c7, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 14, 1, 1);
         }
         break;
         case 218: {
-          e10 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 6, 1, 1);
         }
         break;
         case 219: {
           e01 = c2;
           e10 = c2;
-          e11 = (c7.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c1, c3, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c1, c3, 2, 1, 1);
         }
         break;
         case 220: {
           e00 = c0;
           e01 = c0;
-          e10 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 6, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 6, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
         }
         break;
         case 223: {
           e10 = c4;
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 14, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 14, 1, 1);
         }
         break;
         case 233:
@@ -13669,35 +13669,35 @@ namespace Imager.Filters {
           e00 = c1;
           e01 = c1;
           e11 = c1;
-          e10 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 14, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 14, 1, 1);
         }
         break;
         case 234: {
           e01 = c0;
           e11 = c0;
-          e10 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 6, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 6, 1, 1);
         }
         break;
         case 235: {
           e01 = c2;
           e11 = c2;
-          e10 = (c7.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c3, c7, 14, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c1, c3, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c3, c7, 14, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c1, c3, 2, 1, 1);
         }
         break;
         case 239: {
           e01 = c4;
           e11 = c4;
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 14, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 14, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 14, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 14, 1, 1);
         }
         break;
         case 242: {
           e00 = c0;
           e10 = c0;
-          e11 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 6, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 6, 1, 1);
         }
         break;
         case 243: {
@@ -13716,70 +13716,70 @@ namespace Imager.Filters {
           e00 = c0;
           e01 = c0;
           e10 = c0;
-          e11 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 14, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 14, 1, 1);
         }
         break;
         case 245: {
           e00 = c1;
           e01 = c1;
           e10 = c1;
-          e11 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 14, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 14, 1, 1);
         }
         break;
         case 246: {
           e00 = c0;
           e10 = c0;
-          e11 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 14, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 2, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 14, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 2, 1, 1);
         }
         break;
         case 247: {
           e00 = c3;
           e10 = c3;
-          e11 = (c7.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c5, c7, 14, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 14, 1, 1));
+          e11 = c7.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c5, c7, 14, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 14, 1, 1);
         }
         break;
         case 249: {
           e00 = c1;
           e01 = c1;
-          e10 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 14, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 14, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 2, 1, 1);
         }
         break;
         case 251: {
           e01 = c2;
-          e10 = (c7.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c3, c7, 14, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c1, c3, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c3, c7, 14, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c1, c3, 2, 1, 1);
         }
         break;
         case 252: {
           e00 = c0;
           e01 = c0;
-          e10 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 2, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 14, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 2, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 14, 1, 1);
         }
         break;
         case 253: {
           e00 = c1;
           e01 = c1;
-          e10 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 14, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 14, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 14, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 14, 1, 1);
         }
         break;
         case 254: {
           e00 = c0;
-          e10 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 2, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 14, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 2, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 2, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 14, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 2, 1, 1);
         }
         break;
         case 255: {
-          e10 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 14, 1, 1));
-          e11 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 14, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 14, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 14, 1, 1));
+          e10 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 14, 1, 1);
+          e11 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 14, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 14, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 14, 1, 1);
         }
         break;
         #endregion
@@ -13791,7 +13791,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard LQ2x3 casepath
-    public static void Lq2x3Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
+    public static void Lq2x3Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, IPixelWorker<sPixel> worker) {
       sPixel e01, e10, e11, e20, e21;
       var e00 = e01 = e10 = e11 = e20 = e21 = c4;
       switch (pattern) {
@@ -14146,7 +14146,7 @@ namespace Imager.Filters {
           e11 = c0;
           e20 = c0;
           e21 = c0;
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 10, 3, 3);
         }
         break;
         case 47:
@@ -14156,7 +14156,7 @@ namespace Imager.Filters {
           e11 = c4;
           e20 = c4;
           e21 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
         }
         break;
         case 58:
@@ -14166,8 +14166,8 @@ namespace Imager.Filters {
           e11 = c0;
           e20 = c0;
           e21 = c0;
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 10, 3, 3);
         }
         break;
         case 59: {
@@ -14177,10 +14177,10 @@ namespace Imager.Filters {
           if (c1.IsLike(c5)) {
             e01 = sPixel.Interpolate(c2, c1, c5, 10, 3, 3);
           }
-          if ((c1.IsNotLike(c5) && c1.IsLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsLike(c3)) {
             e01 = sPixel.Interpolate(c2, c1, 15, 1);
           }
-          if ((c1.IsNotLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsNotLike(c3)) {
             e01 = c2;
           }
           if (c1.IsNotLike(c3)) {
@@ -14196,7 +14196,7 @@ namespace Imager.Filters {
           e10 = c4;
           e20 = c4;
           e21 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e11 = c4;
@@ -14274,14 +14274,14 @@ namespace Imager.Filters {
           e10 = c0;
           e11 = c0;
           e21 = c0;
-          e20 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 10, 3, 3));
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 10, 3, 3);
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 10, 3, 3);
         }
         break;
         case 79: {
           e11 = c4;
           e21 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
           if (c1.IsNotLike(c3)) {
             e00 = c4;
             e01 = c4;
@@ -14355,8 +14355,8 @@ namespace Imager.Filters {
           e10 = c2;
           e11 = c2;
           e20 = c2;
-          e21 = (c7.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c5, c7, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c1, c5, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c5, c7, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c1, c5, 10, 3, 3);
         }
         break;
         case 84:
@@ -14397,7 +14397,7 @@ namespace Imager.Filters {
         case 87: {
           e10 = c3;
           e20 = c3;
-          e21 = (c7.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c5, c7, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c5, c7, 10, 3, 3);
           if (c1.IsNotLike(c5)) {
             e00 = c3;
             e01 = c3;
@@ -14437,17 +14437,17 @@ namespace Imager.Filters {
           e01 = c1;
           e10 = c1;
           e11 = c1;
-          e20 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 10, 3, 3));
-          e21 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 10, 3, 3);
+          e21 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 10, 3, 3);
         }
         break;
         case 90: {
           e10 = c0;
           e11 = c0;
-          e20 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 10, 3, 3));
-          e21 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 10, 3, 3));
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 10, 3, 3);
+          e21 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 10, 3, 3);
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 10, 3, 3);
         }
         break;
         case 91: {
@@ -14455,14 +14455,14 @@ namespace Imager.Filters {
           if (c1.IsLike(c5)) {
             e01 = sPixel.Interpolate(c2, c1, c5, 10, 3, 3);
           }
-          if ((c1.IsNotLike(c5) && c1.IsLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsLike(c3)) {
             e01 = sPixel.Interpolate(c2, c1, 15, 1);
           }
-          if ((c1.IsNotLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsNotLike(c3)) {
             e01 = c2;
           }
-          e20 = (c7.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c3, c7, 10, 3, 3));
-          e21 = (c7.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c5, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c3, c7, 10, 3, 3);
+          e21 = c7.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c5, c7, 10, 3, 3);
           if (c1.IsNotLike(c3)) {
             e00 = c2;
             e10 = c2;
@@ -14477,8 +14477,8 @@ namespace Imager.Filters {
           e01 = c0;
           e10 = c0;
           e11 = c0;
-          e20 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 10, 3, 3));
-          e21 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 10, 3, 3);
+          e21 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 10, 3, 3);
         }
         break;
         case 94: {
@@ -14486,14 +14486,14 @@ namespace Imager.Filters {
           if (c1.IsLike(c3)) {
             e00 = sPixel.Interpolate(c0, c1, c3, 10, 3, 3);
           }
-          if ((c1.IsLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsLike(c5) && c1.IsNotLike(c3)) {
             e00 = sPixel.Interpolate(c0, c1, 15, 1);
           }
-          if ((c1.IsNotLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsNotLike(c3)) {
             e00 = c0;
           }
-          e20 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 10, 3, 3));
-          e21 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 10, 3, 3);
+          e21 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 10, 3, 3);
           if (c1.IsNotLike(c5)) {
             e01 = c0;
             e11 = c0;
@@ -14534,7 +14534,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c4, c3, c7, 6, 5, 5);
             e21 = sPixel.Interpolate(c4, c7, 15, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
         }
         break;
         case 112:
@@ -14574,8 +14574,8 @@ namespace Imager.Filters {
           e10 = c0;
           e11 = c0;
           e20 = c0;
-          e21 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 10, 3, 3);
         }
         break;
         case 116:
@@ -14585,7 +14585,7 @@ namespace Imager.Filters {
           e10 = c0;
           e11 = c0;
           e20 = c0;
-          e21 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 10, 3, 3);
         }
         break;
         case 117:
@@ -14595,7 +14595,7 @@ namespace Imager.Filters {
           e10 = c1;
           e11 = c1;
           e20 = c1;
-          e21 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 10, 3, 3);
         }
         break;
         case 121: {
@@ -14605,10 +14605,10 @@ namespace Imager.Filters {
           if (c7.IsLike(c5)) {
             e21 = sPixel.Interpolate(c1, c5, c7, 10, 3, 3);
           }
-          if ((c7.IsNotLike(c5) && c7.IsLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsLike(c3)) {
             e21 = sPixel.Interpolate(c1, c7, 15, 1);
           }
-          if ((c7.IsNotLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsNotLike(c3)) {
             e21 = c1;
           }
           if (c7.IsNotLike(c3)) {
@@ -14625,10 +14625,10 @@ namespace Imager.Filters {
           if (c7.IsLike(c5)) {
             e21 = sPixel.Interpolate(c0, c5, c7, 10, 3, 3);
           }
-          if ((c7.IsNotLike(c5) && c7.IsLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsLike(c3)) {
             e21 = sPixel.Interpolate(c0, c7, 15, 1);
           }
-          if ((c7.IsNotLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsNotLike(c3)) {
             e21 = c0;
           }
           if (c7.IsNotLike(c3)) {
@@ -14638,8 +14638,8 @@ namespace Imager.Filters {
             e10 = sPixel.Interpolate(c0, c3, 15, 1);
             e20 = sPixel.Interpolate(c0, c3, c7, 6, 5, 5);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 10, 3, 3);
         }
         break;
         case 126: {
@@ -14667,10 +14667,10 @@ namespace Imager.Filters {
           if (c1.IsLike(c5)) {
             e01 = sPixel.Interpolate(c4, c1, c5, 6, 5, 5);
           }
-          if ((c1.IsNotLike(c5) && c1.IsLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsLike(c3)) {
             e01 = sPixel.Interpolate(c4, c1, 15, 1);
           }
-          if ((c1.IsNotLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsNotLike(c3)) {
             e01 = c4;
           }
           if (c7.IsNotLike(c3)) {
@@ -14687,7 +14687,7 @@ namespace Imager.Filters {
             e00 = sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
             e10 = sPixel.Interpolate(c4, c3, 15, 1);
           }
-          e11 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, 15, 1));
+          e11 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, 15, 1);
         }
         break;
         case 146:
@@ -14717,7 +14717,7 @@ namespace Imager.Filters {
           e11 = c2;
           e20 = c2;
           e21 = c2;
-          e01 = (c1.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c1, c5, 10, 3, 3));
+          e01 = c1.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c1, c5, 10, 3, 3);
         }
         break;
         case 151:
@@ -14727,7 +14727,7 @@ namespace Imager.Filters {
           e11 = c3;
           e20 = c3;
           e21 = c3;
-          e01 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 10, 3, 3));
+          e01 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 10, 3, 3);
         }
         break;
         case 158: {
@@ -14737,10 +14737,10 @@ namespace Imager.Filters {
           if (c1.IsLike(c3)) {
             e00 = sPixel.Interpolate(c0, c1, c3, 10, 3, 3);
           }
-          if ((c1.IsLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsLike(c5) && c1.IsNotLike(c3)) {
             e00 = sPixel.Interpolate(c0, c1, 15, 1);
           }
-          if ((c1.IsNotLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsNotLike(c3)) {
             e00 = c0;
           }
           if (c1.IsNotLike(c5)) {
@@ -14763,7 +14763,7 @@ namespace Imager.Filters {
             e00 = sPixel.Interpolate(c4, c1, c3, 6, 5, 5);
             e10 = sPixel.Interpolate(c4, c3, 15, 1);
           }
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 191: {
@@ -14771,8 +14771,8 @@ namespace Imager.Filters {
           e11 = c4;
           e20 = c4;
           e21 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         case 200:
@@ -14803,7 +14803,7 @@ namespace Imager.Filters {
           e10 = c1;
           e11 = c1;
           e21 = c1;
-          e20 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 10, 3, 3);
         }
         break;
         case 211: {
@@ -14832,7 +14832,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c3, c7, 15, 1);
             e21 = sPixel.Interpolate(c3, c5, c7, 6, 5, 5);
           }
-          e01 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 10, 3, 3));
+          e01 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 10, 3, 3);
         }
         break;
         case 218: {
@@ -14840,10 +14840,10 @@ namespace Imager.Filters {
           if (c7.IsLike(c3)) {
             e20 = sPixel.Interpolate(c0, c3, c7, 10, 3, 3);
           }
-          if ((c7.IsLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsLike(c5) && c7.IsNotLike(c3)) {
             e20 = sPixel.Interpolate(c0, c7, 15, 1);
           }
-          if ((c7.IsNotLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsNotLike(c3)) {
             e20 = c0;
           }
           if (c7.IsNotLike(c5)) {
@@ -14853,8 +14853,8 @@ namespace Imager.Filters {
             e11 = sPixel.Interpolate(c0, c5, 15, 1);
             e21 = sPixel.Interpolate(c0, c5, c7, 6, 5, 5);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 10, 3, 3);
         }
         break;
         case 219: {
@@ -14885,10 +14885,10 @@ namespace Imager.Filters {
           if (c7.IsLike(c3)) {
             e20 = sPixel.Interpolate(c0, c3, c7, 10, 3, 3);
           }
-          if ((c7.IsLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsLike(c5) && c7.IsNotLike(c3)) {
             e20 = sPixel.Interpolate(c0, c7, 15, 1);
           }
-          if ((c7.IsNotLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsNotLike(c3)) {
             e20 = c0;
           }
           if (c7.IsNotLike(c5)) {
@@ -14904,10 +14904,10 @@ namespace Imager.Filters {
           if (c1.IsLike(c3)) {
             e00 = sPixel.Interpolate(c4, c1, c3, 6, 5, 5);
           }
-          if ((c1.IsLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsLike(c5) && c1.IsNotLike(c3)) {
             e00 = sPixel.Interpolate(c4, c1, 15, 1);
           }
-          if ((c1.IsNotLike(c5) && c1.IsNotLike(c3))) {
+          if (c1.IsNotLike(c5) && c1.IsNotLike(c3)) {
             e00 = c4;
           }
           if (c7.IsNotLike(c5)) {
@@ -14917,7 +14917,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c4, c7, 15, 1);
             e21 = sPixel.Interpolate(c4, c5, c7, 6, 5, 5);
           }
-          e10 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, 15, 1));
+          e10 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, 15, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e11 = c4;
@@ -14939,14 +14939,14 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c0, c3, c7, 6, 5, 5);
             e21 = sPixel.Interpolate(c0, c7, 15, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 10, 3, 3));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 10, 3, 3);
         }
         break;
         case 235: {
           e10 = c2;
           e11 = c2;
           e21 = c2;
-          e20 = (c7.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c3, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c3, c7, 10, 3, 3);
           if (c1.IsNotLike(c3)) {
             e00 = c2;
             e01 = c2;
@@ -14961,8 +14961,8 @@ namespace Imager.Filters {
           e10 = c4;
           e11 = c4;
           e21 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
         }
         break;
         case 242: {
@@ -14977,7 +14977,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c0, c7, 15, 1);
             e21 = sPixel.Interpolate(c0, c5, c7, 6, 5, 5);
           }
-          e01 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 10, 3, 3));
+          e01 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 10, 3, 3);
         }
         break;
         case 243: {
@@ -14999,7 +14999,7 @@ namespace Imager.Filters {
           e10 = c0;
           e11 = c0;
           e20 = c0;
-          e21 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 10, 3, 3);
           if (c1.IsNotLike(c5)) {
             e00 = c0;
             e01 = c0;
@@ -15014,15 +15014,15 @@ namespace Imager.Filters {
           e10 = c3;
           e11 = c3;
           e20 = c3;
-          e21 = (c7.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c5, c7, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c5, c7, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 10, 3, 3);
         }
         break;
         case 249: {
           e00 = c1;
           e01 = c1;
           e10 = c1;
-          e20 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 10, 3, 3);
           if (c7.IsNotLike(c5)) {
             e11 = c1;
             e21 = c1;
@@ -15036,10 +15036,10 @@ namespace Imager.Filters {
           if (c7.IsLike(c5)) {
             e21 = sPixel.Interpolate(c2, c5, c7, 6, 5, 5);
           }
-          if ((c7.IsNotLike(c5) && c7.IsLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsLike(c3)) {
             e21 = sPixel.Interpolate(c2, c7, 15, 1);
           }
-          if ((c7.IsNotLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsNotLike(c3)) {
             e21 = c2;
           }
           if (c7.IsNotLike(c3)) {
@@ -15049,7 +15049,7 @@ namespace Imager.Filters {
             e10 = sPixel.Interpolate(c2, c3, 15, 1);
             e20 = sPixel.Interpolate(c2, c3, c7, 10, 3, 3);
           }
-          e11 = (c7.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c5, 15, 1));
+          e11 = c7.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c5, 15, 1);
           if (c1.IsNotLike(c3)) {
             e00 = c2;
             e01 = c2;
@@ -15070,20 +15070,20 @@ namespace Imager.Filters {
             e10 = sPixel.Interpolate(c0, c3, 15, 1);
             e20 = sPixel.Interpolate(c0, c3, c7, 6, 5, 5);
           }
-          e21 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 10, 3, 3));
+          e21 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 10, 3, 3);
         }
         break;
         case 254: {
           if (c7.IsLike(c3)) {
             e20 = sPixel.Interpolate(c0, c3, c7, 6, 5, 5);
           }
-          if ((c7.IsLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsLike(c5) && c7.IsNotLike(c3)) {
             e20 = sPixel.Interpolate(c0, c7, 15, 1);
           }
-          if ((c7.IsNotLike(c5) && c7.IsNotLike(c3))) {
+          if (c7.IsNotLike(c5) && c7.IsNotLike(c3)) {
             e20 = c0;
           }
-          e10 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, 15, 1));
+          e10 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, 15, 1);
           if (c7.IsNotLike(c5)) {
             e11 = c0;
             e21 = c0;
@@ -15103,10 +15103,10 @@ namespace Imager.Filters {
         case 255: {
           e10 = c4;
           e11 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 10, 3, 3));
-          e21 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 10, 3, 3));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 10, 3, 3));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 10, 3, 3));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 10, 3, 3);
+          e21 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 10, 3, 3);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 10, 3, 3);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 10, 3, 3);
         }
         break;
         #endregion
@@ -15120,7 +15120,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard LQ2x4 casepath
-    public static void Lq2x4Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
+    public static void Lq2x4Kernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, IPixelWorker<sPixel> worker) {
       sPixel e01, e10, e11, e20, e21, e30, e31;
       var e00 = e01 = e10 = e11 = e20 = e21 = e30 = e31 = c4;
       switch (pattern) {
@@ -15521,7 +15521,7 @@ namespace Imager.Filters {
           e21 = c4;
           e30 = c4;
           e31 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
         }
         break;
         case 58:
@@ -15574,7 +15574,7 @@ namespace Imager.Filters {
           e21 = c4;
           e30 = c4;
           e31 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e11 = c4;
@@ -16030,7 +16030,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c4, c3, 3, 1);
             e30 = sPixel.Interpolate(c7, c3, c4, 2, 1, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
         }
         break;
         case 112:
@@ -16206,7 +16206,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c4, c3, 3, 1);
             e30 = sPixel.Interpolate(c7, c3, c4, 2, 1, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c4;
             e11 = c4;
@@ -16264,7 +16264,7 @@ namespace Imager.Filters {
           e21 = c3;
           e30 = c3;
           e31 = c3;
-          e01 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 6, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 6, 1, 1);
         }
         break;
         case 158: {
@@ -16301,7 +16301,7 @@ namespace Imager.Filters {
             e00 = sPixel.Interpolate(c1, c3, c4, 2, 1, 1);
             e10 = sPixel.Interpolate(c4, c3, 3, 1);
           }
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 191: {
@@ -16311,8 +16311,8 @@ namespace Imager.Filters {
           e21 = c4;
           e30 = c4;
           e31 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 200:
@@ -16382,7 +16382,7 @@ namespace Imager.Filters {
             e21 = sPixel.Interpolate(c3, c5, 3, 1);
             e31 = sPixel.Interpolate(c7, c3, c5, 2, 1, 1);
           }
-          e01 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 6, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 6, 1, 1);
         }
         break;
         case 218: {
@@ -16476,7 +16476,7 @@ namespace Imager.Filters {
             e00 = sPixel.Interpolate(c1, c3, c4, 2, 1, 1);
             e10 = sPixel.Interpolate(c4, c3, 3, 1);
           }
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         case 233:
@@ -16488,7 +16488,7 @@ namespace Imager.Filters {
           e20 = c1;
           e21 = c1;
           e31 = c1;
-          e30 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 6, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 6, 1, 1);
         }
         break;
         case 234: {
@@ -16518,7 +16518,7 @@ namespace Imager.Filters {
           e20 = c2;
           e21 = c2;
           e31 = c2;
-          e30 = (c7.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c3, c7, 6, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c3, c7, 6, 1, 1);
           if (c1.IsNotLike(c3)) {
             e00 = c2;
             e10 = c2;
@@ -16535,8 +16535,8 @@ namespace Imager.Filters {
           e20 = c4;
           e21 = c4;
           e31 = c4;
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
         }
         break;
         case 242: {
@@ -16585,7 +16585,7 @@ namespace Imager.Filters {
           e20 = c0;
           e21 = c0;
           e30 = c0;
-          e31 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 6, 1, 1));
+          e31 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 6, 1, 1);
         }
         break;
         case 245: {
@@ -16596,7 +16596,7 @@ namespace Imager.Filters {
           e20 = c1;
           e21 = c1;
           e30 = c1;
-          e31 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 6, 1, 1));
+          e31 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 6, 1, 1);
         }
         break;
         case 246: {
@@ -16605,7 +16605,7 @@ namespace Imager.Filters {
           e20 = c0;
           e21 = c0;
           e30 = c0;
-          e31 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 6, 1, 1));
+          e31 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 6, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c0;
             e11 = c0;
@@ -16622,8 +16622,8 @@ namespace Imager.Filters {
           e20 = c3;
           e21 = c3;
           e30 = c3;
-          e31 = (c7.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c5, c7, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 6, 1, 1));
+          e31 = c7.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c5, c7, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 6, 1, 1);
         }
         break;
         case 249: {
@@ -16632,7 +16632,7 @@ namespace Imager.Filters {
           e10 = c1;
           e11 = c1;
           e20 = c1;
-          e30 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 6, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 6, 1, 1);
           if (c7.IsNotLike(c5)) {
             e21 = c1;
             e31 = c1;
@@ -16646,7 +16646,7 @@ namespace Imager.Filters {
           e01 = c2;
           e11 = c2;
           e20 = c2;
-          e30 = (c7.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c3, c7, 6, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c3, c7, 6, 1, 1);
           if (c7.IsNotLike(c5)) {
             e21 = c2;
             e31 = c2;
@@ -16676,7 +16676,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c0, c3, 3, 1);
             e30 = sPixel.Interpolate(c7, c0, c3, 2, 1, 1);
           }
-          e31 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 6, 1, 1));
+          e31 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 6, 1, 1);
         }
         break;
         case 253: {
@@ -16686,8 +16686,8 @@ namespace Imager.Filters {
           e11 = c1;
           e20 = c1;
           e21 = c1;
-          e30 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 6, 1, 1));
-          e31 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 6, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 6, 1, 1);
+          e31 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 6, 1, 1);
         }
         break;
         case 254: {
@@ -16701,7 +16701,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c0, c3, 3, 1);
             e30 = sPixel.Interpolate(c7, c0, c3, 2, 1, 1);
           }
-          e31 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 6, 1, 1));
+          e31 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 6, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c0;
             e11 = c0;
@@ -16716,10 +16716,10 @@ namespace Imager.Filters {
           e11 = c4;
           e20 = c4;
           e21 = c4;
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 6, 1, 1));
-          e31 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 6, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 6, 1, 1));
-          e01 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 6, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 6, 1, 1);
+          e31 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 6, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 6, 1, 1);
+          e01 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 6, 1, 1);
         }
         break;
         #endregion
@@ -16735,7 +16735,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard LQ3x casepath
-    public static void Lq3xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
+    public static void Lq3xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, IPixelWorker<sPixel> worker) {
       sPixel e01, e02, e10, e11, e12, e20, e21, e22;
       var e00 = e01 = e02 = e10 = e11 = e12 = e20 = e21 = e22 = c4;
       switch (pattern) {
@@ -17142,7 +17142,7 @@ namespace Imager.Filters {
           e20 = c0;
           e21 = c0;
           e22 = c0;
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 2, 1, 1);
         }
         break;
         case 47:
@@ -17155,7 +17155,7 @@ namespace Imager.Filters {
           e20 = c4;
           e21 = c4;
           e22 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 58:
@@ -17168,8 +17168,8 @@ namespace Imager.Filters {
           e20 = c0;
           e21 = c0;
           e22 = c0;
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 2, 1, 1);
         }
         break;
         case 59: {
@@ -17187,7 +17187,7 @@ namespace Imager.Filters {
             e01 = sPixel.Interpolate(c2, c1, 7, 1);
             e10 = sPixel.Interpolate(c2, c3, 7, 1);
           }
-          e02 = (c1.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c1, c5, 2, 1, 1));
+          e02 = c1.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c1, c5, 2, 1, 1);
         }
         break;
         case 63: {
@@ -17197,7 +17197,7 @@ namespace Imager.Filters {
           e20 = c4;
           e21 = c4;
           e22 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e02 = c4;
             e12 = c4;
@@ -17287,8 +17287,8 @@ namespace Imager.Filters {
           e12 = c0;
           e21 = c0;
           e22 = c0;
-          e20 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 2, 1, 1);
         }
         break;
         case 79: {
@@ -17297,7 +17297,7 @@ namespace Imager.Filters {
           e12 = c4;
           e21 = c4;
           e22 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
           if (c1.IsNotLike(c3)) {
             e00 = c4;
             e01 = c4;
@@ -17383,8 +17383,8 @@ namespace Imager.Filters {
           e12 = c2;
           e20 = c2;
           e21 = c2;
-          e22 = (c7.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c5, c7, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c1, c5, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c5, c7, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c1, c5, 2, 1, 1);
         }
         break;
         case 84:
@@ -17434,7 +17434,7 @@ namespace Imager.Filters {
           e11 = c3;
           e20 = c3;
           e21 = c3;
-          e22 = (c7.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c5, c7, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c5, c7, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c3;
             e02 = c3;
@@ -17480,8 +17480,8 @@ namespace Imager.Filters {
           e11 = c1;
           e12 = c1;
           e21 = c1;
-          e20 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 2, 1, 1));
-          e22 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 2, 1, 1);
+          e22 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 2, 1, 1);
         }
         break;
         case 90: {
@@ -17490,18 +17490,18 @@ namespace Imager.Filters {
           e11 = c0;
           e12 = c0;
           e21 = c0;
-          e20 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 2, 1, 1));
-          e22 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 2, 1, 1);
+          e22 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 2, 1, 1);
         }
         break;
         case 91: {
           e11 = c2;
           e12 = c2;
           e21 = c2;
-          e20 = (c7.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c3, c7, 2, 1, 1));
-          e22 = (c7.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c5, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c3, c7, 2, 1, 1);
+          e22 = c7.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c5, c7, 2, 1, 1);
           if (c1.IsNotLike(c3)) {
             e00 = c2;
             e01 = c2;
@@ -17511,7 +17511,7 @@ namespace Imager.Filters {
             e01 = sPixel.Interpolate(c2, c1, 7, 1);
             e10 = sPixel.Interpolate(c2, c3, 7, 1);
           }
-          e02 = (c1.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c1, c5, 2, 1, 1));
+          e02 = c1.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c1, c5, 2, 1, 1);
         }
         break;
         case 92: {
@@ -17522,17 +17522,17 @@ namespace Imager.Filters {
           e11 = c0;
           e12 = c0;
           e21 = c0;
-          e20 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 2, 1, 1));
-          e22 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 2, 1, 1);
+          e22 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
         }
         break;
         case 94: {
           e10 = c0;
           e11 = c0;
           e21 = c0;
-          e20 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 2, 1, 1));
-          e22 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 2, 1, 1);
+          e22 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c0;
             e02 = c0;
@@ -17581,7 +17581,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c3, c7, c4, 7, 7, 2);
             e21 = sPixel.Interpolate(c4, c7, 7, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 112:
@@ -17632,8 +17632,8 @@ namespace Imager.Filters {
           e12 = c0;
           e20 = c0;
           e21 = c0;
-          e22 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 2, 1, 1);
         }
         break;
         case 116:
@@ -17646,7 +17646,7 @@ namespace Imager.Filters {
           e12 = c0;
           e20 = c0;
           e21 = c0;
-          e22 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
         }
         break;
         case 117:
@@ -17659,7 +17659,7 @@ namespace Imager.Filters {
           e12 = c1;
           e20 = c1;
           e21 = c1;
-          e22 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 2, 1, 1);
         }
         break;
         case 121: {
@@ -17677,7 +17677,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c3, c7, c1, 7, 7, 2);
             e21 = sPixel.Interpolate(c1, c7, 7, 1);
           }
-          e22 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 2, 1, 1);
         }
         break;
         case 122: {
@@ -17693,9 +17693,9 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c3, c7, c0, 7, 7, 2);
             e21 = sPixel.Interpolate(c0, c7, 7, 1);
           }
-          e22 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 2, 1, 1);
         }
         break;
         case 126: {
@@ -17783,7 +17783,7 @@ namespace Imager.Filters {
           e20 = c2;
           e21 = c2;
           e22 = c2;
-          e02 = (c1.IsNotLike(c5)) ? (c2) : (sPixel.Interpolate(c2, c1, c5, 2, 1, 1));
+          e02 = c1.IsNotLike(c5) ? c2 : sPixel.Interpolate(c2, c1, c5, 2, 1, 1);
         }
         break;
         case 151:
@@ -17796,7 +17796,7 @@ namespace Imager.Filters {
           e20 = c3;
           e21 = c3;
           e22 = c3;
-          e02 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 2, 1, 1));
+          e02 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 2, 1, 1);
         }
         break;
         case 158: {
@@ -17805,7 +17805,7 @@ namespace Imager.Filters {
           e20 = c0;
           e21 = c0;
           e22 = c0;
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c0;
             e02 = c0;
@@ -17831,7 +17831,7 @@ namespace Imager.Filters {
             e00 = sPixel.Interpolate(c1, c3, c4, 7, 7, 2);
             e10 = sPixel.Interpolate(c4, c3, 7, 1);
           }
-          e02 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e02 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 191: {
@@ -17842,8 +17842,8 @@ namespace Imager.Filters {
           e20 = c4;
           e21 = c4;
           e22 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 200:
@@ -17881,7 +17881,7 @@ namespace Imager.Filters {
           e12 = c1;
           e21 = c1;
           e22 = c1;
-          e20 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 2, 1, 1);
         }
         break;
         case 211: {
@@ -17916,14 +17916,14 @@ namespace Imager.Filters {
             e21 = sPixel.Interpolate(c3, c7, 7, 1);
             e22 = sPixel.Interpolate(c5, c7, c3, 7, 7, 2);
           }
-          e02 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 2, 1, 1));
+          e02 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 2, 1, 1);
         }
         break;
         case 218: {
           e01 = c0;
           e10 = c0;
           e11 = c0;
-          e20 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 2, 1, 1);
           if (c7.IsNotLike(c5)) {
             e12 = c0;
             e21 = c0;
@@ -17933,8 +17933,8 @@ namespace Imager.Filters {
             e21 = sPixel.Interpolate(c0, c7, 7, 1);
             e22 = sPixel.Interpolate(c5, c7, c0, 7, 7, 2);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 2, 1, 1);
         }
         break;
         case 219: {
@@ -17967,7 +17967,7 @@ namespace Imager.Filters {
           e02 = c0;
           e10 = c0;
           e11 = c0;
-          e20 = (c7.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c3, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c3, c7, 2, 1, 1);
           if (c7.IsNotLike(c5)) {
             e12 = c0;
             e21 = c0;
@@ -18022,7 +18022,7 @@ namespace Imager.Filters {
             e20 = sPixel.Interpolate(c3, c7, c0, 7, 7, 2);
             e21 = sPixel.Interpolate(c0, c7, 7, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c0) : (sPixel.Interpolate(c0, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c0 : sPixel.Interpolate(c0, c1, c3, 2, 1, 1);
         }
         break;
         case 235: {
@@ -18032,7 +18032,7 @@ namespace Imager.Filters {
           e12 = c2;
           e21 = c2;
           e22 = c2;
-          e20 = (c7.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c3, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c3, c7, 2, 1, 1);
           if (c1.IsNotLike(c3)) {
             e00 = c2;
             e01 = c2;
@@ -18050,8 +18050,8 @@ namespace Imager.Filters {
           e12 = c4;
           e21 = c4;
           e22 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 242: {
@@ -18069,7 +18069,7 @@ namespace Imager.Filters {
             e21 = sPixel.Interpolate(c0, c7, 7, 1);
             e22 = sPixel.Interpolate(c5, c7, c0, 7, 7, 2);
           }
-          e02 = (c1.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c1, c5, 2, 1, 1));
+          e02 = c1.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c1, c5, 2, 1, 1);
         }
         break;
         case 243: {
@@ -18098,7 +18098,7 @@ namespace Imager.Filters {
           e12 = c0;
           e20 = c0;
           e21 = c0;
-          e22 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e01 = c0;
             e02 = c0;
@@ -18116,8 +18116,8 @@ namespace Imager.Filters {
           e12 = c3;
           e20 = c3;
           e21 = c3;
-          e22 = (c7.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c5, c7, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c5, c7, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 2, 1, 1);
         }
         break;
         case 249: {
@@ -18127,7 +18127,7 @@ namespace Imager.Filters {
           e10 = c1;
           e11 = c1;
           e21 = c1;
-          e20 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 2, 1, 1);
           if (c7.IsNotLike(c5)) {
             e12 = c1;
             e22 = c1;
@@ -18179,7 +18179,7 @@ namespace Imager.Filters {
             e10 = sPixel.Interpolate(c0, c3, 7, 1);
             e20 = sPixel.Interpolate(c3, c7, c0, 7, 7, 2);
           }
-          e22 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
+          e22 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
         }
         break;
         case 254: {
@@ -18216,10 +18216,10 @@ namespace Imager.Filters {
           e11 = c4;
           e12 = c4;
           e21 = c4;
-          e20 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e22 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e02 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e20 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e22 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e02 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         #endregion
@@ -18236,7 +18236,7 @@ namespace Imager.Filters {
     }
     #endregion
     #region standard LQ4x casepath
-    public static void Lq4xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, PixelWorker<sPixel> worker) {
+    public static void Lq4xKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8, IPixelWorker<sPixel> worker) {
       sPixel e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23, e30, e31, e32, e33;
       var e00 = e01 = e02 = e03 = e10 = e11 = e12 = e13 = e20 = e21 = e22 = e23 = e30 = e31 = e32 = e33 = c4;
       switch (pattern) {
@@ -18797,7 +18797,7 @@ namespace Imager.Filters {
           e31 = c4;
           e32 = c4;
           e33 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 58:
@@ -18877,7 +18877,7 @@ namespace Imager.Filters {
           e31 = c4;
           e32 = c4;
           e33 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e02 = c4;
             e03 = c4;
@@ -19537,7 +19537,7 @@ namespace Imager.Filters {
             e30 = sPixel.Interpolate(c3, c7, 1, 1);
             e31 = sPixel.Interpolate(c4, c7, 1, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 112:
@@ -19803,7 +19803,7 @@ namespace Imager.Filters {
             e30 = sPixel.Interpolate(c3, c7, 1, 1);
             e31 = sPixel.Interpolate(c4, c7, 1, 1);
           }
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e02 = c4;
             e03 = c4;
@@ -19890,7 +19890,7 @@ namespace Imager.Filters {
           e31 = c3;
           e32 = c3;
           e33 = c3;
-          e03 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 2, 1, 1));
+          e03 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 2, 1, 1);
         }
         break;
         case 158: {
@@ -19946,7 +19946,7 @@ namespace Imager.Filters {
             e01 = sPixel.Interpolate(c1, c4, 1, 1);
             e10 = sPixel.Interpolate(c3, c4, 1, 1);
           }
-          e03 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e03 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 191: {
@@ -19964,8 +19964,8 @@ namespace Imager.Filters {
           e31 = c4;
           e32 = c4;
           e33 = c4;
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e03 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e03 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 200:
@@ -20073,7 +20073,7 @@ namespace Imager.Filters {
             e32 = sPixel.Interpolate(c3, c7, 1, 1);
             e33 = sPixel.Interpolate(c5, c7, 1, 1);
           }
-          e03 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 2, 1, 1));
+          e03 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 2, 1, 1);
         }
         break;
         case 218: {
@@ -20209,7 +20209,7 @@ namespace Imager.Filters {
             e01 = sPixel.Interpolate(c1, c4, 1, 1);
             e10 = sPixel.Interpolate(c3, c4, 1, 1);
           }
-          e03 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e03 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         case 233:
@@ -20229,7 +20229,7 @@ namespace Imager.Filters {
           e31 = c1;
           e32 = c1;
           e33 = c1;
-          e30 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 2, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 2, 1, 1);
         }
         break;
         case 234: {
@@ -20276,7 +20276,7 @@ namespace Imager.Filters {
           e31 = c2;
           e32 = c2;
           e33 = c2;
-          e30 = (c7.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c3, c7, 2, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c3, c7, 2, 1, 1);
           if (c1.IsNotLike(c3)) {
             e00 = c2;
             e01 = c2;
@@ -20303,8 +20303,8 @@ namespace Imager.Filters {
           e31 = c4;
           e32 = c4;
           e33 = c4;
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
         }
         break;
         case 242: {
@@ -20382,7 +20382,7 @@ namespace Imager.Filters {
           e30 = c0;
           e31 = c0;
           e32 = c0;
-          e33 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
+          e33 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
         }
         break;
         case 245: {
@@ -20401,7 +20401,7 @@ namespace Imager.Filters {
           e30 = c1;
           e31 = c1;
           e32 = c1;
-          e33 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 2, 1, 1));
+          e33 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 2, 1, 1);
         }
         break;
         case 246: {
@@ -20417,7 +20417,7 @@ namespace Imager.Filters {
           e30 = c0;
           e31 = c0;
           e32 = c0;
-          e33 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
+          e33 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e02 = c0;
             e03 = c0;
@@ -20444,8 +20444,8 @@ namespace Imager.Filters {
           e30 = c3;
           e31 = c3;
           e32 = c3;
-          e33 = (c7.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c5, c7, 2, 1, 1));
-          e03 = (c1.IsNotLike(c5)) ? (c3) : (sPixel.Interpolate(c3, c1, c5, 2, 1, 1));
+          e33 = c7.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c5, c7, 2, 1, 1);
+          e03 = c1.IsNotLike(c5) ? c3 : sPixel.Interpolate(c3, c1, c5, 2, 1, 1);
         }
         break;
         case 249: {
@@ -20461,7 +20461,7 @@ namespace Imager.Filters {
           e21 = c1;
           e22 = c1;
           e31 = c1;
-          e30 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 2, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 2, 1, 1);
           if (c7.IsNotLike(c5)) {
             e23 = c1;
             e32 = c1;
@@ -20483,7 +20483,7 @@ namespace Imager.Filters {
           e21 = c2;
           e22 = c2;
           e31 = c2;
-          e30 = (c7.IsNotLike(c3)) ? (c2) : (sPixel.Interpolate(c2, c3, c7, 2, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c2 : sPixel.Interpolate(c2, c3, c7, 2, 1, 1);
           if (c7.IsNotLike(c5)) {
             e23 = c2;
             e32 = c2;
@@ -20526,7 +20526,7 @@ namespace Imager.Filters {
             e30 = sPixel.Interpolate(c3, c7, 1, 1);
             e31 = sPixel.Interpolate(c0, c7, 1, 1);
           }
-          e33 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
+          e33 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
         }
         break;
         case 253: {
@@ -20544,8 +20544,8 @@ namespace Imager.Filters {
           e23 = c1;
           e31 = c1;
           e32 = c1;
-          e30 = (c7.IsNotLike(c3)) ? (c1) : (sPixel.Interpolate(c1, c3, c7, 2, 1, 1));
-          e33 = (c7.IsNotLike(c5)) ? (c1) : (sPixel.Interpolate(c1, c5, c7, 2, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c1 : sPixel.Interpolate(c1, c3, c7, 2, 1, 1);
+          e33 = c7.IsNotLike(c5) ? c1 : sPixel.Interpolate(c1, c5, c7, 2, 1, 1);
         }
         break;
         case 254: {
@@ -20567,7 +20567,7 @@ namespace Imager.Filters {
             e30 = sPixel.Interpolate(c3, c7, 1, 1);
             e31 = sPixel.Interpolate(c0, c7, 1, 1);
           }
-          e33 = (c7.IsNotLike(c5)) ? (c0) : (sPixel.Interpolate(c0, c5, c7, 2, 1, 1));
+          e33 = c7.IsNotLike(c5) ? c0 : sPixel.Interpolate(c0, c5, c7, 2, 1, 1);
           if (c1.IsNotLike(c5)) {
             e02 = c0;
             e03 = c0;
@@ -20592,10 +20592,10 @@ namespace Imager.Filters {
           e23 = c4;
           e31 = c4;
           e32 = c4;
-          e30 = (c7.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c3, c7, 2, 1, 1));
-          e33 = (c7.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c5, c7, 2, 1, 1));
-          e00 = (c1.IsNotLike(c3)) ? (c4) : (sPixel.Interpolate(c4, c1, c3, 2, 1, 1));
-          e03 = (c1.IsNotLike(c5)) ? (c4) : (sPixel.Interpolate(c4, c1, c5, 2, 1, 1));
+          e30 = c7.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c3, c7, 2, 1, 1);
+          e33 = c7.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c5, c7, 2, 1, 1);
+          e00 = c1.IsNotLike(c3) ? c4 : sPixel.Interpolate(c4, c1, c3, 2, 1, 1);
+          e03 = c1.IsNotLike(c5) ? c4 : sPixel.Interpolate(c4, c1, c5, 2, 1, 1);
         }
         break;
         #endregion

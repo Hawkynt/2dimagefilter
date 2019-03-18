@@ -26,17 +26,16 @@ using Imager;
 namespace Classes.ScriptActions {
   internal class NullTransformCommand : IScriptAction {
     #region Implementation of IScriptAction
-    public bool ChangesSourceImage => (false);
-
-    public bool ChangesTargetImage => (true);
-    public bool ProvidesNewGdiSource => (false);
+    public bool ChangesSourceImage => false;
+    public bool ChangesTargetImage => true;
+    public bool ProvidesNewGdiSource => false;
 
     public bool Execute() {
       this.TargetImage = this.SourceImage;
-      return (true);
+      return true;
     }
 
-    public Bitmap GdiSource => (null);
+    public Bitmap GdiSource => null;
 
     public cImage SourceImage { get; set; }
 

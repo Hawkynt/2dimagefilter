@@ -1,4 +1,24 @@
-﻿
+﻿#region (c)2008-2019 Hawkynt
+/*
+ *  cImage 
+ *  Image filtering library 
+    Copyright (C) 2008-2019 Hawkynt
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#endregion
+
 using System;
 
 namespace Imager.Filters {
@@ -8,7 +28,7 @@ namespace Imager.Filters {
     /// TODO: make mathutils and join clamp, min and max with the ones from spixel
     /// </summary>
     /// <param name="worker">The worker.</param>
-    public static void Process(PixelWorker<sPixel>worker ) {
+    public static void Process(IPixelWorker<sPixel>worker ) {
 
       var b1 = worker.SourceP0M2();
       var b = worker.SourceP0M1();
@@ -58,12 +78,12 @@ namespace Imager.Filters {
 
       var tilt = (7 * (bb + cc) - 3 * (aa + dd)) / 16;
 
-      var m = (s < 128) ? 2 * s : 2 * (byte.MaxValue - s);
+      var m = s < 128 ? 2 * s : 2 * (byte.MaxValue - s);
 
-      m = min(m, 2 * abs(bb));
-      m = min(m, 2 * abs(cc));
+      m = _Min(m, 2 * _Abs(bb));
+      m = _Min(m, 2 * _Abs(cc));
 
-      tilt = clamp(tilt, -m, m);
+      tilt = _Clamp(tilt, -m, m);
 
       var s1 = s + tilt / 2;
       var s0 = s1 - tilt;
@@ -80,12 +100,12 @@ namespace Imager.Filters {
 
       tilt = (7 * (bb + cc) - 3 * (aa + dd)) / 16;
 
-      m = (s < 128) ? 2 * s : 2 * (byte.MaxValue - s);
+      m = s < 128 ? 2 * s : 2 * (byte.MaxValue - s);
 
-      m = min(m, 2 * abs(bb));
-      m = min(m, 2 * abs(cc));
+      m = _Min(m, 2 * _Abs(bb));
+      m = _Min(m, 2 * _Abs(cc));
 
-      tilt = clamp(tilt, -m, m);
+      tilt = _Clamp(tilt, -m, m);
 
       var e1 = s + tilt / 2;
       var e0 = e1 - tilt;
@@ -96,29 +116,22 @@ namespace Imager.Filters {
 
       tilt = (7 * (bb + cc) - 3 * (aa + dd)) / 16;
 
-      m = (s < 128) ? 2 * s : 2 * (byte.MaxValue - s);
+      m = s < 128 ? 2 * s : 2 * (byte.MaxValue - s);
 
-      m = min(m, 2 * abs(bb));
-      m = min(m, 2 * abs(cc));
+      m = _Min(m, 2 * _Abs(bb));
+      m = _Min(m, 2 * _Abs(cc));
 
-      tilt = clamp(tilt, -m, m);
+      tilt = _Clamp(tilt, -m, m);
 
       var e3 = s + tilt / 2;
       var e2 = e3 - tilt;
 
-      return (Tuple.Create(e0, e1, e2, e3));
+      return Tuple.Create(e0, e1, e2, e3);
     }
 
-    private static int abs(int a) {
-      return (a < 0 ? -a : a);
-    }
+    private static int _Abs(int a) => a < 0 ? -a : a;
+    private static int _Min(int a, int b) => a < b ? a : b;
+    private static int _Clamp(int v, int min, int max) => v < min ? min : v > max ? max : v;
 
-    private static int min(int a, int b) {
-      return (a < b ? a : b);
-    }
-
-    private static int clamp(int v, int min, int max) {
-      return (v < min ? min : v > max ? max : v);
-    }
   }
 }

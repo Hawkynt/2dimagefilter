@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ namespace Imager.Filters {
     /// <summary>
     /// just a bad old-school TV effect
     /// </summary>
-    public static void Tv2x(PixelWorker<sPixel> worker) {
+    public static void Tv2x(IPixelWorker<sPixel> worker) {
       var pixel = worker.SourceP0P0();
       var luminance = pixel.Luminance;
       worker.TargetP0P0(new sPixel(pixel.Red, 0, 0, pixel.Alpha));
@@ -36,7 +36,7 @@ namespace Imager.Filters {
     /// <summary>
     /// another bad one a made for MS-Dos in 1998
     /// </summary>
-    public static void Tv3x(PixelWorker<sPixel> worker) {
+    public static void Tv3x(IPixelWorker<sPixel> worker) {
       var pixel = worker.SourceP0P0();
       worker.TargetP0P0(new sPixel(pixel.Red, 0, 0, pixel.Alpha));
       worker.TargetP1P0(new sPixel(0, pixel.Green, 0, pixel.Alpha));

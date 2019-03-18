@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,20 +16,6 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * This is a C# port of my former classImage perl library.
- * 
- * Mapping usually is implemented as
- *
- * 2x:
- * C0 C1 C2     00  01
- * C3 C4 C5 =>
- * C6 C7 C8     10  11
- * 
- * 3x:
- * C0 C1 C2    00 01 02
- * C3 C4 C5 => 10 11 12
- * C6 C7 C8    20 21 22
-      
  */
 #endregion
 
@@ -175,7 +161,7 @@ namespace Imager {
     /// <value>The image from the hue components.</value>
     public cImage HueColored {
       get {
-        return (new cImage(this, pixel => {
+        return new cImage(this, pixel => {
           const float conversionFactor = 360f / 256f;
           var hue = pixel.Hue * conversionFactor;
           const float saturation = 1f;
@@ -240,8 +226,8 @@ namespace Imager {
               }
             }
           }
-          return (new sPixel(red, green, blue, pixel.Alpha / 255.0));
-        }));
+          return new sPixel(red, green, blue, pixel.Alpha / 255.0);
+        });
       }
     }
 
@@ -323,7 +309,7 @@ namespace Imager {
             this[x, y] = filterFunction(sourceImage[x, y]);
           }
         }
-        return (threadStorage);
+        return threadStorage;
       }, _ => {
       });
     }
@@ -347,7 +333,7 @@ namespace Imager {
             this[x, y] = sPixel.FromGrey(colorFilter(sourceImage[x, y]));
           }
         }
-        return (threadStorage);
+        return threadStorage;
       }, _ => {
       });
     }
@@ -385,7 +371,7 @@ namespace Imager {
       if (y < 0 || y >= height)
         y = this._verticalOutOfBoundsHandler(y, height, y < 0);
 
-      return (this._imageData[y * width + x]);
+      return this._imageData[y * width + x];
     }
 
 #if NETFX_45

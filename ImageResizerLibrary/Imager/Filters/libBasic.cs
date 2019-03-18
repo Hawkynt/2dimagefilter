@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ namespace Imager.Filters {
     /// <summary>
     /// Horizontal scanlines
     /// </summary>
-    public static void HorizontalScanlines(PixelWorker<sPixel> worker , float grayFactor) {
+    public static void HorizontalScanlines(IPixelWorker<sPixel> worker , float grayFactor) {
       var pixel = worker.SourceP0P0();
       worker.TargetP0P0( pixel);
       var factor = grayFactor / 100f + 1f;
@@ -34,7 +34,7 @@ namespace Imager.Filters {
     /// <summary>
     /// Vertical scanlines
     /// </summary>
-    public static void VerticalScanlines(PixelWorker<sPixel>worker , float grayFactor) {
+    public static void VerticalScanlines(IPixelWorker<sPixel>worker , float grayFactor) {
       var pixel = worker.SourceP0P0();
       worker.TargetP0P0(pixel);
       var factor = grayFactor / 100f + 1f;

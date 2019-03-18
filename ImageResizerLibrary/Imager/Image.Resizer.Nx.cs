@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,10 +31,7 @@ using Imager.Filters;
 using Imager.Interface;
 
 namespace Imager {
-  /// <summary>
-  /// 
-  /// </summary>
-  public partial class cImage {
+  partial class cImage {
     /// <summary>
     /// The NQ kernel.
     /// </summary>
@@ -49,17 +46,17 @@ namespace Imager {
     /// <param name="c7">The c7.</param>
     /// <param name="c8">The c8.</param>
     /// <returns></returns>
-    internal delegate void NqKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8,PixelWorker<sPixel> worker);
+    public delegate void NqKernel(byte pattern, sPixel c0, sPixel c1, sPixel c2, sPixel c3, sPixel c4, sPixel c5, sPixel c6, sPixel c7, sPixel c8,IPixelWorker<sPixel> worker);
 
     /// <summary>
     /// The NQ filter itself
     /// </summary>
-    internal delegate void NqFilter(PixelWorker<sPixel> worker , byte scx, byte scy, NqKernel kernel);
+    public delegate void NqFilter(IPixelWorker<sPixel> worker , byte scx, byte scy, NqKernel kernel);
 
     /// <summary>
     /// Stores all available parameterless pixel scalers.
     /// </summary>
-    internal static readonly Dictionary<NqScalerType, Tuple<byte, byte, NqKernel>> NQ_SCALERS = new Dictionary<NqScalerType, Tuple<byte, byte, NqKernel>> {
+    public static readonly IReadOnlyDictionary<NqScalerType, Tuple<byte, byte, NqKernel>> NQ_SCALERS = new Dictionary<NqScalerType, Tuple<byte, byte, NqKernel>> {
       {NqScalerType.Hq2,Tuple.Create<byte, byte, NqKernel>(2,2,libHQ.Hq2xKernel)},
       {NqScalerType.Hq2X3,Tuple.Create<byte, byte, NqKernel>(2,3,libHQ.Hq2x3Kernel)},
       {NqScalerType.Hq2X4,Tuple.Create<byte, byte, NqKernel>(2,4,libHQ.Hq2x4Kernel)},
@@ -76,7 +73,7 @@ namespace Imager {
     /// <summary>
     /// The different NQ modes.
     /// </summary>
-    internal static readonly Dictionary<NqMode, NqFilter> NQ_MODES = new Dictionary<NqMode, NqFilter> {
+    public static readonly IReadOnlyDictionary<NqMode, NqFilter> NQ_MODES = new Dictionary<NqMode, NqFilter> {
       {NqMode.Normal,libHQ.ComplexFilter},
       {NqMode.Bold,libHQ.ComplexFilterBold},
       {NqMode.Smart,libHQ.ComplexFilterSmart},
@@ -99,10 +96,11 @@ namespace Imager {
       var scaleY = info.Item2;
       var kernel = info.Item3;
 
-      return (this._RunLoop(filterRegion, scaleX, scaleY, worker => scaler(worker, scaleX, scaleY, kernel)));
+      return this._RunLoop(filterRegion, scaleX, scaleY, worker => scaler(worker, scaleX, scaleY, kernel));
     }
 
 #if NETFX_45
+
     /// <summary>
     /// Applies the NQ pixel scaler.
     /// </summary>
@@ -112,9 +110,10 @@ namespace Imager {
     /// <returns>
     /// The rescaled image.
     /// </returns>
-    public cImage ApplyScaler(NqScalerType type, NqMode mode, Rect? filterRegion = null) {
-      return ApplyScaler(type, mode, filterRegion?.ToRectangle());
-    }
+    public cImage ApplyScaler(NqScalerType type, NqMode mode, Rect? filterRegion = null) 
+      => this.ApplyScaler(type, mode, filterRegion?.ToRectangle())
+    ;
+
 #endif
 
     /// <summary>
@@ -122,24 +121,22 @@ namespace Imager {
     /// </summary>
     /// <param name="type">The type.</param>
     /// <returns></returns>
-    internal static Tuple<byte, byte, NqKernel> GetPixelScalerInfo(NqScalerType type) {
-      Tuple<byte, byte, NqKernel> info;
-      if (NQ_SCALERS.TryGetValue(type, out info))
-        return (info);
-      throw new NotSupportedException(string.Format("NQ scaler '{0}' not supported.", type));
-    }
+    public static Tuple<byte, byte, NqKernel> GetPixelScalerInfo(NqScalerType type) 
+      => NQ_SCALERS.TryGetValue(type, out var info) 
+        ? info 
+        : throw new NotSupportedException(string.Format("NQ scaler '{0}' not supported.", type))
+    ;
 
     /// <summary>
     /// Gets the pixel scaler info.
     /// </summary>
     /// <param name="type">The type.</param>
     /// <returns></returns>
-    internal static NqFilter GetPixelScalerInfo(NqMode type) {
-      NqFilter info;
-      if (NQ_MODES.TryGetValue(type, out info))
-        return (info);
-      throw new NotSupportedException(string.Format("NQ mode '{0}' not supported.", type));
-    }
+    public static NqFilter GetPixelScalerInfo(NqMode type) 
+      => NQ_MODES.TryGetValue(type, out var info) 
+        ? info 
+        : throw new NotSupportedException(string.Format("NQ mode '{0}' not supported.", type))
+    ;
 
     /// <summary>
     /// Gets the scaler information.
@@ -147,11 +144,11 @@ namespace Imager {
     /// <param name="type">The type of nq scaler.</param>
     /// <returns></returns>
     /// <exception cref="System.NotSupportedException"></exception>
-    public static ScalerInformation GetScalerInformation(NqScalerType type) {
-      Tuple<byte, byte, NqKernel> info;
-      if (NQ_SCALERS.TryGetValue(type, out info))
-        return (new ScalerInformation(ReflectionUtils.GetDisplayNameForEnumValue(type), ReflectionUtils.GetDescriptionForEnumValue(type), info.Item1, info.Item2));
-      throw new NotSupportedException(string.Format("NQ scaler '{0}' not supported.", type));
-    }
+    public static ScalerInformation GetScalerInformation(NqScalerType type) 
+      => NQ_SCALERS.TryGetValue(type, out var info) 
+        ? new ScalerInformation(ReflectionUtils.GetDisplayNameForEnumValue(type), ReflectionUtils.GetDescriptionForEnumValue(type), info.Item1, info.Item2) 
+        : throw new NotSupportedException(string.Format("NQ scaler '{0}' not supported.", type))
+    ;
+
   }
 }

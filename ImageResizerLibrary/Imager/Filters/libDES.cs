@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ namespace Imager.Filters {
     /// <summary>
     /// DES filters from FNES
     /// </summary>
-    public static void DES(PixelWorker<sPixel> worker) {
+    public static void DES(IPixelWorker<sPixel> worker) {
       var n = worker.SourceP0M1();
       var w = worker.SourceM1P0();
       var c = worker.SourceP0P0();
@@ -32,17 +32,17 @@ namespace Imager.Filters {
       var s = worker.SourceP0P1();
 
 
-      var p0 = (((w.IsLike(n)) && (n.IsNotLike(e)) && (w.IsNotLike(s))) ? w : c);
-      var p1 = (((n.IsLike(e)) && (n.IsNotLike(w)) && (e.IsNotLike(s))) ? e : c);
-      var p2 = (((w.IsLike(s)) && (w.IsNotLike(n)) && (s.IsNotLike(e))) ? w : c);
-      var p3 = (((s.IsLike(e)) && (w.IsNotLike(s)) && (n.IsNotLike(e))) ? e : c);
+      var p0 = w.IsLike(n) && n.IsNotLike(e) && w.IsNotLike(s) ? w : c;
+      var p1 = n.IsLike(e) && n.IsNotLike(w) && e.IsNotLike(s) ? e : c;
+      var p2 = w.IsLike(s) && w.IsNotLike(n) && s.IsNotLike(e) ? w : c;
+      var p3 = s.IsLike(e) && w.IsNotLike(s) && n.IsNotLike(e) ? e : c;
 
       var d = sPixel.Interpolate(p0, p1, p2, p3);
 
       worker.TargetP0P0(d);
     }
 
-    public static void DES2(PixelWorker<sPixel> worker) {
+    public static void DES2(IPixelWorker<sPixel> worker) {
       var n = worker.SourceP0M1();
       var w = worker.SourceM1P0();
       var c = worker.SourceP0P0();
@@ -50,10 +50,10 @@ namespace Imager.Filters {
       var s = worker.SourceP0P1();
       var se = worker.SourceP1P1();
 
-      var p0 = (((w.IsLike(n)) && (n.IsNotLike(e)) && (w.IsNotLike(s))) ? w : c);
-      var p1 = (((n.IsLike(e)) && (n.IsNotLike(w)) && (e.IsNotLike(s))) ? e : c);
-      var p2 = (((w.IsLike(s)) && (w.IsNotLike(n)) && (s.IsNotLike(e))) ? w : c);
-      var p3 = (((s.IsLike(e)) && (w.IsNotLike(s)) && (n.IsNotLike(e))) ? e : c);
+      var p0 = w.IsLike(n) && n.IsNotLike(e) && w.IsNotLike(s) ? w : c;
+      var p1 = n.IsLike(e) && n.IsNotLike(w) && e.IsNotLike(s) ? e : c;
+      var p2 = w.IsLike(s) && w.IsNotLike(n) && s.IsNotLike(e) ? w : c;
+      var p3 = s.IsLike(e) && w.IsNotLike(s) && n.IsNotLike(e) ? e : c;
 
       var cx = c;
       var ce = sPixel.Interpolate(c, e, 3, 1);

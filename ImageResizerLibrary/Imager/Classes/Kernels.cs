@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 /*
  * Thanks to Pascal Getreuer who wrote some of these interpolation kernels in C++
@@ -62,7 +62,7 @@ namespace Imager.Classes {
   /// <summary>
   /// Contains all fixed-radius interpolation kernels.
   /// </summary>
-  internal static class Kernels {
+  public static class Kernels {
     public delegate double FixedRadiusKernelMethod(float n);
 
     public struct FixedRadiusKernelInfo {
@@ -76,7 +76,7 @@ namespace Imager.Classes {
     /// <summary>
     /// Lookup table for interpolation kernels
     /// </summary>
-    internal static readonly Dictionary<KernelType, FixedRadiusKernelInfo> KERNELS = new Dictionary<KernelType, FixedRadiusKernelInfo> {
+    public static readonly IReadOnlyDictionary<KernelType, FixedRadiusKernelInfo> KERNELS = new Dictionary<KernelType, FixedRadiusKernelInfo> {
       {KernelType.Rectangular,new FixedRadiusKernelInfo{Kernel= _RectangularKernel,KernelRadius = 0.51f}},
       {KernelType.Bicubic,new FixedRadiusKernelInfo{Kernel= _BicubicKernel,KernelRadius = 2}},
       {KernelType.Schaum2,new FixedRadiusKernelInfo{Kernel=_Schaum2Kernel,KernelRadius = 1.51f}},
@@ -125,7 +125,7 @@ namespace Imager.Classes {
 
     #region math lib wrappers
     private static float _Abs(float x) {
-      return (x < 0 ? -x : x);
+      return x < 0 ? -x : x;
     }
     #endregion
 
@@ -380,14 +380,14 @@ namespace Imager.Classes {
       x = _Abs(x);
 
       if (x <= 1)
-        return (((((-10 * x + 30) * x - (200 / 33.0f)) * x - (540 / 11.0f)) * x - (5 / 33.0f)) * x + (687 / 11.0f)) / 120;
+        return (((((-10 * x + 30) * x - 200 / 33.0f) * x - 540 / 11.0f) * x - 5 / 33.0f) * x + 687 / 11.0f) / 120;
       if (x < 2)
         return (((((330 * x - 2970) * x + 10100) * x
             - 14940) * x + 6755) * x + 2517) / 7920;
       if (x < 3) {
         x = 3 - x;
         var xSqr = x * x;
-        return ((xSqr + (20 / 33.0f)) * xSqr + (1 / 66.0f)) * x / 120;
+        return ((xSqr + 20 / 33.0f) * xSqr + 1 / 66.0f) * x / 120;
       }
       return 0;
     }
@@ -413,7 +413,7 @@ namespace Imager.Classes {
       if (x < 4) {
         x = 4 - x;
         var xSqr = x * x;
-        return (x * (xSqr * (xSqr * (2145 * xSqr + 3003) + 385) + 3)) / 10810800;
+        return x * (xSqr * (xSqr * (2145 * xSqr + 3003) + 385) + 3) / 10810800;
       }
       return 0;
     }

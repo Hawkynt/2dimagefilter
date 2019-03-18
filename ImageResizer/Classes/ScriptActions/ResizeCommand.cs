@@ -31,26 +31,25 @@ using word = System.UInt16;
 namespace Classes.ScriptActions {
   internal class ResizeCommand : IScriptAction {
     #region Implementation of IScriptAction
-    public bool ChangesSourceImage => (false);
-
-    public bool ChangesTargetImage => (true);
-    public bool ProvidesNewGdiSource => (false);
+    public bool ChangesSourceImage => false;
+    public bool ChangesTargetImage => true;
+    public bool ProvidesNewGdiSource => false;
 
     public bool Execute() {
       var source = this._applyToTarget ? this.TargetImage : this.SourceImage;
 
-      var width = this._width;
-      var height = this._height;
+      var width = this.Width;
+      var height = this.Height;
 
       // pverwrite dimensions from percentage if needed
-      var percentage = this._percentage;
+      var percentage = this.Percentage;
       if (percentage > 0) {
         width = (word)Math.Round(source.Width * percentage / 100d);
         height = (word)Math.Round(source.Height * percentage / 100d);
       }
 
       // correct aspect ratio if needed
-      if (this._maintainAspect) {
+      if (this.MaintainAspect) {
         if (width == 0) {
           width = (word)Math.Round((double)height * source.Width / source.Height);
         } else {
@@ -58,12 +57,12 @@ namespace Classes.ScriptActions {
         }
       }
 
-      sPixel.AllowThresholds = this._useThresholds;
-      source.HorizontalOutOfBoundsMode = this._horizontalBph;
-      source.VerticalOutOfBoundsMode = this._verticalBph;
+      sPixel.AllowThresholds = this.UseThresholds;
+      source.HorizontalOutOfBoundsMode = this.HorizontalBph;
+      source.VerticalOutOfBoundsMode = this.VerticalBph;
 
       cImage result = null;
-      var method = this._manipulator;
+      var method = this.Manipulator;
       var scaler = method as AScaler;
       var interpolator = method as Interpolator;
       var planeExtractor = method as PlaneExtractor;
@@ -72,7 +71,7 @@ namespace Classes.ScriptActions {
 
       if (scaler != null) {
         result = source;
-        for (var i = 0; i < this._count; i++)
+        for (var i = 0; i < this.Count; i++)
           result = scaler.Apply(result);
       } else {
         if (interpolator != null)
@@ -80,70 +79,48 @@ namespace Classes.ScriptActions {
         else if (planeExtractor != null)
           result = planeExtractor.Apply(source);
         else if (resampler != null)
-          result = resampler.Apply(source, width, height, this._useCenteredGrid);
+          result = resampler.Apply(source, width, height, this.UseCenteredGrid);
         else if (radiusResampler != null)
-          result = radiusResampler.Apply(source, width, height, this._radius, this._useCenteredGrid);
+          result = radiusResampler.Apply(source, width, height, this.Radius, this.UseCenteredGrid);
       }
 
       this.TargetImage = result;
-      return (true);
+      return true;
     }
 
-    public Bitmap GdiSource => (null);
-
+    public Bitmap GdiSource => null;
     public cImage SourceImage { get; set; }
-
     public cImage TargetImage { get; set; }
+    
     #endregion
 
-    private readonly IImageManipulator _manipulator;
-    public IImageManipulator Manipulator => (this._manipulator);
-
-    private readonly word _width;
-    public word Width => (this._width);
-
-    private readonly word _height;
-    public word Height => (this._height);
-
-    private readonly bool _maintainAspect;
-    public bool MaintainAspect => (this._maintainAspect);
-
-    private readonly OutOfBoundsMode _horizontalBph;
-    public OutOfBoundsMode HorizontalBph => (this._horizontalBph);
-
-    private readonly OutOfBoundsMode _verticalBph;
-    public OutOfBoundsMode VerticalBph => (this._verticalBph);
-
-    private readonly byte _count;
-    public byte Count => (this._count);
-
-    private readonly bool _useThresholds;
-    public bool UseThresholds => (this._useThresholds);
-
-    private readonly bool _useCenteredGrid;
-    public bool UseCenteredGrid => (this._useCenteredGrid);
-
-    private readonly float _radius;
-    public float Radius => (this._radius);
-
-    private readonly word _percentage;
-    public word Percentage => (this._percentage);
+    public IImageManipulator Manipulator { get; }
+    public word Width { get; }
+    public word Height { get; }
+    public bool MaintainAspect { get; }
+    public OutOfBoundsMode HorizontalBph { get; }
+    public OutOfBoundsMode VerticalBph { get; }
+    public byte Count { get; }
+    public bool UseThresholds { get; }
+    public bool UseCenteredGrid { get; }
+    public float Radius { get; }
+    public word Percentage { get; }
 
     private readonly bool _applyToTarget;
 
     public ResizeCommand(bool applyToTarget, IImageManipulator manipulator, word width, word height, word percentage, bool maintainAspect, OutOfBoundsMode horizontalBph, OutOfBoundsMode verticalBph, byte count, bool useThresholds, bool useCenteredGrid, float radius) {
       this._applyToTarget = applyToTarget;
-      this._manipulator = manipulator;
-      this._width = width;
-      this._height = height;
-      this._maintainAspect = maintainAspect;
-      this._horizontalBph = horizontalBph;
-      this._verticalBph = verticalBph;
-      this._count = count;
-      this._useThresholds = useThresholds;
-      this._useCenteredGrid = useCenteredGrid;
-      this._radius = radius;
-      this._percentage = percentage;
+      this.Manipulator = manipulator;
+      this.Width = width;
+      this.Height = height;
+      this.MaintainAspect = maintainAspect;
+      this.HorizontalBph = horizontalBph;
+      this.VerticalBph = verticalBph;
+      this.Count = count;
+      this.UseThresholds = useThresholds;
+      this.UseCenteredGrid = useCenteredGrid;
+      this.Radius = radius;
+      this.Percentage = percentage;
     }
   }
 }

@@ -31,7 +31,7 @@ namespace System {
     ///   <c>true</c> if the given string is <c>null</c> or whitespace-only; otherwise, <c>false</c>.
     /// </returns>
     public static bool IsNullOrWhiteSpace(this string This) {
-      return (string.IsNullOrWhiteSpace(This));
+      return string.IsNullOrWhiteSpace(This);
     }
 
     /// <summary>

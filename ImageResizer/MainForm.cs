@@ -91,7 +91,7 @@ namespace ImageResizer {
     }
 
     private PictureBoxSizeMode _SourceImageSizeMode {
-      get { return (this.iwhSourceImage.SizeMode); }
+      get { return this.iwhSourceImage.SizeMode; }
       set {
         Config.SourceSizeMode = this.iwhSourceImage.SizeMode = value;
         this.stretchToolStripMenuItem.Checked =
@@ -116,7 +116,7 @@ namespace ImageResizer {
     }
 
     private PictureBoxSizeMode _TargetImageSizeMode {
-      get { return (this.iwhTargetImage.SizeMode); }
+      get { return this.iwhTargetImage.SizeMode; }
       set {
         Config.TargetSizeMode = this.iwhTargetImage.SizeMode = value;
         this.stretchToolStripMenuItem1.Checked =
@@ -199,7 +199,7 @@ namespace ImageResizer {
       var verticalBph = (OutOfBoundsMode)this.cmbVerticalBPH.SelectedItem;
       var radius = (float)this.nudRadius.Value;
 
-      if ((targetWidth <= 0 && method.SupportsWidth) || (targetHeight <= 0 && method.SupportsHeight)) {
+      if (targetWidth <= 0 && method.SupportsWidth || targetHeight <= 0 && method.SupportsHeight) {
         MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
         return;
       }
@@ -365,7 +365,7 @@ namespace ImageResizer {
         else
           result = radiusResampler.Apply(source, targetWidth, targetHeight, radius, useCenteredGrid);
 
-      return (result);
+      return result;
     }
 
     /// <summary>
@@ -375,19 +375,19 @@ namespace ImageResizer {
     /// <returns><c>true</c> if we accept this file extensions; otherwise, <c>false</c>.</returns>
     private static bool _IsSupportedFileExtension(string extension) {
       if (string.IsNullOrWhiteSpace(extension))
-        return (false);
+        return false;
       extension = extension.Trim().ToUpper();
       if (extension == ".JPEG" || extension == ".JPG")
-        return (true);
+        return true;
       if (extension == ".BMP")
-        return (true);
+        return true;
       if (extension == ".PNG")
-        return (true);
+        return true;
       if (extension == ".GIF")
-        return (true);
+        return true;
       if (extension == ".TIF" || extension == ".TIFF")
-        return (true);
-      return (false);
+        return true;
+      return false;
     }
 
     /// <summary>
@@ -398,8 +398,8 @@ namespace ImageResizer {
     private static string[] _GetSupportedFiles(DragEventArgs e) {
       var files = e == null ? null : ((Array)e.Data.GetData(DataFormats.FileDrop)).OfType<string>().ToArray();
       if (files == null || files.Length < 1)
-        return (null);
-      return (files.Where(f => _IsSupportedFileExtension(Path.GetExtension(f)) || string.Equals(ScriptSerializer.DEFAULT_FILE_EXTENSION, Path.GetExtension(f))).ToArray());
+        return null;
+      return files.Where(f => _IsSupportedFileExtension(Path.GetExtension(f)) || string.Equals(ScriptSerializer.DEFAULT_FILE_EXTENSION, Path.GetExtension(f))).ToArray();
     }
 
     /// <summary>

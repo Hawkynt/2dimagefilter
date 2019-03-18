@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
 // TODO: radius&alpha/sigma parametrized resampling (as some windowing functions already support a radius and an alpha/sigma param)
 // Note: There are still some todos in here, mostly when I could not get a good formula for the given window. If you have one, please send me a link.
 using System;
@@ -79,7 +80,7 @@ namespace Imager.Classes {
   /// <summary>
   /// Contains all radius-adjustable kernels.
   /// </summary>
-  internal static class Windows {
+  public static class Windows {
     public delegate double RadiusFreeKernelMethod(float n, float radius);
 
     public struct RadiusFreeKernelInfo {
@@ -97,20 +98,20 @@ namespace Imager.Classes {
         var normalize = this.kernelNormalize;
         var alpha = this.prefilterAlpha;
         var scale = this.prefilterScale;
-        return (new Kernels.FixedRadiusKernelInfo {
+        return new Kernels.FixedRadiusKernelInfo {
           Kernel = f => kernelMethod(f, radius),
           KernelRadius = radius,
           KernelNormalize = normalize,
           PrefilterAlpha = alpha,
           PrefilterScale = scale
-        });
+        };
       }
     }
 
     /// <summary>
     /// Lookup table for windowing functions
     /// </summary>
-    internal static readonly Dictionary<WindowType, RadiusFreeKernelInfo> WINDOWS = new Dictionary<WindowType, RadiusFreeKernelInfo> {
+    public static readonly IReadOnlyDictionary<WindowType, RadiusFreeKernelInfo> WINDOWS = new Dictionary<WindowType, RadiusFreeKernelInfo> {
       {WindowType.Triangular,new RadiusFreeKernelInfo{kernel =  _TriangularWindow}},
       {WindowType.Welch,new RadiusFreeKernelInfo{kernel= _WelchWindow}},
       {WindowType.Hann,new RadiusFreeKernelInfo{kernel= _HannWindow}},
@@ -136,32 +137,32 @@ namespace Imager.Classes {
     private const double _M_PI = Math.PI;
 
     private static float _Abs(float x) {
-      return (x < 0 ? -x : x);
+      return x < 0 ? -x : x;
     }
 
     private static double _Abs(double x) {
-      return (x < 0 ? -x : x);
+      return x < 0 ? -x : x;
     }
 
     private static double _Sin(double x) {
-      return (Math.Sin(x));
+      return Math.Sin(x);
     }
 
     private static double _Cos(double x) {
-      return (Math.Cos(x));
+      return Math.Cos(x);
     }
 
     private static double _Pow(double x, double n) {
-      return (Math.Pow(x, n));
+      return Math.Pow(x, n);
     }
 
     private static double _Exp(double x) {
-      return (Math.Exp(x));
+      return Math.Exp(x);
     }
 
     private static double _Sinc(double x) {
       var w = _M_PI * x;
-      return (Math.Sin(w) / w);
+      return Math.Sin(w) / w;
     }
     #endregion
 
@@ -203,8 +204,8 @@ namespace Imager.Classes {
     private static double _HannWindow(float x, float radius) {
       x = _Abs(x);
       if (x < radius)
-        return (0.5f * (1 + _Cos(_M_PI * x / radius)));
-      return (0);
+        return 0.5f * (1 + _Cos(_M_PI * x / radius));
+      return 0;
     }
 
     /// <summary>
@@ -217,8 +218,8 @@ namespace Imager.Classes {
     private static double _HammingWindow(float x, double alpha, float radius) {
       x = _Abs(x);
       if (x < radius)
-        return (alpha + (1 - alpha) * _Cos(_M_PI * x / radius));
-      return (0);
+        return alpha + (1 - alpha) * _Cos(_M_PI * x / radius);
+      return 0;
     }
 
     /// <summary>
@@ -230,7 +231,7 @@ namespace Imager.Classes {
     /// <returns></returns>
     private static double _BlackmanWindow(float x, double alpha, float radius) {
       if (x < -radius || x > radius)
-        return (0);
+        return 0;
 
       var n = (double)x + radius;
       var N = 2d * radius + 1;
@@ -240,7 +241,7 @@ namespace Imager.Classes {
       var a2 = alpha / 2d;
       var doublePiScaled = 2 * _M_PI * n / (N - 1);
       var w = a0 - a1 * _Cos(doublePiScaled) + a2 * _Cos(2 * doublePiScaled);
-      return (w);
+      return w;
     }
 
     // TODO: mitchell
@@ -253,7 +254,7 @@ namespace Imager.Classes {
     /// <returns></returns>
     private static double _NuttalWindow(float x, float radius) {
       if (x < -radius || x > radius)
-        return (0);
+        return 0;
 
       var n = (double)x + radius;
       var N = 2d * radius + 1;
@@ -264,7 +265,7 @@ namespace Imager.Classes {
       const double a3 = 0.012604d;
       var doublePiScaled = 2 * _M_PI * n / (N - 1);
       var w = a0 - a1 * _Cos(doublePiScaled) + a2 * _Cos(2 * doublePiScaled) - a3 * _Cos(3 * doublePiScaled);
-      return (w);
+      return w;
     }
 
     /// <summary>
@@ -275,7 +276,7 @@ namespace Imager.Classes {
     /// <returns></returns>
     private static double _BlackmanNuttalWindow(float x, float radius) {
       if (x < -radius || x > radius)
-        return (0);
+        return 0;
 
       var n = (double)x + radius;
       var N = 2d * radius + 1;
@@ -286,7 +287,7 @@ namespace Imager.Classes {
       const double a3 = 0.0106411d;
       var doublePiScaled = 2 * _M_PI * n / (N - 1);
       var w = a0 - a1 * _Cos(doublePiScaled) + a2 * _Cos(2 * doublePiScaled) - a3 * _Cos(3 * doublePiScaled);
-      return (w);
+      return w;
     }
 
     /// <summary>
@@ -297,7 +298,7 @@ namespace Imager.Classes {
     /// <returns></returns>
     private static double _BlackmanHarrisWindow(float x, float radius) {
       if (x < -radius || x > radius)
-        return (0);
+        return 0;
 
       var n = (double)x + radius;
       var N = 2d * radius + 1;
@@ -308,7 +309,7 @@ namespace Imager.Classes {
       const double a3 = 0.01168d;
       var doublePiScaled = 2 * _M_PI * n / (N - 1);
       var w = a0 - a1 * _Cos(doublePiScaled) + a2 * _Cos(2 * doublePiScaled) - a3 * _Cos(3 * doublePiScaled);
-      return (w);
+      return w;
     }
 
     /// <summary>
@@ -319,7 +320,7 @@ namespace Imager.Classes {
     /// <returns></returns>
     private static double _FlatTopWindow(float x, float radius) {
       if (x < -radius || x > radius)
-        return (0);
+        return 0;
 
       var n = (double)x + radius;
       var N = 2d * radius + 1;
@@ -331,7 +332,7 @@ namespace Imager.Classes {
       const double a4 = 0.028d;
       var doublePiScaled = 2 * _M_PI * n / (N - 1);
       var w = a0 - a1 * _Cos(doublePiScaled) + a2 * _Cos(2 * doublePiScaled) - a3 * _Cos(3 * doublePiScaled) + a4 * _Cos(4 * doublePiScaled);
-      return (w);
+      return w;
     }
 
     /// <summary>
@@ -343,13 +344,13 @@ namespace Imager.Classes {
     /// <returns></returns>
     private static double _PowerOfCosine(float x, float alpha, float radius) {
       if (x < -radius || x > radius)
-        return (0);
+        return 0;
 
       var n = (double)x + radius;
       var N = 2d * radius + 1;
 
       var w = _Pow(_Cos(_M_PI * n / (N - 1) - _M_PI / 2d), alpha);
-      return (w);
+      return w;
     }
 
     /// <summary>
@@ -361,8 +362,8 @@ namespace Imager.Classes {
     private static double _CosineWindow(float x, float radius) {
       x = _Abs(x);
       if (x < radius)
-        return (_Cos(_M_PI / 2d * x / radius));
-      return (0);
+        return _Cos(_M_PI / 2d * x / radius);
+      return 0;
     }
 
     /// <summary>
@@ -374,10 +375,10 @@ namespace Imager.Classes {
     /// <returns></returns>
     private static double _GaussianWindow(float x, float sigma, float radius) {
       if (x < -radius || x > radius)
-        return (0);
+        return 0;
 
       var w = _Exp(-0.5 * _Pow(x / (sigma * radius), 2));
-      return (w);
+      return w;
     }
 
     /// <summary>
@@ -389,21 +390,21 @@ namespace Imager.Classes {
     /// <returns></returns>
     private static double _TukeyWindow(float x, float alpha, float radius) {
       if (x < -radius || x > radius)
-        return (0);
+        return 0;
 
       var n = (double)x + radius;
       var N = 2d * radius + 1;
 
       double w;
 
-      if (n <= (alpha * (N - 1) / 2d))
+      if (n <= alpha * (N - 1) / 2d)
         w = 0.5 * (1 + _Cos(_M_PI * (2 * n / (alpha * (N - 1)) - 1)));
-      else if (n <= ((N - 1) * (1 - alpha / 2d)))
+      else if (n <= (N - 1) * (1 - alpha / 2d))
         w = 1;
       else
         w = 0.5 * (1 + _Cos(_M_PI * (2 * n / (alpha * (N - 1)) - 2 / alpha - 1)));
 
-      return (w);
+      return w;
     }
 
     // TODO: Planck-Taper interpolation window
@@ -420,15 +421,15 @@ namespace Imager.Classes {
     /// <returns></returns>
     private static double _PoissonWindow(float x, float d, float radius) {
       if (x < -radius || x > radius)
-        return (0);
+        return 0;
 
       var n = (double)x + radius;
       var N = 2d * radius + 1;
 
-      var r = (N / 2) / (d / 8.69);
+      var r = N / 2 / (d / 8.69);
       var w = _Exp(-_Abs(n - (N - 1) / 2d) * (1 / r));
 
-      return (w);
+      return w;
     }
 
     /// <summary>
@@ -439,7 +440,7 @@ namespace Imager.Classes {
     /// <returns></returns>
     private static double _BartlettHann(float x, float radius) {
       if (x < -radius || x > radius)
-        return (0);
+        return 0;
 
       var n = (double)x + radius;
       var N = 2d * radius + 1;
@@ -450,7 +451,7 @@ namespace Imager.Classes {
 
       var w = a0 - a1 * _Abs(n / (N - 1) - 0.5) - a2 * _Cos(2 * _M_PI * n / (N - 1));
 
-      return (w);
+      return w;
     }
 
     /// <summary>
@@ -462,13 +463,13 @@ namespace Imager.Classes {
     /// <returns></returns>
     private static double _HanningPoisson(float x, float alpha, float radius) {
       if (x < -radius || x > radius)
-        return (0);
+        return 0;
 
       var n = (double)x + radius;
       var N = 2d * radius + 1;
 
-      var w = 0.5 * (1 - _Cos(2 * _M_PI * n / (N - 1))) * _Exp((-alpha * _Abs(N - 1 - 2 * n)) / (N - 1));
-      return (w);
+      var w = 0.5 * (1 - _Cos(2 * _M_PI * n / (N - 1))) * _Exp(-alpha * _Abs(N - 1 - 2 * n) / (N - 1));
+      return w;
     }
 
     // TODO: sinc
@@ -482,11 +483,11 @@ namespace Imager.Classes {
     /// <returns></returns>
     private static double _BohmanWindow(float x, float radius) {
       if (x < -radius || x > radius)
-        return (0);
+        return 0;
 
       var factor = _Abs(x / radius);
       var w = (1 - factor) * _Cos(_M_PI * factor) + _Sin(_M_PI * factor) / _M_PI;
-      return (w);
+      return w;
     }
 
     /// <summary>
@@ -498,13 +499,13 @@ namespace Imager.Classes {
     /// <returns></returns>
     private static double _CauchyWindow(float x, float alpha, float radius) {
       if (x < -radius || x > radius)
-        return (0);
+        return 0;
 
       var n = (double)x + radius;
       var N = 2d * radius + 1;
 
       var w = 1 / (1 + _Pow(alpha * _Abs(x) / radius, 2));
-      return (w);
+      return w;
     }
 
     /// <summary>
@@ -515,10 +516,10 @@ namespace Imager.Classes {
     /// <returns></returns>
     private static double _LanczosKernel(float x, float radius) {
       if (x < -radius || x > radius)
-        return (0);
+        return 0;
 
       if (x != 0)
-        return _Sin(_M_PI * x) * _Sin((_M_PI / radius) * x) / ((_M_PI * _M_PI / radius) * x * x);
+        return _Sin(_M_PI * x) * _Sin(_M_PI / radius * x) / (_M_PI * _M_PI / radius * x * x);
 
       return 1;
     }

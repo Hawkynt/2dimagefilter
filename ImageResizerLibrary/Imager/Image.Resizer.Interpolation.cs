@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,17 +18,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
 namespace Imager {
-  public partial class cImage {
+  partial class cImage {
     /// <summary>
     /// Stores all available parameterless pixel scalers.
     /// </summary>
-    internal static readonly InterpolationMode[] INTERPOLATORS = new[] {
+    public static readonly InterpolationMode[] INTERPOLATORS = {
       InterpolationMode.NearestNeighbor,
       InterpolationMode.Bilinear,
       InterpolationMode.Bicubic,
@@ -74,7 +75,7 @@ namespace Imager {
       var result = FromBitmap(bitmap);
       result.HorizontalOutOfBoundsMode = this.HorizontalOutOfBoundsMode;
       result.VerticalOutOfBoundsMode = this.VerticalOutOfBoundsMode;
-      return (result);
+      return result;
 
     }
 

@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ namespace Imager.Filters {
     /// <summary>
     /// SNES9x's EPXB modified by Hawkynt to support thresholds
     /// </summary>
-    public static void EpxB(PixelWorker<sPixel> worker ) {
+    public static void EpxB(IPixelWorker<sPixel> worker ) {
       var c0 = worker.SourceM1M1();
       var c1 = worker.SourceP0M1();
       var c2 = worker.SourceP1M1();
@@ -38,22 +38,18 @@ namespace Imager.Filters {
       var e00 = e01 = e10 = e11 = c4;
       if (
     c3.IsNotLike(c5) &&
-    c1.IsNotLike(c7) && ( // diagonal
-      (
-        c4.IsLike(c3) ||
-        c4.IsLike(c7) ||
-        c4.IsLike(c5) ||
-        c4.IsLike(c1) || ( // edge smoothing
-          (
-            c0.IsNotLike(c8) ||
-            c4.IsLike(c6) ||
-            c4.IsLike(c2)
-          ) && (
-            c6.IsNotLike(c2) ||
-            c4.IsLike(c0) ||
-            c4.IsLike(c8)
-          )
-        )
+    c1.IsNotLike(c7) && (
+      c4.IsLike(c3) ||
+      c4.IsLike(c7) ||
+      c4.IsLike(c5) ||
+      c4.IsLike(c1) || (
+        c0.IsNotLike(c8) ||
+        c4.IsLike(c6) ||
+        c4.IsLike(c2)
+      ) && (
+        c6.IsNotLike(c2) ||
+        c4.IsLike(c0) ||
+        c4.IsLike(c8)
       )
     )
   ) {
@@ -108,7 +104,7 @@ namespace Imager.Filters {
     /// <summary>
     /// SNES9x's EPX3 modified by Hawkynt to support thresholds
     /// </summary>
-    public static void Epx3(PixelWorker<sPixel>worker ) {
+    public static void Epx3(IPixelWorker<sPixel>worker ) {
       var c0 = worker.SourceM1M1();
       var c1 = worker.SourceP0M1();
       var c2 = worker.SourceP1M1();
@@ -136,14 +132,14 @@ namespace Imager.Filters {
         var eq75 = c7.IsLike(c5) && (neq48 || neq40 || c7.IsNotLike(c6) || c5.IsNotLike(c2));
         var eq51 = c5.IsLike(c1) && (neq42 || neq46 || c5.IsNotLike(c8) || c1.IsNotLike(c0));
         if (
-          (!neq40) ||
-          (!neq41) ||
-          (!neq42) ||
-          (!neq43) ||
-          (!neq45) ||
-          (!neq46) ||
-          (!neq47) ||
-          (!neq48)
+          !neq40 ||
+          !neq41 ||
+          !neq42 ||
+          !neq43 ||
+          !neq45 ||
+          !neq46 ||
+          !neq47 ||
+          !neq48
         ) {
           if (eq13)
             e00 = sPixel.Interpolate(c1, c3);
@@ -154,28 +150,28 @@ namespace Imager.Filters {
           if (eq75)
             e22 = sPixel.Interpolate(c7, c5);
 
-          if ((eq51 && neq40) && (eq13 && neq42))
+          if (eq51 && neq40 && eq13 && neq42)
             e01 = sPixel.Interpolate(c1, c3, c5);
           else if (eq51 && neq40)
             e01 = sPixel.Interpolate(c1, c5);
           else if (eq13 && neq42)
             e01 = sPixel.Interpolate(c1, c3);
 
-          if ((eq13 && neq46) && (eq37 && neq40))
+          if (eq13 && neq46 && eq37 && neq40)
             e10 = sPixel.Interpolate(c3, c1, c7);
           else if (eq13 && neq46)
             e10 = sPixel.Interpolate(c3, c1);
           else if (eq37 && neq40)
             e10 = sPixel.Interpolate(c3, c7);
 
-          if ((eq75 && neq42) && (eq51 && neq48))
+          if (eq75 && neq42 && eq51 && neq48)
             e12 = sPixel.Interpolate(c5, c1, c7);
           else if (eq75 && neq42)
             e12 = sPixel.Interpolate(c5, c7);
           else if (eq51 && neq48)
             e12 = sPixel.Interpolate(c5, c1);
 
-          if ((eq37 && neq48) && (eq75 && neq46))
+          if (eq37 && neq48 && eq75 && neq46)
             e21 = sPixel.Interpolate(c7, c3, c5);
           else if (eq75 && neq46)
             e21 = sPixel.Interpolate(c7, c5);
@@ -208,7 +204,7 @@ namespace Imager.Filters {
     /// <summary>
     /// SNES9x's EPXC modified by Hawkynt to support thresholds
     /// </summary>
-    public static void EpxC(PixelWorker<sPixel> worker) {
+    public static void EpxC(IPixelWorker<sPixel> worker) {
       var c0 = worker.SourceM1M1();
       var c1 = worker.SourceP0M1();
       var c2 = worker.SourceP1M1();
@@ -236,17 +232,17 @@ namespace Imager.Filters {
         var eq75 = c7.IsLike(c5) && (neq48 || neq40 || c7.IsNotLike(c6) || c5.IsNotLike(c2));
         var eq51 = c5.IsLike(c1) && (neq42 || neq46 || c5.IsNotLike(c8) || c1.IsNotLike(c0));
         if (
-          (!neq40) ||
-          (!neq41) ||
-          (!neq42) ||
-          (!neq43) ||
-          (!neq45) ||
-          (!neq46) ||
-          (!neq47) ||
-          (!neq48)
+          !neq40 ||
+          !neq41 ||
+          !neq42 ||
+          !neq43 ||
+          !neq45 ||
+          !neq46 ||
+          !neq47 ||
+          !neq48
         ) {
           sPixel c3A;
-          if ((eq13 && neq46) && (eq37 && neq40))
+          if (eq13 && neq46 && eq37 && neq40)
             c3A = sPixel.Interpolate(c3, c1, c7);
           else if (eq13 && neq46)
             c3A = sPixel.Interpolate(c3, c1);
@@ -256,7 +252,7 @@ namespace Imager.Filters {
             c3A = c4;
 
           sPixel c7B;
-          if ((eq37 && neq48) && (eq75 && neq46))
+          if (eq37 && neq48 && eq75 && neq46)
             c7B = sPixel.Interpolate(c7, c3, c5);
           else if (eq37 && neq48)
             c7B = sPixel.Interpolate(c7, c3);
@@ -266,7 +262,7 @@ namespace Imager.Filters {
             c7B = c4;
 
           sPixel c5C;
-          if ((eq75 && neq42) && (eq51 && neq48))
+          if (eq75 && neq42 && eq51 && neq48)
             c5C = sPixel.Interpolate(c5, c1, c7);
           else if (eq75 && neq42)
             c5C = sPixel.Interpolate(c5, c7);
@@ -277,7 +273,7 @@ namespace Imager.Filters {
 
           sPixel c1D;
 
-          if ((eq51 && neq40) && (eq13 && neq42))
+          if (eq51 && neq40 && eq13 && neq42)
             c1D = sPixel.Interpolate(c1, c3, c5);
           else if (eq51 && neq40)
             c1D = sPixel.Interpolate(c1, c5);

@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("»SynthelicZ«")]
 [assembly: AssemblyProduct("ImageResizer")]
-[assembly: AssemblyCopyright("Copyright © 2008-2015 Hawkynt")]
+[assembly: AssemblyCopyright("Copyright © 2008-2019 Hawkynt")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

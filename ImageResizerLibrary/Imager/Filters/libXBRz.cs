@@ -1,4 +1,23 @@
-﻿
+﻿#region (c)2008-2019 Hawkynt
+/*
+ *  cImage 
+ *  Image filtering library 
+    Copyright (C) 2008-2019 Hawkynt
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#endregion
 
 using System;
 using System.Runtime.CompilerServices;
@@ -143,7 +162,7 @@ namespace Imager.Filters {
     private static void _PreProcessCorners(Kernel_4X4 kernel, BlendResult blendResult, IColorDist preProcessCornersColorDist) {
       blendResult.Reset();
 
-      if ((kernel.f == kernel.g && kernel.j == kernel.k) || (kernel.f == kernel.j && kernel.g == kernel.k))
+      if (kernel.f == kernel.g && kernel.j == kernel.k || kernel.f == kernel.j && kernel.g == kernel.k)
         return;
 
       var dist = preProcessCornersColorDist;
@@ -521,7 +540,7 @@ namespace Imager.Filters {
 
     private static class BlendInfo {
       public static BlendType GetTopL(byte b) {
-        return (BlendType)((b) & 0x3);
+        return (BlendType)(b & 0x3);
       }
 
       public static BlendType GetTopR(byte b) {
@@ -578,7 +597,7 @@ namespace Imager.Filters {
       _MATRIX_ROTATION = new Tuple[(_MAX_SCALE - 1) * _MAX_SCALE_SQUARED * _MAX_ROTS];
       for (var n = 2; n < _MAX_SCALE + 1; n++)
         for (var r = 0; r < _MAX_ROTS; r++) {
-          var nr = (n - 2) * (_MAX_ROTS * _MAX_SCALE_SQUARED) + r * _MAX_SCALE_SQUARED;
+          var nr = (n - 2) * _MAX_ROTS * _MAX_SCALE_SQUARED + r * _MAX_SCALE_SQUARED;
           for (var i = 0; i < _MAX_SCALE; i++)
             for (var j = 0; j < _MAX_SCALE; j++)
               _MATRIX_ROTATION[nr + i * _MAX_SCALE + j] =
@@ -612,7 +631,7 @@ namespace Imager.Filters {
       private int _nr;
 
       public OutputMatrix(int scale, sPixel[] output, int outWidth) {
-        this._n = (scale - 2) * (_MAX_ROTS * _MAX_SCALE_SQUARED);
+        this._n = (scale - 2) * _MAX_ROTS * _MAX_SCALE_SQUARED;
         this._output = new ImagePointer(output);
         this._outWidth = outWidth;
       }

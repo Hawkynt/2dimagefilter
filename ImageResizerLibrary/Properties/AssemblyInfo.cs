@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("»SynthelicZ«")]
 [assembly: AssemblyProduct("ImageResizer")]
-[assembly: AssemblyCopyright("Copyright © 2008-2015 Hawkynt")]
+[assembly: AssemblyCopyright("Copyright © 2008-2019 Hawkynt")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
 
-[assembly: InternalsVisibleTo("ImageResizer")]
+//[assembly: InternalsVisibleTo("ImageResizer")]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("13bdb1ca-845c-44a6-bfbd-ad2428a318d4")]

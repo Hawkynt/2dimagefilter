@@ -27,25 +27,26 @@ using Imager;
 namespace Classes.ScriptActions {
   internal class LoadStdInCommand : IScriptAction {
     #region Implementation of IScriptAction
-    public bool ChangesSourceImage => (true);
+    public bool ChangesSourceImage => true;
 
-    public bool ChangesTargetImage => (true);
-    public bool ProvidesNewGdiSource => (true);
+    public bool ChangesTargetImage => true;
+    public bool ProvidesNewGdiSource => true;
 
     public bool Execute() {
       using (var stream = Console.OpenStandardInput())
         this.SourceImage = cImage.FromBitmap(this.GdiSource = (Bitmap)Image.FromStream(stream, false));
-      return (true);
+      return true;
     }
 
     public cImage SourceImage { get; set; }
 
-    public cImage TargetImage { get { return (null); } set { } }
+    public cImage TargetImage {
+      get => null;
+      set { }
+    }
 
     public Bitmap GdiSource { get; private set; }
     #endregion
-
-    public LoadStdInCommand() { }
 
   }
 }

@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
 using System;
 using System.Collections.Generic;
 
@@ -48,11 +49,11 @@ namespace Imager.Interface {
     Transparent,
   }
 
-  internal static class OutOfBoundsUtils {
+  public static class OutOfBoundsUtils {
 
     public delegate int OutOfBoundsHandler(int index, int count, bool isUnderflow);
 
-    private static readonly Dictionary<OutOfBoundsMode, OutOfBoundsHandler> _OUT_OF_BOUNDS_HANDLERS = new Dictionary<OutOfBoundsMode, OutOfBoundsHandler> {
+    private static readonly IReadOnlyDictionary<OutOfBoundsMode, OutOfBoundsHandler> _OUT_OF_BOUNDS_HANDLERS = new Dictionary<OutOfBoundsMode, OutOfBoundsHandler> {
       {OutOfBoundsMode.ConstantExtension,_ConstantExtension},
       {OutOfBoundsMode.WrapAround,_WrapAround},
       {OutOfBoundsMode.HalfSampleSymmetric,_HalfSampleSymmetric},
@@ -62,7 +63,7 @@ namespace Imager.Interface {
 
     #region out of bounds handlers
     private static int _ConstantExtension(int index, int count, bool isUnderflow) {
-      return (isUnderflow ? 0 : count - 1);
+      return isUnderflow ? 0 : count - 1;
     }
 
     private static int _WrapAround(int index, int count, bool isUnderflow) {
@@ -77,7 +78,7 @@ namespace Imager.Interface {
           */
 
       if (!isUnderflow)
-        return (index % count);
+        return index % count;
       /*
       // Loop-version
       if (overflow)
@@ -88,7 +89,7 @@ namespace Imager.Interface {
             return(index);
       */
 
-      return (count - ((-index) % count)) % count;
+      return (count - -index % count) % count;
 
       /*
       // Loop-Version
@@ -105,9 +106,9 @@ namespace Imager.Interface {
         if (index < 0)
           index = -1 - index;
         else if (index >= count)
-          index = (2 * count - 1) - index;
+          index = 2 * count - 1 - index;
         else
-          return (index);
+          return index;
       }
     }
 
@@ -118,9 +119,9 @@ namespace Imager.Interface {
         if (index < 0)
           index = -index;
         else if (index >= count)
-          index = (2 * count - 2) - index;
+          index = 2 * count - 2 - index;
         else
-          return (index);
+          return index;
       }
     }
     #endregion
@@ -133,7 +134,7 @@ namespace Imager.Interface {
     public static OutOfBoundsHandler GetHandlerOrCrash(OutOfBoundsMode mode) {
       OutOfBoundsHandler result;
       if (_OUT_OF_BOUNDS_HANDLERS.TryGetValue(mode, out result))
-        return (result);
+        return result;
 
       throw new NotSupportedException("The OutOfBoundsMode " + mode + " is not supported");
     }

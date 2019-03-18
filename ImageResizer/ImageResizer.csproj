@@ -112,6 +112,9 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ImageResizerLibrary\Classes\ReflectionUtils.cs">
+      <Link>Classes\ReflectionUtils.cs</Link>
+    </Compile>
     <Compile Include="Classes\CLI.cs" />
     <Compile Include="Classes\CLIExitCode.cs" />
     <Compile Include="Classes\Config.cs" />
@@ -137,6 +140,7 @@
     <Compile Include="Classes\ScriptSerializer.cs" />
     <Compile Include="Classes\ScriptSerializerException.cs" />
     <Compile Include="Classes\SupportedManipulators.cs" />
+    <Compile Include="Framework\System.StringExtensions.cs" />
     <Compile Include="Framework\System.Windows.Forms.ControlExtensions.cs" />
     <Compile Include="MainForm.EventHandlers.cs">
       <SubType>Form</SubType>

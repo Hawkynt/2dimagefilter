@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
 using Classes;
 using Imager.Filters;
 using Imager.Interface;
@@ -29,7 +30,7 @@ using System.Windows;
 #endif
 
 namespace Imager {
-  public partial class cImage {
+  partial class cImage {
     /// <summary>
     /// The XBRz filter
     /// </summary>
@@ -39,12 +40,12 @@ namespace Imager {
     /// <param name="height">The height.</param>
     /// <param name="minY">The minimum y.</param>
     /// <param name="maxY">The maximum y.</param>
-    internal delegate void XbrzFilter(sPixel[] src, sPixel[] tgt, int width, int height, int minX, int minY, int maxX, int maxY);
+    public delegate void XbrzFilter(sPixel[] src, sPixel[] tgt, int width, int height, int minX, int minY, int maxX, int maxY);
 
     /// <summary>
     /// Stores all available parameterless pixel scalers.
     /// </summary>
-    internal static readonly Dictionary<XbrzScalerType, Tuple<byte, byte, XbrzFilter>> XBRz_SCALERS = new Dictionary<XbrzScalerType, Tuple<byte, byte, XbrzFilter>> {
+    public static readonly IReadOnlyDictionary<XbrzScalerType, Tuple<byte, byte, XbrzFilter>> XBRz_SCALERS = new Dictionary<XbrzScalerType, Tuple<byte, byte, XbrzFilter>> {
       {XbrzScalerType.Xbrz2, Tuple.Create<byte, byte, XbrzFilter>(2, 2, (src,tgt,w,h,minx,miny,maxx,maxy)=>libXBRz.ScaleImage(libXBRz.ScaleSize.TIMES2, src,tgt,w,h,minx,miny,maxx,maxy))},
       {XbrzScalerType.Xbrz3, Tuple.Create<byte, byte, XbrzFilter>(3, 3, (src,tgt,w,h,minx,miny,maxx,maxy)=>libXBRz.ScaleImage(libXBRz.ScaleSize.TIMES3, src,tgt,w,h,minx,miny,maxx,maxy))},
       {XbrzScalerType.Xbrz4, Tuple.Create<byte, byte, XbrzFilter>(4, 4, (src,tgt,w,h,minx,miny,maxx,maxy)=>libXBRz.ScaleImage(libXBRz.ScaleSize.TIMES4, src,tgt,w,h,minx,miny,maxx,maxy))},
@@ -71,10 +72,11 @@ namespace Imager {
       var result = new cImage(this.Width * scaleX, this.Height * scaleY);
       // TODO: generic pixel loop
       scaler(this.GetImageData(), result.GetImageData(), this.Width, this.Height, filterRegion.Value.Left, filterRegion.Value.Top, filterRegion.Value.Right, filterRegion.Value.Bottom);
-      return (result);
+      return result;
     }
 
 #if NETFX_45
+
     /// <summary>
     /// Applies the XBR pixel scaler.
     /// </summary>
@@ -83,9 +85,10 @@ namespace Imager {
     /// <returns>
     /// The rescaled image.
     /// </returns>
-    public cImage ApplyScaler(XbrzScalerType type, Rect? filterRegion = null) {
-      return ApplyScaler(type,  filterRegion?.ToRectangle());
-    }
+    public cImage ApplyScaler(XbrzScalerType type, Rect? filterRegion = null) 
+      => this.ApplyScaler(type,  filterRegion?.ToRectangle())
+    ;
+
 #endif
 
     /// <summary>
@@ -93,12 +96,11 @@ namespace Imager {
     /// </summary>
     /// <param name="type">The type.</param>
     /// <returns></returns>
-    internal static Tuple<byte, byte, XbrzFilter> GetPixelScalerInfo(XbrzScalerType type) {
-      Tuple<byte, byte, XbrzFilter> info;
-      if (XBRz_SCALERS.TryGetValue(type, out info))
-        return (info);
-      throw new NotSupportedException(string.Format("XBRz scaler '{0}' not supported.", type));
-    }
+    public static Tuple<byte, byte, XbrzFilter> GetPixelScalerInfo(XbrzScalerType type) 
+      => XBRz_SCALERS.TryGetValue(type, out var info) 
+        ? info 
+        : throw new NotSupportedException(string.Format("XBRz scaler '{0}' not supported.", type))
+    ;
 
     /// <summary>
     /// Gets the scaler information.
@@ -106,11 +108,11 @@ namespace Imager {
     /// <param name="type">The type of XBR scaler.</param>
     /// <returns></returns>
     /// <exception cref="System.NotSupportedException"></exception>
-    public static ScalerInformation GetScalerInformation(XbrzScalerType type) {
-      Tuple<byte, byte, XbrzFilter> info;
-      if (XBRz_SCALERS.TryGetValue(type, out info))
-        return (new ScalerInformation(ReflectionUtils.GetDisplayNameForEnumValue(type), ReflectionUtils.GetDescriptionForEnumValue(type), info.Item1, info.Item2));
-      throw new NotSupportedException(string.Format("XBRz scaler '{0}' not supported.", type));
-    }
+    public static ScalerInformation GetScalerInformation(XbrzScalerType type) 
+      => XBRz_SCALERS.TryGetValue(type, out var info) 
+        ? new ScalerInformation(ReflectionUtils.GetDisplayNameForEnumValue(type), ReflectionUtils.GetDescriptionForEnumValue(type), info.Item1, info.Item2) 
+        : throw new NotSupportedException(string.Format("XBRz scaler '{0}' not supported.", type))
+    ;
+
   }
 }

@@ -27,56 +27,41 @@ namespace System.Windows.Forms {
     /// <summary>
     /// Safely invokes the given code on the control's thread.
     /// </summary>
-    /// <param name="This">This Control.</param>
+    /// <param name="this">This Control.</param>
     /// <param name="task">The task to perform in its thread.</param>
     /// <param name="async">if set to <c>true</c> [async].</param>
     /// <returns>
     ///   <c>true</c> when no thread switch was needed; otherwise, <c>false</c>.
     /// </returns>
-    public static bool SafelyInvoke(this Control This, Action task, bool @async = true) {
-      Contract.Requires(This != null);
+    public static bool SafelyInvoke(this Control @this, Action task, bool @async = true) {
+      Contract.Requires(@this != null);
       Contract.Requires(task != null);
-      var result = This.InvokeRequired;
+      var result = @this.InvokeRequired;
       if (result) {
         if (@async)
-          This.BeginInvoke(task);
+          @this.BeginInvoke(task);
         else
-          This.Invoke(task);
+          @this.Invoke(task);
       } else
         task();
-      return (!result);
+      return !result;
     }
 
     /// <summary>
     /// Executes a task in a thread that is definitely not the GUI thread.
     /// </summary>
-    /// <param name="This">This Control.</param>
+    /// <param name="this">This Control.</param>
     /// <param name="task">The task.</param>
     /// <returns><c>true</c> when a thread switch was needed; otherwise, <c>false</c>.</returns>
-    public static bool Async(this Control This, Action task) {
-      Contract.Requires(This != null);
+    public static bool Async(this Control @this, Action task) {
+      Contract.Requires(@this != null);
       Contract.Requires(task != null);
-      if (This.InvokeRequired) {
+      if (@this.InvokeRequired) {
         task();
-        return (false);
+        return false;
       }
       task.BeginInvoke(task.EndInvoke, null);
-      return (true);
-    }
-
-    /// <summary>
-    /// Safelies executes an action and returns the result..
-    /// </summary>
-    /// <typeparam name="TResult">The type of the result.</typeparam>
-    /// <param name="This">The this.</param>
-    /// <param name="function">The function.</param>
-    /// <returns>Whatever the method returned.</returns>
-    public static TResult SafelyInvoke<TResult>(this Control This, Func<TResult> function) {
-      Contract.Requires(This != null);
-      Contract.Requires(function != null);
-      if (This.InvokeRequired)
-        return ((TResult)This.Invoke(function));
-      return (function());
+      return true;
     }
 
   }

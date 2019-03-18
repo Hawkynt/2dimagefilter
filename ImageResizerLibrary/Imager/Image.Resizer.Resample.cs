@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
 using System.Drawing;
 #if NETFX_45
 using System.Windows;
@@ -25,7 +26,7 @@ using System.Windows;
 using Imager.Classes;
 
 namespace Imager {
-  public partial class cImage {
+  partial class cImage {
 
     /// <summary>
     /// Applies the pixel scaler for float32 images.
@@ -42,7 +43,7 @@ namespace Imager {
       var fpImage = FloatImage.FromImage(this, filterRegion);
       var fpResult = fpImage.Resize(width, height, type, centeredGrid);
       var result = fpResult.ToImage();
-      return (result);
+      return result;
     }
 
     /// <summary>
@@ -61,10 +62,11 @@ namespace Imager {
       var fpImage = FloatImage.FromImage(this, filterRegion);
       var fpResult = fpImage.Resize(width, height, type, radius, centeredGrid);
       var result = fpResult.ToImage();
-      return (result);
+      return result;
     }
 
 #if NETFX_45
+
     /// <summary>
     /// Applies the pixel scaler for float32 images.
     /// </summary>
@@ -76,9 +78,9 @@ namespace Imager {
     /// <returns>
     /// The rescaled image.
     /// </returns>
-    public cImage ApplyScaler(KernelType type, int width, int height, bool centeredGrid, Rect? filterRegion = null) {
-      return ApplyScaler(type, width, height, centeredGrid, filterRegion?.ToRectangle());
-    }
+    public cImage ApplyScaler(KernelType type, int width, int height, bool centeredGrid, Rect? filterRegion = null) 
+      => this.ApplyScaler(type, width, height, centeredGrid, filterRegion?.ToRectangle())
+    ;
 
     /// <summary>
     /// Applies the pixel scaler for float32 images.
@@ -92,9 +94,10 @@ namespace Imager {
     /// <returns>
     /// The rescaled image.
     /// </returns>
-    public cImage ApplyScaler(WindowType type, int width, int height, float radius, bool centeredGrid, Rect? filterRegion = null) {
-      return ApplyScaler(type, width, height, radius, centeredGrid, filterRegion?.ToRectangle());
-    }
+    public cImage ApplyScaler(WindowType type, int width, int height, float radius, bool centeredGrid, Rect? filterRegion = null) 
+      => this.ApplyScaler(type, width, height, radius, centeredGrid, filterRegion?.ToRectangle())
+    ;
+
 #endif
   }
 }

@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,23 +18,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
 using System;
 
 namespace Classes {
   internal class ScriptSerializerException : Exception {
-    private readonly string _filename;
-    public string Filename => (this._filename);
-
-    private readonly int _lineNumber;
-    public int LineNumber => (this._lineNumber);
-
-    private readonly CLIExitCode _errorType;
-    public CLIExitCode ErrorType => (this._errorType);
+    public string Filename { get; }
+    public int LineNumber { get; }
+    public CLIExitCode ErrorType { get; }
 
     public ScriptSerializerException(string filename, int lineNumber, CLIExitCode errorType) {
-      this._filename = filename;
-      this._lineNumber = lineNumber;
-      this._errorType = errorType;
+      this.Filename = filename;
+      this.LineNumber = lineNumber;
+      this.ErrorType = errorType;
     }
   }
 }

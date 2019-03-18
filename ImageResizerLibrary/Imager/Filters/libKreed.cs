@@ -1,8 +1,8 @@
-﻿#region (c)2008-2015 Hawkynt
+﻿#region (c)2008-2019 Hawkynt
 /*
  *  cImage 
  *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+    Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,18 +28,18 @@ namespace Imager.Filters {
 
       var acAreAlike = c00.IsLike(c10);
       var x = acAreAlike ? 1 : 0;
-      var y = (c01.IsLike(c10) && !(acAreAlike)) ? 1 : 0;
+      var y = c01.IsLike(c10) && !acAreAlike ? 1 : 0;
 
       var adAreAlike = c00.IsLike(c11);
       x += adAreAlike ? 1 : 0;
-      y += (c01.IsLike(c11) && !(adAreAlike)) ? 1 : 0;
+      y += c01.IsLike(c11) && !adAreAlike ? 1 : 0;
 
       if (x <= 1)
         result++;
       if (y <= 1)
         result--;
 
-      return (result);
+      return result;
     }
 
     // TODO: to be really exact, the comparisons are not that right by comparing to already interpolated values
@@ -48,7 +48,7 @@ namespace Imager.Filters {
     /// <summary>
     /// Kreed's SuperEagle modified by Hawkynt to allow thresholds
     /// </summary>
-    public static void SuperEagle(PixelWorker<sPixel> worker) {
+    public static void SuperEagle(IPixelWorker<sPixel> worker) {
       var c0 = worker.SourceM1M1();
       var c1 = worker.SourceP0M1();
       var c2 = worker.SourceP1M1();
@@ -148,7 +148,7 @@ namespace Imager.Filters {
     /// <summary>
     /// Derek Liauw Kie Fa's 2XSaI
     /// </summary>
-    public static void SaI2X(PixelWorker<sPixel> worker) {
+    public static void SaI2X(IPixelWorker<sPixel> worker) {
       var c0 = worker.SourceM1M1();
       var c1 = worker.SourceP0M1();
       var c2 = worker.SourceP1M1();
@@ -170,26 +170,26 @@ namespace Imager.Filters {
 
       if (c4.IsLike(c8) && c5.IsNotLike(c7)) {
         var c48 = sPixel.Interpolate(c4, c8);
-        if ((c48.IsLike(c1) && c5.IsLike(d5)) || (c48.IsLike(c7) && c48.IsLike(c2) && c5.IsNotLike(c1) && c5.IsLike(d3))) {
+        if (c48.IsLike(c1) && c5.IsLike(d5) || c48.IsLike(c7) && c48.IsLike(c2) && c5.IsNotLike(c1) && c5.IsLike(d3)) {
           //nothing
         } else {
           e01 = sPixel.Interpolate(c48, c5);
         }
 
-        if ((c48.IsLike(c3) && c7.IsLike(d2)) || (c48.IsLike(c5) && c48.IsLike(c6) && c3.IsNotLike(c7) && c7.IsLike(d0))) {
+        if (c48.IsLike(c3) && c7.IsLike(d2) || c48.IsLike(c5) && c48.IsLike(c6) && c3.IsNotLike(c7) && c7.IsLike(d0)) {
           //nothing
         } else {
           e10 = sPixel.Interpolate(c48, c7);
         }
       } else if (c5.IsLike(c7) && c4.IsNotLike(c8)) {
         var c57 = sPixel.Interpolate(c5, c7);
-        if ((c57.IsLike(c2) && c4.IsLike(c6)) || (c57.IsLike(c1) && c57.IsLike(c8) && c4.IsNotLike(c2) && c4.IsLike(c0))) {
+        if (c57.IsLike(c2) && c4.IsLike(c6) || c57.IsLike(c1) && c57.IsLike(c8) && c4.IsNotLike(c2) && c4.IsLike(c0)) {
           e01 = c57;
         } else {
           e01 = sPixel.Interpolate(c4, c57);
         }
 
-        if ((c57.IsLike(c6) && c4.IsLike(c2)) || (c57.IsLike(c3) && c57.IsLike(c8) && c4.IsNotLike(c6) && c4.IsLike(c0))) {
+        if (c57.IsLike(c6) && c4.IsLike(c2) || c57.IsLike(c3) && c57.IsLike(c8) && c4.IsNotLike(c6) && c4.IsLike(c0)) {
           e10 = c57;
         } else {
           e10 = sPixel.Interpolate(c4, c57);
@@ -242,7 +242,7 @@ namespace Imager.Filters {
     /// <summary>
     /// Kreed's SuperSaI
     /// </summary>
-    public static void SuperSaI(PixelWorker<sPixel> worker) {
+    public static void SuperSaI(IPixelWorker<sPixel> worker) {
       var c0 = worker.SourceM1M1();
       var c1 = worker.SourceP0M1();
       var c2 = worker.SourceP1M1();

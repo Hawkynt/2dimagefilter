@@ -26,30 +26,31 @@ using Imager;
 namespace Classes.ScriptActions {
   internal class LoadFileCommand : IScriptAction {
     #region Implementation of IScriptAction
-    public bool ChangesSourceImage => (true);
+    public bool ChangesSourceImage => true;
 
-    public bool ChangesTargetImage => (true);
-    public bool ProvidesNewGdiSource => (true);
+    public bool ChangesTargetImage => true;
+    public bool ProvidesNewGdiSource => true;
 
     public bool Execute() {
-      this.SourceImage = cImage.FromBitmap(this.GdiSource = (Bitmap)Image.FromFile(this._fileName));
-      return (true);
+      this.SourceImage = cImage.FromBitmap(this.GdiSource = (Bitmap)Image.FromFile(this.FileName));
+      return true;
     }
 
     public cImage SourceImage { get; set; }
 
-    public cImage TargetImage { get { return (null); } set { } }
+    public cImage TargetImage {
+      get => null;
+      set { }
+    }
 
     public Bitmap GdiSource { get; private set; }
     #endregion
 
-    private readonly string _fileName;
-
-    public string FileName => (this._fileName);
+    public string FileName { get; }
 
     public LoadFileCommand(string fileName) {
       Contract.Requires(!string.IsNullOrWhiteSpace(fileName));
-      this._fileName = fileName;
+      this.FileName = fileName;
     }
 
   }

@@ -33,7 +33,7 @@ namespace Classes.ScriptActions {
     public bool Execute() {
       this.SourceImage = this.TargetImage;
       this.TargetImage = null;
-      return (true);
+      return true;
     }
 
     public Bitmap GdiSource => null;
