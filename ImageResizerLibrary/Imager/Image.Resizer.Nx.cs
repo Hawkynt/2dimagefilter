@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-#if NETFX_45
+#if NET45
 using System.Windows;
 #endif
 using Classes;
@@ -99,7 +99,7 @@ namespace Imager {
       return this._RunLoop(filterRegion, scaleX, scaleY, worker => scaler(worker, scaleX, scaleY, kernel));
     }
 
-#if NETFX_45
+#if NET45
 
     /// <summary>
     /// Applies the NQ pixel scaler.

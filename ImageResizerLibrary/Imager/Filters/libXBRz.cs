@@ -50,7 +50,7 @@ namespace Imager.Filters {
 
     private static readonly ScalerCfg _CONFIGURATION = new ScalerCfg();
 
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static void _AlphaBlend(int n, int m, ImagePointer dstPtr, sPixel col)
@@ -58,7 +58,7 @@ namespace Imager.Filters {
       ;
 
     //fill block with the given color
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static void _FillBlock(sPixel[] trg, int trgi, int pitch, sPixel col, int blockSize) {
@@ -67,7 +67,7 @@ namespace Imager.Filters {
           trg[trgi + x] = col;
     }
 
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static double _Square(double value) => value * value;

@@ -120,4 +120,5 @@
   <PropertyGroup>
     <PostBuildEvent>rem copy "$(TargetPath)" "D:\_copyapps\paint.net\effects\"</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="..\..\..\Framework\VersionSpecificSymbols.Common.prop" />
 </Project>

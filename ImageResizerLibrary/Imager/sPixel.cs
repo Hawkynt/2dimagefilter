@@ -69,7 +69,7 @@ namespace Imager {
     /// <param name="b">The b.</param>
     /// <param name="c">The c.</param>
     /// <returns></returns>
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static byte _Max(byte a, byte b, byte c) {
@@ -84,7 +84,7 @@ namespace Imager {
     /// <param name="b">The b.</param>
     /// <param name="c">The c.</param>
     /// <returns></returns>
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static byte _Min(byte a, byte b, byte c) {
@@ -97,7 +97,7 @@ namespace Imager {
     /// </summary>
     /// <param name="value">The value.</param>
     /// <returns></returns>
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static float _Byte2Single(byte value) => value / 255f;
@@ -107,7 +107,7 @@ namespace Imager {
     /// </summary>
     /// <param name="value">The value.</param>
     /// <returns></returns>
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static double _Byte2Double(byte value) => value / 255d;
@@ -117,7 +117,7 @@ namespace Imager {
     /// </summary>
     /// <param name="value">The value.</param>
     /// <returns></returns>
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static byte _TopClamp(int value) => value > byte.MaxValue ? byte.MaxValue : (byte)value;
@@ -127,7 +127,7 @@ namespace Imager {
     /// </summary>
     /// <param name="value">The value.</param>
     /// <returns></returns>
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static byte _FullClamp(int value) => value > byte.MaxValue ? byte.MaxValue : value < byte.MinValue ? byte.MinValue : (byte)value;
@@ -137,7 +137,7 @@ namespace Imager {
     /// </summary>
     /// <param name="value">The float value to clip.</param>
     /// <returns>The clipped value</returns>
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static byte _FullClamp(float value) => value > byte.MaxValue ? byte.MaxValue : value < byte.MinValue ? byte.MinValue : (byte)value;
@@ -147,7 +147,7 @@ namespace Imager {
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The alpha component</returns>
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static byte _GetAlpha(uint rgbBytes) => (byte)(rgbBytes >> _ALPHA_SHIFT);
@@ -157,7 +157,7 @@ namespace Imager {
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The red component</returns>
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static byte _GetRed(uint rgbBytes) => (byte)(rgbBytes >> _RED_SHIFT);
@@ -167,7 +167,7 @@ namespace Imager {
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The green component</returns>
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static byte _GetGreen(uint rgbBytes) => (byte)(rgbBytes >> _GREEN_SHIFT);
@@ -177,7 +177,7 @@ namespace Imager {
     /// </summary>
     /// <param name="rgbBytes">The pixel value.</param>
     /// <returns>The blue component</returns>
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static byte _GetBlue(uint rgbBytes) => (byte)(rgbBytes >> _BLUE_SHIFT);
@@ -956,7 +956,7 @@ namespace Imager {
 
   internal static partial class MathExtensions {
     [TargetedPatchingOptOut("")]
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public static uint Abs(this int v) {

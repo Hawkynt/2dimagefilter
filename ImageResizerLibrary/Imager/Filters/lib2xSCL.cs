@@ -97,12 +97,12 @@ namespace Imager.Filters {
       worker.TargetP1P1(p3);
     }
 
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static sPixel _Mixpal(sPixel c1, sPixel c2) => sPixel.Interpolate(c1, c2, 3, 1);
 
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static sPixel _Unmix(sPixel c1, sPixel c2) {
@@ -124,7 +124,7 @@ namespace Imager.Filters {
       return sPixel.FromRGBA(r, g, b, (c1.Alpha + c2.Alpha) >> 1);
     }
 
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static int _ClampToByteRange(int n) => n < 0 ? 0 : n > 255 ? 255 : n;

@@ -25,7 +25,7 @@ using Imager.Interface;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-#if NETFX_45
+#if NET45
 using System.Windows;
 #endif
 
@@ -100,7 +100,7 @@ namespace Imager {
       return this._RunLoop(filterRegion, scaleX, scaleY, w => scaler(w));
     }
 
-#if NETFX_45
+#if NET45
 
     /// <summary>
     /// Applies the pixel scaler without any parameters.

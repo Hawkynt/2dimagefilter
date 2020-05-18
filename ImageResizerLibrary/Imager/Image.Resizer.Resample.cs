@@ -20,7 +20,7 @@
 #endregion
 
 using System.Drawing;
-#if NETFX_45
+#if NET45
 using System.Windows;
 #endif
 using Imager.Classes;
@@ -65,7 +65,7 @@ namespace Imager {
       return result;
     }
 
-#if NETFX_45
+#if NET45
 
     /// <summary>
     /// Applies the pixel scaler for float32 images.

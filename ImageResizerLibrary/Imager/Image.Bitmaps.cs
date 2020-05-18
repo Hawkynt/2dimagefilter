@@ -22,7 +22,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Drawing;
-#if NETFX_45
+#if NET45
 using System.Runtime.CompilerServices;
 #endif
 using System.Threading.Tasks;
@@ -39,7 +39,7 @@ namespace Imager {
     /// <param name="target">The target.</param>
     /// <param name="targetOffset">The target offset.</param>
     /// <param name="count">The count.</param>
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static unsafe void _CopyBlock(int* source, int sourceOffset, int* target, int targetOffset, int count) {
@@ -69,7 +69,7 @@ namespace Imager {
         _CopyPixels(x, y, width, height, (int*) sourceData.ToPointer(), sourceWidth, (int*) target, targetWidth, sourceStride >> 2, targetStride);
     }
 
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static unsafe void _CopyPixels(int x, int y, int width, int height, int* source, int sourceWidth, int* target, int targetWidth, int sourceStrideNormalized, int targetStrideNormalized) {
@@ -169,7 +169,7 @@ namespace Imager {
     }
 
 
-#if NETFX_45
+#if NET45
     /// <summary>
     /// Converts this image to a <see cref="BitmapSource"/> instance.
     /// </summary>

@@ -347,7 +347,7 @@ namespace Imager {
       set { this.SetPixel(x, y, value); }
     }
 
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     internal void SetPixel(int x, int y, sPixel value) {
@@ -358,7 +358,7 @@ namespace Imager {
         this._imageData[y * width + x] = value;
     }
 
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     internal sPixel GetPixel(int x, int y) {
@@ -374,7 +374,7 @@ namespace Imager {
       return this._imageData[y * width + x];
     }
 
-#if NETFX_45
+#if NET45
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     internal sPixel[] GetImageData() => this._imageData;
