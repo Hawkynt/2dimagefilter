@@ -78,14 +78,11 @@ namespace Imager.Filters {
           if (conc2D > 0) {
             e10 = c57;
             e01 = c57;
-            e11 = sPixel.Interpolate(c48, c57);
-            e00 = sPixel.Interpolate(c48, c57);
+            e00 = e11 = sPixel.Interpolate(c48, c57);
           } else if (conc2D < 0) {
-            e10 = sPixel.Interpolate(c48, c57);
-            e01 = sPixel.Interpolate(c48, c57);
+            e01 = e10 = sPixel.Interpolate(c48, c57);
           } else {
-            e10 = c57;
-            e01 = c57;
+            e01 = e10 = c57;
           }
         } else {
           if (c48.IsLike(c1) && c48.IsLike(d5))
