@@ -46,6 +46,7 @@ namespace Imager {
       {XbrScalerType.Xbr3, Tuple.Create<byte, byte, XbrFilter>(3, 3, (worker, a) => libXBR.Xbr3X(worker, a, true))},
       {XbrScalerType.Xbr3Modified, Tuple.Create<byte, byte, XbrFilter>(3, 3, (worker, a) => libXBR.Xbr3X(worker, a, false))},
       {XbrScalerType.Xbr4, Tuple.Create<byte, byte, XbrFilter>(4, 4, libXBR.Xbr4X)},
+      {XbrScalerType.Xbr5, Tuple.Create<byte, byte, XbrFilter>(5, 5, (worker, a) => libXBR.Xbr5X(worker))},
     };
 
     /// <summary>

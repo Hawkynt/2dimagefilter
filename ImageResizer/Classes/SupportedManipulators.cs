@@ -59,6 +59,7 @@ namespace Classes {
     #region add xbr resizer
 .Concat(
       from p in ReflectionUtils.GetEnumValues<XbrScalerType>()
+      where p!=XbrScalerType.Xbr5
       select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p) + " <NoBlend>", new XbrScaler(p, false))
 )
 .Concat(

@@ -32,12 +32,15 @@ namespace Imager.Interface {
     [EnumDisplayName("XBR 3x")]
     [Description("Hyllian's XBR 3x")]
     Xbr3,
-    [EnumDisplayName("XBR 3x(modified)")]
+    [EnumDisplayName("XBR 3x (modified)")]
     [Description("Hyllian's XBR 3x (non-original version)")]
     Xbr3Modified,
     [EnumDisplayName("XBR 4x")]
     [Description("Hyllian's XBR 4x")]
     Xbr4,
+    [EnumDisplayName("XBR 5x (legacy)")]
+    [Description("Hyllian's XBR 5x")]
+    Xbr5,
     #endregion
   }
 }

@@ -69,22 +69,32 @@ namespace Imager {
     void TargetP1M1(TColorStorage value);
     void TargetP2M1(TColorStorage value);
     void TargetP3M1(TColorStorage value);
+    void TargetP4M1(TColorStorage value);
     void TargetP0P0(TColorStorage value);
     void TargetP1P0(TColorStorage value);
     void TargetP2P0(TColorStorage value);
     void TargetP3P0(TColorStorage value);
+    void TargetP4P0(TColorStorage value);
     void TargetP0P1(TColorStorage value);
     void TargetP1P1(TColorStorage value);
     void TargetP2P1(TColorStorage value);
     void TargetP3P1(TColorStorage value);
+    void TargetP4P1(TColorStorage value);
     void TargetP0P2(TColorStorage value);
     void TargetP1P2(TColorStorage value);
     void TargetP2P2(TColorStorage value);
     void TargetP3P2(TColorStorage value);
+    void TargetP4P2(TColorStorage value);
     void TargetP0P3(TColorStorage value);
     void TargetP1P3(TColorStorage value);
     void TargetP2P3(TColorStorage value);
     void TargetP3P3(TColorStorage value);
+    void TargetP4P3(TColorStorage value);
+    void TargetP0P4(TColorStorage value);
+    void TargetP1P4(TColorStorage value);
+    void TargetP2P4(TColorStorage value);
+    void TargetP3P4(TColorStorage value);
+    void TargetP4P4(TColorStorage value);
     #endregion
 
   }
@@ -132,6 +142,7 @@ namespace Imager {
     private readonly int _targetOffsetP1Y;
     private readonly int _targetOffsetP2Y;
     private readonly int _targetOffsetP3Y;
+    private readonly int _targetOffsetP4Y;
     #endregion
 
     public PixelWorker(Func<int, TColorStorage> sourceImageGetter, int sourceX, int sourceY, int sourceWidth, int sourceHeight, int sourceStride, OutOfBoundsUtils.OutOfBoundsHandler sourceXWrapper, OutOfBoundsUtils.OutOfBoundsHandler sourceYWrapper, Action<int, TColorStorage> targetImageSetter, int targetX, int targetY, int targetStride) {
@@ -168,6 +179,7 @@ namespace Imager {
       this._targetOffsetP1Y = targetStride     ;          // for nx2 filters
       this._targetOffsetP2Y = targetStride << 1;          // for nx3 filters
       this._targetOffsetP3Y = targetStride *  3;          // for nx4 filters
+      this._targetOffsetP4Y = targetStride << 2;          // for nx5 filters
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -181,8 +193,8 @@ namespace Imager {
 
     public void IncrementX(int targetXIncrementor){
       this._targetOffset+=targetXIncrementor;
-      this._sourceOffset++;
-      this._sourceX++;
+      ++this._sourceOffset;
+      ++this._sourceX;
       this._sourceOffsetM2X = this._CalculateOffsetM2X;
       this._sourceOffsetM1X = this._GetOffsetM1X;
       this._sourceOffsetM1XValue = -1;
@@ -311,6 +323,10 @@ namespace Imager {
       => this._targetImageSetter(this._targetOffset + 3 + this._targetOffsetM1Y, value)
       ;
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void TargetP4M1(TColorStorage value)
+      => this._targetImageSetter(this._targetOffset + 4 + this._targetOffsetM1Y, value)
+      ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP0P0(TColorStorage value)
       => this._targetImageSetter(this._targetOffset, value)
       ;
@@ -325,6 +341,10 @@ namespace Imager {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP3P0(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 3, value)
+      ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void TargetP4P0(TColorStorage value)
+      => this._targetImageSetter(this._targetOffset + 4, value)
       ;
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP0P1(TColorStorage value)
@@ -343,6 +363,10 @@ namespace Imager {
       => this._targetImageSetter(this._targetOffset + 3 + this._targetOffsetP1Y, value)
       ;
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void TargetP4P1(TColorStorage value)
+      => this._targetImageSetter(this._targetOffset + 4 + this._targetOffsetP1Y, value)
+      ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP0P2(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + this._targetOffsetP2Y, value)
       ;
@@ -357,6 +381,10 @@ namespace Imager {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP3P2(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 3 + this._targetOffsetP2Y, value)
+      ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void TargetP4P2(TColorStorage value)
+      => this._targetImageSetter(this._targetOffset + 4 + this._targetOffsetP2Y, value)
       ;
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void TargetP0P3(TColorStorage value)
@@ -374,6 +402,30 @@ namespace Imager {
     public void TargetP3P3(TColorStorage value)
       => this._targetImageSetter(this._targetOffset + 3 + this._targetOffsetP3Y, value)
       ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void TargetP4P3(TColorStorage value)
+      => this._targetImageSetter(this._targetOffset + 4 + this._targetOffsetP3Y, value)
+      ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void TargetP0P4(TColorStorage value)
+      => this._targetImageSetter(this._targetOffset + this._targetOffsetP4Y, value)
+      ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void TargetP1P4(TColorStorage value)
+      => this._targetImageSetter(this._targetOffset + 1 + this._targetOffsetP4Y, value)
+      ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void TargetP2P4(TColorStorage value)
+      => this._targetImageSetter(this._targetOffset + 2 + this._targetOffsetP4Y, value)
+      ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void TargetP3P4(TColorStorage value)
+      => this._targetImageSetter(this._targetOffset + 3 + this._targetOffsetP4Y, value)
+      ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void TargetP4P4(TColorStorage value)
+      => this._targetImageSetter(this._targetOffset + 4 + this._targetOffsetP4Y, value)
+      ;
     #endregion
 
     #region calculate source offset deltas
@@ -388,7 +440,7 @@ namespace Imager {
       var result = value - current;
       this._sourceOffsetM2XValue = result;
       this._sourceOffsetM2X = this._GetOffsetM2X;
-      return (result);
+      return result;
     }
     private int _GetOffsetM1X() => this._sourceOffsetM1XValue;
     private int _CalculateOffsetM1X() {
@@ -400,7 +452,7 @@ namespace Imager {
       var result = value - current;
       this._sourceOffsetM1XValue = result;
       this._sourceOffsetM1X = this._GetOffsetM1X;
-      return (result);
+      return result;
     }
     private int _GetOffsetP1X() => this._sourceOffsetP1XValue;
     private int _CalculateOffsetP1X() {
@@ -412,7 +464,7 @@ namespace Imager {
       var result = value - current;
       this._sourceOffsetP1XValue = result;
       this._sourceOffsetP1X = this._GetOffsetP1X;
-      return (result);
+      return result;
     }
     private int _GetOffsetP2X() => this._sourceOffsetP2XValue;
     private int _CalculateOffsetP2X() {
@@ -424,7 +476,7 @@ namespace Imager {
       var result = value - current;
       this._sourceOffsetP2XValue = result;
       this._sourceOffsetP2X = this._GetOffsetP2X;
-      return (result);
+      return result;
     }
     private int _GetOffsetM2Y() => this._sourceOffsetM2YValue;
     private int _CalculateOffsetM2Y() {
@@ -436,7 +488,7 @@ namespace Imager {
       var result = (value - current) * this._sourceStride;
       this._sourceOffsetM2YValue = result;
       this._sourceOffsetM2Y = this._GetOffsetM2Y;
-      return (result);
+      return result;
     }
     private int _GetOffsetM1Y() => this._sourceOffsetM1YValue;
     private int _CalculateOffsetM1Y() {
@@ -448,7 +500,7 @@ namespace Imager {
       var result = (value - current) * this._sourceStride;
       this._sourceOffsetM1YValue = result;
       this._sourceOffsetM1Y = this._GetOffsetM1Y;
-      return (result);
+      return result;
     }
     private int _GetOffsetP1Y() => this._sourceOffsetP1YValue;
     private int _CalculateOffsetP1Y() {
@@ -460,7 +512,7 @@ namespace Imager {
       var result = (value - current) * this._sourceStride;
       this._sourceOffsetP1YValue = result;
       this._sourceOffsetP1Y = this._GetOffsetP1Y;
-      return (result);
+      return result;
     }
     private int _GetOffsetP2Y() => this._sourceOffsetP2YValue;
     private int _CalculateOffsetP2Y() {
@@ -472,7 +524,7 @@ namespace Imager {
       var result = (value - current) * this._sourceStride;
       this._sourceOffsetP2YValue = result;
       this._sourceOffsetP2Y = this._GetOffsetP2Y;
-      return (result);
+      return result;
     }
     #endregion
 

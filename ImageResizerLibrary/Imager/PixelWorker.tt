@@ -28,8 +28,8 @@
   var shiftMultipliers=Enumerable.Range(0,8).ToDictionary(i=>1<<i,i=>i);
   var sourceXRange=new[]{-2,-1,0,1,2};
   var sourceYRange=new[]{-2,-1,0,1,2};
-  var targetXRange=new[]{0,1,2,3};
-  var targetYRange=new[]{-1,0,1,2,3};
+  var targetXRange=new[]{0,1,2,3,4};
+  var targetYRange=new[]{-1,0,1,2,3,4};
   Func<int,string> GetLineDescription=v=>v<0?"M"+Math.Abs(v).ToString():"P"+v.ToString();
   Func<int,int,string> GetPointDescription=(x,y)=>GetLineDescription(x)+GetLineDescription(y);
 #>
@@ -149,8 +149,8 @@ namespace Imager {
 
     public void IncrementX(int targetXIncrementor){
       this._targetOffset+=targetXIncrementor;
-      this._sourceOffset++;
-      this._sourceX++;
+      ++this._sourceOffset;
+      ++this._sourceX;
 <# foreach(var i in sourceXRange.Where(i=>i!=0)) { #>
 <# if(i==-1){ #>
       this._sourceOffset<#=GetLineDescription(i)#>X = this._GetOffset<#=GetLineDescription(i)#>X;
@@ -196,7 +196,7 @@ namespace Imager {
       var result = value - current;
       this._sourceOffset<#=GetLineDescription(i)#>XValue = result;
       this._sourceOffset<#=GetLineDescription(i)#>X = this._GetOffset<#=GetLineDescription(i)#>X;
-      return (result);
+      return result;
     }
 <# } #>
 <# foreach(var i in sourceYRange.Where(i=>i!=0)) { #>
@@ -210,7 +210,7 @@ namespace Imager {
       var result = (value - current) * this._sourceStride;
       this._sourceOffset<#=GetLineDescription(i)#>YValue = result;
       this._sourceOffset<#=GetLineDescription(i)#>Y = this._GetOffset<#=GetLineDescription(i)#>Y;
-      return (result);
+      return result;
     }
 <# } #>
     #endregion

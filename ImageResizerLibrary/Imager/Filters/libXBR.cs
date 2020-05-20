@@ -119,6 +119,62 @@ namespace Imager.Filters {
     }
 
     /// <summary>
+    /// This is the XBR5x by Hyllian/Jararaca (see https://github.com/libretro/common-shaders/blob/master/xbr/shaders/legacy/5xbr.cg)
+    /// </summary>
+    /// <param name="worker"></param>
+    public static void Xbr5X(IPixelWorker<sPixel> worker) {
+      var a = worker.SourceM1M1();
+      var b = worker.SourceP0M1();
+      var c = worker.SourceP1M1();
+      var d = worker.SourceM1P0();
+      var e = worker.SourceP0P0();
+      var f = worker.SourceP1P0();
+      var g = worker.SourceM1P1();
+      var h = worker.SourceP0P1();
+      var i = worker.SourceP1P1();
+
+      var E14 = e;
+      var E19 = e;
+      var E24 = e;
+
+      if (h.IsLike(f) && h.IsNotLike(e) && (e.IsLike(g) && (h.IsLike(i) || e.IsLike(d)) || e.IsLike(c) && (h.IsLike(i) || e.IsLike(b)))) {
+        E24 = f;
+        E19 = sPixel.Interpolate(E19, f, 1, 8);
+        E14 = sPixel.Interpolate(E14, f, 8, 1);
+      }
+
+      worker.TargetP0P0(E24);
+      worker.TargetP1P0(E19);
+      worker.TargetP2P0(E14);
+      worker.TargetP3P0(E19);
+      worker.TargetP4P0(E24);
+
+      worker.TargetP0P1(E19);
+      worker.TargetP1P1(E14);
+      worker.TargetP2P1(e);
+      worker.TargetP3P1(E14);
+      worker.TargetP4P1(E19);
+
+      worker.TargetP0P2(E14);
+      worker.TargetP1P2(e);
+      worker.TargetP2P2(e);
+      worker.TargetP3P2(e);
+      worker.TargetP4P2(E14);
+
+      worker.TargetP0P3(E19);
+      worker.TargetP1P3(E14);
+      worker.TargetP2P3(e);
+      worker.TargetP3P3(E14);
+      worker.TargetP4P3(E19);
+
+      worker.TargetP0P4(E24);
+      worker.TargetP1P4(E19);
+      worker.TargetP2P4(E14);
+      worker.TargetP3P4(E19);
+      worker.TargetP4P4(E24);
+    }
+
+    /// <summary>
     /// This is the XBR4x by Hyllian (see http://board.byuu.org/viewtopic.php?f=10&t=2248)
     /// </summary>
     public static void Xbr4X(IPixelWorker<sPixel> worker, bool allowAlphaBlending) {
@@ -175,13 +231,11 @@ namespace Imager.Filters {
       worker.TargetP3P3(ef);
     }
 
-    private static uint _YuvDifference(sPixel a, sPixel b) {
-      return a.AbsDifference(b);
-    }
+    #region tools
 
-    private static bool _IsEqual(sPixel a, sPixel b) {
-      return a.IsLike(b);
-    }
+    private static uint _YuvDifference(sPixel a, sPixel b) => a.AbsDifference(b);
+
+    private static bool _IsEqual(sPixel a, sPixel b) => a.IsLike(b);
 
     private static void _AlphaBlend32W(ref sPixel dst, sPixel src, bool blend) {
       if (blend)
@@ -198,13 +252,15 @@ namespace Imager.Filters {
         dst = sPixel.Interpolate(dst, src);
     }
 
-    private static void _AlphaBlend192W(ref sPixel dst, sPixel src, bool blend) {
-      dst = blend ? sPixel.Interpolate(dst, src, 1, 3) : src;
-    }
+    private static void _AlphaBlend192W(ref sPixel dst, sPixel src, bool blend) 
+      => dst = blend ? sPixel.Interpolate(dst, src, 1, 3) : src
+    ;
 
-    private static void _AlphaBlend224W(ref sPixel dst, sPixel src, bool blend) {
-      dst = blend ? sPixel.Interpolate(dst, src, 1, 7) : src;
-    }
+    private static void _AlphaBlend224W(ref sPixel dst, sPixel src, bool blend) 
+      => dst = blend ? sPixel.Interpolate(dst, src, 1, 7) : src
+    ;
+
+    #endregion
 
     #region 2x
     private static void _LeftUp2_2X(ref sPixel n3, ref sPixel n2, out sPixel n1, sPixel pixel, bool blend) {
