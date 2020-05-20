@@ -107,10 +107,6 @@
       <Project>{13BDB1CA-845C-44A6-BFBD-AD2428A318D4}</Project>
       <Name>ImageResizerLibrary</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ImageResizer\ImageResizer.csproj">
-      <Project>{d22baaae-f358-438f-bfb3-880dac29b4d4}</Project>
-      <Name>ImageResizer</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />

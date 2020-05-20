@@ -270,6 +270,8 @@
     <ProjectReference Include="..\ImageResizerLibrary\ImageResizerLibrary.csproj">
       <Project>{13bdb1ca-845c-44a6-bfbd-ad2428a318d4}</Project>
       <Name>ImageResizerLibrary</Name>
+      <EmbedAssembly>true</EmbedAssembly>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
