@@ -120,6 +120,7 @@ namespace Imager.Filters {
 
     /// <summary>
     /// This is the XBR5x by Hyllian/Jararaca (see https://github.com/libretro/common-shaders/blob/master/xbr/shaders/legacy/5xbr.cg)
+    /// Note: something here is off maybe this (https://github.com/carlosascari/2xBR-Filter/blob/master/xbr.js) helps to understand...
     /// </summary>
     /// <param name="worker"></param>
     public static void Xbr5X(IPixelWorker<sPixel> worker) {
@@ -139,8 +140,8 @@ namespace Imager.Filters {
 
       if (h.IsLike(f) && h.IsNotLike(e) && (e.IsLike(g) && (h.IsLike(i) || e.IsLike(d)) || e.IsLike(c) && (h.IsLike(i) || e.IsLike(b)))) {
         E24 = f;
-        E19 = sPixel.Interpolate(E19, f, 1, 8);
-        E14 = sPixel.Interpolate(E14, f, 8, 1);
+        E19 = sPixel.Interpolate(e, f, 1, 7);
+        E14 = sPixel.Interpolate(e, f, 7, 1);
       }
 
       worker.TargetP0P0(E24);

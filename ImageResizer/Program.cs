@@ -80,6 +80,7 @@ namespace ImageResizer {
         var consoleHandle = _GetConsoleWindow();
 
         // run GUI
+        var host = AppDomain.CurrentDomain.FriendlyName;
         if (consoleHandle == IntPtr.Zero || AppDomain.CurrentDomain.FriendlyName.Contains(".vshost") || firstParam == _FORCE_GUI_CLP_NAME || fileToOpenOnStart != null) {
 
           // we either have no console window or we're started from within visual studio or we are forced into GUI mode
