@@ -26,6 +26,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 using Classes.ScriptActions;
@@ -190,18 +191,21 @@ namespace Classes {
     /// <summary>
     /// Saves an image and adjust jpeg quality if saving to jpeg.
     /// </summary>
-    /// <param name="filename">The filename.</param>
+    /// <param name="fullFilePath">The filename.</param>
     /// <param name="image">The image.</param>
     /// <returns><c>true</c> on success; otherwise, <c>false</c>.</returns>
-    internal static CLIExitCode SaveHelper(string filename, Image image) {
-      Contract.Requires(filename != null);
+    internal static CLIExitCode SaveHelper(string fullFilePath, Image image) {
+      Contract.Requires(fullFilePath != null);
 
       if (image == null)
         return CLIExitCode.NothingToSave;
 
-      var extension = Path.GetExtension(filename)?.ToUpperInvariant();
+      var extension = Path.GetExtension(fullFilePath)?.ToUpperInvariant();
 
+      // atomic save - temp file first, than rename, remove existing file
+      var temporaryFileName = _GetTempFileName(fullFilePath);
       try {
+
         switch (extension) {
           case ".JPG":
           case ".JPEG": {
@@ -211,7 +215,7 @@ namespace Classes {
               return CLIExitCode.JpegNotSupportedOnThisPlatform;
             }
             Contract.Assume(Encoder.Quality != null);
-            image.Save(filename, codecs[0], new EncoderParameters {
+            image.Save(temporaryFileName, codecs[0], new EncoderParameters {
               Param = new[] {
                 new EncoderParameter(Encoder.Quality, (long)100)
               }
@@ -219,23 +223,53 @@ namespace Classes {
             break;
           }
           case ".BMP":
-            image.Save(filename, ImageFormat.Bmp);
+            image.Save(temporaryFileName, ImageFormat.Bmp);
             break;
           case ".GIF":
-            image.Save(filename, ImageFormat.Gif);
+            image.Save(temporaryFileName, ImageFormat.Gif);
             break;
           case ".TIF":
-            image.Save(filename, ImageFormat.Tiff);
+            image.Save(temporaryFileName, ImageFormat.Tiff);
             break;
           default:
-            image.Save(filename, ImageFormat.Png);
+            image.Save(temporaryFileName, ImageFormat.Png);
             break;
         }
+        
+        if(!File.Exists(temporaryFileName))
+          return CLIExitCode.TargetFileCouldNotBeSaved;
+
+        File.Copy(temporaryFileName, fullFilePath,true);
+        File.Delete(temporaryFileName);
       } catch (Exception) {
+        if (!File.Exists(temporaryFileName))
+          return CLIExitCode.ExceptionDuringImageWrite;
+
+        // removing temp file again
+        _TryDeleteFile(temporaryFileName);
         return CLIExitCode.ExceptionDuringImageWrite;
       }
 
       return CLIExitCode.OK;
+    }
+
+    private static bool _TryDeleteFile(string fileName) {
+      try {
+        File.Delete(fileName);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    private static string _GetTempFileName(string fileName) {
+      var extension = Path.GetExtension(fileName);
+      var i = 0;
+      for (;;) {
+        var result = Path.ChangeExtension(fileName, i++ + extension);
+        if (!File.Exists(result))
+          return result;
+      }
     }
 
   }
