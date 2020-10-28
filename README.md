@@ -1,7 +1,7 @@
 2D-Image and Texture Filter
 ===========================
 This project tries to get all available image filters together, known to upscale lowres computer and console graphics.
-The goal is to modify them all to allow them to be used on a wide range of low-res graphics. 
+The goal is to modify them all to allow them to be used on a wide range of low-res graphics.
 One of the steps to achieve that is converting the filter algorithms, normally written to make comparisons like
 
 `(color1==color2)?color1:color3`
@@ -36,5 +36,5 @@ Prerequisites
 
 Downloads
 ---------
-* Standalone v1.1.3.3 ([r133](http://en.file-upload.net/download-9803513/ImageResizer-r133.exe.html))
-* Paint.NET Plugin ([r133](http://en.file-upload.net/download-9803540/2dImageFilter-r133.dll.html))
+* Standalone v2.0.0 ([2.0.0](https://github.com/Hawkynt/2dimagefilter/releases/download/2.0.0/Standalone.zip))
+* Paint.NET Plugin ([2.0.0](https://github.com/Hawkynt/2dimagefilter/releases/download/2.0.0/PaintDotNetPlugin.zip))
