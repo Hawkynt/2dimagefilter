@@ -36,4 +36,5 @@ Prerequisites
 
 Downloads
 ---------
-* v2.0.0 ([r133](http://en.file-upload.net/download-9803513/ImageResizer-r133.exe.html))
+* Standalone v2.0.0 ([2.0.0](https://github.com/Hawkynt/2dimagefilter/releases/download/2.0.0/Standalone.zip))
+* Paint.NET Plugin ([2.0.0](https://github.com/Hawkynt/2dimagefilter/releases/download/2.0.0/PaintDotNetPlugin.zip))
