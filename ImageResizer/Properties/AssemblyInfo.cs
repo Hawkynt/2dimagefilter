@@ -2,18 +2,6 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 
-// Allgemeine Informationen über eine Assembly werden über die folgenden 
-// Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
-// die mit einer Assembly verknüpft sind.
-[assembly: AssemblyTitle("ImageResizer")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("»SynthelicZ«")]
-[assembly: AssemblyProduct("ImageResizer")]
-[assembly: AssemblyCopyright("Copyright © 2008-2019 Hawkynt")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
-
 // Durch Festlegen von ComVisible auf "false" werden die Typen in dieser Assembly unsichtbar 
 // für COM-Komponenten. Wenn Sie auf einen Typ in dieser Assembly von 
 // COM zugreifen müssen, legen Sie das ComVisible-Attribut für diesen Typ auf "true" fest.
@@ -37,17 +25,3 @@ using System.Windows;
   //(wird verwendet, wenn eine Ressource auf der Seite, in der Anwendung oder einem 
   // designspezifischen Ressourcenwörterbuch nicht gefunden werden kann.)
 )]
-
-
-// Versionsinformationen für eine Assembly bestehen aus den folgenden vier Werten:
-//
-//      Hauptversion
-//      Nebenversion 
-//      Buildnummer
-//      Revision
-//
-// Sie können alle Werte angeben oder die standardmäßigen Build- und Revisionsnummern 
-// übernehmen, indem Sie "*" eingeben:
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.3.3")]
-[assembly: AssemblyFileVersion("1.1.3.3")]

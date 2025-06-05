@@ -1,28 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{D22BAAAE-F358-438F-BFB3-880DAC29B4D4}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ImageResizer</RootNamespace>
-    <AssemblyName>ImageResizer</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
-    <StartupObject>
-    </StartupObject>
+    <TargetFramework>net45</TargetFramework>
+    <StartupObject />
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <TargetFrameworkProfile />
+    <FileUpgradeFlags />
+    <UpgradeBackupLocation />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -38,249 +22,67 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <CodeContractsAssemblyMode>0</CodeContractsAssemblyMode>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NETFX_45</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <AssemblyTitle>ImageResizer</AssemblyTitle>
+    <Company>»SynthelicZ«</Company>
+    <Product>ImageResizer</Product>
+    <Copyright>Copyright © 2008-2019 Hawkynt</Copyright>
+    <AssemblyVersion>1.1.3.3</AssemblyVersion>
+    <FileVersion>1.1.3.3</FileVersion>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
-    <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
-    <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
-    <CodeContractsRuntimeCallSiteRequires>False</CodeContractsRuntimeCallSiteRequires>
-    <CodeContractsRuntimeSkipQuantifiers>False</CodeContractsRuntimeSkipQuantifiers>
-    <CodeContractsRunCodeAnalysis>True</CodeContractsRunCodeAnalysis>
-    <CodeContractsNonNullObligations>False</CodeContractsNonNullObligations>
-    <CodeContractsBoundsObligations>False</CodeContractsBoundsObligations>
-    <CodeContractsArithmeticObligations>False</CodeContractsArithmeticObligations>
-    <CodeContractsEnumObligations>False</CodeContractsEnumObligations>
-    <CodeContractsRedundantAssumptions>False</CodeContractsRedundantAssumptions>
-    <CodeContractsRunInBackground>True</CodeContractsRunInBackground>
-    <CodeContractsShowSquigglies>True</CodeContractsShowSquigglies>
-    <CodeContractsUseBaseLine>False</CodeContractsUseBaseLine>
-    <CodeContractsEmitXMLDocs>False</CodeContractsEmitXMLDocs>
-    <CodeContractsCustomRewriterAssembly />
-    <CodeContractsCustomRewriterClass />
-    <CodeContractsLibPaths />
-    <CodeContractsExtraRewriteOptions />
-    <CodeContractsExtraAnalysisOptions />
-    <CodeContractsBaseLineFile />
-    <CodeContractsCacheAnalysisResults>False</CodeContractsCacheAnalysisResults>
-    <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
-    <CodeContractsReferenceAssembly>%28none%29</CodeContractsReferenceAssembly>
-    <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>App.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <DefineConstants>TRACE;DEBUG;NETFX_45</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE;NETFX_45</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>App.ico</ApplicationIcon>
-  </PropertyGroup>
+  <Import Project="..\..\Framework\VersionSpecificSymbols.Common.prop" />
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\ImageResizerLibrary\Classes\ReflectionUtils.cs">
-      <Link>Classes\ReflectionUtils.cs</Link>
-    </Compile>
-    <Compile Include="Classes\CLI.cs" />
-    <Compile Include="Classes\CLIExitCode.cs" />
-    <Compile Include="Classes\Config.cs" />
-    <Compile Include="Classes\IImageManipulator.cs" />
-    <Compile Include="Classes\ImageManipulators\AScaler.cs" />
-    <Compile Include="Classes\ImageManipulators\Interpolator.cs" />
-    <Compile Include="Classes\ImageManipulators\PlaneExtractor.cs" />
-    <Compile Include="Classes\ImageManipulators\RadiusResampler.cs" />
-    <Compile Include="Classes\ImageManipulators\Resampler.cs" />
-    <Compile Include="Classes\ImageManipulators\Scalers\NqScaler.cs" />
-    <Compile Include="Classes\ImageManipulators\Scalers\PixelScaler.cs" />
-    <Compile Include="Classes\ImageManipulators\Scalers\XbrScaler.cs" />
-    <Compile Include="Classes\ImageManipulators\Scalers\XbrzScaler.cs" />
-    <Compile Include="Classes\IScriptAction.cs" />
-    <Compile Include="Classes\ScriptActions\LoadFileCommand.cs" />
-    <Compile Include="Classes\ScriptActions\LoadStdInCommand.cs" />
-    <Compile Include="Classes\ScriptActions\NullTransformCommand.cs" />
-    <Compile Include="Classes\ScriptActions\ResizeCommand.cs" />
-    <Compile Include="Classes\ScriptActions\SaveFileCommand.cs" />
-    <Compile Include="Classes\ScriptActions\SaveStdOutCommand.cs" />
-    <Compile Include="Classes\ScriptActions\TargetToSourceCommand.cs" />
-    <Compile Include="Classes\ScriptEngine.cs" />
-    <Compile Include="Classes\ScriptSerializer.cs" />
-    <Compile Include="Classes\ScriptSerializerException.cs" />
-    <Compile Include="Classes\SupportedManipulators.cs" />
-    <Compile Include="Framework\System.StringExtensions.cs" />
-    <Compile Include="Framework\System.Windows.Forms.ControlExtensions.cs" />
-    <Compile Include="MainForm.EventHandlers.cs">
+    <Compile Include="..\ImageResizerLibrary\Classes\ReflectionUtils.cs" Link="Classes\ReflectionUtils.cs" />
+    <Compile Update="MainForm.EventHandlers.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Program.cs" />
-    <Compile Include="UserControls\ImageWithDetails.cs">
+    <Compile Update="UserControls\ImageWithDetails.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UserControls\ImageWithDetails.Designer.cs">
-      <DependentUpon>ImageWithDetails.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Windows\AboutWindow.cs">
+    <Compile Update="Windows\AboutWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Windows\AboutWindow.Designer.cs">
-      <DependentUpon>AboutWindow.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="MainForm.cs">
+    <Compile Update="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Update="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UserControls\ImageWithDetails.resx">
+    <EmbeddedResource Update="UserControls\ImageWithDetails.resx">
       <DependentUpon>ImageWithDetails.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Windows\AboutWindow.resx">
+    <EmbeddedResource Update="Windows\AboutWindow.resx">
       <DependentUpon>AboutWindow.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <AppDesigner Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="App.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ProgressCircularBlue.gif" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Width.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Height.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Horizontal.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Vertical.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Resize.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Repeat.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Switch.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\CLIHelpText.txt" />
+    <ProjectReference Include="..\ImageResizerLibrary\ImageResizerLibrary.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ImageResizerLibrary\ImageResizerLibrary.csproj">
-      <Project>{13bdb1ca-845c-44a6-bfbd-ad2428a318d4}</Project>
-      <Name>ImageResizerLibrary</Name>
-      <EmbedAssembly>true</EmbedAssembly>
-      <Private>False</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
-  <Import Project="..\..\Framework\VersionSpecificSymbols.Common.prop" />
 </Project>
