@@ -22,7 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-#if NET45
+#if NET45_OR_GREATER
 using System.Windows;
 #endif
 using Classes;
@@ -67,7 +67,7 @@ namespace Imager {
       return this._RunLoop(filterRegion, scaleX, scaleY, worker => scaler(worker, allowAlphaBlending));
     }
 
-#if NET45
+#if NET45_OR_GREATER
 
     /// <summary>
     /// Applies the XBR pixel scaler.
@@ -92,7 +92,7 @@ namespace Imager {
     public static Tuple<byte, byte, XbrFilter> GetPixelScalerInfo(XbrScalerType type) 
       => XBR_SCALERS.TryGetValue(type, out var info) 
         ? info 
-        : throw new NotSupportedException(string.Format("XBR scaler '{0}' not supported.", type))
+        : throw new NotSupportedException($"XBR scaler '{type}' not supported.")
     ;
 
     /// <summary>
@@ -104,7 +104,7 @@ namespace Imager {
     public static ScalerInformation GetScalerInformation(XbrScalerType type) 
       => XBR_SCALERS.TryGetValue(type, out var info) 
         ? new ScalerInformation(ReflectionUtils.GetDisplayNameForEnumValue(type), ReflectionUtils.GetDescriptionForEnumValue(type), info.Item1, info.Item2) 
-        : throw new NotSupportedException(string.Format("XBR scaler '{0}' not supported.", type))
+        : throw new NotSupportedException($"XBR scaler '{type}' not supported.")
     ;
 
   }

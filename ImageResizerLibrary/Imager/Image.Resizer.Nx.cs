@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-#if NET45
+#if NET45_OR_GREATER
 using System.Windows;
 #endif
 using Classes;
@@ -99,7 +99,7 @@ namespace Imager {
       return this._RunLoop(filterRegion, scaleX, scaleY, worker => scaler(worker, scaleX, scaleY, kernel));
     }
 
-#if NET45
+#if NET45_OR_GREATER
 
     /// <summary>
     /// Applies the NQ pixel scaler.
@@ -124,7 +124,7 @@ namespace Imager {
     public static Tuple<byte, byte, NqKernel> GetPixelScalerInfo(NqScalerType type) 
       => NQ_SCALERS.TryGetValue(type, out var info) 
         ? info 
-        : throw new NotSupportedException(string.Format("NQ scaler '{0}' not supported.", type))
+        : throw new NotSupportedException($"NQ scaler '{type}' not supported.")
     ;
 
     /// <summary>
@@ -135,7 +135,7 @@ namespace Imager {
     public static NqFilter GetPixelScalerInfo(NqMode type) 
       => NQ_MODES.TryGetValue(type, out var info) 
         ? info 
-        : throw new NotSupportedException(string.Format("NQ mode '{0}' not supported.", type))
+        : throw new NotSupportedException($"NQ mode '{type}' not supported.")
     ;
 
     /// <summary>
@@ -147,7 +147,7 @@ namespace Imager {
     public static ScalerInformation GetScalerInformation(NqScalerType type) 
       => NQ_SCALERS.TryGetValue(type, out var info) 
         ? new ScalerInformation(ReflectionUtils.GetDisplayNameForEnumValue(type), ReflectionUtils.GetDescriptionForEnumValue(type), info.Item1, info.Item2) 
-        : throw new NotSupportedException(string.Format("NQ scaler '{0}' not supported.", type))
+        : throw new NotSupportedException($"NQ scaler '{type}' not supported.")
     ;
 
   }

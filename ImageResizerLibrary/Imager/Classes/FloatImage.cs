@@ -24,7 +24,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Threading.Tasks;
-#if NET45
+#if NET45_OR_GREATER
 using System.Windows;
 #endif
 using Imager.Interface;
@@ -144,7 +144,7 @@ namespace Imager.Classes {
       return result;
     }
 
-#if NET45
+#if NET45_OR_GREATER
 
     /// <summary>
     /// Converts a given image into a floating point one.

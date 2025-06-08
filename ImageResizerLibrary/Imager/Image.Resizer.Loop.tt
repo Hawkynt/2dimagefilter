@@ -27,7 +27,7 @@ using System;
 using System.Drawing;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-#if NET45
+#if NET45_OR_GREATER
 using System.Windows;
 #endif
 
@@ -92,7 +92,7 @@ namespace Imager {
       return(result);
     }
 
-#if NET45
+#if NET45_OR_GREATER
     private cImage _RunLoop(Rect? filterRegion, byte scaleX, byte scaleY, Action<PixelWorker<sPixel>> scaler) {
       return _RunLoop(filterRegion?.ToRectangle(), scaleX, scaleY, scaler);
     }

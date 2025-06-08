@@ -25,7 +25,7 @@ using Imager.Interface;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-#if NET45
+#if NET45_OR_GREATER
 using System.Windows;
 #endif
 
@@ -75,7 +75,7 @@ namespace Imager {
       return result;
     }
 
-#if NET45
+#if NET45_OR_GREATER
 
     /// <summary>
     /// Applies the XBR pixel scaler.
@@ -99,7 +99,7 @@ namespace Imager {
     public static Tuple<byte, byte, XbrzFilter> GetPixelScalerInfo(XbrzScalerType type) 
       => XBRz_SCALERS.TryGetValue(type, out var info) 
         ? info 
-        : throw new NotSupportedException(string.Format("XBRz scaler '{0}' not supported.", type))
+        : throw new NotSupportedException($"XBRz scaler '{type}' not supported.")
     ;
 
     /// <summary>
@@ -111,7 +111,7 @@ namespace Imager {
     public static ScalerInformation GetScalerInformation(XbrzScalerType type) 
       => XBRz_SCALERS.TryGetValue(type, out var info) 
         ? new ScalerInformation(ReflectionUtils.GetDisplayNameForEnumValue(type), ReflectionUtils.GetDescriptionForEnumValue(type), info.Item1, info.Item2) 
-        : throw new NotSupportedException(string.Format("XBRz scaler '{0}' not supported.", type))
+        : throw new NotSupportedException($"XBRz scaler '{type}' not supported.")
     ;
 
   }

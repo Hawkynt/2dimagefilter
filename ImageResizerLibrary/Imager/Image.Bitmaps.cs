@@ -22,12 +22,14 @@
 using System;
 using System.Collections.Concurrent;
 using System.Drawing;
-#if NET45
+#if SUPPORTS_INLINING
 using System.Runtime.CompilerServices;
 #endif
 using System.Threading.Tasks;
+#if NET45_OR_GREATER
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+#endif
 
 namespace Imager {
   partial class cImage {
@@ -39,7 +41,7 @@ namespace Imager {
     /// <param name="target">The target.</param>
     /// <param name="targetOffset">The target offset.</param>
     /// <param name="count">The count.</param>
-#if NET45
+#if SUPPORTS_INLINING
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static unsafe void _CopyBlock(int* source, int sourceOffset, int* target, int targetOffset, int count) {
@@ -69,7 +71,7 @@ namespace Imager {
         _CopyPixels(x, y, width, height, (int*) sourceData.ToPointer(), sourceWidth, (int*) target, targetWidth, sourceStride >> 2, targetStride);
     }
 
-#if NET45
+#if SUPPORTS_INLINING
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private static unsafe void _CopyPixels(int x, int y, int width, int height, int* source, int sourceWidth, int* target, int targetWidth, int sourceStrideNormalized, int targetStrideNormalized) {
@@ -169,7 +171,7 @@ namespace Imager {
     }
 
 
-#if NET45
+#if NET45_OR_GREATER
     /// <summary>
     /// Converts this image to a <see cref="BitmapSource"/> instance.
     /// </summary>

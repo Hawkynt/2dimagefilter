@@ -24,7 +24,7 @@
   <PropertyGroup>
     <PostBuildEvent>rem copy "$(TargetPath)" "D:\_copyapps\paint.net\effects\"</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="..\..\Framework\VersionSpecificSymbols.Common.prop" />
+  <Import Project="..\VersionSpecificSymbols.Common.prop" />
   <ItemGroup>
     <Reference Include="PaintDotNet.Base">
       <HintPath>..\..\..\..\..\..\PortableApps\Paint.NET\bin\PaintDotNet.Base.dll</HintPath>

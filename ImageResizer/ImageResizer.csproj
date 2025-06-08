@@ -42,7 +42,7 @@
     <DebugType>pdbonly</DebugType>
     <DefineConstants>TRACE;NETFX_45</DefineConstants>
   </PropertyGroup>
-  <Import Project="..\..\Framework\VersionSpecificSymbols.Common.prop" />
+  <Import Project="..\VersionSpecificSymbols.Common.prop" />
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Forms.DataVisualization" />

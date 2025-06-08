@@ -25,7 +25,7 @@ using Imager.Interface;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-#if NET45
+#if NET45_OR_GREATER
 using System.Windows;
 #endif
 
@@ -100,7 +100,7 @@ namespace Imager {
       return this._RunLoop(filterRegion, scaleX, scaleY, w => scaler(w));
     }
 
-#if NET45
+#if NET45_OR_GREATER
 
     /// <summary>
     /// Applies the pixel scaler without any parameters.
@@ -124,7 +124,7 @@ namespace Imager {
     public static Tuple<byte, byte, ParameterlessPixelScaler> GetPixelScalerInfo(PixelScalerType type) 
       => PIXEL_SCALERS.TryGetValue(type, out var info) 
         ? info 
-        : throw new NotSupportedException(string.Format("Parameterless scaler '{0}' not supported.", type))
+        : throw new NotSupportedException($"Parameterless scaler '{type}' not supported.")
     ;
 
     /// <summary>
@@ -136,7 +136,7 @@ namespace Imager {
     public static ScalerInformation GetScalerInformation(PixelScalerType type) 
       => PIXEL_SCALERS.TryGetValue(type, out var info) 
         ? new ScalerInformation(ReflectionUtils.GetDisplayNameForEnumValue(type), ReflectionUtils.GetDescriptionForEnumValue(type), info.Item1, info.Item2) 
-        : throw new NotSupportedException(string.Format("Parameterless scaler '{0}' not supported.", type))
+        : throw new NotSupportedException($"Parameterless scaler '{type}' not supported.")
     ;
 
   }

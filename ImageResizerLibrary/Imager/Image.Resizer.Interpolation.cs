@@ -49,7 +49,7 @@ namespace Imager {
     /// </returns>
     public cImage ApplyScaler(InterpolationMode type, int width, int height, Rectangle? filterRegion = null) {
       if (!((IList<InterpolationMode>)INTERPOLATORS).Contains(type))
-        throw new NotSupportedException(string.Format("Interpolation mode '{0}' not supported.", type));
+        throw new NotSupportedException($"Interpolation mode '{type}' not supported.");
 
       var startX = filterRegion == null ? 0 : Math.Max(0, filterRegion.Value.Left);
       var startY = filterRegion == null ? 0 : Math.Max(0, filterRegion.Value.Top);
