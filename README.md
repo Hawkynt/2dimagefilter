@@ -1,40 +1,173 @@
-2D-Image and Texture Filter
-===========================
-This project tries to get all available image filters together, known to upscale lowres computer and console graphics.
-The goal is to modify them all to allow them to be used on a wide range of low-res graphics.
-One of the steps to achieve that is converting the filter algorithms, normally written to make comparisons like
+# 2D Image Filter
 
-`(color1==color2)?color1:color3`
+[![License](https://img.shields.io/badge/License-GPL_3.0-blue)](https://licenses.nuget.org/GPL-3.0-or-later)
+![Language](https://img.shields.io/github/languages/top/Hawkynt/2dImagefilter?color=purple)
 
-into something like that
+> A comprehensive collection of pixel art scaling algorithms for upscaling low-resolution computer and console graphics.
 
-`(color1 IsLike color2)?Interpolate(color1,color2):color3`
+## 📖 Overview
 
-I'm trying not to use code from other projects directly, but I implement their algo's in a similar way.
+2D Image Filter is a powerful library that brings together the most popular image scaling algorithms specifically designed for pixel art and low-resolution graphics. Unlike traditional image scaling methods that often blur or distort pixel art, these algorithms preserve the crisp, clean aesthetic while intelligently enlarging images.
 
-As of now (2015) this project has become a reference for much more image resampling algorithms. Even very exotic windowing functions found their way into the code, so the next goal is more like getting each possible available rescaling algo into the library.
+### 🎯 Project Goals
 
-So credits go to the following scalers:
-* Eagle (the godfather himself)
-* Super Eagle (thanks Kreed and ZSNES)
-* SaI2x, Super2xSaI (also Kreed and DOSBox)
-* Scale2x, Scale3x (thanks MAME for these)
-* AdvInterp2x, AdvInterp3x (also MAME)
-* HQ2x, HQ3x, HQ4x (Maxim Stepin)
-* LQ2x, LQ3x, LQ4x (AFAIK SNES9x but AdvMAME also)
-* HQ2x3, HQ2x4, LQ2x3, LQ2x4 (AdvMAME again)
-* nQx Bold and Smart Version (SNES9x, VirtualBoyAdvance)
-* Bilinear Plus Original and Modified (VBA-rr)
-* XBR2x, XBR3x, XBR4x Normal and NonBlend (thanks Hyllian)
-* Resampling kernels (Pascal Getreuer)
-* XBRz (Zenju)
-* SCL, DES (FNES)
+- **Algorithm Collection**: Gather all available pixel art scaling filters in one comprehensive library
+- **Enhanced Flexibility**: Convert rigid color comparisons into parameterized "IsLike" functions
+- **Wide Compatibility**: Support various graphics types with configurable similarity thresholds
+- **Performance**: Optimized implementations using unsafe code for maximum speed
 
-Prerequisites
--------------
-* .NET Framework 4.5
+### 🔧 Key Innovation
 
-Downloads
----------
-* Standalone v2.0.0 ([2.0.0](https://github.com/Hawkynt/2dimagefilter/releases/download/2.0.0/Standalone.zip))
-* Paint.NET Plugin ([2.0.0](https://github.com/Hawkynt/2dimagefilter/releases/download/2.0.0/PaintDotNetPlugin.zip))
+Traditional scaling algorithms use hard-coded comparisons:
+```csharp
+(color1 == color2) ? color1 : color3
+```
+
+Our enhanced approach uses flexible similarity functions:
+```csharp
+(color1.IsLike(color2)) ? Interpolate(color1, color2) : color3
+```
+
+## 🚀 Features
+
+### 📦 Multiple Distribution Formats
+- **Standalone Application**: GUI application for interactive image processing
+- **Paint.NET Plugin**: Seamless integration with Paint.NET editor
+- **Library**: .NET library for programmatic use in your applications
+
+### 🎨 Supported Scaling Algorithms
+
+#### Classic Pixel Art Scalers
+- **Eagle Family**: Eagle 2x/3x, Super Eagle
+- **SaI Family**: 2xSaI, Super2xSaI (Kreed/DOSBox)
+- **Scale Family**: Scale2x/3x (MAME - Andrea Mazzoleni)
+- **AdvInterp**: AdvInterp2x/3x (MAME)
+
+#### High Quality Scalers  
+- **HQ Family**: HQ2x/3x/4x (Maxim Stepin)
+- **LQ Family**: LQ2x/3x/4x (SNES9x/AdvMAME)
+- **nQ Family**: nQx Bold and Smart versions
+
+#### Modern Advanced Scalers
+- **XBR Family**: XBR2x/3x/4x Normal and NonBlend (Hyllian)
+- **XBRz**: High quality scaling (Zenju)
+- **Reverse AA**: Anti-aliasing filter (Hyllian)
+
+#### Specialized Effects
+- **CRT Effects**: MAME TV/RGB, Hawkynt TV effects
+- **Scanlines**: Horizontal/vertical scanline effects
+- **Bilinear Plus**: VBA enhanced bilinear filtering
+- **FNES Filters**: DES, 2xSCL variants
+
+#### Resampling Kernels
+- Comprehensive collection of windowing functions
+- Bicubic, Lanczos, and exotic mathematical kernels
+- Support for custom radius and parameters
+
+## 💻 Installation & Usage
+
+### Prerequisites
+- .NET Framework 4.5 or higher
+- Windows Vista/7/8/10/11
+
+### Quick Start
+
+#### Option 1: Standalone Application
+1. Download from [Releases](https://github.com/Hawkynt/2dimagefilter/releases)
+2. Extract and run `ImageResizer.exe`
+3. Load your image and select a scaling algorithm
+4. Configure parameters and export the result
+
+#### Option 2: Paint.NET Plugin
+1. Download the Paint.NET plugin
+2. Extract to your Paint.NET Effects folder
+3. Restart Paint.NET
+4. Find "Pixel Art Scaling" in the Effects menu
+
+#### Option 3: Command Line Interface
+```bash
+ImageResizer.exe load input.png resize auto "HQ 2x" save output.png
+ImageResizer.exe load sprite.bmp resize 400% "XBR 3x" save scaled_sprite.png
+```
+
+### Building from Source
+```bash
+# Clone the repository
+git clone https://github.com/Hawkynt/2dimagefilter.git
+cd 2dimagefilter
+
+# Build the solution
+dotnet build ImageResizer.sln -c Release
+
+# Or build individual projects
+dotnet build ImageResizerLibrary/ImageResizerLibrary.csproj
+dotnet build ImageResizer/ImageResizer.csproj
+```
+
+## 📚 Documentation
+
+### Command Line Usage
+The application supports powerful command-line scripting:
+
+```bash
+# Basic usage
+ImageResizer.exe load <input> resize <dimensions> <method> save <output>
+
+# Dimension formats
+resize auto "Scale2x"          # Auto-detect from algorithm
+resize 320x240 "Bicubic"       # Specific dimensions  
+resize w128 "HQ 2x"            # Width only (height auto)
+resize h96 "Eagle"             # Height only (width auto)
+resize 200% "XBR 3x"           # Percentage scaling
+
+# Parameter examples
+resize auto "Bicubic(radius=1.5,vbounds=wrap)"
+resize 2x2 "HQ 2x(thresholds=1,repeat=2)"
+```
+
+### Supported Parameters
+- `radius`: Filter radius for resampling kernels
+- `thresholds`: Enable/disable similarity thresholds
+- `repeat`: Number of filter repetitions
+- `vbounds`/`hbounds`: Out-of-bounds handling (const, half, whole, wrap, transparent)
+- `centered`: Use centered grid for filtering
+
+## 🎮 Perfect For
+
+- **Pixel Art**: Classic video game sprites and artwork
+- **Retro Gaming**: Emulator enhancement and ROM hacking
+- **Digital Art**: Low-resolution artwork enlargement  
+- **Game Development**: Asset upscaling for modern displays
+- **Academic Research**: Comparative analysis of scaling algorithms
+
+## 🏆 Algorithm Credits
+
+This project implements algorithms from numerous sources:
+
+- **Eagle/Super Eagle**: Derek Liauw Kie Fa (Kreed), ZSNES team
+- **Scale2x/3x**: Andrea Mazzoleni (MAME)
+- **HQ2x/3x/4x**: Maxim Stepin
+- **XBR**: Hyllian
+- **XBRz**: Zenju  
+- **Resampling Kernels**: Pascal Getreuer
+- **FNES Filters**: FNES emulator team
+- **VBA Enhancements**: VBA-rr team
+
+## 📄 License
+
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+
+## 🤝 Contributing
+
+Contributions are welcome! Whether you want to:
+- Add new scaling algorithms
+- Improve existing implementations
+- Fix bugs or enhance performance
+- Improve documentation
+
+Please feel free to open an issue or submit a pull request.
+
+## 📊 Downloads
+
+- **Standalone Application**: [Download v2.0.0](https://github.com/Hawkynt/2dimagefilter/releases/download/2.0.0/Standalone.zip)
+- **Paint.NET Plugin**: [Download v2.0.0](https://github.com/Hawkynt/2dimagefilter/releases/download/2.0.0/PaintDotNetPlugin.zip)
