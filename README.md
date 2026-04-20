@@ -1,5 +1,9 @@
 # 2D Image Filter
 
+[![CI](https://github.com/Hawkynt/2dimagefilter/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Hawkynt/2dimagefilter/actions/workflows/ci.yml)
+[![Release](https://github.com/Hawkynt/2dimagefilter/actions/workflows/release.yml/badge.svg)](https://github.com/Hawkynt/2dimagefilter/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/Hawkynt/2dimagefilter?label=release&sort=semver)](https://github.com/Hawkynt/2dimagefilter/releases/latest)
+[![Latest nightly](https://img.shields.io/github/v/release/Hawkynt/2dimagefilter?include_prereleases&label=nightly&sort=date)](https://github.com/Hawkynt/2dimagefilter/releases?q=prerelease%3Atrue)
 [![License](https://img.shields.io/badge/License-GPL_3.0-blue)](https://licenses.nuget.org/GPL-3.0-or-later)
 ![Language](https://img.shields.io/github/languages/top/Hawkynt/2dImagefilter?color=purple)
 

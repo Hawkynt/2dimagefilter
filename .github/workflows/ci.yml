@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_call: {}
+
+jobs:
+  build:
+    # net45 + net47 WPF targets require Windows + .NET Framework targeting packs.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'            # SDK only; actual targets are net45/net47
+
+      - name: Stamp versions
+        shell: bash
+        run: perl .github/workflows/scripts/version.pl --stamp
+
+      - name: Restore
+        run: dotnet restore ImageResizer.sln
+
+      - name: Build
+        run: dotnet build ImageResizer.sln --configuration Release --no-restore
+
+      # No test projects exist in this repo -- build success is the only CI signal.
+      - name: No tests to run
+        run: echo "No test project -- build-only CI."

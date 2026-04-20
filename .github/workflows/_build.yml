@@ -1,0 +1,74 @@
+name: Build artifacts
+
+# Produces:
+#   * ImageResizer-win-<version>.zip         (WPF app, net45)
+#   * PixelArtScalingPlugin-win-<version>.zip (plugin, net47)
+# Both are framework-dependent -- target machine needs .NET Framework installed.
+on:
+  workflow_call:
+    inputs:
+      version: { required: true, type: string }
+      release-kind: { required: true, type: string }
+      changelog-flag: { required: true, type: string }
+      ref: { required: false, type: string, default: "" }
+    outputs:
+      exe-artifact:
+        value: ${{ jobs.build.outputs.exe-artifact }}
+      plugin-artifact:
+        value: ${{ jobs.build.outputs.plugin-artifact }}
+
+jobs:
+  build:
+    runs-on: windows-latest
+    outputs:
+      exe-artifact:    ImageResizer-win-${{ inputs.version }}
+      plugin-artifact: PixelArtScalingPlugin-win-${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '8.x' }
+
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+
+      - name: Update CHANGELOG
+        shell: bash
+        run: node .github/workflows/scripts/update-changelog.mjs ${{ inputs.changelog-flag }}
+
+      - name: Stamp versions
+        shell: bash
+        run: perl .github/workflows/scripts/version.pl --stamp
+
+      - name: Build ImageResizer
+        run: dotnet build ImageResizer/ImageResizer.csproj -c Release
+
+      - name: Build PixelArtScalingPlugin
+        run: dotnet build PixelArtScalingPlugin/PixelArtScaling.csproj -c Release
+
+      - name: Package ImageResizer zip
+        shell: pwsh
+        run: |
+          $v = "${{ inputs.version }}"
+          $out = "ImageResizer/bin/Release/net45"
+          if (-not (Test-Path $out)) { $out = (Get-ChildItem -Path "ImageResizer/bin/Release" -Directory | Select-Object -First 1).FullName }
+          Compress-Archive -Path "$out/*" -DestinationPath "ImageResizer-win-$v.zip"
+
+      - name: Package Plugin zip
+        shell: pwsh
+        run: |
+          $v = "${{ inputs.version }}"
+          $out = "PixelArtScalingPlugin/bin/Release"
+          Compress-Archive -Path "$out/*" -DestinationPath "PixelArtScalingPlugin-win-$v.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ImageResizer-win-${{ inputs.version }}
+          path: ImageResizer-win-${{ inputs.version }}.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PixelArtScalingPlugin-win-${{ inputs.version }}
+          path: PixelArtScalingPlugin-win-${{ inputs.version }}.zip

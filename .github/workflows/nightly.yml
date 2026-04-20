@@ -1,0 +1,88 @@
+name: Nightly
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nightly
+  cancel-in-progress: true
+
+jobs:
+  meta:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    outputs:
+      date: ${{ steps.m.outputs.date }}
+      version: ${{ steps.m.outputs.version }}
+      tag: ${{ steps.m.outputs.tag }}
+      sha: ${{ steps.m.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+          fetch-depth: 0
+      - id: m
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+          VERSION=$(perl .github/workflows/scripts/version.pl)
+          SHA="${{ github.event.workflow_run.head_sha || github.sha }}"
+          echo "date=$DATE"         >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION"   >> "$GITHUB_OUTPUT"
+          echo "tag=nightly-$DATE"  >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA"           >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: meta
+    uses: ./.github/workflows/_build.yml
+    with:
+      version: ${{ needs.meta.outputs.version }}
+      release-kind: nightly
+      changelog-flag: --nightly --version ${{ needs.meta.outputs.version }}
+      ref: ${{ needs.meta.outputs.sha }}
+
+  publish:
+    needs: [meta, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: "${{ needs.build.outputs.exe-artifact }}",    path: dist }
+      - uses: actions/download-artifact@v4
+        with: { name: "${{ needs.build.outputs.plugin-artifact }}", path: dist }
+
+      - name: Delete same-date nightly
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "${{ needs.meta.outputs.tag }}" -R "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release delete "${{ needs.meta.outputs.tag }}" -R "${{ github.repository }}" --cleanup-tag --yes
+          fi
+
+      - name: Publish nightly release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ needs.meta.outputs.tag }}" \
+              -R "${{ github.repository }}" \
+              --title "Nightly ${{ needs.meta.outputs.date }} (${{ needs.meta.outputs.version }})" \
+              --prerelease \
+              --notes "Automated build of commit \`${{ needs.meta.outputs.sha }}\`. Requires .NET Framework." \
+              dist/*.zip
+
+  prune:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: GFS prune (7 daily + 4 weekly + 3 monthly)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/workflows/scripts/prune-nightlies.mjs

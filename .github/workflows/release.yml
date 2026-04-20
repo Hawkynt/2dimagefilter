@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  version:
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - id: v
+        run: echo "version=$(perl .github/workflows/scripts/version.pl)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: version
+    uses: ./.github/workflows/_build.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+      release-kind: release
+      changelog-flag: --release ${{ github.ref_name }}
+
+  publish:
+    needs: [version, build]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: "${{ needs.build.outputs.exe-artifact }}",    path: dist }
+      - uses: actions/download-artifact@v4
+        with: { name: "${{ needs.build.outputs.plugin-artifact }}", path: dist }
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.version.outputs.version }}
+          name: v${{ needs.version.outputs.version }}
+          body: |
+            ## 2D Image Filter v${{ needs.version.outputs.version }}
+
+            - **ImageResizer** — WPF GUI (net45)
+            - **PixelArtScalingPlugin** — plugin DLL (net47)
+
+            Both require .NET Framework.
+          files: dist/*.zip
+          generate_release_notes: true
