@@ -47,40 +47,8 @@ namespace Imager {
       {PixelScalerType.VerticalHalfLightScanlines,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,1,w=>libBasic.VerticalScanlines(w,+50f))},
       {PixelScalerType.VerticalFullLightScanlines,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,1,w=>libBasic.VerticalScanlines(w,+100f))},
 
-      {PixelScalerType.MameTv,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libMAME.Tv2x)},
-      {PixelScalerType.MameTv3,Tuple.Create<byte, byte, ParameterlessPixelScaler>(3,3,libMAME.Tv3x)},
-      {PixelScalerType.MameRgb,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libMAME.Rgb2x)},
-      {PixelScalerType.MameRgb3,Tuple.Create<byte, byte, ParameterlessPixelScaler>(3,3,libMAME.Rgb3x)},
-      {PixelScalerType.HawkyntTv,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libHawkynt.Tv2x)},
       {PixelScalerType.HawkyntTv3,Tuple.Create<byte, byte, ParameterlessPixelScaler>(3,2,libHawkynt.Tv3x)},
 
-      {PixelScalerType.BilinearPlusOriginal,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libVBA.BilinearPlusOriginal)},
-      {PixelScalerType.BilinearPlus,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libVBA.BilinearPlus)},
-
-      {PixelScalerType.Eagle,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libEagle.Eagle2x)},
-      {PixelScalerType.Eagle3,Tuple.Create<byte, byte, ParameterlessPixelScaler>(3,3,libEagle.Eagle3x)},
-      {PixelScalerType.Eagle3B,Tuple.Create<byte, byte, ParameterlessPixelScaler>(3,3,libEagle.Eagle3xB)},
-      {PixelScalerType.SuperEagle,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libKreed.SuperEagle)},
-
-      {PixelScalerType.SaI,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libKreed.SaI2X)},
-      {PixelScalerType.SuperSaI,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libKreed.SuperSaI)},
-      
-      {PixelScalerType.AdvInterp2,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libMAME.AdvInterp2x)},
-      {PixelScalerType.AdvInterp3,Tuple.Create<byte, byte, ParameterlessPixelScaler>(3,3,libMAME.AdvInterp3x)},
-      {PixelScalerType.Scale2,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libMAME.Scale2x)},
-      {PixelScalerType.Scale3,Tuple.Create<byte, byte, ParameterlessPixelScaler>(3,3,libMAME.Scale3x)},
-      
-      {PixelScalerType.EpxB,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libSNES9x.EpxB)},
-      {PixelScalerType.EpxC,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libSNES9x.EpxC)},
-      {PixelScalerType.Epx3,Tuple.Create<byte, byte, ParameterlessPixelScaler>(3,3,libSNES9x.Epx3)},
-
-      {PixelScalerType.ReverseAntiAlias,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,ReverseAntiAlias.Process)},
-
-      {PixelScalerType.DES,Tuple.Create<byte, byte, ParameterlessPixelScaler>(1,1,libDES.DES)},
-      {PixelScalerType.DES2,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,libDES.DES2)},
-      {PixelScalerType.Normal2xScl,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,lib2xSCL.Do2XScl)},
-      {PixelScalerType.Super2xScl,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,lib2xSCL.DoSuper2XScl)},
-      {PixelScalerType.Ultra2xScl,Tuple.Create<byte, byte, ParameterlessPixelScaler>(2,2,lib2xSCL.DoUltra2XScl)},
     };
 
     /// <summary>

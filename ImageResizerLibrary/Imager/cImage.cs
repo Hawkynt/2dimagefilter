@@ -92,24 +92,6 @@ namespace Imager {
     public cImage Alpha => new cImage(this, pixel => pixel.Alpha);
 
     /// <summary>
-    /// Gets the a new instance containing a greyscale image of the luminance values only.
-    /// </summary>
-    /// <value>The greyscale image from the luminance components.</value>
-    public cImage Luminance => new cImage(this, pixel => pixel.Luminance);
-
-    /// <summary>
-    /// Gets the a new instance containing a greyscale image of the color(U) values only.
-    /// </summary>
-    /// <value>The greyscale image from the color(U) components.</value>
-    public cImage ChrominanceU => new cImage(this, pixel => pixel.ChrominanceU);
-
-    /// <summary>
-    /// Gets the a new instance containing a greyscale image of the color(V) values only.
-    /// </summary>
-    /// <value>The greyscale image from the color(V) components.</value>
-    public cImage ChrominanceV => new cImage(this, pixel => pixel.ChrominanceV);
-
-    /// <summary>
     /// Gets the a new instance containing a greyscale image of the color(u) values only.
     /// </summary>
     /// <value>The greyscale image from the color(u) components.</value>
@@ -128,18 +110,6 @@ namespace Imager {
     public cImage Brightness => new cImage(this, pixel => pixel.Brightness);
 
     /// <summary>
-    /// Gets the a new instance containing a greyscale image of the minimum values only.
-    /// </summary>
-    /// <value>The greyscale image from the minimum of all components.</value>
-    public cImage Min => new cImage(this, pixel => pixel.Minimum);
-
-    /// <summary>
-    /// Gets the a new instance containing a greyscale image of the maximum values only.
-    /// </summary>
-    /// <value>The greyscale image from the maximum of all components.</value>
-    public cImage Max => new cImage(this, pixel => pixel.Maximum);
-
-    /// <summary>
     /// Extracts the colors from an image and returns a new image with only base colors.
     /// </summary>
     public cImage ExtractColors => new cImage(this, pixel => pixel.ExtractColors);
@@ -148,12 +118,6 @@ namespace Imager {
     /// Extracts the grey deltas for use with an image that is color extracted.
     /// </summary>
     public cImage ExtractDeltas => new cImage(this, pixel => pixel.ExtractDeltas);
-
-    /// <summary>
-    /// Gets the a new instance containing a greyscale image of the hue values only.
-    /// </summary>
-    /// <value>The greyscale image from the hue components.</value>
-    public cImage Hue => new cImage(this, pixel => pixel.Hue);
 
     /// <summary>
     /// Gets the a new instance containing an image of the hue values only.

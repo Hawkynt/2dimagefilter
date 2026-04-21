@@ -60,14 +60,35 @@ namespace PixelArtScaling {
             }
         }
         
-        /// <summary>
-        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap App {
-            get {
-                object obj = ResourceManager.GetObject("App", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
+            get { return (System.Drawing.Bitmap)ResourceManager.GetObject("App", resourceCulture); }
+        }
+        internal static System.Drawing.Bitmap Width {
+            get { return (System.Drawing.Bitmap)ResourceManager.GetObject("Width", resourceCulture); }
+        }
+        internal static System.Drawing.Bitmap Height {
+            get { return (System.Drawing.Bitmap)ResourceManager.GetObject("Height", resourceCulture); }
+        }
+        internal static System.Drawing.Bitmap Resize {
+            get { return (System.Drawing.Bitmap)ResourceManager.GetObject("Resize", resourceCulture); }
+        }
+        internal static System.Drawing.Bitmap Switch {
+            get { return (System.Drawing.Bitmap)ResourceManager.GetObject("Switch", resourceCulture); }
+        }
+        internal static System.Drawing.Bitmap Repeat {
+            get { return (System.Drawing.Bitmap)ResourceManager.GetObject("Repeat", resourceCulture); }
+        }
+        internal static System.Drawing.Bitmap Horizontal {
+            get { return (System.Drawing.Bitmap)ResourceManager.GetObject("Horizontal", resourceCulture); }
+        }
+        internal static System.Drawing.Bitmap Vertical {
+            get { return (System.Drawing.Bitmap)ResourceManager.GetObject("Vertical", resourceCulture); }
+        }
+        internal static System.Drawing.Bitmap ProgressCircularBlue {
+            get { return (System.Drawing.Bitmap)ResourceManager.GetObject("ProgressCircularBlue", resourceCulture); }
+        }
+        internal static System.Drawing.Bitmap Clipboard {
+            get { return (System.Drawing.Bitmap)ResourceManager.GetObject("Clipboard", resourceCulture); }
         }
     }
 }

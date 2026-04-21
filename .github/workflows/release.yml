@@ -37,9 +37,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
-        with: { name: "${{ needs.build.outputs.exe-artifact }}",    path: dist }
+        with: { name: "ImageResizer-win-${{ needs.version.outputs.version }}", path: dist }
       - uses: actions/download-artifact@v4
-        with: { name: "${{ needs.build.outputs.plugin-artifact }}", path: dist }
+        with: { name: "PixelArtScalingPlugin-win-${{ needs.version.outputs.version }}", path: dist }
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.version.outputs.version }}
@@ -47,9 +47,9 @@ jobs:
           body: |
             ## 2D Image Filter v${{ needs.version.outputs.version }}
 
-            - **ImageResizer** — WPF GUI (net45)
-            - **PixelArtScalingPlugin** — plugin DLL (net47)
+            - **ImageResizer** — WinForms GUI (net48)
+            - **PixelArtScalingPlugin** — single-DLL Paint.NET 5 effect (net48, Costura-bundled)
 
-            Both require .NET Framework.
+            Requires .NET Framework 4.8+.
           files: dist/*.zip
           generate_release_notes: true

@@ -68,11 +68,17 @@ namespace Classes.ScriptActions {
       var planeExtractor = method as PlaneExtractor;
       var resampler = method as Resampler;
       var radiusResampler = method as RadiusResampler;
+      var bitmapFixed = method as BitmapFixedAdapter;
+      var bitmapResampler = method as BitmapResamplerAdapter;
 
       if (scaler != null) {
         result = source;
         for (var i = 0; i < this.Count; i++)
           result = scaler.Apply(result);
+      } else if (bitmapFixed != null) {
+        result = bitmapFixed.Apply(source);
+      } else if (bitmapResampler != null) {
+        result = bitmapResampler.Apply(source, width, height);
       } else {
         if (interpolator != null)
           result = interpolator.Apply(source, width, height);

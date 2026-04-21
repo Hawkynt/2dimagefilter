@@ -1,7 +1,7 @@
-﻿#region (c)2008-2019 Hawkynt
+#region (c)2008-2019 Hawkynt
 /*
- *  cImage 
- *  Image filtering library 
+ *  cImage
+ *  Image filtering library
     Copyright (C) 2008-2019 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
@@ -21,74 +21,142 @@
 using Classes;
 using Imager;
 using Imager.Interface;
-using System;
-using System.Drawing;
+using Imager.Pipelines;
 using System.Linq;
 
 namespace PixelArtScaling {
-  class SupportedManipulators {
+  internal static class SupportedManipulators {
 
-    internal delegate cImage ImageManipulator(cImage sourceImage, Rectangle sourceRectangle);
+    public static readonly ManipulatorEntry[] Manipulators =
+      new ManipulatorEntry[0]
 
-    public static readonly Tuple<string, ScalerInformation, ImageManipulator>[] Manipulators =
-      new Tuple<string, ScalerInformation, ImageManipulator>[0]
-
-    #region add pixel resizer
-
+    #region local pixel scalers (PixelScalerType)
 .Concat(
-          from p in ReflectionUtils.GetEnumValues<PixelScalerType>()
-          select
-            Tuple.Create(
-              ReflectionUtils.GetDisplayNameForEnumValue(p),
-              cImage.GetScalerInformation(p),
-              new ImageManipulator((i, r) => i.ApplyScaler(p, r)))
-        )
+    from p in ReflectionUtils.GetEnumValues<PixelScalerType>()
+    let info = cImage.GetScalerInformation(p)
+    let capture = p
+    select (ManipulatorEntry)new FixedScaleEntry(
+      ReflectionUtils.GetDisplayNameForEnumValue(capture),
+      info.Description,
+      info.ScaleFactorX, info.ScaleFactorY,
+      (img, r) => img.ApplyScaler(capture, r)
+    ))
     #endregion
 
-    #region add xbr resizer
-
+    #region local XBR scalers (XbrScalerType, both blend modes)
 .Concat(
-          from p in ReflectionUtils.GetEnumValues<XbrScalerType>()
-          select
-            Tuple.Create(
-              ReflectionUtils.GetDisplayNameForEnumValue(p) + " <NoBlend>",
-              cImage.GetScalerInformation(p),
-              new ImageManipulator((i, r) => i.ApplyScaler(p, false, r)))
-        )
-        .Concat(
-          from p in ReflectionUtils.GetEnumValues<XbrScalerType>()
-          select
-            Tuple.Create(
-              ReflectionUtils.GetDisplayNameForEnumValue(p),
-              cImage.GetScalerInformation(p),
-              new ImageManipulator((i, r) => i.ApplyScaler(p, true, r)))
-        )
-    #endregion
-    #region xbrz
+    from p in ReflectionUtils.GetEnumValues<XbrScalerType>()
+    let info = cImage.GetScalerInformation(p)
+    let capture = p
+    select (ManipulatorEntry)new FixedScaleEntry(
+      ReflectionUtils.GetDisplayNameForEnumValue(capture) + " <NoBlend>",
+      info.Description,
+      info.ScaleFactorX, info.ScaleFactorY,
+      (img, r) => img.ApplyScaler(capture, false, r)
+    ))
 .Concat(
-          from p in ReflectionUtils.GetEnumValues<XbrzScalerType>()
-          select
-            Tuple.Create(
-              ReflectionUtils.GetDisplayNameForEnumValue(p),
-              cImage.GetScalerInformation(p),
-              new ImageManipulator((i, r) => i.ApplyScaler(p, r)))
-        )
+    from p in ReflectionUtils.GetEnumValues<XbrScalerType>()
+    let info = cImage.GetScalerInformation(p)
+    let capture = p
+    select (ManipulatorEntry)new FixedScaleEntry(
+      ReflectionUtils.GetDisplayNameForEnumValue(capture),
+      info.Description,
+      info.ScaleFactorX, info.ScaleFactorY,
+      (img, r) => img.ApplyScaler(capture, true, r)
+    ))
     #endregion
 
-    #region add nq resizer
-
+    #region local XBRZ scalers (XbrzScalerType)
 .Concat(
-          from p in ReflectionUtils.GetEnumValues<NqScalerType>()
-          from m in ReflectionUtils.GetEnumValues<NqMode>()
-          select
-            Tuple.Create(
-              ReflectionUtils.GetDisplayNameForEnumValue(p) +
-              (m == NqMode.Normal ? string.Empty : " " + ReflectionUtils.GetDisplayNameForEnumValue(m)),
-              cImage.GetScalerInformation(p),
-              new ImageManipulator((i, r) => i.ApplyScaler(p, m, r)))
-        )
+    from p in ReflectionUtils.GetEnumValues<XbrzScalerType>()
+    let info = cImage.GetScalerInformation(p)
+    let capture = p
+    select (ManipulatorEntry)new FixedScaleEntry(
+      ReflectionUtils.GetDisplayNameForEnumValue(capture),
+      info.Description,
+      info.ScaleFactorX, info.ScaleFactorY,
+      (img, r) => img.ApplyScaler(capture, r)
+    ))
     #endregion
 
-.ToArray();
+    #region local NQ scalers (NqScalerType × NqMode)
+.Concat(
+    from p in ReflectionUtils.GetEnumValues<NqScalerType>()
+    from m in ReflectionUtils.GetEnumValues<NqMode>()
+    let info = cImage.GetScalerInformation(p)
+    let captureP = p
+    let captureM = m
+    select (ManipulatorEntry)new FixedScaleEntry(
+      ReflectionUtils.GetDisplayNameForEnumValue(captureP) + (captureM == NqMode.Normal ? string.Empty : " " + ReflectionUtils.GetDisplayNameForEnumValue(captureM)),
+      info.Description,
+      info.ScaleFactorX, info.ScaleFactorY,
+      (img, r) => img.ApplyScaler(captureP, captureM, r)
+    ))
+    #endregion
+
+    #region upstream pixel scalers (Scaler: …) — single dropdown entry per algorithm; user W/H or Scale (%) snaps to a supported variant for multi-scale algorithms
+.Concat(
+    from s in UpstreamPipeline.PixelScalers()
+    where s.SupportedScales.Length == 1
+    let capture = s
+    let only = capture.SupportedScales[0]
+    let scaleX = (byte)System.Math.Max(1, System.Math.Min(byte.MaxValue, only.X))
+    let scaleY = (byte)System.Math.Max(1, System.Math.Min(byte.MaxValue, only.Y))
+    select (ManipulatorEntry)new FixedScaleEntry(
+      "Scaler: " + capture.Name,
+      capture.Description,
+      scaleX, scaleY,
+      (img, r) => cImage.FromBitmap(capture.Apply(img.ToBitmap(), r.Width * scaleX, r.Height * scaleY))
+    ))
+.Concat(
+    from s in UpstreamPipeline.PixelScalers()
+    where s.SupportedScales.Length > 1
+    let capture = s
+    let scalesText = string.Join(", ", capture.SupportedScales.Select(UpstreamPipeline.FormatScaleSuffix))
+    select (ManipulatorEntry)new ScaleVariantEntry(
+      "Scaler: " + capture.Name,
+      capture.Description + " — supports " + scalesText + "; Target W/H or Scale (%) snaps to the nearest variant.",
+      capture.SupportedScales,
+      (img, _, w, h) => cImage.FromBitmap(capture.Apply(img.ToBitmap(), w, h))
+    ))
+    #endregion
+
+    #region upstream filters (Filter: …)
+.Concat(
+    from f in UpstreamPipeline.Filters()
+    let capture = f
+    select (ManipulatorEntry)new FixedScaleEntry(
+      "Filter: " + capture.Name,
+      capture.Description,
+      1, 1,
+      (img, _) => cImage.FromBitmap(capture.Apply(img.ToBitmap()))
+    ))
+    #endregion
+
+    #region upstream colour-space plane extractors (Plane: …)
+.Concat(
+    from p in UpstreamPipeline.PlaneExtractors()
+    let capture = p
+    select (ManipulatorEntry)new FixedScaleEntry(
+      "Plane: " + capture.Name,
+      capture.Description,
+      1, 1,
+      (img, _) => new cImage(img, capture.Extract)
+    ))
+    #endregion
+
+    #region upstream resamplers (Resampler: …) — variable user-supplied target width/height
+.Concat(
+    from r in UpstreamPipeline.Resamplers()
+    let capture = r
+    select (ManipulatorEntry)new ResampleEntry(
+      "Resampler: " + capture.Name,
+      capture.Description,
+      (img, _, w, h) => cImage.FromBitmap(capture.Resample(img.ToBitmap(), w, h))
+    ))
+    #endregion
+
+      .OrderBy(e => e.Name, System.StringComparer.OrdinalIgnoreCase)
+      .ToArray();
   }
 }

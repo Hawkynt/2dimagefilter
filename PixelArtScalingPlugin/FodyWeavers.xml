@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
+  <Costura>
+    <!-- Embed every transitive .NET dependency into a single plugin DLL, except the
+         Paint.NET host assemblies (those are provided by Paint.NET at runtime; bundling
+         them would just waste space and risk version skew). -->
+    <IncludeDebugSymbols>false</IncludeDebugSymbols>
+    <ExcludeAssemblies>
+PaintDotNet.Base
+PaintDotNet.Core
+PaintDotNet.Data
+PaintDotNet.Effects
+PaintDotNet.Framework
+PaintDotNet.Resources
+    </ExcludeAssemblies>
+  </Costura>
+</Weavers>

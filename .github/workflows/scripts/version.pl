@@ -110,11 +110,25 @@ sub _QueryBaseVersion {
 sub _FindCsprojFiles {
     my ($root) = @_;
     my @files;
-    # bsd_glob handles paths with spaces; the builtin glob splits on whitespace.
-    for my $dir ($root, bsd_glob("$root/*")) {
-        next unless -d $dir;
-        push @files, bsd_glob("$dir/*.csproj");
-    }
+    # Walk the whole tree. File::Find traverses symlinks-by-default, which is
+    # usually fine for a source tree. We prune noisy / generated directories
+    # so a repo with hundreds of format libs doesn't take forever.
+    my %skip = map { $_ => 1 } qw(
+        bin obj packages node_modules .git .github .vs .idea .svn
+        TestResults artifacts publish dist stage coverage
+    );
+    File::Find::find(
+        {
+            preprocess => sub {
+                return grep { !$skip{$_} } @_;
+            },
+            wanted => sub {
+                push @files, $File::Find::name if /\.csproj$/i && -f $File::Find::name;
+            },
+            no_chdir => 1,
+        },
+        $root,
+    );
     return @files;
 }
 

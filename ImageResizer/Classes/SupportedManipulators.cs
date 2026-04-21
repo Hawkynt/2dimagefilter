@@ -1,7 +1,7 @@
-﻿#region (c)2008-2015 Hawkynt
+#region (c)2008-2015 Hawkynt
 /*
- *  cImage 
- *  Image filtering library 
+ *  cImage
+ *  Image filtering library
     Copyright (C) 2008-2015 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
@@ -23,11 +23,13 @@ using Classes.ImageManipulators.Scalers;
 using Imager;
 using Imager.Classes;
 using Imager.Interface;
+using Imager.Pipelines;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Classes {
   internal static class SupportedManipulators {
+
     public static readonly KeyValuePair<string, IImageManipulator>[] MANIPULATORS = new KeyValuePair<string, IImageManipulator>[0]
 
     #region add interpolators
@@ -83,29 +85,74 @@ namespace Classes {
     )
     #endregion
 
-    #region plane extractors
+    #region plane extractors (local-only; upstream-equivalent ones live under "Plane:" prefix)
 .Concat(
     new[] {
-      new KeyValuePair<string, IImageManipulator>("Red",new PlaneExtractor(c=>c.Red,"Returns only the red channel of the source image.")),
-      new KeyValuePair<string, IImageManipulator>("Green",new PlaneExtractor(c=>c.Green,"Returns only the green channel of the source image.")),
-      new KeyValuePair<string, IImageManipulator>("Blue",new PlaneExtractor(c=>c.Blue,"Returns only the blue channel of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("Red",new PlaneExtractor(c=>c.Red,"Raw red channel (gamma-encoded sRGB).")),
+      new KeyValuePair<string, IImageManipulator>("Green",new PlaneExtractor(c=>c.Green,"Raw green channel (gamma-encoded sRGB).")),
+      new KeyValuePair<string, IImageManipulator>("Blue",new PlaneExtractor(c=>c.Blue,"Raw blue channel (gamma-encoded sRGB).")),
       new KeyValuePair<string, IImageManipulator>("Alpha",new PlaneExtractor(c=>c.Alpha,"Returns only the alpha channel of the source image.")),
-      new KeyValuePair<string, IImageManipulator>("Luminance",new PlaneExtractor(c=>c.Luminance,"Returns only the luminance channel of the source image.")),
-      new KeyValuePair<string, IImageManipulator>("ChrominanceU",new PlaneExtractor(c=>c.ChrominanceU,"Returns only the chroma-U channel of the source image.")),
-      new KeyValuePair<string, IImageManipulator>("ChrominanceV",new PlaneExtractor(c=>c.ChrominanceV,"Returns only the chroma-V channel of the source image.")),
-      new KeyValuePair<string, IImageManipulator>("u",new PlaneExtractor(c=>c.u,"Returns only the alternate chroma-U of the source image.")),
-      new KeyValuePair<string, IImageManipulator>("v",new PlaneExtractor(c=>c.v,"Returns only the alternate chroma-V channel of the source image.")),
-      new KeyValuePair<string, IImageManipulator>("Hue",new PlaneExtractor(c=>c.Hue,"Returns only the hue channel of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("u",new PlaneExtractor(c=>c.u,"Alternate chroma-U (sPixel-specific positive-sum form, no upstream equivalent).")),
+      new KeyValuePair<string, IImageManipulator>("v",new PlaneExtractor(c=>c.v,"Alternate chroma-V (sPixel-specific positive-sum form, no upstream equivalent).")),
       new KeyValuePair<string, IImageManipulator>("Hue Colored",new PlaneExtractor(c=>c.HueColored,"Returns the colorized hue channel of the source image.")),
-      new KeyValuePair<string, IImageManipulator>("Brightness",new PlaneExtractor(c=>c.Brightness,"Returns only the brightness channel of the source image.")),
-      new KeyValuePair<string, IImageManipulator>("Min",new PlaneExtractor(c=>c.Min,"Returns only the minimum component of the RGB channels of the source image.")),
-      new KeyValuePair<string, IImageManipulator>("Max",new PlaneExtractor(c=>c.Max,"Returns only the maximum component of the RGB channels of the source image.")),
+      new KeyValuePair<string, IImageManipulator>("Brightness",new PlaneExtractor(c=>c.Brightness,"Brightness as 3R+3G+2B / 8 — non-standard formula, no upstream equivalent.")),
       new KeyValuePair<string, IImageManipulator>("ExtractColors",new PlaneExtractor(c=>c.ExtractColors,"Tries to extract the full saturated colors of the source image.")),
       new KeyValuePair<string, IImageManipulator>("ExtractDeltas",new PlaneExtractor(c=>c.ExtractDeltas,"The difference between the original source image and the hue-colored result.")),
     }
     )
     #endregion
 
+    #region add upstream pixel scalers (fixed factor, from UpstreamPipeline) — one entry per (algorithm, supported scale)
+.Concat(
+    from s in UpstreamPipeline.PixelScalers()
+    from scale in s.SupportedScales
+    let multi = s.SupportedScales.Length > 1
+    let suffix = multi ? " " + UpstreamPipeline.FormatScaleSuffix(scale) : string.Empty
+    let scaleX = (int)scale.X
+    let scaleY = (int)scale.Y
+    let captured = s
+    select new KeyValuePair<string, IImageManipulator>(
+      "Scaler: " + s.Name + suffix,
+      new BitmapFixedAdapter(
+        multi ? s.Description + " — " + UpstreamPipeline.FormatScaleSuffix(scale) + " variant" : s.Description,
+        changesResolution: true,
+        b => captured.Apply(b, b.Width * scaleX, b.Height * scaleY)
+      )
+    )
+    )
+    #endregion
+
+    #region add upstream resamplers (user width/height, from UpstreamPipeline)
+.Concat(
+    from s in UpstreamPipeline.Resamplers()
+    select new KeyValuePair<string, IImageManipulator>(
+      "Resampler: " + s.Name,
+      new BitmapResamplerAdapter(s.Description, s.Resample, s.Kernel)
+    )
+    )
+    #endregion
+
+    #region add upstream-colorspace plane extractors (from UpstreamPipeline)
+.Concat(
+    from p in UpstreamPipeline.PlaneExtractors()
+    select new KeyValuePair<string, IImageManipulator>(
+      "Plane: " + p.Name,
+      new PlaneExtractor(src => new cImage(src, p.Extract), p.Description)
+    )
+    )
+    #endregion
+
+    #region add upstream filters (same size, from UpstreamPipeline)
+.Concat(
+    from f in UpstreamPipeline.Filters()
+    select new KeyValuePair<string, IImageManipulator>(
+      "Filter: " + f.Name,
+      new BitmapFixedAdapter(f.Description, changesResolution: false, f.Apply)
+    )
+    )
+    #endregion
+
+.OrderBy(kv => kv.Key, System.StringComparer.OrdinalIgnoreCase)
 .ToArray();
   }
 }

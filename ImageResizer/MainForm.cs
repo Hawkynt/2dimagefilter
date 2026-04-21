@@ -263,10 +263,17 @@ namespace ImageResizer {
 
       var kernelBasedResampler = method as Resampler;
       var kernelBasedRadiusResampler = method as RadiusResampler;
-      if (kernelBasedResampler == null && kernelBasedRadiusResampler == null)
+      var upstreamResampler = method as BitmapResamplerAdapter;
+      if (kernelBasedResampler == null && kernelBasedRadiusResampler == null && (upstreamResampler == null || upstreamResampler.KernelInfo == null))
         return;
 
-      var info = kernelBasedRadiusResampler == null ? kernelBasedResampler.GetKernelMethodInfo() : kernelBasedRadiusResampler.GetKernelMethodInfo((float)this.nudRadius.Value);
+      Imager.Classes.Kernels.FixedRadiusKernelInfo info;
+      if (kernelBasedResampler != null)
+        info = kernelBasedResampler.GetKernelMethodInfo();
+      else if (kernelBasedRadiusResampler != null)
+        info = kernelBasedRadiusResampler.GetKernelMethodInfo((float)this.nudRadius.Value);
+      else
+        info = upstreamResampler.KernelInfo.Value;
       for (var x = -info.KernelRadius; x <= info.KernelRadius; x += 0.001f)
         dataPointCollection.AddXY(Math.Round(x, 3), Math.Round(info.Kernel(x), 3));
       chart.ChartAreas[0].AxisX.Minimum = -Math.Round(info.KernelRadius, 1);
@@ -342,12 +349,21 @@ namespace ImageResizer {
       var planeExtractor = method as PlaneExtractor;
       var resampler = method as Resampler;
       var radiusResampler = method as RadiusResampler;
+      var bitmapFixed = method as BitmapFixedAdapter;
+      var bitmapResampler = method as BitmapResamplerAdapter;
 
       if (scaler != null) {
         result = source;
         for (var i = 0; i < repetitionCount; i++)
           result = scaler.Apply(result);
-      } else if (interpolator != null)
+      } else if (bitmapFixed != null)
+        result = bitmapFixed.Apply(source);
+      else if (bitmapResampler != null)
+        if (targetWidth <= 0 || targetHeight <= 0)
+          MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
+        else
+          result = bitmapResampler.Apply(source, targetWidth, targetHeight);
+      else if (interpolator != null)
         if (targetWidth <= 0 || targetHeight <= 0)
           MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
         else

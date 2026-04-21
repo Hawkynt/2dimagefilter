@@ -121,4 +121,31 @@
   <data name="App" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\App.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Width" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Width.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Height" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Height.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Resize" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Resize.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Switch" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Switch.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Repeat" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Repeat.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Horizontal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Horizontal.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Vertical" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Vertical.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ProgressCircularBlue" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\ProgressCircularBlue.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Clipboard" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Clipboard.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

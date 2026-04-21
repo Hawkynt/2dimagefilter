@@ -14,15 +14,12 @@ on:
     outputs:
       exe-artifact:
         value: ${{ jobs.build.outputs.exe-artifact }}
-      plugin-artifact:
-        value: ${{ jobs.build.outputs.plugin-artifact }}
 
 jobs:
   build:
     runs-on: windows-latest
     outputs:
-      exe-artifact:    ImageResizer-win-${{ inputs.version }}
-      plugin-artifact: PixelArtScalingPlugin-win-${{ inputs.version }}
+      exe-artifact: ImageResizer-win-${{ inputs.version }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -43,6 +40,8 @@ jobs:
         shell: bash
         run: perl .github/workflows/scripts/version.pl --stamp
 
+      # Paint.NET reference DLLs are committed under PixelArtScalingPlugin/External/,
+      # so the plugin builds alongside the exe with no external prep.
       - name: Build ImageResizer
         run: dotnet build ImageResizer/ImageResizer.csproj -c Release
 
@@ -53,21 +52,24 @@ jobs:
         shell: pwsh
         run: |
           $v = "${{ inputs.version }}"
-          $out = "ImageResizer/bin/Release/net45"
+          $out = "ImageResizer/bin/Release/net48"
           if (-not (Test-Path $out)) { $out = (Get-ChildItem -Path "ImageResizer/bin/Release" -Directory | Select-Object -First 1).FullName }
           Compress-Archive -Path "$out/*" -DestinationPath "ImageResizer-win-$v.zip"
 
-      - name: Package Plugin zip
+      - name: Package PixelArtScalingPlugin zip
         shell: pwsh
         run: |
           $v = "${{ inputs.version }}"
-          $out = "PixelArtScalingPlugin/bin/Release"
-          Compress-Archive -Path "$out/*" -DestinationPath "PixelArtScalingPlugin-win-$v.zip"
+          $out = "PixelArtScalingPlugin/bin/Release/net48"
+          if (-not (Test-Path $out)) { $out = (Get-ChildItem -Path "PixelArtScalingPlugin/bin/Release" -Directory | Select-Object -First 1).FullName }
+          # Costura bundles every dep into 2dImageFilter.dll, so ship just that.
+          Compress-Archive -Path "$out/2dImageFilter.dll" -DestinationPath "PixelArtScalingPlugin-win-$v.zip"
 
       - uses: actions/upload-artifact@v4
         with:
           name: ImageResizer-win-${{ inputs.version }}
           path: ImageResizer-win-${{ inputs.version }}.zip
+
       - uses: actions/upload-artifact@v4
         with:
           name: PixelArtScalingPlugin-win-${{ inputs.version }}

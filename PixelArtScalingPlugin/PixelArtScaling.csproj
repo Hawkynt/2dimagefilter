@@ -2,7 +2,7 @@
   <PropertyGroup>
     <NoStandardLibraries>false</NoStandardLibraries>
     <AssemblyName>2dImageFilter</AssemblyName>
-    <TargetFramework>net47</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <AssemblyTitle>2d Image Filter Plugin</AssemblyTitle>
     <Company>Hawkynt</Company>
     <Product>PixelArtScalingPlugin</Product>
@@ -12,6 +12,7 @@
     <FileVersion>1.1.3.3</FileVersion>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>9</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -27,22 +28,22 @@
   <Import Project="..\VersionSpecificSymbols.Common.prop" />
   <ItemGroup>
     <Reference Include="PaintDotNet.Base">
-      <HintPath>..\..\..\..\..\..\PortableApps\Paint.NET\bin\PaintDotNet.Base.dll</HintPath>
+      <HintPath>External\PaintDotNet.Base.dll</HintPath>
     </Reference>
     <Reference Include="PaintDotNet.Core">
-      <HintPath>..\..\..\..\..\..\PortableApps\Paint.NET\bin\PaintDotNet.Core.dll</HintPath>
+      <HintPath>External\PaintDotNet.Core.dll</HintPath>
     </Reference>
     <Reference Include="PaintDotNet.Data">
-      <HintPath>..\..\..\..\..\..\PortableApps\Paint.NET\bin\PaintDotNet.Data.dll</HintPath>
+      <HintPath>External\PaintDotNet.Data.dll</HintPath>
     </Reference>
     <Reference Include="PaintDotNet.Effects">
-      <HintPath>..\..\..\..\..\..\PortableApps\Paint.NET\bin\PaintDotNet.Effects.dll</HintPath>
+      <HintPath>External\PaintDotNet.Effects.dll</HintPath>
     </Reference>
     <Reference Include="PaintDotNet.Framework">
-      <HintPath>..\..\..\..\..\..\PortableApps\Paint.NET\bin\PaintDotNet.Framework.dll</HintPath>
+      <HintPath>External\PaintDotNet.Framework.dll</HintPath>
     </Reference>
     <Reference Include="PaintDotNet.Resources">
-      <HintPath>..\..\..\..\..\..\PortableApps\Paint.NET\bin\PaintDotNet.Resources.dll</HintPath>
+      <HintPath>External\PaintDotNet.Resources.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="WindowsBase" />
@@ -57,6 +58,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\App.png" />
+    <None Include="Resources\Width.png" />
+    <None Include="Resources\Height.png" />
+    <None Include="Resources\Resize.png" />
+    <None Include="Resources\Switch.png" />
+    <None Include="Resources\Repeat.png" />
+    <None Include="Resources\Horizontal.png" />
+    <None Include="Resources\Vertical.png" />
+    <None Include="Resources\ProgressCircularBlue.gif" />
+    <None Include="Resources\Clipboard.png" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Documents\Paint.NET - Effects Plugin Template - Sepcot.com %282014-10-26 12-21-06%29.htm" />
@@ -75,5 +85,12 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ImageResizerLibrary\ImageResizerLibrary.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Bundles every reachable dependency assembly into the plugin DLL as a compressed
+         embedded resource and registers an AppDomain.AssemblyResolve hook at module init.
+         Result: ship a single 2dImageFilter.dll. -->
+    <PackageReference Include="Costura.Fody" Version="5.7.0" PrivateAssets="all" />
+    <PackageReference Include="Fody" Version="6.8.1" PrivateAssets="all" />
   </ItemGroup>
 </Project>

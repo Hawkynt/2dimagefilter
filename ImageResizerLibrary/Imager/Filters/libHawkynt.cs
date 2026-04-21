@@ -22,18 +22,6 @@
 namespace Imager.Filters {
   internal static class libHawkynt {
     /// <summary>
-    /// just a bad old-school TV effect
-    /// </summary>
-    public static void Tv2x(IPixelWorker<sPixel> worker) {
-      var pixel = worker.SourceP0P0();
-      var luminance = pixel.Luminance;
-      worker.TargetP0P0(new sPixel(pixel.Red, 0, 0, pixel.Alpha));
-      worker.TargetP1P0(new sPixel(0, pixel.Green, 0, pixel.Alpha));
-      worker.TargetP0P1(new sPixel(0, 0, pixel.Blue, pixel.Alpha));
-      worker.TargetP1P1(sPixel.FromGrey(luminance, pixel.Alpha));
-    }
-
-    /// <summary>
     /// another bad one a made for MS-Dos in 1998
     /// </summary>
     public static void Tv3x(IPixelWorker<sPixel> worker) {

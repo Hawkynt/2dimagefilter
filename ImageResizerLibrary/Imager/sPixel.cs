@@ -212,18 +212,6 @@ namespace Imager {
     public static bool AllowThresholds = true;
 
     /// <summary>
-    /// Gets the minimum value of Red, Green and Blue.
-    /// </summary>
-    /// <value>The minimum.</value>
-    public byte Minimum => _Min(this.Red, this.Green, this.Blue);
-
-    /// <summary>
-    /// Gets the maximum value of Red, Green and Blue.
-    /// </summary>
-    /// <value>The maximum.</value>
-    public byte Maximum => _Max(this.Red, this.Green, this.Blue);
-
-    /// <summary>
     /// Factor that is used to avoid noise in color extraction.
     /// The higher the factor, the lesser colors will be detected.
     /// </summary>

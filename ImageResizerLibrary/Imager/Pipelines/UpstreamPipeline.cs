@@ -1,0 +1,345 @@
+#region (c)2008-2026 Hawkynt
+/*
+ *  cImage
+ *  Image filtering library
+    Copyright (C) 2008-2026 Hawkynt
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#endregion
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+
+using Hawkynt.ColorProcessing.Filtering;
+using Hawkynt.ColorProcessing.Resizing;
+using Hawkynt.ColorProcessing.Spaces.Cmyk;
+using Hawkynt.ColorProcessing.Spaces.Cylindrical;
+using Hawkynt.ColorProcessing.Spaces.Lab;
+using Hawkynt.ColorProcessing.Spaces.Perceptual;
+using Hawkynt.ColorProcessing.Spaces.Yuv;
+using Hawkynt.ColorProcessing.Working;
+using Hawkynt.Drawing;
+
+using Imager.Classes;
+
+namespace Imager.Pipelines {
+  /// <summary>
+  /// Pure factory layer over the upstream <c>FrameworkExtensions.System.Drawing</c> registries.
+  /// Yields ready-to-call delegates so consumers (the standalone exe and the Paint.NET plugin)
+  /// can wrap them in their own manipulator types without duplicating the per-algorithm wiring.
+  /// </summary>
+  public static class UpstreamPipeline {
+
+    #region pixel scalers (fixed factor)
+
+    public readonly struct PixelScalerInfo {
+      public readonly string Name;
+      public readonly string Description;
+      /// <summary>The scale factors this algorithm advertises. Length 1 = fixed scale; length &gt; 1 = pick one at apply time.</summary>
+      public readonly ScaleFactor[] SupportedScales;
+      /// <summary>Applies the scaler to <paramref name="targetWidth"/> × <paramref name="targetHeight"/>; the upstream library routes to the matching supported variant.</summary>
+      public readonly Func<Bitmap, int, int, Bitmap> Apply;
+
+      public PixelScalerInfo(string name, string description, ScaleFactor[] supportedScales, Func<Bitmap, int, int, Bitmap> apply) {
+        this.Name = name; this.Description = description;
+        this.SupportedScales = supportedScales; this.Apply = apply;
+      }
+    }
+
+    public static IEnumerable<PixelScalerInfo> PixelScalers() {
+      foreach (var s in ScalerRegistry.PixelScalers) {
+        if (s.Type.ContainsGenericParameters)
+          continue;
+        var capture = s;
+        var scales = capture.SupportedScales;
+        if (scales == null || scales.Length == 0)
+          scales = new[] { new ScaleFactor(1, 1) };
+        yield return new PixelScalerInfo(
+          capture.Name,
+          ComposeDescription(capture.Description, capture.Name, capture.Author),
+          scales,
+          (b, w, h) => capture.Scale(b, w, h)
+        );
+      }
+    }
+
+    /// <summary>Renders a scale factor as a short human-readable suffix (<c>"2x"</c> for square, <c>"2x3"</c> otherwise).</summary>
+    public static string FormatScaleSuffix(ScaleFactor scale) => scale.X == scale.Y ? scale.X + "x" : scale.X + "x" + scale.Y;
+
+    /// <summary>Picks the supported scale whose target dimensions are closest (Manhattan distance) to <paramref name="requestedWidth"/> × <paramref name="requestedHeight"/>.</summary>
+    public static ScaleFactor SnapToNearestSupportedScale(ScaleFactor[] scales, int sourceWidth, int sourceHeight, int requestedWidth, int requestedHeight) {
+      if (scales == null || scales.Length == 0)
+        return new ScaleFactor(1, 1);
+      var best = scales[0];
+      var bestDist = long.MaxValue;
+      foreach (var s in scales) {
+        var dx = (long)sourceWidth * s.X - requestedWidth;
+        var dy = (long)sourceHeight * s.Y - requestedHeight;
+        var dist = Math.Abs(dx) + Math.Abs(dy);
+        if (dist < bestDist) { bestDist = dist; best = s; }
+      }
+      return best;
+    }
+
+    #endregion
+
+    #region resamplers (variable target)
+
+    public readonly struct ResamplerInfo {
+      public readonly string Name;
+      public readonly string Description;
+      public readonly Func<Bitmap, int, int, Bitmap> Resample;
+      public readonly Kernels.FixedRadiusKernelInfo? Kernel;
+      public ResamplerInfo(string name, string description, Func<Bitmap, int, int, Bitmap> resample, Kernels.FixedRadiusKernelInfo? kernel) {
+        this.Name = name; this.Description = description;
+        this.Resample = resample; this.Kernel = kernel;
+      }
+    }
+
+    public static IEnumerable<ResamplerInfo> Resamplers() {
+      foreach (var s in ScalerRegistry.Resamplers) {
+        if (s.Type.ContainsGenericParameters)
+          continue;
+        var capture = s;
+        yield return new ResamplerInfo(
+          capture.Name,
+          ComposeDescription(capture.Description, capture.Name, capture.Author),
+          (b, w, h) => capture.Resample(b, w, h),
+          ResolveKernelForUpstream(capture.Name)
+        );
+      }
+    }
+
+    #endregion
+
+    #region filters (same size)
+
+    public readonly struct FilterInfo {
+      public readonly string Name;
+      public readonly string Description;
+      public readonly Func<Bitmap, Bitmap> Apply;
+      public FilterInfo(string name, string description, Func<Bitmap, Bitmap> apply) {
+        this.Name = name; this.Description = description; this.Apply = apply;
+      }
+    }
+
+    public static IEnumerable<FilterInfo> Filters() {
+      foreach (var f in FilterRegistry.All) {
+        if (f.Type.ContainsGenericParameters)
+          continue;
+        var capture = f;
+        yield return new FilterInfo(
+          capture.Name,
+          ComposeDescription(capture.Description, capture.Name, capture.Author),
+          b => capture.Apply(b, ScalerQuality.HighQuality)
+        );
+      }
+    }
+
+    #endregion
+
+    #region plane extractors (single colour-space component, sPixel → byte)
+
+    public readonly struct PlaneExtractorInfo {
+      public readonly string Name;
+      public readonly string Description;
+      public readonly Func<sPixel, byte> Extract;
+      public PlaneExtractorInfo(string name, string description, Func<sPixel, byte> extract) {
+        this.Name = name; this.Description = description; this.Extract = extract;
+      }
+    }
+
+    public static IEnumerable<PlaneExtractorInfo> PlaneExtractors() {
+      yield return Plane("Oklab L",
+        "Perceptual lightness (Oklab L*) via upstream color pipeline — linearised sRGB, better than ITU luma.",
+        l => { var ok = default(LinearRgbaFToOklabF).Project(in l); return ToByte(ok.C1); });
+
+      yield return Plane("Oklab a (green↔red)",
+        "Oklab a axis — negative = green, positive = red. Zero-centered, mapped to 0..255.",
+        l => { var ok = default(LinearRgbaFToOklabF).Project(in l); return ToByte(ok.C2 * 0.5f + 0.5f); });
+
+      yield return Plane("Oklab b (blue↔yellow)",
+        "Oklab b axis — negative = blue, positive = yellow. Zero-centered, mapped to 0..255.",
+        l => { var ok = default(LinearRgbaFToOklabF).Project(in l); return ToByte(ok.C3 * 0.5f + 0.5f); });
+
+      yield return Plane("OkLCh Chroma",
+        "OkLCh chroma (perceptual colorfulness).",
+        l => { var ok = default(LinearRgbaFToOklchF).Project(in l); return ToByte(ok.C2); });
+
+      yield return Plane("OkLCh Hue",
+        "OkLCh hue angle (periodic).",
+        l => { var ok = default(LinearRgbaFToOklchF).Project(in l); return HueToByte(ok.C3); });
+
+      yield return Plane("CIE Lab L",
+        "CIE L* (1976) via upstream pipeline.",
+        l => { var lab = default(LinearRgbaFToLabF).Project(in l); return ToByte(lab.C1); });
+
+      yield return Plane("HSL Hue",
+        "HSL hue (periodic).",
+        l => { var hsl = default(LinearRgbaFToHslF).Project(in l); return HueToByte(hsl.H); });
+
+      yield return Plane("HSL Saturation",
+        "HSL saturation.",
+        l => { var hsl = default(LinearRgbaFToHslF).Project(in l); return ToByte(hsl.S); });
+
+      yield return Plane("HSL Lightness",
+        "HSL lightness.",
+        l => { var hsl = default(LinearRgbaFToHslF).Project(in l); return ToByte(hsl.L); });
+
+      yield return Plane("HSV Saturation",
+        "HSV saturation.",
+        l => { var hsv = default(LinearRgbaFToHsvF).Project(in l); return ToByte(hsv.S); });
+
+      yield return Plane("HSV Value",
+        "HSV value (max of R/G/B).",
+        l => { var hsv = default(LinearRgbaFToHsvF).Project(in l); return ToByte(hsv.V); });
+
+      yield return Plane("HWB Whiteness",
+        "HWB whiteness component.",
+        l => { var hwb = default(LinearRgbaFToHwbF).Project(in l); return ToByte(hwb.C2); });
+
+      yield return Plane("HWB Blackness",
+        "HWB blackness component.",
+        l => { var hwb = default(LinearRgbaFToHwbF).Project(in l); return ToByte(hwb.C3); });
+
+      yield return Plane("LCh Chroma",
+        "CIE LCh chroma.",
+        l => { var lch = default(LinearRgbaFToLchF).Project(in l); return ToByte(lch.C2); });
+
+      yield return Plane("LCh Hue",
+        "CIE LCh hue (periodic).",
+        l => { var lch = default(LinearRgbaFToLchF).Project(in l); return HueToByte(lch.C3); });
+
+      yield return Plane("CMYK Cyan",
+        "CMYK cyan ink.",
+        l => { var cmyk = default(LinearRgbaFToCmykF).Project(in l); return ToByte(cmyk.C1); });
+
+      yield return Plane("CMYK Magenta",
+        "CMYK magenta ink.",
+        l => { var cmyk = default(LinearRgbaFToCmykF).Project(in l); return ToByte(cmyk.C2); });
+
+      yield return Plane("CMYK Yellow",
+        "CMYK yellow ink.",
+        l => { var cmyk = default(LinearRgbaFToCmykF).Project(in l); return ToByte(cmyk.C3); });
+
+      yield return Plane("CMYK Key",
+        "CMYK key (black) ink.",
+        l => { var cmyk = default(LinearRgbaFToCmykF).Project(in l); return ToByte(cmyk.C4); });
+
+      yield return Plane("YCbCr BT.601 Y",
+        "BT.601 luma (digital SD).",
+        l => { var y = default(LinearRgbaFToYCbCrBt601F).Project(in l); return ToByte(y.Y); });
+
+      yield return Plane("YCbCr BT.601 Cb",
+        "BT.601 blue-difference chroma. Zero-centered, mapped to 0..255.",
+        l => { var y = default(LinearRgbaFToYCbCrBt601F).Project(in l); return ToByte(y.Cb + 0.5f); });
+
+      yield return Plane("YCbCr BT.601 Cr",
+        "BT.601 red-difference chroma. Zero-centered, mapped to 0..255.",
+        l => { var y = default(LinearRgbaFToYCbCrBt601F).Project(in l); return ToByte(y.Cr + 0.5f); });
+
+      yield return Plane("YCbCr BT.709 Y",
+        "BT.709 luma (digital HD).",
+        l => { var y = default(LinearRgbaFToYCbCrBt709F).Project(in l); return ToByte(y.Y); });
+
+      yield return Plane("YCbCr BT.709 Cb",
+        "BT.709 blue-difference chroma. Zero-centered, mapped to 0..255.",
+        l => { var y = default(LinearRgbaFToYCbCrBt709F).Project(in l); return ToByte(y.Cb + 0.5f); });
+
+      yield return Plane("YCbCr BT.709 Cr",
+        "BT.709 red-difference chroma. Zero-centered, mapped to 0..255.",
+        l => { var y = default(LinearRgbaFToYCbCrBt709F).Project(in l); return ToByte(y.Cr + 0.5f); });
+
+      yield return Plane("YUV Y",
+        "Analog YUV luma.",
+        l => { var y = default(LinearRgbaFToYuvF).Project(in l); return ToByte(y.Y); });
+
+      yield return Plane("YUV U",
+        "Analog YUV U (blue projection). Zero-centered, mapped to 0..255.",
+        l => { var y = default(LinearRgbaFToYuvF).Project(in l); return ToByte(y.U + 0.5f); });
+
+      yield return Plane("YUV V",
+        "Analog YUV V (red projection). Zero-centered, mapped to 0..255.",
+        l => { var y = default(LinearRgbaFToYuvF).Project(in l); return ToByte(y.V + 0.5f); });
+    }
+
+    #endregion
+
+    #region kernel name lookup (for the resampler kernel chart)
+
+    private static readonly Dictionary<string, Kernels.FixedRadiusKernelInfo> _UPSTREAM_KERNEL_LOOKUP = BuildUpstreamKernelLookup();
+
+    private static Dictionary<string, Kernels.FixedRadiusKernelInfo> BuildUpstreamKernelLookup() {
+      var result = new Dictionary<string, Kernels.FixedRadiusKernelInfo>();
+      foreach (var kv in Kernels.KERNELS)
+        result[Normalise(kv.Key.ToString())] = kv.Value;
+      foreach (var kv in Windows.WINDOWS) {
+        var key = Normalise(kv.Key.ToString());
+        if (!result.ContainsKey(key))
+          result[key] = kv.Value.WithRadius(2);
+      }
+      return result;
+    }
+
+    /// <summary>
+    /// Looks up a local <see cref="Kernels.FixedRadiusKernelInfo"/> matching an upstream resampler name.
+    /// Returns <c>null</c> when no name-equivalent local kernel exists.
+    /// </summary>
+    public static Kernels.FixedRadiusKernelInfo? ResolveKernelForUpstream(string name) {
+      if (_UPSTREAM_KERNEL_LOOKUP.TryGetValue(Normalise(name), out var hit))
+        return hit;
+      return null;
+    }
+
+    #endregion
+
+    #region helpers
+
+    private static PlaneExtractorInfo Plane(string name, string description, Func<LinearRgbaF, byte> projector) {
+      Func<sPixel, byte> extract = px => {
+        var linear = ColorAdapter.ToLinearRgbaF(px.Color);
+        return projector(linear);
+      };
+      return new PlaneExtractorInfo(name, description, extract);
+    }
+
+    private static byte ToByte(float f) {
+      if (float.IsNaN(f)) return 0;
+      if (f <= 0f) return 0;
+      if (f >= 1f) return 255;
+      return (byte)(f * 255f + 0.5f);
+    }
+
+    private static byte HueToByte(float h) {
+      h = h - (float)Math.Floor(h);
+      if (float.IsNaN(h)) return 0;
+      return (byte)(h * 255f + 0.5f);
+    }
+
+    private static string ComposeDescription(string description, string name, string author) {
+      var basePart = string.IsNullOrEmpty(description) ? name : description;
+      if (string.IsNullOrEmpty(author))
+        return basePart;
+      return basePart + " (by " + author + ")";
+    }
+
+    private static string Normalise(string s) =>
+      new string((s ?? string.Empty).Where(char.IsLetterOrDigit).ToArray()).ToLowerInvariant();
+
+    #endregion
+  }
+}

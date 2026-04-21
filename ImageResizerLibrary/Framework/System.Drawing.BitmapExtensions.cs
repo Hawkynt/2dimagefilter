@@ -1,28 +1,25 @@
-﻿#region (c)2010-2020 Hawkynt
+#region (c)2010-2020 Hawkynt
 /*
   This file is part of Hawkynt's .NET Framework extensions.
 
-    Hawkynt's .NET Framework extensions are free software: 
+    Hawkynt's .NET Framework extensions are free software:
     you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Hawkynt's .NET Framework extensions is distributed in the hope that 
-    it will be useful, but WITHOUT ANY WARRANTY; without even the implied 
+    Hawkynt's .NET Framework extensions is distributed in the hope that
+    it will be useful, but WITHOUT ANY WARRANTY; without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
     the GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Hawkynt's .NET Framework extensions.  
+    along with Hawkynt's .NET Framework extensions.
     If not, see <http://www.gnu.org/licenses/>.
 */
 #endregion
 using System.Diagnostics.Contracts;
 using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Media.Imaging;
 namespace System.Drawing {
   internal static partial class BitmapExtensions {
 
@@ -50,14 +47,32 @@ namespace System.Drawing {
 
       #region Implementation of IDisposable
 
-      ~DisposableBitmapData() => this.Dispose();
+      // The finalizer runs on partially-constructed instances too (e.g. when LockBits threw),
+      // so every member access must tolerate nulls and must never throw — finalizers that
+      // throw on .NET 9 crash the whole process.
+      ~DisposableBitmapData() {
+        try {
+          this._SafeDispose();
+        } catch {
+          // swallow — we are on the finalizer thread
+        }
+      }
 
       public void Dispose() {
+        this._SafeDispose();
+        GC.SuppressFinalize(this);
+      }
+
+      private void _SafeDispose() {
         if (this._isDisposed)
           return;
 
         this._isDisposed = true;
-        this._source.UnlockBits(this.BitmapData);
+        var source = this._source;
+        var data = this.BitmapData;
+        if (source == null || data == null)
+          return;
+        source.UnlockBits(data);
       }
 
       #endregion
@@ -69,59 +84,7 @@ namespace System.Drawing {
       #endregion
     }
 
-    /// <summary>
-    /// A bitmap handle that automatically gets properly disposed.
-    /// </summary>
-    private class DisposableBitmapHandle : IDisposable {
-
-      private static class NativeMethods {
-
-        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
-        public static extern bool DeleteObject(IntPtr hObject);
-
-      }
-
-      public IntPtr Handle { get; }
-      private bool _isDisposed;
-
-      public DisposableBitmapHandle(Bitmap source) => this.Handle = source.GetHbitmap();
-
-      #region IDisposable
-
-      ~DisposableBitmapHandle() => this.Dispose();
-
-      public void Dispose() {
-        if (this._isDisposed)
-          return;
-
-        this._isDisposed = true;
-        if(this.Handle!=IntPtr.Zero)
-          NativeMethods.DeleteObject(this.Handle);
-      }
-
-      #endregion
-    }
-
     #endregion
-
-    /// <summary>
-    /// Copies the given Bitmap into a BitmapSource.
-    /// </summary>
-    /// <param name="this">This Bitmap.</param>
-    /// <returns>The copy of the Bitmap as a BitmapSource-instance.</returns>
-    public static BitmapSource AsBitmapSource(this Bitmap @this) {
-      Contract.Requires(@this != null);
-      using(var handle=new DisposableBitmapHandle(@this)) {
-        var result = Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-          handle.Handle,
-          IntPtr.Zero,
-          Int32Rect.Empty,
-          BitmapSizeOptions.FromEmptyOptions()
-        );
-        result.Freeze();
-        return result;
-      }
-    }
 
     /// <summary>
     /// Locks a bitmap for write mode only.

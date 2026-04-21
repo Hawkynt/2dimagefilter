@@ -1,8 +1,8 @@
-#region (c)2008-2019 Hawkynt
+#region (c)2008-2026 Hawkynt
 /*
- *  cImage 
- *  Image filtering library 
-    Copyright (C) 2008-2019 Hawkynt
+ *  cImage
+ *  Image filtering library
+    Copyright (C) 2008-2026 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,21 +18,20 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
+
 using PaintDotNet;
 using PaintDotNet.Effects;
-using PaintDotNet.IndirectUI;
-using PaintDotNet.PropertySystem;
-// Compiler options:  /unsafe /optimize /debug- /target:library /out:"D:\_COPYAPPS\Paint.NET\Effects\Untitled.dll"
+
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
-using System.Windows.Forms;
+
 using Imager;
 
 namespace PixelArtScaling {
+
   public class PluginSupportInfo : IPluginSupportInfo {
     private readonly Type _thisType = typeof(PluginSupportInfo);
 
@@ -41,195 +40,154 @@ namespace PixelArtScaling {
     public string DisplayName => this._thisType.GetAssemblyAttribute<AssemblyProductAttribute>().Product;
     public Version Version => this._thisType.Assembly.GetName().Version;
     public Uri WebsiteUri => new Uri("https://github.com/Hawkynt/2dimagefilter");
-
   }
 
   [PluginSupportInfo(typeof(PluginSupportInfo), DisplayName = "2d Image Filter")]
-  public class PixelArtScalingEffectPlugin : PropertyBasedEffect {
+  public sealed class PixelArtScalingEffectPlugin : Effect {
     public static string StaticName => "2D Image Filter";
-
     public static string StaticSubMenu => "Tools";
-
     public static Image StaticIcon => Resources.App;
 
-    public PixelArtScalingEffectPlugin(): base(StaticName, StaticIcon, StaticSubMenu, EffectFlags.Configurable) { }
+    private static readonly Dictionary<string, ManipulatorEntry> _ENTRIES_BY_NAME =
+      SupportedManipulators.Manipulators.ToDictionary(e => e.Name, e => e);
 
-    public enum PropertyNames {
-      FilterType,
-      FilterToClipboard
+    public PixelArtScalingEffectPlugin() : base(StaticName, StaticIcon, StaticSubMenu, EffectFlags.Configurable) { }
+
+    public override EffectConfigDialog CreateConfigDialog() => new PluginConfigDialog();
+
+    private Surface _filteredSurface;
+    private Rectangle _targetRectangle;
+    private readonly object _renderLock = new object();
+    private string _lastSignature;
+
+    protected override void OnSetRenderInfo(EffectConfigToken parameters, RenderArgs dstArgs, RenderArgs srcArgs) {
+      var token = parameters as PluginConfigToken;
+      if (token == null) {
+        base.OnSetRenderInfo(parameters, dstArgs, srcArgs);
+        return;
+      }
+
+      lock (this._renderLock) {
+        var signature = _BuildSignature(token, srcArgs.Surface);
+        if (signature == this._lastSignature && this._filteredSurface != null) {
+          base.OnSetRenderInfo(parameters, dstArgs, srcArgs);
+          return;
+        }
+        this._lastSignature = signature;
+
+        if (!_ENTRIES_BY_NAME.TryGetValue(token.FilterName ?? string.Empty, out var entry))
+          entry = SupportedManipulators.Manipulators[0];
+
+        var sourceSurface = srcArgs.Surface;
+        var sourceRect = this.EnvironmentParameters.GetSelection(sourceSurface.Bounds).GetBoundsInt();
+        var (userW, userH) = _ResolveTargetSize(token, sourceRect.Width, sourceRect.Height);
+        var targetRect = entry.ComputeTargetRectangle(sourceRect, userW, userH);
+
+        var input = cImage.FromBitmap(sourceSurface.CreateAliasedBitmap());
+        if (_OobAppliesToEntry(entry)) {
+          input.HorizontalOutOfBoundsMode = token.HorizontalOobMode;
+          input.VerticalOutOfBoundsMode = token.VerticalOobMode;
+        }
+        var filtered = entry.Apply(input, sourceRect, userW, userH);
+        var newSurface = _CreateSurfaceFromImage(filtered, targetRect);
+
+        var old = this._filteredSurface;
+        this._filteredSurface = newSurface;
+        this._targetRectangle = targetRect;
+        old?.Dispose();
+      }
+
+      base.OnSetRenderInfo(parameters, dstArgs, srcArgs);
     }
 
-    private string _filterName;
-    private string _oldFilterName;
-    private bool _copyToClipboard;
-    private bool _oldCopyToClipboard;
+    public override void Render(EffectConfigToken parameters, RenderArgs dstArgs, RenderArgs srcArgs, Rectangle[] rois, int startIndex, int length) {
+      Surface filtered;
+      Rectangle target;
+      lock (this._renderLock) {
+        filtered = this._filteredSurface;
+        target = this._targetRectangle;
+      }
+      if (filtered == null || length == 0) return;
 
-    private Surface _lastFilteredImage;
-    private Rectangle _lastTargetRectangle;
-
-    private readonly object _locker = new object();
-
-
-    protected override PropertyCollection OnCreatePropertyCollection() {
-      return new PropertyCollection(
-        new Property[] {
-          new StaticListChoiceProperty(
-            PropertyNames.FilterType,
-            (from i in SupportedManipulators.Manipulators select (object)i.Item1).ToArray()),
-          new Int32Property(PropertyNames.FilterToClipboard, 0,0,255), 
-        });
-    }
-
-    protected override ControlInfo OnCreateConfigUI(PropertyCollection props) {
-      const string BT_RENDER_TO_CLIPBOARD = "Render to Clipboard";
-      const string DESCR_RENDER_TO_CLIPBOARD = "This will render the filter directly to the clipboard.";
-
-      var defaultConfigUi = CreateDefaultConfigUI(props);
-      defaultConfigUi.SetPropertyControlValue(
-        PropertyNames.FilterType,
-        ControlInfoPropertyNames.DisplayName,
-        "Scaling Algorithm");
-
-      defaultConfigUi.SetPropertyControlValue(
-        PropertyNames.FilterToClipboard,
-        ControlInfoPropertyNames.DisplayName,
-        string.Empty);
-      defaultConfigUi.SetPropertyControlType(
-        PropertyNames.FilterToClipboard,
-        PropertyControlType.IncrementButton
-      );
-      defaultConfigUi.SetPropertyControlValue(
-        PropertyNames.FilterToClipboard,
-        ControlInfoPropertyNames.ButtonText,
-        BT_RENDER_TO_CLIPBOARD);
-      defaultConfigUi.SetPropertyControlValue(
-        PropertyNames.FilterToClipboard,
-        ControlInfoPropertyNames.Description,
-        DESCR_RENDER_TO_CLIPBOARD);
-      return defaultConfigUi;
-    }
-
-    /// <summary>
-    ///   Called whenever the UI for the plugin is changed somehow.  
-    ///   May be called more than once for the same change; uses test-lock-test to prevent doing the same thing twice.
-    ///   This code handles all of the resource allocation & initiates all of the computations needed for the plugin effect.
-    /// </summary>
-    /// <param name = "newToken"></param>
-    /// <param name = "dstArgs"></param>
-    /// <param name = "srcArgs"></param>
-    protected override void OnSetRenderInfo(
-      PropertyBasedEffectConfigToken newToken,
-      RenderArgs dstArgs,
-      RenderArgs srcArgs) {
-      this._filterName = _GetFilterName(newToken);
-      this._copyToClipboard = _IsCopyToClipboard(newToken);
-
-      // if something has changed, this is not a 'phantom' method call due to threading
-      if (this._filterName != this._oldFilterName || this._copyToClipboard != this._oldCopyToClipboard) {
-        lock (this._locker) {
-          if (this._filterName != this._oldFilterName) {
-            this._oldFilterName = this._filterName;
-
-            var filterParameters = SupportedManipulators.Manipulators.FirstOrDefault(i => i.Item1 == this._filterName);
-            Debug.Assert(filterParameters!=null);
-            
-            var inputSurface = srcArgs.Surface;
-            var sourceRectangle = this.EnvironmentParameters.GetSelection(inputSurface.Bounds).GetBoundsInt();
-            var targetRectangle =new Rectangle(
-              sourceRectangle.X * filterParameters.Item2.ScaleFactorX,
-              sourceRectangle.Y * filterParameters.Item2.ScaleFactorY,
-              sourceRectangle.Width* filterParameters.Item2.ScaleFactorX,
-              sourceRectangle.Height * filterParameters.Item2.ScaleFactorY
-            );
-            
-            var image = this._CreateImageFromSurface(inputSurface);
-            var filtered = filterParameters.Item3(image, sourceRectangle);
-            this._lastFilteredImage = this._CreateSurfaceFromImage(filtered, targetRectangle);
-            this._lastTargetRectangle = targetRectangle;
-          }
-          if (this._copyToClipboard != this._oldCopyToClipboard) {
-            this._oldCopyToClipboard = this._copyToClipboard;
-
-            if (this._copyToClipboard)
-              this._DirectToClipboard();
+      var dst = dstArgs.Surface;
+      var fw = filtered.Width;
+      var fh = filtered.Height;
+      for (var i = startIndex; i < startIndex + length; ++i) {
+        var rect = rois[i];
+        for (var y = rect.Top; y < rect.Bottom; y++) {
+          var sy = y - target.Top;
+          if (sy < 0 || sy >= fh) continue;
+          for (var x = rect.Left; x < rect.Right; x++) {
+            var sx = x - target.Left;
+            if (sx < 0 || sx >= fw) continue;
+            dst[x, y] = filtered[sx, sy];
           }
         }
       }
-
-      // pass along control
-      base.OnSetRenderInfo(newToken, dstArgs, srcArgs);
     }
 
-    private static string _GetFilterName(PropertyBasedEffectConfigToken newToken) 
-      => (string)newToken.GetProperty<StaticListChoiceProperty>(PropertyNames.FilterType).Value
-    ;
-
-    private static bool _IsCopyToClipboard(PropertyBasedEffectConfigToken newToken) 
-      => newToken.GetProperty<Int32Property>(PropertyNames.FilterToClipboard).Value != 0
-    ;
-
-    private cImage _CreateImageFromSurface(Surface surface) 
-      => cImage.FromBitmap(surface.CreateAliasedBitmap())
-    ;
-
-    private Surface _CreateSurfaceFromImage(cImage image, Rectangle rect) {
-      var bitmap = image.ToBitmap();
-      var selection = bitmap.Clone(rect, bitmap.PixelFormat);
-      var result = Surface.CopyFromBitmap(selection);
-      return result;
+    protected override void OnDispose(bool disposing) {
+      if (disposing) {
+        this._filteredSurface?.Dispose();
+        this._filteredSurface = null;
+      }
+      base.OnDispose(disposing);
     }
 
-    private void _DirectToClipboard() {
-      var clipboardThread =
-        new Thread(
-          () => {
-            Document.FromImage(this._lastFilteredImage.CreateAliasedBitmap());
-            Clipboard.SetDataObject(this._lastFilteredImage.CreateAliasedBitmap(), true);
-          });
-      clipboardThread.SetApartmentState(ApartmentState.STA);
-      clipboardThread.Start();
-      clipboardThread.Join();
+    private static bool _OobAppliesToEntry(ManipulatorEntry entry) {
+      // Upstream-prefixed entries go through the Bitmap-based adapters that don't honour cImage OOB.
+      var name = entry?.Name;
+      if (string.IsNullOrEmpty(name)) return false;
+      if (name.StartsWith("Scaler:") || name.StartsWith("Resampler:") || name.StartsWith("Filter:") || name.StartsWith("Plane:"))
+        return false;
+      return true;
     }
 
-    /// <summary>
-    ///   Renders each region of interest (ROI)
-    /// </summary>
-    /// <param name = "rois"></param>
-    /// <param name = "startIndex"></param>
-    /// <param name = "length"></param>
-    protected override void OnRender(Rectangle[] rois, int startIndex, int length) {
-      if (length == 0 || this._lastFilteredImage == null)
-        return;
-
-      var selectedRectangle = this._lastTargetRectangle;
-      for (var i = startIndex; i < startIndex + length; ++i)
-        this._Render(this.DstArgs.Surface, rois[i], selectedRectangle);
+    private static string _BuildSignature(PluginConfigToken token, Surface src) {
+      return string.Concat(
+        token.FilterName, "|", (int)token.Mode, "|",
+        token.PercentX, "/", token.PercentY, "|",
+        token.FactorX.ToString("R"), "/", token.FactorY.ToString("R"), "|",
+        token.TargetWidth, "x", token.TargetHeight, "|",
+        token.LockAspectRatio ? "1" : "0", "|",
+        (int)token.HorizontalOobMode, "/", (int)token.VerticalOobMode, "|",
+        token.OobColor.ToArgb().ToString("X8"), "|",
+        src.Width, "x", src.Height
+      );
     }
 
-    /// <summary>
-    /// Renders the given region of interest from the interal temporary surface to the given destination.
-    /// Assumes the destination is large enough to accomodate the data.
-    /// </summary>
-    /// <param name="dst">the destination surface</param>
-    /// <param name="rect">the RIO</param>
-    /// <param name="selectionCopy">The selection copy.</param>
-    private void _Render(Surface dst, Rectangle rect, Rectangle selectionCopy) {
-      for (var y = rect.Top; y < rect.Bottom; y++) {
-        for (var x = rect.Left; x < rect.Right; x++)
-          dst[x, y] = this._lastFilteredImage[x - selectionCopy.Left, y - selectionCopy.Top];
+    private static (int width, int height) _ResolveTargetSize(PluginConfigToken token, int sourceW, int sourceH) {
+      double sx, sy;
+      switch (token.Mode) {
+        case ScaleMode.Percent:
+          sx = token.PercentX / 100.0;
+          sy = token.LockAspectRatio ? sx : token.PercentY / 100.0;
+          return (Math.Max(1, (int)Math.Round(sourceW * sx)), Math.Max(1, (int)Math.Round(sourceH * sy)));
+        case ScaleMode.Factor:
+          sx = token.FactorX;
+          sy = token.LockAspectRatio ? sx : token.FactorY;
+          return (Math.Max(1, (int)Math.Round(sourceW * sx)), Math.Max(1, (int)Math.Round(sourceH * sy)));
+        case ScaleMode.Size:
+        default: {
+          var w = token.TargetWidth > 0 ? token.TargetWidth : sourceW;
+          var h = token.TargetHeight > 0 ? token.TargetHeight : sourceH;
+          if (token.LockAspectRatio && token.TargetWidth > 0 && sourceW > 0)
+            h = Math.Max(1, (int)Math.Round((double)w * sourceH / sourceW));
+          return (w, h);
+        }
       }
     }
 
-
-    protected override void OnCustomizeConfigUIWindowProperties(PropertyCollection props) {
-
-      // Change the effect's window title
-      var name =
-        ((AssemblyProductAttribute)
-          this.GetType().Assembly.GetCustomAttributes(typeof(AssemblyProductAttribute), false)[0]).Product;
-      var version = this.GetType().Assembly.GetName().Version;
-      props[ControlInfoPropertyNames.WindowTitle].Value = name + " v" + version;
-      base.OnCustomizeConfigUIWindowProperties(props);
+    private static Surface _CreateSurfaceFromImage(cImage image, Rectangle rect) {
+      var bitmap = image.ToBitmap();
+      var clipRect = new Rectangle(
+        Math.Max(0, Math.Min(bitmap.Width - 1, rect.X)),
+        Math.Max(0, Math.Min(bitmap.Height - 1, rect.Y)),
+        Math.Max(1, Math.Min(bitmap.Width - rect.X, rect.Width)),
+        Math.Max(1, Math.Min(bitmap.Height - rect.Y, rect.Height))
+      );
+      var selection = bitmap.Clone(clipRect, bitmap.PixelFormat);
+      return Surface.CopyFromBitmap(selection);
     }
   }
 }
