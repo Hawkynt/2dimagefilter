@@ -20,10 +20,10 @@
 #endregion
 
 using Classes.ScriptActions;
-using Imager.Interface;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Drawing.Extensions.ColorProcessing.Resizing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -291,7 +291,7 @@ namespace Classes {
               else if (value == WRAP_BOUNDS_VALUE)
                 vbounds = OutOfBoundsMode.WrapAround;
               else if (value == TRANSPARENT_BOUNDS_VALUE)
-                vbounds = OutOfBoundsMode.Transparent;
+                vbounds = OutOfBoundsMode.FlatColor;
               else
                 return CLIExitCode.InvalidOutOfBoundsMode;
               break;
@@ -307,7 +307,7 @@ namespace Classes {
               else if (value == WRAP_BOUNDS_VALUE)
                 hbounds = OutOfBoundsMode.WrapAround;
               else if (value == TRANSPARENT_BOUNDS_VALUE)
-                hbounds = OutOfBoundsMode.Transparent;
+                hbounds = OutOfBoundsMode.FlatColor;
               else
                 return CLIExitCode.InvalidOutOfBoundsMode;
               break;
@@ -416,7 +416,7 @@ namespace Classes {
           return WHOLE_BOUNDS_VALUE;
         case OutOfBoundsMode.WrapAround:
           return WRAP_BOUNDS_VALUE;
-        case OutOfBoundsMode.Transparent:
+        case OutOfBoundsMode.FlatColor:
           return TRANSPARENT_BOUNDS_VALUE;
         default:
           throw new NotImplementedException();

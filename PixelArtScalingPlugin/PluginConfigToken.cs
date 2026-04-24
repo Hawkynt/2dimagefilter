@@ -20,8 +20,7 @@
 #endregion
 
 using System.Drawing;
-
-using Imager.Interface;
+using System.Drawing.Extensions.ColorProcessing.Resizing;
 
 using PaintDotNet.Effects;
 
@@ -53,7 +52,7 @@ namespace PixelArtScaling {
     public OutOfBoundsMode HorizontalOobMode { get; set; } = OutOfBoundsMode.ConstantExtension;
     /// <summary>Vertical out-of-bounds handling mode (forwarded to upstream resamplers).</summary>
     public OutOfBoundsMode VerticalOobMode { get; set; } = OutOfBoundsMode.ConstantExtension;
-    /// <summary>Canvas fill colour used when either axis is in <see cref="OutOfBoundsMode.Transparent"/> mode — painted around the source image.</summary>
+    /// <summary>Canvas fill colour used when either axis is in <see cref="OutOfBoundsMode.FlatColor"/> mode — painted around the source image.</summary>
     public Color CanvasColor { get; set; } = Color.Transparent;
     /// <summary>When <c>true</c>, destination pixel centres are aligned with source coordinates; when <c>false</c>, top-left corners are. Upstream resamplers honour this per-call.</summary>
     public bool UseCenteredGrid { get; set; } = true;

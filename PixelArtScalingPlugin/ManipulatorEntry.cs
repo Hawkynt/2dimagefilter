@@ -22,10 +22,11 @@
 using System;
 using System.Drawing;
 
+using System.Drawing.Extensions.ColorProcessing.Resizing;
+
 using Hawkynt.ColorProcessing.Resizing;
 
 using Imager;
-using Imager.Interface;
 using Imager.Pipelines;
 
 namespace PixelArtScaling {

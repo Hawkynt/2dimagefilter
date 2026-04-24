@@ -20,20 +20,31 @@
 #endregion
 using Classes.ImageManipulators;
 using Imager;
-using Imager.Interface;
 using Imager.Pipelines;
 using System.Collections.Generic;
+using System.Drawing.Drawing2D;
 using System.Linq;
 
 namespace Classes {
   internal static class SupportedManipulators {
 
+    // GDI+ resamplers exposed as a system-API baseline for visual comparison against the upstream resamplers.
+    // Backed by GdiPlusResampler which produces a standard BitmapResamplerAdapter — the dedicated
+    // Interpolator class (and cImage.INTERPOLATORS + cImage.ApplyScaler(InterpolationMode, …)) is gone.
+    private static readonly InterpolationMode[] _GDI_PLUS_MODES = {
+      InterpolationMode.NearestNeighbor,
+      InterpolationMode.Bilinear,
+      InterpolationMode.Bicubic,
+      InterpolationMode.HighQualityBilinear,
+      InterpolationMode.HighQualityBicubic,
+    };
+
     public static readonly KeyValuePair<string, IImageManipulator>[] MANIPULATORS = new KeyValuePair<string, IImageManipulator>[0]
 
     #region add GDI+ resamplers (system-API passthrough — comparison baseline, not a library algorithm)
 .Concat(
-    from p in cImage.INTERPOLATORS
-    select new KeyValuePair<string, IImageManipulator>("Resampler: " + ReflectionUtils.GetDisplayNameForEnumValue(p) + " <GDI+>", new Interpolator(p))
+    from p in _GDI_PLUS_MODES
+    select new KeyValuePair<string, IImageManipulator>("Resampler: " + ReflectionUtils.GetDisplayNameForEnumValue(p) + " <GDI+>", GdiPlusResampler.Create(p))
     )
     #endregion
 

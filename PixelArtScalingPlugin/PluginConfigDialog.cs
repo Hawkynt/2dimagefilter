@@ -31,13 +31,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using System.Drawing.Extensions.ColorProcessing.Resizing;
+
 using Hawkynt.ColorProcessing.Resizing;
 
 using PaintDotNet;
 using PaintDotNet.Effects;
 
 using Imager;
-using Imager.Interface;
 
 namespace PixelArtScaling {
   internal sealed class PluginConfigDialog : EffectConfigDialog {

@@ -208,8 +208,8 @@ namespace Imager.Pipelines {
       Bitmap source,
       int targetWidth,
       int targetHeight,
-      Imager.Interface.OutOfBoundsMode horizontalMode,
-      Imager.Interface.OutOfBoundsMode verticalMode,
+      System.Drawing.Extensions.ColorProcessing.Resizing.OutOfBoundsMode horizontalMode,
+      System.Drawing.Extensions.ColorProcessing.Resizing.OutOfBoundsMode verticalMode,
       Color canvasColor,
       bool useCenteredGrid
     );
@@ -253,22 +253,12 @@ namespace Imager.Pipelines {
           capture.Name,
           ComposeDescription(capture.Description, capture.Name, capture.Author),
           (b, w, h, xMode, yMode, canvas, centred) =>
-            capture.Resample(b, w, h, _TranslateOob(xMode), _TranslateOob(yMode), canvas, centred),
+            capture.Resample(b, w, h, xMode, yMode, canvas, centred),
           kernelRadius,
           evaluateKernel
         );
       }
     }
-
-    /// <summary>Translates the local (consumer-facing) OOB enum into the upstream enum. The local one is kept because the exe's script serialization + plugin token use stable member names that differ from upstream.</summary>
-    private static System.Drawing.Extensions.ColorProcessing.Resizing.OutOfBoundsMode _TranslateOob(Imager.Interface.OutOfBoundsMode mode) => mode switch {
-      Imager.Interface.OutOfBoundsMode.ConstantExtension => System.Drawing.Extensions.ColorProcessing.Resizing.OutOfBoundsMode.Const,
-      Imager.Interface.OutOfBoundsMode.HalfSampleSymmetric => System.Drawing.Extensions.ColorProcessing.Resizing.OutOfBoundsMode.Half,
-      Imager.Interface.OutOfBoundsMode.WholeSampleSymmetric => System.Drawing.Extensions.ColorProcessing.Resizing.OutOfBoundsMode.Whole,
-      Imager.Interface.OutOfBoundsMode.WrapAround => System.Drawing.Extensions.ColorProcessing.Resizing.OutOfBoundsMode.Wrap,
-      Imager.Interface.OutOfBoundsMode.Transparent => System.Drawing.Extensions.ColorProcessing.Resizing.OutOfBoundsMode.Transparent,
-      _ => System.Drawing.Extensions.ColorProcessing.Resizing.OutOfBoundsMode.Const,
-    };
 
     #endregion
 

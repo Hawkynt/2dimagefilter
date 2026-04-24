@@ -36,7 +36,7 @@ using Classes.ScriptActions;
 using ImageResizer.Properties;
 
 using Imager;
-using Imager.Interface;
+using System.Drawing.Extensions.ColorProcessing.Resizing;
 using word = System.UInt16;
 
 namespace ImageResizer {
@@ -614,7 +614,6 @@ namespace ImageResizer {
       // are threaded into upstream resamplers below.
 
       cImage result = null;
-      var interpolator = method as Interpolator;
       var planeExtractor = method as PlaneExtractor;
       var bitmapFixed = method as BitmapFixedAdapter;
       var bitmapResampler = method as BitmapResamplerAdapter;
@@ -626,11 +625,6 @@ namespace ImageResizer {
           MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
         else
           result = bitmapResampler.Apply(source, targetWidth, targetHeight, horizontalBh, verticalBh, Color.Transparent, useCenteredGrid);
-      } else if (interpolator != null) {
-        if (targetWidth <= 0 || targetHeight <= 0)
-          MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
-        else
-          result = interpolator.Apply(source, targetWidth, targetHeight);
       } else if (planeExtractor != null) {
         result = planeExtractor.Apply(source);
       }

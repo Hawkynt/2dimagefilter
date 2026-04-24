@@ -20,7 +20,6 @@
 #endregion
 using Classes;
 using Imager;
-using Imager.Interface;
 using Imager.Pipelines;
 using System.Linq;
 
@@ -45,7 +44,7 @@ namespace PixelArtScaling {
       UpstreamPipeline.ClassifyRescaler(capture) + ": " + capture.Name,
       capture.Description,
       scaleX, scaleY,
-      (img, r) => cImage.FromBitmap(capture.Apply(img.ToBitmap(), r.Width * scaleX, r.Height * scaleY, useThresholds: false))
+      (img, r) => cImage.FromBitmap(capture.Apply(img.ToBitmap(), r.Width * scaleX, r.Height * scaleY, false))
     ))
 .Concat(
     from s in UpstreamPipeline.Rescalers()
@@ -56,7 +55,7 @@ namespace PixelArtScaling {
       UpstreamPipeline.ClassifyRescaler(capture) + ": " + capture.Name,
       capture.Description + " — supports " + scalesText + "; Target W/H or Scale (%) snaps to the nearest variant.",
       capture.SupportedScales,
-      (img, _, w, h) => cImage.FromBitmap(capture.Apply(img.ToBitmap(), w, h, useThresholds: false))
+      (img, _, w, h) => cImage.FromBitmap(capture.Apply(img.ToBitmap(), w, h, false))
     ))
     #endregion
 

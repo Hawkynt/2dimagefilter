@@ -22,9 +22,10 @@
 using System;
 using System.Drawing;
 
+using System.Drawing.Extensions.ColorProcessing.Resizing;
+
 using Classes.ImageManipulators;
 using Imager;
-using Imager.Interface;
 
 using word = System.UInt16;
 
@@ -62,7 +63,6 @@ namespace Classes.ScriptActions {
 
       cImage result = null;
       var method = this.Manipulator;
-      var interpolator = method as Interpolator;
       var planeExtractor = method as PlaneExtractor;
       var bitmapFixed = method as BitmapFixedAdapter;
       var bitmapResampler = method as BitmapResamplerAdapter;
@@ -71,8 +71,6 @@ namespace Classes.ScriptActions {
         result = bitmapFixed.Apply(source, this.UseThresholds);
       } else if (bitmapResampler != null) {
         result = bitmapResampler.Apply(source, width, height, this.HorizontalBph, this.VerticalBph, System.Drawing.Color.Transparent, this.UseCenteredGrid);
-      } else if (interpolator != null) {
-        result = interpolator.Apply(source, width, height);
       } else if (planeExtractor != null) {
         result = planeExtractor.Apply(source);
       }
