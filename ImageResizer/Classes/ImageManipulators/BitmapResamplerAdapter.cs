@@ -24,46 +24,50 @@ using System.ComponentModel;
 using System.Drawing;
 
 using Imager;
-using Imager.Classes;
+using Imager.Interface;
+using Imager.Pipelines;
 
 namespace Classes.ImageManipulators {
   /// <summary>
-  /// Wraps a NuGet-provided bitmap resampler — takes a target width and height from the user.
+  /// Wraps an upstream bitmap resampler — takes a target width and height from the user.
+  /// Forwards out-of-bounds mode, canvas fill colour and centred-grid flag into the upstream pipeline.
   /// </summary>
   [Description("Upstream bitmap resampler")]
   internal class BitmapResamplerAdapter : IImageManipulator {
 
-    private readonly Func<Bitmap, int, int, Bitmap> _operation;
+    private readonly UpstreamPipeline.ResampleFunc _operation;
 
-    public BitmapResamplerAdapter(string description, Func<Bitmap, int, int, Bitmap> operation, Kernels.FixedRadiusKernelInfo? kernelInfo = null) {
+    public BitmapResamplerAdapter(string description, UpstreamPipeline.ResampleFunc operation, int kernelRadius = 0, Func<float, float> evaluateKernel = null) {
       this.Description = description;
       this._operation = operation;
-      this.KernelInfo = kernelInfo;
+      this.KernelRadius = kernelRadius;
+      this.EvaluateKernel = evaluateKernel;
     }
 
     #region Implementation of IImageManipulator
     public bool SupportsWidth => true;
     public bool SupportsHeight => true;
     public bool SupportsRepetitionCount => false;
-    public bool SupportsGridCentering => false;
+    public bool SupportsGridCentering => true;
     public bool SupportsThresholds => false;
     public bool SupportsRadius => false;
     public bool ChangesResolution => true;
     public string Description { get; }
     #endregion
 
-    /// <summary>
-    /// Optional 1-D kernel shape for the kernel chart. <c>null</c> when no equivalent local
-    /// kernel definition is available; the chart will be hidden in that case.
-    /// </summary>
-    public Kernels.FixedRadiusKernelInfo? KernelInfo { get; }
+    /// <summary>Kernel support radius (the resampler samples over <c>[-Radius, +Radius]</c>). Zero when the upstream resampler is not a separable-kernel one.</summary>
+    public int KernelRadius { get; }
 
-    public cImage Apply(cImage source, int width, int height) {
-      using (var input = source.ToBitmap()) {
-        using (var output = this._operation(input, width, height)) {
-          return cImage.FromBitmap(output);
-        }
-      }
+    /// <summary>Closed-form 1-D kernel weight function for the chart, or <c>null</c> for edge-aware / content-adaptive / fixed-tap resamplers where no separable weight exists.</summary>
+    public Func<float, float> EvaluateKernel { get; }
+
+    public cImage Apply(cImage source, int width, int height)
+      => this.Apply(source, width, height, OutOfBoundsMode.ConstantExtension, OutOfBoundsMode.ConstantExtension, Color.Transparent, useCenteredGrid: true);
+
+    public cImage Apply(cImage source, int width, int height, OutOfBoundsMode horizontalMode, OutOfBoundsMode verticalMode, Color canvasColor, bool useCenteredGrid) {
+      using (var input = source.ToBitmap())
+      using (var output = this._operation(input, width, height, horizontalMode, verticalMode, canvasColor, useCenteredGrid))
+        return cImage.FromBitmap(output);
     }
   }
 }

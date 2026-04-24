@@ -48,10 +48,6 @@ namespace Imager {
     /// </summary>
     private readonly int _height;
 
-    private OutOfBoundsMode _horizontalOutOfBoundsMode;
-    private OutOfBoundsUtils.OutOfBoundsHandler _horizontalOutOfBoundsHandler;
-    private OutOfBoundsMode _verticalOutOfBoundsMode;
-    private OutOfBoundsUtils.OutOfBoundsHandler _verticalOutOfBoundsHandler;
     #endregion
 
     #region properties
@@ -91,141 +87,10 @@ namespace Imager {
     /// <value>The greyscale image from the alpha components.</value>
     public cImage Alpha => new cImage(this, pixel => pixel.Alpha);
 
-    /// <summary>
-    /// Gets the a new instance containing a greyscale image of the color(u) values only.
-    /// </summary>
-    /// <value>The greyscale image from the color(u) components.</value>
-    public cImage u => new cImage(this, pixel => pixel.u);
+    // Custom plane-extractor properties (u, v, Brightness, ExtractColors, ExtractDeltas, HueColored)
+    // removed — consumers now go through upstream Plane: descriptors in ColorProcessing.Spaces.
 
-    /// <summary>
-    /// Gets the a new instance containing a greyscale image of the color(v) values only.
-    /// </summary>
-    /// <value>The greyscale image from the color(v) components.</value>
-    public cImage v => new cImage(this, pixel => pixel.v);
-
-    /// <summary>
-    /// Gets the a new instance containing a greyscale image of the brightness values only.
-    /// </summary>
-    /// <value>The greyscale image from the brightness components.</value>
-    public cImage Brightness => new cImage(this, pixel => pixel.Brightness);
-
-    /// <summary>
-    /// Extracts the colors from an image and returns a new image with only base colors.
-    /// </summary>
-    public cImage ExtractColors => new cImage(this, pixel => pixel.ExtractColors);
-
-    /// <summary>
-    /// Extracts the grey deltas for use with an image that is color extracted.
-    /// </summary>
-    public cImage ExtractDeltas => new cImage(this, pixel => pixel.ExtractDeltas);
-
-    /// <summary>
-    /// Gets the a new instance containing an image of the hue values only.
-    /// </summary>
-    /// <value>The image from the hue components.</value>
-    public cImage HueColored {
-      get {
-        return new cImage(this, pixel => {
-          const float conversionFactor = 360f / 256f;
-          var hue = pixel.Hue * conversionFactor;
-          const float saturation = 1f;
-          const float value = 1f;
-          float red, green, blue;
-
-          if (hue < 0.001) {
-            red = green = blue = 0.5f;
-          } else {
-            hue = hue / 60f;
-            var i = (byte)Math.Floor(hue);
-            var f = hue - i;
-            const float p = value * (1 - saturation);
-            var q = value * (1 - saturation * f);
-            var t = value * (1 - saturation * (1 - f));
-            switch (i) {
-              case 0:
-              {
-                red = value;
-                green = t;
-                blue = p;
-                break;
-              }
-              case 1:
-              {
-                red = q;
-                green = value;
-                blue = p;
-                break;
-              }
-              case 2:
-              {
-                red = p;
-                green = value;
-                blue = t;
-                break;
-              }
-              case 3:
-              {
-                red = p;
-                green = q;
-                blue = value;
-                break;
-              }
-              case 4:
-              {
-                red = t;
-                green = p;
-                blue = value;
-                break;
-              }
-              case 5:
-              {
-                red = value;
-                green = p;
-                blue = q;
-                break;
-              }
-              default:
-              {
-                throw new NotSupportedException();
-              }
-            }
-          }
-          return new sPixel(red, green, blue, pixel.Alpha / 255.0);
-        });
-      }
-    }
-
-    /// <summary>
-    /// Gets or sets the horizontal out of bounds mode.
-    /// </summary>
-    /// <value>
-    /// The horizontal out of bounds mode.
-    /// </value>
-    public OutOfBoundsMode HorizontalOutOfBoundsMode {
-      get {
-        return this._horizontalOutOfBoundsMode;
-      }
-      set {
-        this._horizontalOutOfBoundsMode = value;
-        this._horizontalOutOfBoundsHandler = OutOfBoundsUtils.GetHandlerOrCrash(value);
-      }
-    }
-
-    /// <summary>
-    /// Gets or sets the vertical out of bounds mode.
-    /// </summary>
-    /// <value>
-    /// The vertical out of bounds mode.
-    /// </value>
-    public OutOfBoundsMode VerticalOutOfBoundsMode {
-      get {
-        return this._verticalOutOfBoundsMode;
-      }
-      set {
-        this._verticalOutOfBoundsMode = value;
-        this._verticalOutOfBoundsHandler = OutOfBoundsUtils.GetHandlerOrCrash(value);
-      }
-    }
+    // OOB mode setters removed — after the local XBR/XBRz/NQ/resampler migration, no reader remains.
     #endregion
     #region ctor dtor idx
     /// <summary>
@@ -237,8 +102,6 @@ namespace Imager {
       this._width = width;
       this._height = height;
       this._imageData = new sPixel[width * height];
-      this.HorizontalOutOfBoundsMode = OutOfBoundsMode.ConstantExtension;
-      this.VerticalOutOfBoundsMode = OutOfBoundsMode.ConstantExtension;
     }
 
     /// <summary>
@@ -329,11 +192,9 @@ namespace Imager {
       var width = this._width;
       var height = this._height;
 
-      if (x < 0 || x >= width)
-        x = this._horizontalOutOfBoundsHandler(x, width, x < 0);
-
-      if (y < 0 || y >= height)
-        y = this._verticalOutOfBoundsHandler(y, height, y < 0);
+      // OOB now clamps to edge — the handler-based dispatch is gone with the local scalers.
+      if (x < 0) x = 0; else if (x >= width) x = width - 1;
+      if (y < 0) y = 0; else if (y >= height) y = height - 1;
 
       return this._imageData[y * width + x];
     }

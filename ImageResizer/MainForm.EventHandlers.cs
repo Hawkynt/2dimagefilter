@@ -49,6 +49,8 @@ namespace ImageResizer {
       this._scriptEngine.ExecuteAction(new TargetToSourceCommand());
       this._SourceImage = this._scriptEngine.GdiSource;
       this._TargetImage = this._scriptEngine.GdiTarget;
+      // No preview: user is deliberately working with the switched pair; an auto-preview
+      // would clobber the target pane.
     }
 
     private void btRepeat_Click(object sender, EventArgs e) {
@@ -163,10 +165,13 @@ namespace ImageResizer {
         this.nudRepetitionCount.Value = 1;
 
       this.nudRadius.Enabled = method != null && method.SupportsRadius;
+
+      this._SchedulePreview();
     }
 
     private void nudRadius_ValueChanged(object sender, EventArgs e) {
       this._RefreshKernelChart();
+      this._SchedulePreview();
     }
 
     private void stretchToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -227,6 +232,7 @@ namespace ImageResizer {
           return;
         this._SourceImage = data;
         this._lastSaveFileName = null;
+        this._SchedulePreview();
         return;
       }
     }
@@ -244,10 +250,12 @@ namespace ImageResizer {
 
     private void nudWidth_ValueChanged(object sender, EventArgs e) {
       this._CorrectAspectRatioIfNeeded(false);
+      this._SchedulePreview();
     }
 
     private void nudHeight_ValueChanged(object sender, EventArgs e) {
       this._CorrectAspectRatioIfNeeded(true);
+      this._SchedulePreview();
     }
 
     private void showToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -268,9 +276,18 @@ namespace ImageResizer {
     }
 
     private void executeToolStripMenuItem_Click(object sender, EventArgs e) {
-      this._scriptEngine.RepeatActions();
-      this._SourceImage = this._scriptEngine.GdiSource;
-      this._TargetImage = this._scriptEngine.GdiTarget;
+      var srcBitmap = this._scriptEngine.GdiSource;
+      var srcW = srcBitmap?.Width ?? 0;
+      var srcH = srcBitmap?.Height ?? 0;
+      try {
+        this._scriptEngine.RepeatActions();
+        this._SourceImage = this._scriptEngine.GdiSource;
+        this._TargetImage = this._scriptEngine.GdiTarget;
+      } catch (Exception ex) {
+        var msg = _ClassifyResizeFailure(_Unwrap(ex), srcW, srcH);
+        this.iwhTargetImage.StatusText = "Script execute failed — " + msg;
+        MessageBox.Show(this, msg, "Script execute failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+      }
     }
 
     private void saveToolStripMenuItem1_Click(object sender, EventArgs e) {

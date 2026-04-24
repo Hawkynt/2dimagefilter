@@ -49,12 +49,14 @@ namespace PixelArtScaling {
     public int TargetHeight { get; set; }
     public bool LockAspectRatio { get; set; } = true;
 
-    /// <summary>Horizontal out-of-bounds handling mode for local cImage-based entries.</summary>
+    /// <summary>Horizontal out-of-bounds handling mode (forwarded to upstream resamplers).</summary>
     public OutOfBoundsMode HorizontalOobMode { get; set; } = OutOfBoundsMode.ConstantExtension;
-    /// <summary>Vertical out-of-bounds handling mode for local cImage-based entries.</summary>
+    /// <summary>Vertical out-of-bounds handling mode (forwarded to upstream resamplers).</summary>
     public OutOfBoundsMode VerticalOobMode { get; set; } = OutOfBoundsMode.ConstantExtension;
-    /// <summary>Flat fill colour used when either OOB mode is <see cref="OutOfBoundsMode.ConstantExtension"/>.</summary>
-    public Color OobColor { get; set; } = Color.Transparent;
+    /// <summary>Canvas fill colour used when either axis is in <see cref="OutOfBoundsMode.Transparent"/> mode — painted around the source image.</summary>
+    public Color CanvasColor { get; set; } = Color.Transparent;
+    /// <summary>When <c>true</c>, destination pixel centres are aligned with source coordinates; when <c>false</c>, top-left corners are. Upstream resamplers honour this per-call.</summary>
+    public bool UseCenteredGrid { get; set; } = true;
 
     public PluginConfigToken() { }
 
@@ -70,7 +72,8 @@ namespace PixelArtScaling {
       this.LockAspectRatio = cloneFrom.LockAspectRatio;
       this.HorizontalOobMode = cloneFrom.HorizontalOobMode;
       this.VerticalOobMode = cloneFrom.VerticalOobMode;
-      this.OobColor = cloneFrom.OobColor;
+      this.CanvasColor = cloneFrom.CanvasColor;
+      this.UseCenteredGrid = cloneFrom.UseCenteredGrid;
     }
 
     public override object Clone() => new PluginConfigToken(this);

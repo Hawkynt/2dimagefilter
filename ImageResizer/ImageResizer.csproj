@@ -34,6 +34,10 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>App.ico</ApplicationIcon>
     <LangVersion>12</LangVersion>
+    <!-- Force the AnyCPU build to run 64-bit on 64-bit Windows. WinForms exes default
+         Prefer32Bit=true, which caps user-mode VAS at 2 GB and OOMs on 12800² sources
+         (~655 MB per Bitmap copy + pipeline intermediates). -->
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -49,6 +53,12 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Resources.Extensions" Version="8.0.0" />
+    <!-- Bundles every reachable dependency assembly (ImageResizerLibrary, FrameworkExtensions,
+         Backports, etc.) into the exe as a compressed embedded resource and registers an
+         AppDomain.AssemblyResolve hook at module init. Result: a single ImageResizer.exe
+         that runs with no adjacent DLLs. Same mechanism as the PixelArtScalingPlugin. -->
+    <PackageReference Include="Costura.Fody" Version="5.7.0" PrivateAssets="all" />
+    <PackageReference Include="Fody" Version="6.8.1" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />

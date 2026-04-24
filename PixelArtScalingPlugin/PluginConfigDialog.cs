@@ -138,7 +138,7 @@ namespace PixelArtScaling {
         this._lockAr.Checked = token.LockAspectRatio;
         this._oobXCombo.SelectedItem = token.HorizontalOobMode;
         this._oobYCombo.SelectedItem = token.VerticalOobMode;
-        this._oobColor = token.OobColor == Color.Empty ? Color.Black : token.OobColor;
+        this._oobColor = token.CanvasColor == Color.Empty ? Color.Black : token.CanvasColor;
       } finally {
         this._suppressEvents = false;
       }
@@ -164,7 +164,7 @@ namespace PixelArtScaling {
       token.LockAspectRatio = this._lockAr.Checked;
       token.HorizontalOobMode = (OutOfBoundsMode)(this._oobXCombo.SelectedItem ?? OutOfBoundsMode.ConstantExtension);
       token.VerticalOobMode = (OutOfBoundsMode)(this._oobYCombo.SelectedItem ?? OutOfBoundsMode.ConstantExtension);
-      token.OobColor = this._oobColor;
+      token.CanvasColor = this._oobColor;
     }
 
     private ScaleMode _CurrentMode() {
@@ -258,7 +258,7 @@ namespace PixelArtScaling {
       _AddLabelledField(table, 3, "OOB Y:", out this._oobYCombo, this._OnOobChanged);
 
       table.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-      table.Controls.Add(_Label("OOB colour:"), 0, 4);
+      table.Controls.Add(_Label("Canvas colour:"), 0, 4);
       this._oobColorButton = new Button {
         Dock = DockStyle.Fill,
         Height = 28,
@@ -888,10 +888,11 @@ namespace PixelArtScaling {
       public readonly OutOfBoundsMode OobX, OobY;
       public readonly bool ApplyOob;
       public readonly Color OobColor;
-      /// <summary>When non-default, forces the pixel-scaler to this supported variant (ScaleVariantEntry).</summary>
+      public readonly bool UseCenteredGrid;
+      /// <summary>When non-default, forces the rescaler to this supported variant (ScaleVariantEntry).</summary>
       public readonly ScaleFactor? VariantScale;
 
-      public UiSnapshot(ManipulatorEntry entry, ScaleMode mode, double px, double py, double fx, double fy, int tw, int th, bool lockAr, OutOfBoundsMode oobX, OutOfBoundsMode oobY, bool applyOob, Color oobColor, ScaleFactor? variantScale) {
+      public UiSnapshot(ManipulatorEntry entry, ScaleMode mode, double px, double py, double fx, double fy, int tw, int th, bool lockAr, OutOfBoundsMode oobX, OutOfBoundsMode oobY, bool applyOob, Color oobColor, bool useCenteredGrid, ScaleFactor? variantScale) {
         this.Entry = entry; this.Mode = mode;
         this.PercentX = px; this.PercentY = py;
         this.FactorX = fx; this.FactorY = fy;
@@ -899,6 +900,7 @@ namespace PixelArtScaling {
         this.LockAr = lockAr;
         this.OobX = oobX; this.OobY = oobY;
         this.ApplyOob = applyOob; this.OobColor = oobColor;
+        this.UseCenteredGrid = useCenteredGrid;
         this.VariantScale = variantScale;
       }
 
@@ -946,6 +948,7 @@ namespace PixelArtScaling {
         (OutOfBoundsMode)(this._oobYCombo.SelectedItem ?? OutOfBoundsMode.ConstantExtension),
         this._OobAppliesToSelectedEntry(),
         this._oobColor,
+        useCenteredGrid: true,
         variant
       );
     }
@@ -999,9 +1002,9 @@ namespace PixelArtScaling {
           cancel.ThrowIfCancellationRequested();
           using (var own = new Bitmap(sourceSnapshot)) {
             var image = cImage.FromBitmap(own);
-            if (snapshot.ApplyOob) { image.HorizontalOutOfBoundsMode = snapshot.OobX; image.VerticalOutOfBoundsMode = snapshot.OobY; }
+            var options = new ResampleOptions(snapshot.OobX, snapshot.OobY, snapshot.OobColor, snapshot.UseCenteredGrid);
             var fullRect = new Rectangle(0, 0, own.Width, own.Height);
-            var output = entry.Apply(image, fullRect, targetW, targetH);
+            var output = entry.Apply(image, fullRect, targetW, targetH, options);
             cancel.ThrowIfCancellationRequested();
             return output.ToBitmap();
           }

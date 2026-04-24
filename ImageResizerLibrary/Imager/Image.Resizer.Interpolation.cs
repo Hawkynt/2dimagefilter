@@ -27,7 +27,9 @@ using System.Drawing.Drawing2D;
 namespace Imager {
   partial class cImage {
     /// <summary>
-    /// Stores all available parameterless pixel scalers.
+    /// GDI+ resampler modes exposed as a comparison baseline — system-API passthrough.
+    /// Not a rescaler (arbitrary scale) and not a library-provided resampler (uses
+    /// <see cref="System.Drawing.Drawing2D.Graphics.DrawImage"/> under the hood).
     /// </summary>
     public static readonly InterpolationMode[] INTERPOLATORS = {
       InterpolationMode.NearestNeighbor,
@@ -38,9 +40,9 @@ namespace Imager {
     };
 
     /// <summary>
-    /// Applies the GDI+ pixel scaler.
+    /// Applies the GDI+ resampler for the given <paramref name="type"/>.
     /// </summary>
-    /// <param name="type">The type of scaler to use.</param>
+    /// <param name="type">The GDI+ interpolation mode.</param>
     /// <param name="width">The width.</param>
     /// <param name="height">The height.</param>
     /// <param name="filterRegion">The filter region, if any.</param>
@@ -72,11 +74,7 @@ namespace Imager {
         // FIXME: this is a hack to prevent the microsoft bug from creating a white pixel on top and left border (see http://forums.asp.net/t/1031961.aspx/1)
         graphics.DrawImage(filterRegion == null ? this.ToBitmap() : this.ToBitmap(startX, startY, endX - startX, endY - startY), -1, -1, bitmap.Width + 1, bitmap.Height + 1);
       }
-      var result = FromBitmap(bitmap);
-      result.HorizontalOutOfBoundsMode = this.HorizontalOutOfBoundsMode;
-      result.VerticalOutOfBoundsMode = this.VerticalOutOfBoundsMode;
-      return result;
-
+      return FromBitmap(bitmap);
     }
 
   }

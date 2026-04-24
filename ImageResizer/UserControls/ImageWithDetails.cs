@@ -50,15 +50,36 @@ namespace ImageResizer.UserControls {
       set {
         this.pbImage.Image = value;
         this._CenterPictureBox();
+        this._dimensionsText = value == null ? string.Empty : string.Format("{0} x {1}", value.Width, value.Height);
+        this._RefreshDetails();
+      }
+    }
 
-        if (value == null) {
-          this.lDetails.Text = string.Empty;
-          return;
-        }
+    private string _dimensionsText = string.Empty;
+    private string _statusText;
 
-        var width = value.Width;
-        var height = value.Height;
-        this.lDetails.Text = string.Format("{0} x {1}", width, height);
+    /// <summary>
+    /// Optional status note rendered alongside the dimensions label — e.g. <c>"Preview — rendering…"</c>
+    /// during an auto-preview. Assign <c>null</c> or empty to clear. Shown in italics.
+    /// </summary>
+    public string StatusText {
+      get => this._statusText;
+      set {
+        this._statusText = value;
+        this._RefreshDetails();
+      }
+    }
+
+    private void _RefreshDetails() {
+      var hasStatus = !string.IsNullOrEmpty(this._statusText);
+      if (hasStatus) {
+        this.lDetails.Font = new Font(this.lDetails.Font, FontStyle.Italic);
+        this.lDetails.Text = string.IsNullOrEmpty(this._dimensionsText)
+          ? this._statusText
+          : this._dimensionsText + " — " + this._statusText;
+      } else {
+        this.lDetails.Font = new Font(this.lDetails.Font, FontStyle.Regular);
+        this.lDetails.Text = this._dimensionsText;
       }
     }
     #endregion

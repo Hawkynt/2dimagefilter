@@ -29,30 +29,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FrameworkExtensions.System.Drawing" Version="1.0.0.134" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="Imager\Image.Resizer.Loop.cs">
-      <DependentUpon>Image.Resizer.Loop.tt</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Update="Imager\PixelWorker.cs">
-      <DependentUpon>PixelWorker.tt</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Imager\Image.Resizer.Loop.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Image.Resizer.Loop.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Imager\PixelWorker.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PixelWorker.cs</LastGenOutput>
-    </None>
+    <!-- Project reference during active development so changes to the upstream
+         IKernelResampler etc. are visible without an intermediate NuGet pack/publish.
+         Swap back to a PackageReference once the upstream is packed + published. -->
+    <ProjectReference Include="..\..\C--FrameworkExtensions\System.Drawing.Extensions\System.Drawing.Extensions.csproj" />
   </ItemGroup>
 </Project>

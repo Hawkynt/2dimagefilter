@@ -90,8 +90,8 @@ Our enhanced approach uses flexible similarity functions:
 
 #### Option 3: Command Line Interface
 ```bash
-ImageResizer.exe load input.png resize auto "HQ 2x" save output.png
-ImageResizer.exe load sprite.bmp resize 400% "XBR 3x" save scaled_sprite.png
+ImageResizer.exe load input.png resize auto "Upscaler: HQ 2x" save output.png
+ImageResizer.exe load sprite.bmp resize 400% "Upscaler: XBR 3x" save scaled_sprite.png
 ```
 
 ### Building from Source
@@ -111,22 +111,24 @@ dotnet build ImageResizer/ImageResizer.csproj
 ## 📚 Documentation
 
 ### Command Line Usage
-The application supports powerful command-line scripting:
+The application supports powerful command-line scripting.
+
+> **Filter names** use the category prefix shown in the GUI dropdown. Scaling prefixes are directional: `Upscaler: ` (integer upscalers such as HQ, XBR, Eagle, Scale), `Downscaler: ` (integer downscalers, future), `Resampler: ` (bidirectional arbitrary-ratio kernels such as Bicubic, Lanczos), `Downsampler: ` (downscale-only resamplers such as DPID, SSIM Downscale). Other categories: `Filter: `, `Plane: `, `Quantize: `, `Dither: `, `Blend: `. Pass the full label (prefix included) as the filter argument.
 
 ```bash
 # Basic usage
 ImageResizer.exe load <input> resize <dimensions> <method> save <output>
 
 # Dimension formats
-resize auto "Scale2x"          # Auto-detect from algorithm
-resize 320x240 "Bicubic"       # Specific dimensions  
-resize w128 "HQ 2x"            # Width only (height auto)
-resize h96 "Eagle"             # Height only (width auto)
-resize 200% "XBR 3x"           # Percentage scaling
+resize auto "Upscaler: Scale 2x"          # Auto-detect from algorithm
+resize 320x240 "Resampler: Bicubic"       # Specific dimensions
+resize w128 "Upscaler: HQ 2x"             # Width only (height auto)
+resize h96 "Upscaler: Eagle"              # Height only (width auto)
+resize 200% "Upscaler: XBR 3x"            # Percentage scaling
 
 # Parameter examples
-resize auto "Bicubic(radius=1.5,vbounds=wrap)"
-resize 2x2 "HQ 2x(thresholds=1,repeat=2)"
+resize auto "Resampler: Bicubic(radius=1.5,vbounds=wrap)"
+resize 2x2 "Upscaler: HQ 2x(thresholds=1,repeat=2)"
 ```
 
 ### Supported Parameters

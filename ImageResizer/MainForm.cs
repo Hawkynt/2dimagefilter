@@ -25,6 +25,8 @@ using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using Classes;
@@ -52,6 +54,18 @@ namespace ImageResizer {
     /// The used scripting engine.
     /// </summary>
     private readonly ScriptEngine _scriptEngine = new ScriptEngine();
+
+    // Debounced preview: each relevant change (method, dimensions, OOB, etc.) calls
+    // _SchedulePreview, which restarts the timer; 300 ms after the last change the timer
+    // tick kicks off an async preview render into iwhTargetImage.
+    private System.Windows.Forms.Timer _previewDebounce;
+    private CancellationTokenSource _previewCts;
+
+    // The preview-owned bitmap currently shown in iwhTargetImage, if any. We OWN it and must
+    // dispose it when replacing. Stays null when the target pane displays an engine-owned
+    // bitmap (scriptEngine.GdiTarget) — disposing that would corrupt engine state and crash
+    // the next PictureBox paint via ImageAnimator.CanAnimate(FrameDimensionsList).
+    private Bitmap _previewOwnedTarget;
     #endregion
 
     #region props
@@ -69,6 +83,10 @@ namespace ImageResizer {
         this._TargetImage = null;
         this.iwhSourceImage.Image = value;
         this._CorrectAspectRatioIfNeeded(false);
+        // Intentionally NOT scheduling a preview here. Apply's continuation re-assigns
+        // _SourceImage = scriptEngine.GdiSource which would otherwise fire a spurious preview
+        // that clobbers the authoritative Apply result. Explicit load sites
+        // (_LoadImageFromFileName and SetSource-style callers) schedule their own preview.
       }
     }
 
@@ -86,7 +104,12 @@ namespace ImageResizer {
               this.saveAsToolStripMenuItem.Enabled =
                 this.tssBenchmark.Visible =
                   value != null;
+        // Transitioning to an engine-owned bitmap — dispose any preview-owned bitmap we
+        // were previously showing, but never touch `value` itself (ScriptEngine still owns it).
+        var previouslyOwned = this._previewOwnedTarget;
+        this._previewOwnedTarget = null;
         this.iwhTargetImage.Image = value;
+        previouslyOwned?.Dispose();
       }
     }
 
@@ -162,13 +185,49 @@ namespace ImageResizer {
         this.ofdOpenFile.InitialDirectory =
           Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
 
-      this.chkUseThresholds.Checked = sPixel.AllowThresholds;
+      this.chkUseThresholds.Checked = false;
 
       this._LoadConfigurationSettings();
 
       if (fileToOpenOnStart != null)
         this._LoadImageFromFileName(fileToOpenOnStart);
 
+      // "Tools" menu added in code to avoid touching the generated Designer.cs. Inserted
+      // left of "Help" — that's the conventional place for a Tools menu (File/Edit/View/
+      // ...tools... /Window/Help across Windows apps).
+      var toolsMenu = new ToolStripMenuItem("&Tools");
+      var reduceColorsItem = new ToolStripMenuItem("&Reduce Colours…", null, this._OnReduceColoursClicked);
+      toolsMenu.DropDownItems.Add(reduceColorsItem);
+      var helpIndex = this.msMain.Items.IndexOf(this.helpToolStripMenuItem);
+      if (helpIndex >= 0)
+        this.msMain.Items.Insert(helpIndex, toolsMenu);
+      else
+        this.msMain.Items.Add(toolsMenu);
+
+      // Preview-debounce timer — 300 ms after the last parameter change fires a preview render.
+      this._previewDebounce = new System.Windows.Forms.Timer { Interval = 300 };
+      this._previewDebounce.Tick += this._OnPreviewDebounceTick;
+
+      // Checkboxes that affect the preview output but have no Designer-generated handler.
+      this.chkUseThresholds.CheckedChanged += (s, e) => this._SchedulePreview();
+      this.chkUseCenteredGrid.CheckedChanged += (s, e) => this._SchedulePreview();
+      this.chkKeepAspect.CheckedChanged += (s, e) => this._SchedulePreview();
+      this.cmbHorizontalBPH.SelectedIndexChanged += (s, e) => this._SchedulePreview();
+      this.cmbVerticalBPH.SelectedIndexChanged += (s, e) => this._SchedulePreview();
+    }
+
+    private void _OnReduceColoursClicked(object sender, EventArgs e) {
+      var src = this.iwhSourceImage.Image as System.Drawing.Bitmap
+             ?? (this.iwhSourceImage.Image == null ? null : new System.Drawing.Bitmap(this.iwhSourceImage.Image));
+      if (src == null) {
+        MessageBox.Show(this, "Load a source image first.", "Reduce Colours", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        return;
+      }
+      using (var dlg = new Windows.ReduceColorsWindow(src)) {
+        if (dlg.ShowDialog(this) != DialogResult.OK || dlg.PickedQuantizer == null) return;
+        var command = new Classes.ScriptActions.ReduceColorsCommand(dlg.PickedQuantizer, dlg.PickedDitherer, dlg.PaletteSize);
+        this._ExecuteScriptActions(command);
+      }
     }
 
     #endregion
@@ -204,6 +263,22 @@ namespace ImageResizer {
         return;
       }
 
+      // Giant-target guard: GDI+ refuses bitmaps beyond ~32767 per side, and a 5 GB+ target
+      // often OOMs even with 64-bit VAS. Warn + confirm rather than let it crash mid-render.
+      const int gdiPlusMaxDim = 32767;
+      const long bitmapPixelBudget = 500_000_000L; // ≈ 2 GB ARGB, single allocation
+      if (method.SupportsWidth && method.SupportsHeight
+          && (targetWidth > gdiPlusMaxDim || targetHeight > gdiPlusMaxDim
+              || (long)targetWidth * targetHeight > bitmapPixelBudget)) {
+        var answer = MessageBox.Show(this,
+          $"The requested target size {targetWidth}×{targetHeight} exceeds safe GDI+ limits " +
+          $"(max {gdiPlusMaxDim} per side, ≤ {bitmapPixelBudget / 1_000_000} megapixels total). " +
+          "Continuing will very likely run out of memory or fail inside GDI+. Proceed anyway?",
+          "Very large target",
+          MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+        if (answer != DialogResult.Yes) return;
+      }
+
       var command = new ResizeCommand(applyToTarget, method, targetWidth, targetHeight, 0, maintainAspect, horizontalBph, verticalBph, repetitionCount, useThresholds, useCenteredGrid, radius);
 
       this._ExecuteScriptActions(command);
@@ -216,69 +291,262 @@ namespace ImageResizer {
     private void _ExecuteScriptActions(params IScriptAction[] commands) {
       Contract.Requires(commands != null);
 
+      // Any in-flight preview would clobber the authoritative result on completion; kill it.
+      this._previewDebounce?.Stop();
+      this._previewCts?.Cancel();
+
+      // Detach the target PictureBox from any bitmap BEFORE kicking off the Async work.
+      // ScriptEngine.TargetImage setter disposes its cached _gdiTarget as part of the
+      // compute; if the PictureBox still references that bitmap, a WM_PAINT arriving
+      // mid-dispose crashes inside ImageAnimator.CanAnimate → FrameDimensionsList.
+      // Route through our own setter so any preview-owned bitmap is cleaned up too.
+      this._TargetImage = null;
+
       // tell the user that we're busy
       this.msMain.Enabled =
         this.tlpMainLayout.Enabled =
           !(this.tssBusy.Visible = true);
+
+      // Capture current source/effective-target dims on the UI thread so the post-failure
+      // classifier can annotate generic "Invalid parameter" GDI+ errors with something
+      // actionable ("target ≥ 32767 px — exceeds GDI+ limit").
+      var srcBitmap = this._scriptEngine.GdiSource;
+      var srcW = srcBitmap?.Width ?? 0;
+      var srcH = srcBitmap?.Height ?? 0;
 
       this.Async(() => {
         // filter image
         var stopwatch = new Stopwatch();
         stopwatch.Restart();
 
-        foreach (var command in commands)
-          this._scriptEngine.ExecuteAction(command);
+        Exception failure = null;
+        try {
+          foreach (var command in commands)
+            this._scriptEngine.ExecuteAction(command);
+        } catch (OutOfMemoryException ex) {
+          failure = ex;
+        } catch (Exception ex) {
+          failure = ex;
+        }
 
         var gdiSource = this._scriptEngine.GdiSource;
         var gdiTarget = this._scriptEngine.GdiTarget;
         stopwatch.Stop();
 
         this.SafelyInvoke(() => {
-          this._SourceImage = gdiSource;
-          this._TargetImage = gdiTarget;
-
-          this.tssBenchmark.Text = stopwatch.ElapsedMilliseconds + "ms";
-          this.tssBenchmark.Visible = true;
-
-          // let the user know, that we're no longer busy
+          // Always restore the "busy" state so the UI isn't dead-locked on failure.
           this.msMain.Enabled =
             this.tlpMainLayout.Enabled =
               !(this.tssBusy.Visible = false);
-
           this.Enabled = true;
+
+          if (failure != null) {
+            var unwrapped = _Unwrap(failure);
+            var tag = _ClassifyResizeFailure(unwrapped, srcW, srcH);
+            this.iwhTargetImage.StatusText = "Resize failed — " + tag;
+            MessageBox.Show(this, tag, "Resize failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+          }
+
+          this._SourceImage = gdiSource;
+          this._TargetImage = gdiTarget;
+          this.iwhTargetImage.StatusText = null; // explicit apply → no longer a "Preview"
+          // Preview forces Zoom to fit the target panel; explicit Apply restores the user's preference.
+          if (Config.TargetSizeMode.HasValue)
+            this.iwhTargetImage.SizeMode = Config.TargetSizeMode.Value;
+
+          this.tssBenchmark.Text = stopwatch.ElapsedMilliseconds + "ms";
+          this.tssBenchmark.Visible = true;
         });
       });
     }
 
     /// <summary>
-    /// Refreshes the kernel chart if necessary or hides it when not applicable.
+    /// Refreshes the kernel chart if the currently selected manipulator is an upstream
+    /// separable-kernel resampler; hides it otherwise.
     /// </summary>
     private void _RefreshKernelChart() {
-      var method = this.cmbResizeMethod.SelectedValue as IImageManipulator;
-
       var chart = this.chtKernel;
       var dataPointCollection = chart.Series[0].Points;
       dataPointCollection.Clear();
       chart.Visible = false;
 
-      var kernelBasedResampler = method as Resampler;
-      var kernelBasedRadiusResampler = method as RadiusResampler;
-      var upstreamResampler = method as BitmapResamplerAdapter;
-      if (kernelBasedResampler == null && kernelBasedRadiusResampler == null && (upstreamResampler == null || upstreamResampler.KernelInfo == null))
+      if (!(this.cmbResizeMethod.SelectedValue is BitmapResamplerAdapter upstream))
+        return;
+      if (upstream.EvaluateKernel == null || upstream.KernelRadius <= 0)
         return;
 
-      Imager.Classes.Kernels.FixedRadiusKernelInfo info;
-      if (kernelBasedResampler != null)
-        info = kernelBasedResampler.GetKernelMethodInfo();
-      else if (kernelBasedRadiusResampler != null)
-        info = kernelBasedRadiusResampler.GetKernelMethodInfo((float)this.nudRadius.Value);
-      else
-        info = upstreamResampler.KernelInfo.Value;
-      for (var x = -info.KernelRadius; x <= info.KernelRadius; x += 0.001f)
-        dataPointCollection.AddXY(Math.Round(x, 3), Math.Round(info.Kernel(x), 3));
-      chart.ChartAreas[0].AxisX.Minimum = -Math.Round(info.KernelRadius, 1);
-      chart.ChartAreas[0].AxisX.Maximum = Math.Round(info.KernelRadius, 1);
+      var radius = upstream.KernelRadius;
+      var kernel = upstream.EvaluateKernel;
+      for (var x = (float)-radius; x <= radius; x += 0.001f)
+        dataPointCollection.AddXY(Math.Round(x, 3), Math.Round(kernel(x), 3));
+      chart.ChartAreas[0].AxisX.Minimum = -radius;
+      chart.ChartAreas[0].AxisX.Maximum = radius;
       chart.Visible = true;
+    }
+
+    /// <summary>
+    /// Maps an exception from <see cref="_ExecuteScriptActions"/> to a human-actionable message.
+    /// The GDI+ <c>ArgumentException("Ungültiger Parameter")</c> in particular is a black-box
+    /// error from the native library — usually "you asked for a bitmap larger than I can make"
+    /// (max 32767 per side, or the address space can't hold it). This classifier inspects the
+    /// source dimensions + failure type + stack trace to emit something useful instead.
+    /// </summary>
+    private static string _ClassifyResizeFailure(Exception ex, int sourceWidth, int sourceHeight) {
+      const int gdiPlusMaxDim = 32767;
+      if (ex is OutOfMemoryException)
+        return $"Out of memory — the target bitmap is too large for GDI+ / your address space.\nSource was {sourceWidth}×{sourceHeight}. Try a smaller scale or start from a downsampled source.";
+
+      var isGdi = ex.StackTrace != null && ex.StackTrace.IndexOf("System.Drawing", StringComparison.Ordinal) >= 0;
+      if (isGdi && (ex is ArgumentException || ex is System.Runtime.InteropServices.ExternalException)) {
+        var guess = string.Empty;
+        if (sourceWidth >= gdiPlusMaxDim / 2 || sourceHeight >= gdiPlusMaxDim / 2)
+          guess = $" Source is {sourceWidth}×{sourceHeight} — most rescalers double or triple it, which pushes past GDI+'s {gdiPlusMaxDim}-px-per-side limit.";
+        return "GDI+ rejected the target bitmap — typically the requested dimensions exceed " +
+               gdiPlusMaxDim + " pixels per side or the total pixel count overflows." + guess +
+               "\n(Original error: " + ex.GetType().Name + ": " + ex.Message + ")";
+      }
+
+      return ex.GetType().Name + ": " + ex.Message;
+    }
+
+    /// <summary>
+    /// Peels <see cref="System.Reflection.TargetInvocationException"/> and
+    /// <see cref="AggregateException"/> wrappers so the error UI shows the useful inner
+    /// exception (e.g. <c>OutOfMemoryException</c>, <c>ArgumentException</c> from GDI+)
+    /// instead of the generic "TargetInvocationException" envelope.
+    /// </summary>
+    private static Exception _Unwrap(Exception ex) {
+      for (var i = 0; i < 8 && ex != null; ++i) {
+        if (ex is System.Reflection.TargetInvocationException && ex.InnerException != null) {
+          ex = ex.InnerException;
+          continue;
+        }
+        if (ex is AggregateException agg && agg.InnerException != null) {
+          ex = agg.InnerException;
+          continue;
+        }
+        break;
+      }
+      return ex;
+    }
+
+    /// <summary>
+    /// (Re)starts the preview debounce. Any call resets the timer to 300 ms. Called from
+    /// the method dropdown + the dimension/OOB change handlers.
+    /// </summary>
+    private void _SchedulePreview() {
+      if (this._previewDebounce == null) return;
+      this._previewDebounce.Stop();
+      this._previewDebounce.Start();
+    }
+
+    private void _OnPreviewDebounceTick(object sender, EventArgs e) {
+      this._previewDebounce.Stop();
+      this._RenderPreviewAsync();
+    }
+
+    /// <summary>
+    /// Maximum width or height of the bitmap fed into a preview. Anything larger is
+    /// bicubic-downscaled before running the method so a 12800×12800 source scaled 4x doesn't
+    /// allocate a 10 GB target and OOM. Applied only to previews — explicit Apply still uses
+    /// the full-resolution source.
+    /// </summary>
+    private const int _PREVIEW_MAX_SOURCE_DIM = 1024;
+
+    /// <summary>
+    /// Render an auto-preview into <c>iwhTargetImage</c> using the currently selected method
+    /// + dimensions, without disabling the rest of the UI and without mutating the ScriptEngine
+    /// state (so an explicit Apply still works as before). Supersedes any in-flight preview.
+    /// </summary>
+    private void _RenderPreviewAsync() {
+      this._previewCts?.Cancel();
+      var cts = this._previewCts = new CancellationTokenSource();
+      var token = cts.Token;
+
+      var method = this.cmbResizeMethod.SelectedValue as IImageManipulator;
+      var fullSource = this._scriptEngine.SourceImage;
+      if (method == null || fullSource == null) return;
+
+      // Snapshot UI state up-front — everything below runs on a worker thread.
+      var targetWidth = (word)this.nudWidth.Value;
+      var targetHeight = (word)this.nudHeight.Value;
+      var maintainAspect = this.chkKeepAspect.Checked;
+      var useThresholds = this.chkUseThresholds.Checked;
+      var useCenteredGrid = this.chkUseCenteredGrid.Checked;
+      var repetitionCount = (byte)this.nudRepetitionCount.Value;
+      var horizontalBph = (OutOfBoundsMode)this.cmbHorizontalBPH.SelectedItem;
+      var verticalBph = (OutOfBoundsMode)this.cmbVerticalBPH.SelectedItem;
+      var radius = (float)this.nudRadius.Value;
+
+      if (targetWidth <= 0 && method.SupportsWidth) return;
+      if (targetHeight <= 0 && method.SupportsHeight) return;
+
+      this.iwhTargetImage.StatusText = "Preview — rendering…";
+
+      Task.Run(() => {
+        cImage previewSource = fullSource;
+        word previewTargetWidth = targetWidth;
+        word previewTargetHeight = targetHeight;
+        string sizeNote = null;
+        try {
+          // Guard 1: shrink giant sources so every method/scale stays in a sane memory budget.
+          if (fullSource.Width > _PREVIEW_MAX_SOURCE_DIM || fullSource.Height > _PREVIEW_MAX_SOURCE_DIM) {
+            var ratio = (double)_PREVIEW_MAX_SOURCE_DIM / Math.Max(fullSource.Width, fullSource.Height);
+            using (var full = fullSource.ToBitmap())
+            using (var shrunk = new Bitmap((int)(full.Width * ratio), (int)(full.Height * ratio), System.Drawing.Imaging.PixelFormat.Format32bppArgb)) {
+              using (var g = Graphics.FromImage(shrunk)) {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                g.DrawImage(full, 0, 0, shrunk.Width, shrunk.Height);
+              }
+              previewSource = cImage.FromBitmap(shrunk);
+            }
+            // Scale the requested target dims by the same ratio so the preview preserves aspect.
+            previewTargetWidth = (word)Math.Max(1, Math.Round(targetWidth * ratio));
+            previewTargetHeight = (word)Math.Max(1, Math.Round(targetHeight * ratio));
+            sizeNote = " — downsized from " + fullSource.Width + "×" + fullSource.Height;
+          }
+
+          // Guard 2: refuse previews whose target would still be obviously too big.
+          const long pixelBudget = 16_000_000L; // ~64 MB ARGB
+          if ((long)previewTargetWidth * previewTargetHeight > pixelBudget) {
+            var target = previewTargetWidth + "×" + previewTargetHeight;
+            this.SafelyInvoke(() => { this.iwhTargetImage.StatusText = "Preview skipped — target " + target + " too large"; });
+            return;
+          }
+
+          var command = new ResizeCommand(false, method, previewTargetWidth, previewTargetHeight, 0, maintainAspect, horizontalBph, verticalBph, repetitionCount, useThresholds, useCenteredGrid, radius) {
+            SourceImage = previewSource,
+            TargetImage = null,
+          };
+          var sw = Stopwatch.StartNew();
+          command.Execute();
+          sw.Stop();
+          if (token.IsCancellationRequested) return;
+          var bmp = command.TargetImage?.ToBitmap();
+          var note = sizeNote;
+          this.SafelyInvoke(() => {
+            if (token.IsCancellationRequested) { bmp?.Dispose(); return; }
+            // Only dispose what we previously allocated — never touch engine-owned
+            // bitmaps that might still be referenced by ScriptEngine.GdiTarget.
+            var previouslyOwned = this._previewOwnedTarget;
+            this._previewOwnedTarget = bmp;
+            // Zoom so the full preview is visible regardless of how much larger than the panel
+            // it is; explicit Apply restores the user's configured SizeMode.
+            this.iwhTargetImage.SizeMode = PictureBoxSizeMode.Zoom;
+            this.iwhTargetImage.Image = bmp;
+            previouslyOwned?.Dispose();
+            this.iwhTargetImage.StatusText = "Preview (" + sw.ElapsedMilliseconds + " ms)" + (note ?? string.Empty);
+          });
+        } catch (OutOfMemoryException) {
+          this.SafelyInvoke(() => { this.iwhTargetImage.StatusText = "Preview — out of memory (source or target too large)"; });
+        } catch (Exception ex) {
+          var msg = (ex.GetType().Name + ": " + ex.Message).Replace('\n', ' ').Replace('\r', ' ');
+          if (msg.Length > 140) msg = msg.Substring(0, 137) + "…";
+          this.SafelyInvoke(() => { this.iwhTargetImage.StatusText = "Preview — " + msg; });
+        }
+      }, token);
     }
 
     /// <summary>
@@ -291,6 +559,9 @@ namespace ImageResizer {
         scriptEngine.ExecuteAction(new LoadFileCommand(fileName));
         this._SourceImage = scriptEngine.GdiSource;
         this._lastSaveFileName = null;
+        // Fresh image → kick off the auto-preview so the target pane reflects the
+        // currently selected method without waiting for the user to touch anything.
+        this._SchedulePreview();
       } catch (Exception exception) {
         MessageBox.Show(string.Format(Resources.txCouldNotLoadImage, fileName, exception.Message), Resources.ttCouldNotLoadImage, MessageBoxButtons.OK, MessageBoxIcon.Error);
       }
@@ -339,47 +610,30 @@ namespace ImageResizer {
     /// <returns></returns>
     internal static cImage FilterImage(cImage source, IImageManipulator method, ushort targetWidth, ushort targetHeight, OutOfBoundsMode horizontalBh, OutOfBoundsMode verticalBh, bool useThresholds, bool useCenteredGrid, byte repetitionCount, float radius) {
       Contract.Requires(source != null);
-      sPixel.AllowThresholds = useThresholds;
-      source.HorizontalOutOfBoundsMode = horizontalBh;
-      source.VerticalOutOfBoundsMode = verticalBh;
+      // useThresholds is vestigial (consumed by the retired local XBR/XBRz pipeline). OOB modes + useCenteredGrid
+      // are threaded into upstream resamplers below.
 
       cImage result = null;
-      var scaler = method as AScaler;
       var interpolator = method as Interpolator;
       var planeExtractor = method as PlaneExtractor;
-      var resampler = method as Resampler;
-      var radiusResampler = method as RadiusResampler;
       var bitmapFixed = method as BitmapFixedAdapter;
       var bitmapResampler = method as BitmapResamplerAdapter;
 
-      if (scaler != null) {
-        result = source;
-        for (var i = 0; i < repetitionCount; i++)
-          result = scaler.Apply(result);
-      } else if (bitmapFixed != null)
+      if (bitmapFixed != null) {
         result = bitmapFixed.Apply(source);
-      else if (bitmapResampler != null)
+      } else if (bitmapResampler != null) {
         if (targetWidth <= 0 || targetHeight <= 0)
           MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
         else
-          result = bitmapResampler.Apply(source, targetWidth, targetHeight);
-      else if (interpolator != null)
+          result = bitmapResampler.Apply(source, targetWidth, targetHeight, horizontalBh, verticalBh, Color.Transparent, useCenteredGrid);
+      } else if (interpolator != null) {
         if (targetWidth <= 0 || targetHeight <= 0)
           MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
         else
           result = interpolator.Apply(source, targetWidth, targetHeight);
-      else if (planeExtractor != null)
+      } else if (planeExtractor != null) {
         result = planeExtractor.Apply(source);
-      else if (resampler != null)
-        if (targetWidth <= 0 || targetHeight <= 0)
-          MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
-        else
-          result = resampler.Apply(source, targetWidth, targetHeight, useCenteredGrid);
-      else if (radiusResampler != null)
-        if (targetWidth <= 0 || targetHeight <= 0)
-          MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
-        else
-          result = radiusResampler.Apply(source, targetWidth, targetHeight, radius, useCenteredGrid);
+      }
 
       return result;
     }

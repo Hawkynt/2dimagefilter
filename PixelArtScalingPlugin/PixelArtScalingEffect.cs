@@ -84,11 +84,13 @@ namespace PixelArtScaling {
         var targetRect = entry.ComputeTargetRectangle(sourceRect, userW, userH);
 
         var input = cImage.FromBitmap(sourceSurface.CreateAliasedBitmap());
-        if (_OobAppliesToEntry(entry)) {
-          input.HorizontalOutOfBoundsMode = token.HorizontalOobMode;
-          input.VerticalOutOfBoundsMode = token.VerticalOobMode;
-        }
-        var filtered = entry.Apply(input, sourceRect, userW, userH);
+        var options = new ResampleOptions(
+          token.HorizontalOobMode,
+          token.VerticalOobMode,
+          token.CanvasColor,
+          token.UseCenteredGrid
+        );
+        var filtered = entry.Apply(input, sourceRect, userW, userH, options);
         var newSurface = _CreateSurfaceFromImage(filtered, targetRect);
 
         var old = this._filteredSurface;
@@ -151,7 +153,8 @@ namespace PixelArtScaling {
         token.TargetWidth, "x", token.TargetHeight, "|",
         token.LockAspectRatio ? "1" : "0", "|",
         (int)token.HorizontalOobMode, "/", (int)token.VerticalOobMode, "|",
-        token.OobColor.ToArgb().ToString("X8"), "|",
+        token.CanvasColor.ToArgb().ToString("X8"), "|",
+        token.UseCenteredGrid ? "1" : "0", "|",
         src.Width, "x", src.Height
       );
     }

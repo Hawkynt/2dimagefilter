@@ -19,9 +19,7 @@
  */
 #endregion
 using Classes.ImageManipulators;
-using Classes.ImageManipulators.Scalers;
 using Imager;
-using Imager.Classes;
 using Imager.Interface;
 using Imager.Pipelines;
 using System.Collections.Generic;
@@ -32,91 +30,41 @@ namespace Classes {
 
     public static readonly KeyValuePair<string, IImageManipulator>[] MANIPULATORS = new KeyValuePair<string, IImageManipulator>[0]
 
-    #region add interpolators
+    #region add GDI+ resamplers (system-API passthrough — comparison baseline, not a library algorithm)
 .Concat(
     from p in cImage.INTERPOLATORS
-    select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p) + " <GDI+>", new Interpolator(p))
+    select new KeyValuePair<string, IImageManipulator>("Resampler: " + ReflectionUtils.GetDisplayNameForEnumValue(p) + " <GDI+>", new Interpolator(p))
     )
     #endregion
 
-    #region add resampler
-.Concat(
-    from p in ReflectionUtils.GetEnumValues<KernelType>()
-    select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p), new Resampler(p))
-    )
-.Concat(
-    from p in ReflectionUtils.GetEnumValues<WindowType>()
-    select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p), new RadiusResampler(p))
-    )
+    // Local kernel-based Resampler(KernelType) and RadiusResampler(WindowType) blocks removed —
+    // their entries are now provided by the upstream resampler block below (via UpstreamPipeline.Resamplers()).
 
-    #endregion
+    // Local PixelScaler / XbrScaler / XbrzScaler / NqScaler blocks removed —
+    // their entries are provided by the upstream rescaler block below.
 
-    #region add pixel resizer
-.Concat(
-      from p in ReflectionUtils.GetEnumValues<PixelScalerType>()
-      select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p), new PixelScaler(p))
-    )
-    #endregion
+    // Local plane-extractor block removed — upstream Plane: … entries cover
+    // RGB/colour-space projections via ColorProcessing.Spaces (Oklab/Lab/HSL/HSV/HWB/YCbCr/YUV/CMYK/LCh).
+    // The six custom sPixel-specific extractors (u, v, Brightness, ExtractColors, ExtractDeltas, HueColored)
+    // have been dropped; they were not reachable from the plugin and were redundant / non-standard on the exe side.
 
-    #region add xbr resizer
+    #region add upstream rescalers (fixed factor, from UpstreamPipeline) — one entry per (algorithm, supported scale)
 .Concat(
-      from p in ReflectionUtils.GetEnumValues<XbrScalerType>()
-      where p!=XbrScalerType.Xbr5
-      select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p) + " <NoBlend>", new XbrScaler(p, false))
-)
-.Concat(
-      from p in ReflectionUtils.GetEnumValues<XbrScalerType>()
-      select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p), new XbrScaler(p, true))
-)
-    #endregion
-
-    #region add xbrz resizer
-.Concat(
-      from p in ReflectionUtils.GetEnumValues<XbrzScalerType>()
-      select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p), new XbrzScaler(p))
-)
-    #endregion
-
-    #region add nq resizer
-.Concat(
-      from p in ReflectionUtils.GetEnumValues<NqScalerType>()
-      from m in ReflectionUtils.GetEnumValues<NqMode>()
-      select new KeyValuePair<string, IImageManipulator>(ReflectionUtils.GetDisplayNameForEnumValue(p) + (m == NqMode.Normal ? string.Empty : " " + ReflectionUtils.GetDisplayNameForEnumValue(m)), new NqScaler(p, m))
-    )
-    #endregion
-
-    #region plane extractors (local-only; upstream-equivalent ones live under "Plane:" prefix)
-.Concat(
-    new[] {
-      new KeyValuePair<string, IImageManipulator>("Red",new PlaneExtractor(c=>c.Red,"Raw red channel (gamma-encoded sRGB).")),
-      new KeyValuePair<string, IImageManipulator>("Green",new PlaneExtractor(c=>c.Green,"Raw green channel (gamma-encoded sRGB).")),
-      new KeyValuePair<string, IImageManipulator>("Blue",new PlaneExtractor(c=>c.Blue,"Raw blue channel (gamma-encoded sRGB).")),
-      new KeyValuePair<string, IImageManipulator>("Alpha",new PlaneExtractor(c=>c.Alpha,"Returns only the alpha channel of the source image.")),
-      new KeyValuePair<string, IImageManipulator>("u",new PlaneExtractor(c=>c.u,"Alternate chroma-U (sPixel-specific positive-sum form, no upstream equivalent).")),
-      new KeyValuePair<string, IImageManipulator>("v",new PlaneExtractor(c=>c.v,"Alternate chroma-V (sPixel-specific positive-sum form, no upstream equivalent).")),
-      new KeyValuePair<string, IImageManipulator>("Hue Colored",new PlaneExtractor(c=>c.HueColored,"Returns the colorized hue channel of the source image.")),
-      new KeyValuePair<string, IImageManipulator>("Brightness",new PlaneExtractor(c=>c.Brightness,"Brightness as 3R+3G+2B / 8 — non-standard formula, no upstream equivalent.")),
-      new KeyValuePair<string, IImageManipulator>("ExtractColors",new PlaneExtractor(c=>c.ExtractColors,"Tries to extract the full saturated colors of the source image.")),
-      new KeyValuePair<string, IImageManipulator>("ExtractDeltas",new PlaneExtractor(c=>c.ExtractDeltas,"The difference between the original source image and the hue-colored result.")),
-    }
-    )
-    #endregion
-
-    #region add upstream pixel scalers (fixed factor, from UpstreamPipeline) — one entry per (algorithm, supported scale)
-.Concat(
-    from s in UpstreamPipeline.PixelScalers()
+    from s in UpstreamPipeline.Rescalers()
     from scale in s.SupportedScales
     let multi = s.SupportedScales.Length > 1
     let suffix = multi ? " " + UpstreamPipeline.FormatScaleSuffix(scale) : string.Empty
     let scaleX = (int)scale.X
     let scaleY = (int)scale.Y
     let captured = s
+    let isFilter = scaleX == 1 && scaleY == 1
     select new KeyValuePair<string, IImageManipulator>(
-      "Scaler: " + s.Name + suffix,
+      UpstreamPipeline.ClassifyRescaler(s) + ": " + s.Name + suffix,
       new BitmapFixedAdapter(
         multi ? s.Description + " — " + UpstreamPipeline.FormatScaleSuffix(scale) + " variant" : s.Description,
-        changesResolution: true,
-        b => captured.Apply(b, b.Width * scaleX, b.Height * scaleY)
+        changesResolution: !isFilter,
+        supportsThresholds: true,
+        (b, useThresholds) => captured.Apply(b, b.Width * scaleX, b.Height * scaleY, useThresholds)
       )
     )
     )
@@ -126,8 +74,8 @@ namespace Classes {
 .Concat(
     from s in UpstreamPipeline.Resamplers()
     select new KeyValuePair<string, IImageManipulator>(
-      "Resampler: " + s.Name,
-      new BitmapResamplerAdapter(s.Description, s.Resample, s.Kernel)
+      UpstreamPipeline.ClassifyResampler(s) + ": " + s.Name,
+      new BitmapResamplerAdapter(s.Description, s.Resample, s.KernelRadius, s.EvaluateKernel)
     )
     )
     #endregion
@@ -151,6 +99,15 @@ namespace Classes {
     )
     )
     #endregion
+
+    // Pure "Quantize: …" entries dropped — palette reduction without a ditherer posterises.
+    //
+    // "Blend: …" entries dropped — blend modes are inherently two-operand (background ⊕ overlay).
+    // Applied to a single image with overlay = source they collapse to per-channel tone maps
+    // (Multiply → x², Screen → 2x-x², Difference → 0, …) which isn't useful image processing.
+    //
+    // "Dither: …" entries dropped — dithering without explicit quantizer+palette-size control is
+    // meaningless; the user-facing path is the Tools → Reduce Colours dialog.
 
 .OrderBy(kv => kv.Key, System.StringComparer.OrdinalIgnoreCase)
 .ToArray();

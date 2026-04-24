@@ -19,125 +19,23 @@
  */
 #endregion
 
-using System;
-using System.Collections.Generic;
-
 namespace Imager.Interface {
   /// <summary>
-  /// This tells us how to handle read requests to pixels which are out of image bounds.
+  /// How to treat pixels read outside the image bounds.
+  /// Retained for the exe script serializer + plugin UI; not currently threaded through any scaler
+  /// (a previous iteration's local XBR/XBRz/resampler pipeline consumed these; post-migration those
+  /// paths use upstream Bitmap-based scalers that do their own edge handling).
   /// </summary>
   public enum OutOfBoundsMode {
-    /// <summary>
-    /// aaa abcde eee
-    /// </summary>
+    /// <summary>aaa abcde eee</summary>
     ConstantExtension = 0,
-    /// <summary>
-    /// cba abcde edc
-    /// </summary>
+    /// <summary>cba abcde edc</summary>
     HalfSampleSymmetric,
-    /// <summary>
-    /// dcb abcde dcb
-    /// </summary>
+    /// <summary>dcb abcde dcb</summary>
     WholeSampleSymmetric,
-    /// <summary>
-    /// cde abcde abc
-    /// </summary>
+    /// <summary>cde abcde abc</summary>
     WrapAround,
-    /// <summary>
-    /// ttt abcde ttt
-    /// </summary>
+    /// <summary>ttt abcde ttt</summary>
     Transparent,
-  }
-
-  public static class OutOfBoundsUtils {
-
-    public delegate int OutOfBoundsHandler(int index, int count, bool isUnderflow);
-
-    private static readonly IReadOnlyDictionary<OutOfBoundsMode, OutOfBoundsHandler> _OUT_OF_BOUNDS_HANDLERS = new Dictionary<OutOfBoundsMode, OutOfBoundsHandler> {
-      {OutOfBoundsMode.ConstantExtension,_ConstantExtension},
-      {OutOfBoundsMode.WrapAround,_WrapAround},
-      {OutOfBoundsMode.HalfSampleSymmetric,_HalfSampleSymmetric},
-      {OutOfBoundsMode.WholeSampleSymmetric,_WholeSampleSymmetric},
-      {OutOfBoundsMode.Transparent,_ConstantExtension},
-    };
-
-    #region out of bounds handlers
-    private static int _ConstantExtension(int index, int count, bool isUnderflow) {
-      return isUnderflow ? 0 : count - 1;
-    }
-
-    private static int _WrapAround(int index, int count, bool isUnderflow) {
-      /*
-        c:2
-          -3 -2 -1  0 +1 +2 +3
-           1  0  1  0  1  0  1
-
-        c:3
-          -3 -2 -1  0 +1 +2 +3
-           0  1  2  0  1  2  0
-          */
-
-      if (!isUnderflow)
-        return index % count;
-      /*
-      // Loop-version
-      if (overflow)
-        while(true)
-          if(index>=count)
-            index-=count;
-          else
-            return(index);
-      */
-
-      return (count - -index % count) % count;
-
-      /*
-      // Loop-Version
-      while (index < 0)
-        index += count;
-      return (index);
-      */
-    }
-
-    private static int _HalfSampleSymmetric(int index, int count, bool isUnderflow) {
-
-      // FIXME: calculate this without a loop
-      while (true) {
-        if (index < 0)
-          index = -1 - index;
-        else if (index >= count)
-          index = 2 * count - 1 - index;
-        else
-          return index;
-      }
-    }
-
-    private static int _WholeSampleSymmetric(int index, int count, bool isUnderflow) {
-
-      // FIXME: calculate this without a loop
-      while (true) {
-        if (index < 0)
-          index = -index;
-        else if (index >= count)
-          index = 2 * count - 2 - index;
-        else
-          return index;
-      }
-    }
-    #endregion
-
-    /// <summary>
-    /// Gets the out of bounds handler or crashes.
-    /// </summary>
-    /// <param name="mode">The mode.</param>
-    /// <returns></returns>
-    public static OutOfBoundsHandler GetHandlerOrCrash(OutOfBoundsMode mode) {
-      OutOfBoundsHandler result;
-      if (_OUT_OF_BOUNDS_HANDLERS.TryGetValue(mode, out result))
-        return result;
-
-      throw new NotSupportedException("The OutOfBoundsMode " + mode + " is not supported");
-    }
-
   }
 }

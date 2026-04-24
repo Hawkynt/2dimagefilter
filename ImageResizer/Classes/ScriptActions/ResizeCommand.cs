@@ -57,37 +57,24 @@ namespace Classes.ScriptActions {
         }
       }
 
-      sPixel.AllowThresholds = this.UseThresholds;
-      source.HorizontalOutOfBoundsMode = this.HorizontalBph;
-      source.VerticalOutOfBoundsMode = this.VerticalBph;
+      // UseThresholds + HorizontalBph/VerticalBph retained in the serialization contract but no longer
+      // thread any scaler behaviour after the local sPixel-based XBR/XBRz/NQ migration.
 
       cImage result = null;
       var method = this.Manipulator;
-      var scaler = method as AScaler;
       var interpolator = method as Interpolator;
       var planeExtractor = method as PlaneExtractor;
-      var resampler = method as Resampler;
-      var radiusResampler = method as RadiusResampler;
       var bitmapFixed = method as BitmapFixedAdapter;
       var bitmapResampler = method as BitmapResamplerAdapter;
 
-      if (scaler != null) {
-        result = source;
-        for (var i = 0; i < this.Count; i++)
-          result = scaler.Apply(result);
-      } else if (bitmapFixed != null) {
-        result = bitmapFixed.Apply(source);
+      if (bitmapFixed != null) {
+        result = bitmapFixed.Apply(source, this.UseThresholds);
       } else if (bitmapResampler != null) {
-        result = bitmapResampler.Apply(source, width, height);
-      } else {
-        if (interpolator != null)
-          result = interpolator.Apply(source, width, height);
-        else if (planeExtractor != null)
-          result = planeExtractor.Apply(source);
-        else if (resampler != null)
-          result = resampler.Apply(source, width, height, this.UseCenteredGrid);
-        else if (radiusResampler != null)
-          result = radiusResampler.Apply(source, width, height, this.Radius, this.UseCenteredGrid);
+        result = bitmapResampler.Apply(source, width, height, this.HorizontalBph, this.VerticalBph, System.Drawing.Color.Transparent, this.UseCenteredGrid);
+      } else if (interpolator != null) {
+        result = interpolator.Apply(source, width, height);
+      } else if (planeExtractor != null) {
+        result = planeExtractor.Apply(source);
       }
 
       this.TargetImage = result;
