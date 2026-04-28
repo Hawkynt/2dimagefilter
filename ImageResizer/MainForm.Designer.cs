@@ -10,8 +10,16 @@
     /// </summary>
     /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
     protected override void Dispose(bool disposing) {
-      if (disposing && (components != null)) {
-        components.Dispose();
+      if (disposing) {
+        // Track-C: detach the source PictureBox FIRST so a stray WM_PAINT can't hit the bitmap
+        // while we're disposing every master in the pool. Same detach-then-dispose pattern the
+        // cImage-removal milestone established for engine-owned bitmaps.
+        if (this.iwhSourceImage != null)
+          this.iwhSourceImage.Image = null;
+        this._masterPool?.Dispose();
+
+        if (components != null)
+          components.Dispose();
       }
       base.Dispose(disposing);
     }
@@ -58,10 +66,19 @@
       this.chkUseThresholds = new System.Windows.Forms.CheckBox();
       this.cmbVerticalBPH = new System.Windows.Forms.ComboBox();
       this.cmbHorizontalBPH = new System.Windows.Forms.ComboBox();
+      this.pnCanvasColor = new System.Windows.Forms.Panel();
+      this.lblCanvasColor = new System.Windows.Forms.Label();
       this.chkKeepAspect = new System.Windows.Forms.CheckBox();
       this.nudWidth = new System.Windows.Forms.NumericUpDown();
       this.nudHeight = new System.Windows.Forms.NumericUpDown();
+      this.btnScale2x = new System.Windows.Forms.Button();
+      this.btnScale3x = new System.Windows.Forms.Button();
+      this.btnScale4x = new System.Windows.Forms.Button();
+      this.btnScale5x = new System.Windows.Forms.Button();
+      this.btnScale6x = new System.Windows.Forms.Button();
+      this.btnScale10x = new System.Windows.Forms.Button();
       this.cmbResizeMethod = new System.Windows.Forms.ComboBox();
+      this.pgManipulatorParameters = new System.Windows.Forms.PropertyGrid();
       this.txtDescription = new System.Windows.Forms.TextBox();
       this.msMain = new System.Windows.Forms.MenuStrip();
       this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -368,6 +385,8 @@
       gbBorderPixelHandling.Controls.Add(this.cmbHorizontalBPH);
       gbBorderPixelHandling.Controls.Add(label5);
       gbBorderPixelHandling.Controls.Add(label4);
+      gbBorderPixelHandling.Controls.Add(this.lblCanvasColor);
+      gbBorderPixelHandling.Controls.Add(this.pnCanvasColor);
       gbBorderPixelHandling.Dock = System.Windows.Forms.DockStyle.Top;
       gbBorderPixelHandling.Location = new System.Drawing.Point(0, 199);
       gbBorderPixelHandling.Name = "gbBorderPixelHandling";
@@ -409,6 +428,29 @@
       this.cmbHorizontalBPH.Name = "cmbHorizontalBPH";
       this.cmbHorizontalBPH.Size = new System.Drawing.Size(161, 21);
       this.cmbHorizontalBPH.TabIndex = 1;
+      //
+      // lblCanvasColor
+      //
+      this.lblCanvasColor.AutoSize = true;
+      this.lblCanvasColor.Location = new System.Drawing.Point(6, 76);
+      this.lblCanvasColor.Name = "lblCanvasColor";
+      this.lblCanvasColor.Size = new System.Drawing.Size(46, 13);
+      this.lblCanvasColor.TabIndex = 4;
+      this.lblCanvasColor.Text = "Canvas:";
+      this.lblCanvasColor.Visible = false;
+      //
+      // pnCanvasColor
+      //
+      this.pnCanvasColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+      this.pnCanvasColor.Cursor = System.Windows.Forms.Cursors.Hand;
+      this.pnCanvasColor.Location = new System.Drawing.Point(90, 73);
+      this.pnCanvasColor.Name = "pnCanvasColor";
+      this.pnCanvasColor.Size = new System.Drawing.Size(40, 20);
+      this.pnCanvasColor.TabIndex = 5;
+      this.pnCanvasColor.Visible = false;
+      this.pnCanvasColor.Paint += new System.Windows.Forms.PaintEventHandler(this.pnCanvasColor_Paint);
+      this.pnCanvasColor.Click += new System.EventHandler(this.pnCanvasColor_Click);
+      this.pnCanvasColor.DoubleClick += new System.EventHandler(this.pnCanvasColor_DoubleClick);
       // 
       // label5
       // 
@@ -439,6 +481,12 @@
       gbTargetResolution.Controls.Add(this.nudHeight);
       gbTargetResolution.Controls.Add(label2);
       gbTargetResolution.Controls.Add(label1);
+      gbTargetResolution.Controls.Add(this.btnScale2x);
+      gbTargetResolution.Controls.Add(this.btnScale3x);
+      gbTargetResolution.Controls.Add(this.btnScale4x);
+      gbTargetResolution.Controls.Add(this.btnScale5x);
+      gbTargetResolution.Controls.Add(this.btnScale6x);
+      gbTargetResolution.Controls.Add(this.btnScale10x);
       gbTargetResolution.Dock = System.Windows.Forms.DockStyle.Top;
       gbTargetResolution.Location = new System.Drawing.Point(0, 115);
       gbTargetResolution.Name = "gbTargetResolution";
@@ -509,7 +557,67 @@
       this.nudHeight.Size = new System.Drawing.Size(68, 20);
       this.nudHeight.TabIndex = 1;
       this.nudHeight.ValueChanged += new System.EventHandler(this.nudHeight_ValueChanged);
-      // 
+      //
+      // btnScale2x
+      //
+      this.btnScale2x.Location = new System.Drawing.Point(6, 71);
+      this.btnScale2x.Name = "btnScale2x";
+      this.btnScale2x.Size = new System.Drawing.Size(30, 23);
+      this.btnScale2x.TabIndex = 4;
+      this.btnScale2x.Text = "2x";
+      this.btnScale2x.UseVisualStyleBackColor = true;
+      this.btnScale2x.Click += new System.EventHandler(this.btnScale2x_Click);
+      //
+      // btnScale3x
+      //
+      this.btnScale3x.Location = new System.Drawing.Point(38, 71);
+      this.btnScale3x.Name = "btnScale3x";
+      this.btnScale3x.Size = new System.Drawing.Size(30, 23);
+      this.btnScale3x.TabIndex = 5;
+      this.btnScale3x.Text = "3x";
+      this.btnScale3x.UseVisualStyleBackColor = true;
+      this.btnScale3x.Click += new System.EventHandler(this.btnScale3x_Click);
+      //
+      // btnScale4x
+      //
+      this.btnScale4x.Location = new System.Drawing.Point(70, 71);
+      this.btnScale4x.Name = "btnScale4x";
+      this.btnScale4x.Size = new System.Drawing.Size(30, 23);
+      this.btnScale4x.TabIndex = 6;
+      this.btnScale4x.Text = "4x";
+      this.btnScale4x.UseVisualStyleBackColor = true;
+      this.btnScale4x.Click += new System.EventHandler(this.btnScale4x_Click);
+      //
+      // btnScale5x
+      //
+      this.btnScale5x.Location = new System.Drawing.Point(102, 71);
+      this.btnScale5x.Name = "btnScale5x";
+      this.btnScale5x.Size = new System.Drawing.Size(30, 23);
+      this.btnScale5x.TabIndex = 7;
+      this.btnScale5x.Text = "5x";
+      this.btnScale5x.UseVisualStyleBackColor = true;
+      this.btnScale5x.Click += new System.EventHandler(this.btnScale5x_Click);
+      //
+      // btnScale6x
+      //
+      this.btnScale6x.Location = new System.Drawing.Point(134, 71);
+      this.btnScale6x.Name = "btnScale6x";
+      this.btnScale6x.Size = new System.Drawing.Size(30, 23);
+      this.btnScale6x.TabIndex = 8;
+      this.btnScale6x.Text = "6x";
+      this.btnScale6x.UseVisualStyleBackColor = true;
+      this.btnScale6x.Click += new System.EventHandler(this.btnScale6x_Click);
+      //
+      // btnScale10x
+      //
+      this.btnScale10x.Location = new System.Drawing.Point(166, 71);
+      this.btnScale10x.Name = "btnScale10x";
+      this.btnScale10x.Size = new System.Drawing.Size(30, 23);
+      this.btnScale10x.TabIndex = 9;
+      this.btnScale10x.Text = "10x";
+      this.btnScale10x.UseVisualStyleBackColor = true;
+      this.btnScale10x.Click += new System.EventHandler(this.btnScale10x_Click);
+      //
       // label2
       // 
       label2.AutoSize = true;
@@ -527,11 +635,12 @@
       label1.Size = new System.Drawing.Size(35, 13);
       label1.TabIndex = 0;
       label1.Text = "Width";
-      // 
+      //
       // gbMethod
-      // 
+      //
       gbMethod.AutoSize = true;
       gbMethod.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+      gbMethod.Controls.Add(this.pgManipulatorParameters);
       gbMethod.Controls.Add(this.cmbResizeMethod);
       gbMethod.Dock = System.Windows.Forms.DockStyle.Top;
       gbMethod.Location = new System.Drawing.Point(0, 0);
@@ -540,9 +649,9 @@
       gbMethod.TabIndex = 3;
       gbMethod.TabStop = false;
       gbMethod.Text = "Method";
-      // 
+      //
       // cmbResizeMethod
-      // 
+      //
       this.cmbResizeMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.cmbResizeMethod.FormattingEnabled = true;
       this.cmbResizeMethod.Location = new System.Drawing.Point(6, 19);
@@ -550,6 +659,17 @@
       this.cmbResizeMethod.Size = new System.Drawing.Size(282, 21);
       this.cmbResizeMethod.TabIndex = 0;
       this.cmbResizeMethod.SelectedValueChanged += new System.EventHandler(this.cbResizeMethod_SelectedValueChanged);
+      //
+      // pgManipulatorParameters
+      //
+      this.pgManipulatorParameters.HelpVisible = false;
+      this.pgManipulatorParameters.Location = new System.Drawing.Point(6, 46);
+      this.pgManipulatorParameters.Name = "pgManipulatorParameters";
+      this.pgManipulatorParameters.PropertySort = System.Windows.Forms.PropertySort.Categorized;
+      this.pgManipulatorParameters.Size = new System.Drawing.Size(282, 150);
+      this.pgManipulatorParameters.TabIndex = 1;
+      this.pgManipulatorParameters.ToolbarVisible = false;
+      this.pgManipulatorParameters.Visible = false;
       // 
       // gbDescription
       // 
@@ -954,10 +1074,19 @@
     private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
     private System.Windows.Forms.Panel pnMiddle;
     private System.Windows.Forms.ComboBox cmbResizeMethod;
+    private System.Windows.Forms.PropertyGrid pgManipulatorParameters;
     private System.Windows.Forms.NumericUpDown nudWidth;
     private System.Windows.Forms.NumericUpDown nudHeight;
+    private System.Windows.Forms.Button btnScale2x;
+    private System.Windows.Forms.Button btnScale3x;
+    private System.Windows.Forms.Button btnScale4x;
+    private System.Windows.Forms.Button btnScale5x;
+    private System.Windows.Forms.Button btnScale6x;
+    private System.Windows.Forms.Button btnScale10x;
     private System.Windows.Forms.ComboBox cmbVerticalBPH;
     private System.Windows.Forms.ComboBox cmbHorizontalBPH;
+    private System.Windows.Forms.Panel pnCanvasColor;
+    private System.Windows.Forms.Label lblCanvasColor;
     private System.Windows.Forms.Button butResize;
     private System.Windows.Forms.Button butSwitch;
     private System.Windows.Forms.Button butRepeat;

@@ -35,7 +35,6 @@ using Classes.ScriptActions;
 
 using ImageResizer.Properties;
 
-using Imager;
 using System.Drawing.Extensions.ColorProcessing.Resizing;
 using word = System.UInt16;
 
@@ -51,9 +50,22 @@ namespace ImageResizer {
     /// </summary>
     private string _lastSaveFileName;
     /// <summary>
+    /// Canvas colour used as the OOB constant when either border-pixel-handling combo is set to FlatColor.
+    /// Defaults to <see cref="Color.Transparent"/>.
+    /// </summary>
+    private Color _canvasColor = Color.Transparent;
+    /// <summary>
     /// The used scripting engine.
     /// </summary>
     private readonly ScriptEngine _scriptEngine = new ScriptEngine();
+
+    /// <summary>
+    /// File-keyed LRU pool of master <see cref="Bitmap"/> instances. The pool owns each master;
+    /// the UI references them but never modifies/locks. Workers obtain private copies via
+    /// <see cref="BitmapMasterPool.CheckoutClone"/>. Disposed on form close after detaching the
+    /// PictureBox to avoid a paint racing with master disposal.
+    /// </summary>
+    private readonly BitmapMasterPool _masterPool = new BitmapMasterPool(maxRecords: 8);
 
     // Debounced preview: each relevant change (method, dimensions, OOB, etc.) calls
     // _SchedulePreview, which restarts the timer; 300 ms after the last change the timer
@@ -66,6 +78,13 @@ namespace ImageResizer {
     // bitmap (scriptEngine.GdiTarget) — disposing that would corrupt engine state and crash
     // the next PictureBox paint via ImageAnimator.CanAnimate(FrameDimensionsList).
     private Bitmap _previewOwnedTarget;
+
+    // Parameter bag for the currently selected manipulator, when that manipulator surfaces a
+    // non-empty <see cref="Hawkynt.ColorProcessing.ParameterDescriptor"/> set. Reset on every
+    // selection change. Apply paths read this back through <see cref="_BindManipulatorParameters"/>
+    // and call <see cref="IImageManipulator.CreateWith"/> before handing the manipulator to
+    // <see cref="Classes.ScriptActions.ResizeCommand"/>.
+    private ManipulatorParameterBag _currentParameterBag;
     #endregion
 
     #region props
@@ -169,6 +188,11 @@ namespace ImageResizer {
     public MainForm(string fileToOpenOnStart = null) {
       InitializeComponent();
 
+      // Wire the master pool into the engine so LoadFileCommand routes through pool.LoadOrGet
+      // and the engine adopts pool-managed source bitmaps non-owning. The pool itself is owned
+      // by the form and disposed on form close (after the PictureBox is detached).
+      this._scriptEngine.MasterPool = this._masterPool;
+
       //this.cbResizeMethod.DataSource = Program.IMAGE_RESIZERS;
       this.cmbResizeMethod.DataSource = SupportedManipulators.MANIPULATORS;
       this.cmbResizeMethod.DisplayMember = "Key";
@@ -212,8 +236,12 @@ namespace ImageResizer {
       this.chkUseThresholds.CheckedChanged += (s, e) => this._SchedulePreview();
       this.chkUseCenteredGrid.CheckedChanged += (s, e) => this._SchedulePreview();
       this.chkKeepAspect.CheckedChanged += (s, e) => this._SchedulePreview();
-      this.cmbHorizontalBPH.SelectedIndexChanged += (s, e) => this._SchedulePreview();
-      this.cmbVerticalBPH.SelectedIndexChanged += (s, e) => this._SchedulePreview();
+      this.cmbHorizontalBPH.SelectedIndexChanged += (s, e) => { this._UpdateCanvasColorVisibility(); this._SchedulePreview(); };
+      this.cmbVerticalBPH.SelectedIndexChanged += (s, e) => { this._UpdateCanvasColorVisibility(); this._SchedulePreview(); };
+
+      // PropertyGrid value changes (parametric manipulator tuning) re-trigger the auto-preview
+      // so the user sees the effect of a tweaked parameter without clicking Apply.
+      this.pgManipulatorParameters.PropertyValueChanged += (s, e) => this._SchedulePreview();
     }
 
     private void _OnReduceColoursClicked(object sender, EventArgs e) {
@@ -241,6 +269,19 @@ namespace ImageResizer {
 
       if (Config.TargetSizeMode != null)
         this._TargetImageSizeMode = Config.TargetSizeMode.Value;
+    }
+
+    /// <summary>
+    /// If the current selection has a parameter surface and the user has changed at least one
+    /// value, returns a freshly-bound manipulator instance via <see cref="IImageManipulator.CreateWith"/>;
+    /// otherwise returns <paramref name="manipulator"/> unchanged. Centralises the apply-time
+    /// binding so the explicit Apply path and the auto-preview path stay in sync.
+    /// </summary>
+    private IImageManipulator _BindManipulatorParameters(IImageManipulator manipulator) {
+      var bag = this._currentParameterBag;
+      if (manipulator == null || bag == null || !bag.HasOverrides)
+        return manipulator;
+      return manipulator.CreateWith(bag.ToValues()) ?? manipulator;
     }
 
     /// <summary>
@@ -279,7 +320,8 @@ namespace ImageResizer {
         if (answer != DialogResult.Yes) return;
       }
 
-      var command = new ResizeCommand(applyToTarget, method, targetWidth, targetHeight, 0, maintainAspect, horizontalBph, verticalBph, repetitionCount, useThresholds, useCenteredGrid, radius);
+      var bound = this._BindManipulatorParameters(method);
+      var command = new ResizeCommand(applyToTarget, bound, targetWidth, targetHeight, 0, maintainAspect, horizontalBph, verticalBph, repetitionCount, useThresholds, useCenteredGrid, radius, this._canvasColor);
 
       this._ExecuteScriptActions(command);
     }
@@ -431,6 +473,49 @@ namespace ImageResizer {
       return ex;
     }
 
+    /// <summary>Show the canvas-colour swatch only when either OOB combo is set to FlatColor.</summary>
+    private void _UpdateCanvasColorVisibility() {
+      var horizontal = this.cmbHorizontalBPH.SelectedItem as OutOfBoundsMode?;
+      var vertical = this.cmbVerticalBPH.SelectedItem as OutOfBoundsMode?;
+      var show = horizontal == OutOfBoundsMode.FlatColor || vertical == OutOfBoundsMode.FlatColor;
+      this.lblCanvasColor.Visible = show;
+      this.pnCanvasColor.Visible = show;
+    }
+
+    private void pnCanvasColor_Paint(object sender, PaintEventArgs e) {
+      var rect = this.pnCanvasColor.ClientRectangle;
+      if (this._canvasColor.A < 255) {
+        // Checkerboard so transparency / partial alpha is visually obvious.
+        const int cell = 4;
+        for (var y = 0; y < rect.Height; y += cell)
+        for (var x = 0; x < rect.Width; x += cell) {
+          var brush = (((x / cell) + (y / cell)) & 1) == 0 ? System.Drawing.Brushes.LightGray : System.Drawing.Brushes.White;
+          e.Graphics.FillRectangle(brush, x, y, cell, cell);
+        }
+      }
+      using var fill = new System.Drawing.SolidBrush(this._canvasColor);
+      e.Graphics.FillRectangle(fill, rect);
+    }
+
+    private void pnCanvasColor_Click(object sender, EventArgs e) {
+      using var dlg = new ColorDialog {
+        AllowFullOpen = true,
+        FullOpen = true,
+        AnyColor = true,
+        Color = this._canvasColor.A == 0 ? Color.White : Color.FromArgb(255, this._canvasColor),
+      };
+      if (dlg.ShowDialog(this) != DialogResult.OK) return;
+      this._canvasColor = Color.FromArgb(255, dlg.Color);
+      this.pnCanvasColor.Invalidate();
+      this._SchedulePreview();
+    }
+
+    private void pnCanvasColor_DoubleClick(object sender, EventArgs e) {
+      this._canvasColor = Color.Transparent;
+      this.pnCanvasColor.Invalidate();
+      this._SchedulePreview();
+    }
+
     /// <summary>
     /// (Re)starts the preview debounce. Any call resets the timer to 300 ms. Called from
     /// the method dropdown + the dimension/OOB change handlers.
@@ -468,6 +553,11 @@ namespace ImageResizer {
       var fullSource = this._scriptEngine.SourceImage;
       if (method == null || fullSource == null) return;
 
+      // Bind parameter overrides into a fresh manipulator instance so the preview reflects
+      // whatever the user has typed into the PropertyGrid. Snapshot here on the UI thread —
+      // the Task.Run continuation must not touch the bag.
+      method = this._BindManipulatorParameters(method);
+
       // Snapshot UI state up-front — everything below runs on a worker thread.
       var targetWidth = (word)this.nudWidth.Value;
       var targetHeight = (word)this.nudHeight.Value;
@@ -478,53 +568,84 @@ namespace ImageResizer {
       var horizontalBph = (OutOfBoundsMode)this.cmbHorizontalBPH.SelectedItem;
       var verticalBph = (OutOfBoundsMode)this.cmbVerticalBPH.SelectedItem;
       var radius = (float)this.nudRadius.Value;
+      var capturedCanvasColor = this._canvasColor;
 
       if (targetWidth <= 0 && method.SupportsWidth) return;
       if (targetHeight <= 0 && method.SupportsHeight) return;
 
+      // Track-C: obtain a privately-owned source clone so the worker thread never touches the
+      // engine-owned / pool-owned master that iwhSourceImage is simultaneously painting. WinForms
+      // WM_PAINT is serialised on the UI thread, so this same-thread clone cannot collide with
+      // PictureBox.OnPaint. Without a clone, a WM_PAINT arriving mid-Apply on the worker would
+      // race with the manipulator's LockBits and crash with "Bitmap region is already locked".
+      // Preferred path: pool.CheckoutClone(currentKey) — full-size clone owned by the caller.
+      // Fallback (legacy, e.g. a drag-dropped raw bitmap not yet routed through the pool):
+      // clone here on the UI thread the same way the pool would.
+      Bitmap previewSourceOwned;
+      word previewTargetWidth = targetWidth;
+      word previewTargetHeight = targetHeight;
+      string sizeNote = null;
+      try {
+        var poolKey = this._scriptEngine.CurrentSourceKey;
+        Bitmap fullClone;
+        if (poolKey != null) {
+          fullClone = this._masterPool.CheckoutClone(poolKey);
+        } else {
+          fullClone = new Bitmap(fullSource.Width, fullSource.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+          using var gFull = Graphics.FromImage(fullClone);
+          gFull.DrawImageUnscaled(fullSource, 0, 0);
+        }
+
+        // Guard 1: shrink giant sources so every method/scale stays in a sane memory budget.
+        // The pool always returns a full-size clone; the preview shrink lives downstream.
+        if (fullClone.Width > _PREVIEW_MAX_SOURCE_DIM || fullClone.Height > _PREVIEW_MAX_SOURCE_DIM) {
+          var ratio = (double)_PREVIEW_MAX_SOURCE_DIM / Math.Max(fullClone.Width, fullClone.Height);
+          previewSourceOwned = new Bitmap((int)(fullClone.Width * ratio), (int)(fullClone.Height * ratio), System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+          using (var g = Graphics.FromImage(previewSourceOwned)) {
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+            g.DrawImage(fullClone, 0, 0, previewSourceOwned.Width, previewSourceOwned.Height);
+          }
+          // Scale the requested target dims by the same ratio so the preview preserves aspect.
+          previewTargetWidth = (word)Math.Max(1, Math.Round(targetWidth * ratio));
+          previewTargetHeight = (word)Math.Max(1, Math.Round(targetHeight * ratio));
+          sizeNote = " — downsized from " + fullClone.Width + "×" + fullClone.Height;
+          fullClone.Dispose();
+        } else {
+          previewSourceOwned = fullClone;
+        }
+      } catch (Exception ex) {
+        var msg = (ex.GetType().Name + ": " + ex.Message).Replace('\n', ' ').Replace('\r', ' ');
+        if (msg.Length > 140) msg = msg.Substring(0, 137) + "…";
+        this.iwhTargetImage.StatusText = "Preview — " + msg;
+        return;
+      }
+
+      // Guard 2: refuse previews whose target would still be obviously too big.
+      const long pixelBudget = 16_000_000L; // ~64 MB ARGB
+      if ((long)previewTargetWidth * previewTargetHeight > pixelBudget) {
+        previewSourceOwned.Dispose();
+        this.iwhTargetImage.StatusText = "Preview skipped — target " + previewTargetWidth + "×" + previewTargetHeight + " too large";
+        return;
+      }
+
       this.iwhTargetImage.StatusText = "Preview — rendering…";
 
       Task.Run(() => {
-        cImage previewSource = fullSource;
-        word previewTargetWidth = targetWidth;
-        word previewTargetHeight = targetHeight;
-        string sizeNote = null;
+        Bitmap previewSource = previewSourceOwned;
         try {
-          // Guard 1: shrink giant sources so every method/scale stays in a sane memory budget.
-          if (fullSource.Width > _PREVIEW_MAX_SOURCE_DIM || fullSource.Height > _PREVIEW_MAX_SOURCE_DIM) {
-            var ratio = (double)_PREVIEW_MAX_SOURCE_DIM / Math.Max(fullSource.Width, fullSource.Height);
-            using (var full = fullSource.ToBitmap())
-            using (var shrunk = new Bitmap((int)(full.Width * ratio), (int)(full.Height * ratio), System.Drawing.Imaging.PixelFormat.Format32bppArgb)) {
-              using (var g = Graphics.FromImage(shrunk)) {
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-                g.DrawImage(full, 0, 0, shrunk.Width, shrunk.Height);
-              }
-              previewSource = cImage.FromBitmap(shrunk);
-            }
-            // Scale the requested target dims by the same ratio so the preview preserves aspect.
-            previewTargetWidth = (word)Math.Max(1, Math.Round(targetWidth * ratio));
-            previewTargetHeight = (word)Math.Max(1, Math.Round(targetHeight * ratio));
-            sizeNote = " — downsized from " + fullSource.Width + "×" + fullSource.Height;
-          }
-
-          // Guard 2: refuse previews whose target would still be obviously too big.
-          const long pixelBudget = 16_000_000L; // ~64 MB ARGB
-          if ((long)previewTargetWidth * previewTargetHeight > pixelBudget) {
-            var target = previewTargetWidth + "×" + previewTargetHeight;
-            this.SafelyInvoke(() => { this.iwhTargetImage.StatusText = "Preview skipped — target " + target + " too large"; });
-            return;
-          }
-
-          var command = new ResizeCommand(false, method, previewTargetWidth, previewTargetHeight, 0, maintainAspect, horizontalBph, verticalBph, repetitionCount, useThresholds, useCenteredGrid, radius) {
+          var command = new ResizeCommand(false, method, previewTargetWidth, previewTargetHeight, 0, maintainAspect, horizontalBph, verticalBph, repetitionCount, useThresholds, useCenteredGrid, radius, capturedCanvasColor) {
             SourceImage = previewSource,
             TargetImage = null,
           };
           var sw = Stopwatch.StartNew();
           command.Execute();
           sw.Stop();
-          if (token.IsCancellationRequested) return;
-          var bmp = command.TargetImage?.ToBitmap();
+          if (token.IsCancellationRequested) {
+            command.TargetImage?.Dispose();
+            return;
+          }
+          var bmp = command.TargetImage;
           var note = sizeNote;
           this.SafelyInvoke(() => {
             if (token.IsCancellationRequested) { bmp?.Dispose(); return; }
@@ -545,6 +666,11 @@ namespace ImageResizer {
           var msg = (ex.GetType().Name + ": " + ex.Message).Replace('\n', ' ').Replace('\r', ' ');
           if (msg.Length > 140) msg = msg.Substring(0, 137) + "…";
           this.SafelyInvoke(() => { this.iwhTargetImage.StatusText = "Preview — " + msg; });
+        } finally {
+          // We always own previewSource (cloned on the UI thread before Task.Run); release whether
+          // the render succeeded, errored, or was cancelled. The engine-owned source bitmap was
+          // never touched by this worker.
+          previewSource.Dispose();
         }
       }, token);
     }
@@ -555,6 +681,11 @@ namespace ImageResizer {
     /// <param name="fileName">Name of the file.</param>
     private void _LoadImageFromFileName(string fileName) {
       try {
+        // Detach both PictureBoxes from the previous engine-owned bitmaps before LoadFileCommand
+        // runs — its commit will dispose the previous source and target, and a still-attached
+        // PictureBox would crash mid-paint via ImageAnimator.CanAnimate(FrameDimensionsList).
+        this.iwhSourceImage.Image = null;
+        this._TargetImage = null;
         var scriptEngine = this._scriptEngine;
         scriptEngine.ExecuteAction(new LoadFileCommand(fileName));
         this._SourceImage = scriptEngine.GdiSource;
@@ -592,44 +723,6 @@ namespace ImageResizer {
 
       if (height != this.nudHeight.Value)
         this.nudHeight.Value = height;
-    }
-
-    /// <summary>
-    /// Filters the image.
-    /// </summary>
-    /// <param name="source">The source.</param>
-    /// <param name="method">The method.</param>
-    /// <param name="targetWidth">Width of the target.</param>
-    /// <param name="targetHeight">Height of the target.</param>
-    /// <param name="horizontalBh">The horizontal bounds handling.</param>
-    /// <param name="verticalBh">The vertical bounds handling.</param>
-    /// <param name="useThresholds">if set to <c>true</c> [use thresholds].</param>
-    /// <param name="useCenteredGrid">if set to <c>true</c> [use centered grid].</param>
-    /// <param name="repetitionCount">The repetition count.</param>
-    /// <param name="radius">The radius.</param>
-    /// <returns></returns>
-    internal static cImage FilterImage(cImage source, IImageManipulator method, ushort targetWidth, ushort targetHeight, OutOfBoundsMode horizontalBh, OutOfBoundsMode verticalBh, bool useThresholds, bool useCenteredGrid, byte repetitionCount, float radius) {
-      Contract.Requires(source != null);
-      // useThresholds is vestigial (consumed by the retired local XBR/XBRz pipeline). OOB modes + useCenteredGrid
-      // are threaded into upstream resamplers below.
-
-      cImage result = null;
-      var planeExtractor = method as PlaneExtractor;
-      var bitmapFixed = method as BitmapFixedAdapter;
-      var bitmapResampler = method as BitmapResamplerAdapter;
-
-      if (bitmapFixed != null) {
-        result = bitmapFixed.Apply(source);
-      } else if (bitmapResampler != null) {
-        if (targetWidth <= 0 || targetHeight <= 0)
-          MessageBox.Show(Resources.txNeedWidthAndHeightAboveZero, Resources.ttNeedWidthAndHeightAboveZero, MessageBoxButtons.OK, MessageBoxIcon.Stop);
-        else
-          result = bitmapResampler.Apply(source, targetWidth, targetHeight, horizontalBh, verticalBh, Color.Transparent, useCenteredGrid);
-      } else if (planeExtractor != null) {
-        result = planeExtractor.Apply(source);
-      }
-
-      return result;
     }
 
     /// <summary>

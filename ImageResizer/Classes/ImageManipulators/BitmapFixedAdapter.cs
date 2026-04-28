@@ -1,6 +1,5 @@
 #region (c)2008-2026 Hawkynt
 /*
- *  cImage
  *  Image filtering library
     Copyright (C) 2008-2026 Hawkynt
 
@@ -20,10 +19,11 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 
-using Imager;
+using Hawkynt.ColorProcessing;
 
 namespace Classes.ImageManipulators {
   /// <summary>
@@ -37,17 +37,36 @@ namespace Classes.ImageManipulators {
   internal class BitmapFixedAdapter : IImageManipulator {
 
     private readonly Func<Bitmap, bool, Bitmap> _operation;
+    private readonly IReadOnlyList<ParameterDescriptor> _parameters;
+    private readonly Func<IReadOnlyDictionary<string, object>, BitmapFixedAdapter> _createWith;
 
     /// <summary>Filter/same-size or threshold-agnostic rescaler wiring.</summary>
     public BitmapFixedAdapter(string description, bool changesResolution, Func<Bitmap, Bitmap> operation)
-      : this(description, changesResolution, supportsThresholds: false, (b, _) => operation(b)) { }
+      : this(description, changesResolution, supportsThresholds: false, (b, _) => operation(b), null, null) { }
 
     /// <summary>Rescaler wiring that exposes an Oklab-distance threshold path.</summary>
-    public BitmapFixedAdapter(string description, bool changesResolution, bool supportsThresholds, Func<Bitmap, bool, Bitmap> operation) {
+    public BitmapFixedAdapter(string description, bool changesResolution, bool supportsThresholds, Func<Bitmap, bool, Bitmap> operation)
+      : this(description, changesResolution, supportsThresholds, operation, null, null) { }
+
+    /// <summary>
+    /// Parametric wiring — the upstream descriptor is registered with a parameter surface.
+    /// <paramref name="parameters"/> is the list shown in the PropertyGrid; <paramref name="createWith"/>
+    /// rebuilds the adapter from a values dictionary so <see cref="CreateWith"/> can return a
+    /// fresh instance bound to user input.
+    /// </summary>
+    public BitmapFixedAdapter(
+      string description,
+      bool changesResolution,
+      bool supportsThresholds,
+      Func<Bitmap, bool, Bitmap> operation,
+      IReadOnlyList<ParameterDescriptor> parameters,
+      Func<IReadOnlyDictionary<string, object>, BitmapFixedAdapter> createWith) {
       this.Description = description;
       this.ChangesResolution = changesResolution;
       this.SupportsThresholds = supportsThresholds;
       this._operation = operation;
+      this._parameters = parameters ?? ImageManipulatorDefaults.EmptyParameters;
+      this._createWith = createWith;
     }
 
     #region Implementation of IImageManipulator
@@ -59,16 +78,18 @@ namespace Classes.ImageManipulators {
     public bool SupportsRadius => false;
     public bool ChangesResolution { get; }
     public string Description { get; }
+
+    public IReadOnlyList<ParameterDescriptor> Parameters => this._parameters;
+
+    public IImageManipulator CreateWith(IReadOnlyDictionary<string, object> values) {
+      if (this._createWith == null || values == null || this._parameters.Count == 0)
+        return this;
+      return this._createWith(values);
+    }
     #endregion
 
-    public cImage Apply(cImage source) => this.Apply(source, useThresholds: false);
+    public Bitmap Apply(Bitmap source) => this.Apply(source, useThresholds: false);
 
-    public cImage Apply(cImage source, bool useThresholds) {
-      using (var input = source.ToBitmap()) {
-        using (var output = this._operation(input, useThresholds)) {
-          return cImage.FromBitmap(output);
-        }
-      }
-    }
+    public Bitmap Apply(Bitmap source, bool useThresholds) => this._operation(source, useThresholds);
   }
 }

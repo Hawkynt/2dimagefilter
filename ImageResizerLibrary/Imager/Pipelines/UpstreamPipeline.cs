@@ -268,9 +268,30 @@ namespace Imager.Pipelines {
       public readonly string Name;
       public readonly string Description;
       public readonly Func<Bitmap, Bitmap> Apply;
-      public FilterInfo(string name, string description, Func<Bitmap, Bitmap> apply) {
+      /// <summary>Tunable parameters for this filter (empty when the filter ships a single fixed default).</summary>
+      public readonly IReadOnlyList<Hawkynt.ColorProcessing.ParameterDescriptor> Parameters;
+      /// <summary>
+      /// Builds a fresh <see cref="FilterInfo"/> whose <see cref="Apply"/> delegate is bound to the
+      /// supplied parameter values. Returns this instance unchanged for non-parametric filters.
+      /// </summary>
+      public readonly Func<IReadOnlyDictionary<string, object>, FilterInfo> CreateWith;
+
+      public FilterInfo(string name, string description, Func<Bitmap, Bitmap> apply)
+        : this(name, description, apply, null, null) { }
+
+      public FilterInfo(
+        string name,
+        string description,
+        Func<Bitmap, Bitmap> apply,
+        IReadOnlyList<Hawkynt.ColorProcessing.ParameterDescriptor> parameters,
+        Func<IReadOnlyDictionary<string, object>, FilterInfo> createWith) {
         this.Name = name; this.Description = description; this.Apply = apply;
+        this.Parameters = parameters ?? _EmptyParameters;
+        this.CreateWith = createWith;
       }
+
+      private static readonly IReadOnlyList<Hawkynt.ColorProcessing.ParameterDescriptor> _EmptyParameters
+        = new Hawkynt.ColorProcessing.ParameterDescriptor[0];
     }
 
     public static IEnumerable<FilterInfo> Filters() {
@@ -278,23 +299,50 @@ namespace Imager.Pipelines {
         if (f.Type.ContainsGenericParameters)
           continue;
         var capture = f;
-        yield return new FilterInfo(
-          capture.Name,
-          ComposeDescription(capture.Description, capture.Name, capture.Author),
-          b => capture.Apply(b, ScalerQuality.HighQuality)
-        );
+        yield return _BuildFilterInfo(capture);
       }
     }
 
+    private static FilterInfo _BuildFilterInfo(FilterDescriptor descriptor) {
+      var name = descriptor.Name;
+      var description = ComposeDescription(descriptor.Description, descriptor.Name, descriptor.Author);
+      var parameters = descriptor.Parameters;
+      Func<IReadOnlyDictionary<string, object>, FilterInfo> createWith = null;
+      if (parameters != null && parameters.Count > 0) {
+        createWith = values => {
+          var dict = values ?? _EmptyParameterValues;
+          var instance = descriptor.CreateWith(dict);
+          return new FilterInfo(
+            name,
+            description,
+            b => descriptor.Apply(b, instance, ScalerQuality.HighQuality),
+            parameters,
+            createWith
+          );
+        };
+      }
+      return new FilterInfo(
+        name,
+        description,
+        b => descriptor.Apply(b, ScalerQuality.HighQuality),
+        parameters,
+        createWith
+      );
+    }
+
+    private static readonly IReadOnlyDictionary<string, object> _EmptyParameterValues
+      = new System.Collections.ObjectModel.ReadOnlyDictionary<string, object>(new Dictionary<string, object>());
+
     #endregion
 
-    #region plane extractors (single colour-space component, sPixel → byte)
+    #region plane extractors (single colour-space component, Color → byte)
 
     public readonly struct PlaneExtractorInfo {
       public readonly string Name;
       public readonly string Description;
-      public readonly Func<sPixel, byte> Extract;
-      public PlaneExtractorInfo(string name, string description, Func<sPixel, byte> extract) {
+      /// <summary>Per-pixel projector: read a <see cref="Color"/>, return the chosen channel as a byte.</summary>
+      public readonly Func<Color, byte> Extract;
+      public PlaneExtractorInfo(string name, string description, Func<Color, byte> extract) {
         this.Name = name; this.Description = description; this.Extract = extract;
       }
     }
@@ -545,8 +593,8 @@ namespace Imager.Pipelines {
     #region helpers
 
     private static PlaneExtractorInfo Plane(string name, string description, Func<LinearRgbaF, byte> projector) {
-      Func<sPixel, byte> extract = px => {
-        var linear = ColorAdapter.ToLinearRgbaF(px.Color);
+      Func<Color, byte> extract = color => {
+        var linear = ColorAdapter.ToLinearRgbaF(color);
         return projector(linear);
       };
       return new PlaneExtractorInfo(name, description, extract);

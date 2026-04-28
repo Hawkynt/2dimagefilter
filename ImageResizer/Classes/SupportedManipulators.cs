@@ -19,7 +19,6 @@
  */
 #endregion
 using Classes.ImageManipulators;
-using Imager;
 using Imager.Pipelines;
 using System.Collections.Generic;
 using System.Drawing.Drawing2D;
@@ -30,7 +29,7 @@ namespace Classes {
 
     // GDI+ resamplers exposed as a system-API baseline for visual comparison against the upstream resamplers.
     // Backed by GdiPlusResampler which produces a standard BitmapResamplerAdapter — the dedicated
-    // Interpolator class (and cImage.INTERPOLATORS + cImage.ApplyScaler(InterpolationMode, …)) is gone.
+    // Interpolator class (and the local Bitmap-passthrough scaler block) is gone.
     private static readonly InterpolationMode[] _GDI_PLUS_MODES = {
       InterpolationMode.NearestNeighbor,
       InterpolationMode.Bilinear,
@@ -56,7 +55,7 @@ namespace Classes {
 
     // Local plane-extractor block removed — upstream Plane: … entries cover
     // RGB/colour-space projections via ColorProcessing.Spaces (Oklab/Lab/HSL/HSV/HWB/YCbCr/YUV/CMYK/LCh).
-    // The six custom sPixel-specific extractors (u, v, Brightness, ExtractColors, ExtractDeltas, HueColored)
+    // The six custom per-pixel extractors (u, v, Brightness, ExtractColors, ExtractDeltas, HueColored)
     // have been dropped; they were not reachable from the plugin and were redundant / non-standard on the exe side.
 
     #region add upstream rescalers (fixed factor, from UpstreamPipeline) — one entry per (algorithm, supported scale)
@@ -96,17 +95,18 @@ namespace Classes {
     from p in UpstreamPipeline.PlaneExtractors()
     select new KeyValuePair<string, IImageManipulator>(
       "Plane: " + p.Name,
-      new PlaneExtractor(src => new cImage(src, p.Extract), p.Description)
+      new PlaneExtractor(p.Extract, p.Description)
     )
     )
     #endregion
 
-    #region add upstream filters (same size, from UpstreamPipeline)
+    #region add upstream filters (same size, from UpstreamPipeline) — parametric variants thread Parameters/CreateWith through
 .Concat(
     from f in UpstreamPipeline.Filters()
+    let captured = f
     select new KeyValuePair<string, IImageManipulator>(
-      "Filter: " + f.Name,
-      new BitmapFixedAdapter(f.Description, changesResolution: false, f.Apply)
+      "Filter: " + captured.Name,
+      _BuildFilterAdapter(captured)
     )
     )
     #endregion
@@ -122,5 +122,38 @@ namespace Classes {
 
 .OrderBy(kv => kv.Key, System.StringComparer.OrdinalIgnoreCase)
 .ToArray();
+
+    /// <summary>
+    /// Wraps an upstream <see cref="UpstreamPipeline.FilterInfo"/> in a <see cref="BitmapFixedAdapter"/>.
+    /// When the filter advertises a non-empty <c>Parameters</c> list (i.e. it was registered through
+    /// <c>FilterRegistry.RegisterParametric</c>), threads the parameter surface and a CreateWith
+    /// rebuilder into the adapter so the consumer's PropertyGrid can render and apply tunable values.
+    /// </summary>
+    private static IImageManipulator _BuildFilterAdapter(UpstreamPipeline.FilterInfo filter) {
+      if (filter.Parameters == null || filter.Parameters.Count == 0 || filter.CreateWith == null)
+        return new BitmapFixedAdapter(filter.Description, changesResolution: false, filter.Apply);
+
+      System.Func<System.Collections.Generic.IReadOnlyDictionary<string, object>, BitmapFixedAdapter> rebuild = null;
+      rebuild = values => {
+        var bound = filter.CreateWith(values);
+        return new BitmapFixedAdapter(
+          bound.Description,
+          changesResolution: false,
+          supportsThresholds: false,
+          (b, _) => bound.Apply(b),
+          bound.Parameters,
+          rebuild
+        );
+      };
+
+      return new BitmapFixedAdapter(
+        filter.Description,
+        changesResolution: false,
+        supportsThresholds: false,
+        (b, _) => filter.Apply(b),
+        filter.Parameters,
+        rebuild
+      );
+    }
   }
 }

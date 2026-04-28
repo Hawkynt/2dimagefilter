@@ -1,6 +1,5 @@
 #region (c)2008-2026 Hawkynt
 /*
- *  cImage
  *  Image filtering library
     Copyright (C) 2008-2026 Hawkynt
 
@@ -20,13 +19,14 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 using System.Drawing.Extensions.ColorProcessing.Resizing;
 
+using Hawkynt.ColorProcessing;
 using Hawkynt.ColorProcessing.Resizing;
 
-using Imager;
 using Imager.Pipelines;
 
 namespace PixelArtScaling {
@@ -49,10 +49,11 @@ namespace PixelArtScaling {
   }
 
   /// <summary>
-  /// One entry in the plugin's filter dropdown. Polymorphic so single-scale entries (most local
-  /// scalers, filters, plane extractors), multi-scale fixed entries (HQ / LQ / Bicubic /
-  /// CRT-* / etc. — pick one of N supported scales), and arbitrary resamplers all share
-  /// the same dispatch path.
+  /// One entry in the plugin's filter dropdown. Polymorphic so single-scale entries (fixed
+  /// rescalers, filters, plane extractors), multi-scale fixed entries (HQ / LQ / Bicubic /
+  /// CRT-* / etc. — pick one of N supported scales), and arbitrary resamplers all share the
+  /// same dispatch path. Apply takes/returns <see cref="Bitmap"/> directly — caller owns the
+  /// result and is responsible for disposing it.
   /// </summary>
   internal abstract class ManipulatorEntry {
     public string Name { get; }
@@ -72,24 +73,60 @@ namespace PixelArtScaling {
     public abstract Rectangle ComputeTargetRectangle(Rectangle source, int userTargetWidth, int userTargetHeight);
 
     /// <summary>Runs the manipulator. <paramref name="targetWidth"/>/<paramref name="targetHeight"/> are honoured by resamplers (free) and multi-scale fixed entries (snapped to the nearest supported scale). Ignored by single-scale fixed entries.</summary>
-    public abstract cImage Apply(cImage source, Rectangle sourceRectangle, int targetWidth, int targetHeight, ResampleOptions options);
+    public abstract Bitmap Apply(Bitmap source, Rectangle sourceRectangle, int targetWidth, int targetHeight, ResampleOptions options);
 
     /// <summary>Convenience overload that uses <see cref="ResampleOptions.Default"/>.</summary>
-    public cImage Apply(cImage source, Rectangle sourceRectangle, int targetWidth, int targetHeight)
+    public Bitmap Apply(Bitmap source, Rectangle sourceRectangle, int targetWidth, int targetHeight)
       => this.Apply(source, sourceRectangle, targetWidth, targetHeight, ResampleOptions.Default);
+
+    /// <summary>
+    /// Tunable parameters this entry surfaces to the plugin's PropertyGrid. Empty for the
+    /// non-parametric majority of entries; non-empty when the underlying upstream descriptor
+    /// (e.g. a parametric <c>FilterDescriptor</c>) carries a <see cref="ParameterDescriptor"/>
+    /// set. Mirrors the PG1 surface on <c>IImageManipulator.Parameters</c>.
+    /// </summary>
+    public virtual IReadOnlyList<ParameterDescriptor> Parameters => Array.Empty<ParameterDescriptor>();
+
+    /// <summary>
+    /// Returns an entry instance bound to the supplied parameter values. For non-parametric
+    /// entries (empty <see cref="Parameters"/>) this returns the current instance unchanged so
+    /// callers can chain unconditionally. Mirrors <c>IImageManipulator.CreateWith</c> in PG1.
+    /// </summary>
+    public virtual ManipulatorEntry CreateWith(IReadOnlyDictionary<string, object> values) => this;
   }
 
   /// <summary>Fixed single-scale entry — output dimensions are <c>source × (ScaleX, ScaleY)</c> and the user W/H sliders are ignored.</summary>
   internal sealed class FixedScaleEntry : ManipulatorEntry {
     public byte ScaleX { get; }
     public byte ScaleY { get; }
-    private readonly Func<cImage, Rectangle, cImage> _apply;
+    private readonly Func<Bitmap, Rectangle, Bitmap> _apply;
+    private readonly IReadOnlyList<ParameterDescriptor> _parameters;
+    private readonly Func<IReadOnlyDictionary<string, object>, FixedScaleEntry> _createWith;
 
-    public FixedScaleEntry(string name, string description, byte scaleX, byte scaleY, Func<cImage, Rectangle, cImage> apply)
+    public FixedScaleEntry(string name, string description, byte scaleX, byte scaleY, Func<Bitmap, Rectangle, Bitmap> apply)
+      : this(name, description, scaleX, scaleY, apply, null, null) { }
+
+    /// <summary>
+    /// Parametric ctor — the entry exposes a parameter surface to the plugin's PropertyGrid.
+    /// <paramref name="parameters"/> is the list shown in the grid; <paramref name="createWith"/>
+    /// rebuilds the entry from a values dictionary so <see cref="ManipulatorEntry.CreateWith"/>
+    /// can return a fresh instance bound to user input. Mirrors PG1's <c>BitmapFixedAdapter</c>
+    /// parametric ctor.
+    /// </summary>
+    public FixedScaleEntry(
+      string name,
+      string description,
+      byte scaleX,
+      byte scaleY,
+      Func<Bitmap, Rectangle, Bitmap> apply,
+      IReadOnlyList<ParameterDescriptor> parameters,
+      Func<IReadOnlyDictionary<string, object>, FixedScaleEntry> createWith)
       : base(name, description) {
       this.ScaleX = scaleX;
       this.ScaleY = scaleY;
       this._apply = apply;
+      this._parameters = parameters ?? Array.Empty<ParameterDescriptor>();
+      this._createWith = createWith;
     }
 
     public override bool SupportsCustomDimensions => false;
@@ -101,7 +138,15 @@ namespace PixelArtScaling {
       source.Height * this.ScaleY
     );
 
-    public override cImage Apply(cImage source, Rectangle sourceRectangle, int _, int __, ResampleOptions options) => this._apply(source, sourceRectangle);
+    public override Bitmap Apply(Bitmap source, Rectangle sourceRectangle, int _, int __, ResampleOptions options) => this._apply(source, sourceRectangle);
+
+    public override IReadOnlyList<ParameterDescriptor> Parameters => this._parameters;
+
+    public override ManipulatorEntry CreateWith(IReadOnlyDictionary<string, object> values) {
+      if (this._createWith == null || values == null || this._parameters.Count == 0)
+        return this;
+      return this._createWith(values);
+    }
   }
 
   /// <summary>
@@ -110,9 +155,9 @@ namespace PixelArtScaling {
   /// </summary>
   internal sealed class ScaleVariantEntry : ManipulatorEntry {
     public ScaleFactor[] SupportedScales { get; }
-    private readonly Func<cImage, Rectangle, int, int, cImage> _apply;
+    private readonly Func<Bitmap, Rectangle, int, int, Bitmap> _apply;
 
-    public ScaleVariantEntry(string name, string description, ScaleFactor[] supportedScales, Func<cImage, Rectangle, int, int, cImage> apply)
+    public ScaleVariantEntry(string name, string description, ScaleFactor[] supportedScales, Func<Bitmap, Rectangle, int, int, Bitmap> apply)
       : base(name, description) {
       this.SupportedScales = supportedScales;
       this._apply = apply;
@@ -125,7 +170,7 @@ namespace PixelArtScaling {
       return new Rectangle(0, 0, source.Width * snapped.X, source.Height * snapped.Y);
     }
 
-    public override cImage Apply(cImage source, Rectangle sourceRectangle, int targetWidth, int targetHeight, ResampleOptions options) {
+    public override Bitmap Apply(Bitmap source, Rectangle sourceRectangle, int targetWidth, int targetHeight, ResampleOptions options) {
       var snapped = UpstreamPipeline.SnapToNearestSupportedScale(this.SupportedScales, sourceRectangle.Width, sourceRectangle.Height, targetWidth, targetHeight);
       return this._apply(source, sourceRectangle, sourceRectangle.Width * snapped.X, sourceRectangle.Height * snapped.Y);
     }
@@ -133,7 +178,7 @@ namespace PixelArtScaling {
 
   /// <summary>Variable-target resampler entry — output dimensions come from the user's W/H or Scale (%) sliders, no snapping. Forwards <see cref="ResampleOptions"/> (OOB modes, canvas colour, centred-grid) into the upstream pipeline.</summary>
   internal sealed class ResampleEntry : ManipulatorEntry {
-    public delegate cImage Dispatch(cImage source, Rectangle sourceRectangle, int targetWidth, int targetHeight, ResampleOptions options);
+    public delegate Bitmap Dispatch(Bitmap source, Rectangle sourceRectangle, int targetWidth, int targetHeight, ResampleOptions options);
 
     private readonly Dispatch _resample;
 
@@ -151,7 +196,7 @@ namespace PixelArtScaling {
       return new Rectangle(0, 0, w, h);
     }
 
-    public override cImage Apply(cImage source, Rectangle sourceRectangle, int targetWidth, int targetHeight, ResampleOptions options) {
+    public override Bitmap Apply(Bitmap source, Rectangle sourceRectangle, int targetWidth, int targetHeight, ResampleOptions options) {
       var w = targetWidth > 0 ? targetWidth : sourceRectangle.Width;
       var h = targetHeight > 0 ? targetHeight : sourceRectangle.Height;
       return this._resample(source, sourceRectangle, w, h, options);

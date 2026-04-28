@@ -1,6 +1,5 @@
 #region (c)2008-2026 Hawkynt
 /*
- *  cImage
  *  Image filtering library
     Copyright (C) 2008-2026 Hawkynt
 
@@ -20,12 +19,14 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 
 using System.Drawing.Extensions.ColorProcessing.Resizing;
 
-using Imager;
+using Hawkynt.ColorProcessing;
+
 using Imager.Pipelines;
 
 namespace Classes.ImageManipulators {
@@ -54,6 +55,12 @@ namespace Classes.ImageManipulators {
     public bool SupportsRadius => false;
     public bool ChangesResolution => true;
     public string Description { get; }
+
+    // Resamplers in UpstreamPipeline are not yet routed through the parametric registry —
+    // expose an empty surface and a no-op CreateWith so the consumer can still call them
+    // through the IImageManipulator contract without special-casing.
+    public IReadOnlyList<ParameterDescriptor> Parameters => ImageManipulatorDefaults.EmptyParameters;
+    public IImageManipulator CreateWith(IReadOnlyDictionary<string, object> values) => this;
     #endregion
 
     /// <summary>Kernel support radius (the resampler samples over <c>[-Radius, +Radius]</c>). Zero when the upstream resampler is not a separable-kernel one.</summary>
@@ -62,13 +69,10 @@ namespace Classes.ImageManipulators {
     /// <summary>Closed-form 1-D kernel weight function for the chart, or <c>null</c> for edge-aware / content-adaptive / fixed-tap resamplers where no separable weight exists.</summary>
     public Func<float, float> EvaluateKernel { get; }
 
-    public cImage Apply(cImage source, int width, int height)
+    public Bitmap Apply(Bitmap source, int width, int height)
       => this.Apply(source, width, height, OutOfBoundsMode.ConstantExtension, OutOfBoundsMode.ConstantExtension, Color.Transparent, useCenteredGrid: true);
 
-    public cImage Apply(cImage source, int width, int height, OutOfBoundsMode horizontalMode, OutOfBoundsMode verticalMode, Color canvasColor, bool useCenteredGrid) {
-      using (var input = source.ToBitmap())
-      using (var output = this._operation(input, width, height, horizontalMode, verticalMode, canvasColor, useCenteredGrid))
-        return cImage.FromBitmap(output);
-    }
+    public Bitmap Apply(Bitmap source, int width, int height, OutOfBoundsMode horizontalMode, OutOfBoundsMode verticalMode, Color canvasColor, bool useCenteredGrid)
+      => this._operation(source, width, height, horizontalMode, verticalMode, canvasColor, useCenteredGrid);
   }
 }

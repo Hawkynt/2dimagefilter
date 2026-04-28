@@ -38,8 +38,6 @@ using Hawkynt.ColorProcessing.Resizing;
 using PaintDotNet;
 using PaintDotNet.Effects;
 
-using Imager;
-
 namespace PixelArtScaling {
   internal sealed class PluginConfigDialog : EffectConfigDialog {
 
@@ -53,7 +51,7 @@ namespace PixelArtScaling {
     // --- scale mode ---
     private GroupBox _scaleModeHost;
     private TableLayoutPanel _scaleModeStack;
-    // Free-dimension controls (Resampler / local cImage-based):
+    // Free-dimension controls (resamplers and other custom-target entries):
     private RadioButton _modeRadioPercent, _modeRadioFactor, _modeRadioSize;
     private GroupBox _percentBox, _factorBox, _sizeBox;
     private NumericUpDown _percentX, _percentY, _factorX, _factorY, _targetWidth, _targetHeight;
@@ -70,9 +68,16 @@ namespace PixelArtScaling {
     // --- copy + preview + property grid ---
     private Button _copyButton;
     private PreviewCanvas _previewCanvas;
-    private Label _previewLabel, _algorithmInfo, _scaleInfo;
+    private Label _previewLabel, _algorithmInfo, _scaleInfo, _parameterLabel;
     private PropertyGrid _propertyGrid;
+    private PropertyGrid _parameterGrid;
+    private Button _resetParametersButton;
     private Button _okButton, _cancelButton;
+
+    // PG2: per-entry parameter bag — non-null when the selected entry exposes a non-empty
+    // ParameterDescriptor list. The execute-time path reads ToValues() back through the
+    // token and calls ManipulatorEntry.CreateWith(...) to bind a parametric variant.
+    private ManipulatorParameterBag _currentParameterBag;
 
     // --- plumbing ---
     private System.Windows.Forms.Timer _debounceTimer;
@@ -147,6 +152,10 @@ namespace PixelArtScaling {
       this._UpdateModeVisibility();
       this._UpdateAlgorithmInfo();
       this._UpdateOobColorButton();
+      // PG2 — _UpdateAlgorithmInfo already re-seeded the parameter bag from the token (it
+      // peeks at theEffectToken.ParameterValues when FilterName matches). Repaint the grid
+      // so the new selection is visible.
+      this._parameterGrid.Refresh();
       if (this._initialPreviewScheduled) this._SchedulePreview();
     }
 
@@ -166,6 +175,17 @@ namespace PixelArtScaling {
       token.HorizontalOobMode = (OutOfBoundsMode)(this._oobXCombo.SelectedItem ?? OutOfBoundsMode.ConstantExtension);
       token.VerticalOobMode = (OutOfBoundsMode)(this._oobYCombo.SelectedItem ?? OutOfBoundsMode.ConstantExtension);
       token.CanvasColor = this._oobColor;
+
+      // PG2 — only persist parameter values for parametric entries with at least one user
+      // override, so the token's signature stays stable for non-parametric picks.
+      if (this._currentParameterBag != null && this._currentParameterBag.HasOverrides) {
+        var values = this._currentParameterBag.ToValues();
+        token.ParameterValues = new System.Collections.Generic.Dictionary<string, object>(values.Count);
+        foreach (var kv in values)
+          token.ParameterValues[kv.Key] = kv.Value;
+      } else {
+        token.ParameterValues = null;
+      }
     }
 
     private ScaleMode _CurrentMode() {
@@ -471,12 +491,15 @@ namespace PixelArtScaling {
       var host = new TableLayoutPanel {
         Dock = DockStyle.Fill,
         ColumnCount = 1,
-        RowCount = 3,
+        RowCount = 6,
         AutoSize = false,
       };
       host.RowStyles.Add(new RowStyle(SizeType.AutoSize));
       host.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-      host.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+      host.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+      host.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+      host.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+      host.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
       this._scaleInfo = new Label { Dock = DockStyle.Fill, AutoSize = false, Height = 22, ForeColor = SystemColors.GrayText, TextAlign = ContentAlignment.MiddleLeft, Margin = new Padding(0, 2, 0, 2) };
       this._algorithmInfo = new Label { Dock = DockStyle.Fill, AutoSize = false, Height = 70, Padding = new Padding(6), BorderStyle = BorderStyle.FixedSingle, TextAlign = ContentAlignment.TopLeft, Margin = new Padding(0, 2, 0, 6) };
@@ -487,9 +510,40 @@ namespace PixelArtScaling {
         PropertySort = PropertySort.Alphabetical,
       };
 
+      // PG2 — parametric algorithm tunables. Header + grid + reset button. Hidden when the
+      // selected entry has no parameters (the historical case for almost every entry).
+      this._parameterLabel = new Label {
+        Text = "Algorithm parameters",
+        Dock = DockStyle.Fill,
+        AutoSize = false,
+        Height = 22,
+        Font = new Font(SystemFonts.MessageBoxFont, FontStyle.Bold),
+        TextAlign = ContentAlignment.MiddleLeft,
+        Margin = new Padding(0, 8, 0, 2),
+        Visible = false,
+      };
+      this._parameterGrid = new PropertyGrid {
+        Dock = DockStyle.Fill,
+        HelpVisible = true,
+        ToolbarVisible = false,
+        PropertySort = PropertySort.CategorizedAlphabetical,
+        Visible = false,
+      };
+      this._parameterGrid.PropertyValueChanged += this._OnParameterValueChanged;
+      this._resetParametersButton = new Button {
+        Text = "Reset to defaults",
+        AutoSize = true,
+        Margin = new Padding(0, 4, 0, 0),
+        Visible = false,
+      };
+      this._resetParametersButton.Click += this._OnResetParametersClicked;
+
       host.Controls.Add(this._scaleInfo, 0, 0);
       host.Controls.Add(this._algorithmInfo, 0, 1);
       host.Controls.Add(this._propertyGrid, 0, 2);
+      host.Controls.Add(this._parameterLabel, 0, 3);
+      host.Controls.Add(this._parameterGrid, 0, 4);
+      host.Controls.Add(this._resetParametersButton, 0, 5);
       return host;
     }
 
@@ -892,8 +946,10 @@ namespace PixelArtScaling {
       public readonly bool UseCenteredGrid;
       /// <summary>When non-default, forces the rescaler to this supported variant (ScaleVariantEntry).</summary>
       public readonly ScaleFactor? VariantScale;
+      /// <summary>PG2 — parameter overrides for the entry; <see langword="null"/> when the entry is non-parametric or every value is at its default.</summary>
+      public readonly IReadOnlyDictionary<string, object> ParameterValues;
 
-      public UiSnapshot(ManipulatorEntry entry, ScaleMode mode, double px, double py, double fx, double fy, int tw, int th, bool lockAr, OutOfBoundsMode oobX, OutOfBoundsMode oobY, bool applyOob, Color oobColor, bool useCenteredGrid, ScaleFactor? variantScale) {
+      public UiSnapshot(ManipulatorEntry entry, ScaleMode mode, double px, double py, double fx, double fy, int tw, int th, bool lockAr, OutOfBoundsMode oobX, OutOfBoundsMode oobY, bool applyOob, Color oobColor, bool useCenteredGrid, ScaleFactor? variantScale, IReadOnlyDictionary<string, object> parameterValues) {
         this.Entry = entry; this.Mode = mode;
         this.PercentX = px; this.PercentY = py;
         this.FactorX = fx; this.FactorY = fy;
@@ -903,6 +959,7 @@ namespace PixelArtScaling {
         this.ApplyOob = applyOob; this.OobColor = oobColor;
         this.UseCenteredGrid = useCenteredGrid;
         this.VariantScale = variantScale;
+        this.ParameterValues = parameterValues;
       }
 
       public (int w, int h) ResolveTarget(int srcW, int srcH) {
@@ -935,6 +992,12 @@ namespace PixelArtScaling {
       ScaleFactor? variant = null;
       if (this._SelectedEntry() is ScaleVariantEntry && this._variantCombo.SelectedItem is VariantItem vi)
         variant = vi.Scale;
+      // PG2 — only forward parameter values when the user has actually edited them. Avoids
+      // CreateWith() rebuilds (and the matching descriptor instance allocation) on every
+      // unrelated UI tick for non-parametric algorithms.
+      var parameterValues = this._currentParameterBag != null && this._currentParameterBag.HasOverrides
+        ? this._currentParameterBag.ToValues()
+        : null;
       return new UiSnapshot(
         this._SelectedEntry(),
         this._CurrentMode(),
@@ -950,7 +1013,8 @@ namespace PixelArtScaling {
         this._OobAppliesToSelectedEntry(),
         this._oobColor,
         useCenteredGrid: true,
-        variant
+        variant,
+        parameterValues
       );
     }
 
@@ -992,22 +1056,31 @@ namespace PixelArtScaling {
     }
 
     private async Task _RenderPreviewAsync(UiSnapshot snapshot, Bitmap sourceSnapshot, CancellationToken cancel) {
+      // PG2 — when the user has parameter overrides, bind them into a fresh entry instance
+      // before render. Mirrors the exe's MainForm._BindManipulatorParameters → ResizeCommand.
       var entry = snapshot.Entry;
+      if (entry != null && snapshot.ParameterValues != null && entry.Parameters.Count > 0)
+        entry = entry.CreateWith(snapshot.ParameterValues) ?? entry;
+
       var (targetW, targetH) = snapshot.ResolveTarget(sourceSnapshot.Width, sourceSnapshot.Height);
       this._SafeSetLabel(this._previewLabel, $"Preview ({sourceSnapshot.Width}×{sourceSnapshot.Height} → {targetW}×{targetH}) — drag to pan · mouse-wheel to zoom");
 
       await this._renderGate.WaitAsync(cancel).ConfigureAwait(false);
       Bitmap result = null;
       try {
+        var boundEntry = entry;
         result = await Task.Run(() => {
           cancel.ThrowIfCancellationRequested();
+          // Make our own copy of the source snapshot so the manipulator can't mutate the
+          // caller's bitmap. Entry.Apply returns a freshly-allocated Bitmap that we hand back
+          // to the UI thread; the UI thread caches it as _cachedFiltered and disposes the
+          // previous one when a newer render arrives.
           using (var own = new Bitmap(sourceSnapshot)) {
-            var image = cImage.FromBitmap(own);
             var options = new ResampleOptions(snapshot.OobX, snapshot.OobY, snapshot.OobColor, snapshot.UseCenteredGrid);
             var fullRect = new Rectangle(0, 0, own.Width, own.Height);
-            var output = entry.Apply(image, fullRect, targetW, targetH, options);
+            var output = boundEntry.Apply(own, fullRect, targetW, targetH, options);
             cancel.ThrowIfCancellationRequested();
-            return output.ToBitmap();
+            return output;
           }
         }, cancel).ConfigureAwait(false);
       } finally {
@@ -1102,6 +1175,7 @@ namespace PixelArtScaling {
         this._algorithmInfo.Text = string.Empty;
         this._scaleInfo.Text = string.Empty;
         this._propertyGrid.SelectedObject = null;
+        this._SetParameterBag(null);
         return;
       }
       this._algorithmInfo.Text = entry.Description ?? string.Empty;
@@ -1116,6 +1190,56 @@ namespace PixelArtScaling {
         this._scaleInfo.Text = string.Empty;
       }
       this._propertyGrid.SelectedObject = new AlgorithmInfoDto(entry);
+      this._RefreshParameterBag(entry, preserveValues: false);
+    }
+
+    /// <summary>
+    /// PG2 — (re)builds <see cref="_currentParameterBag"/> for the selected entry. When the
+    /// entry has a non-empty <see cref="ManipulatorEntry.Parameters"/> list, the parameter
+    /// PropertyGrid + reset button become visible and bind to a fresh bag (or to a bag
+    /// preseeded from the token when <paramref name="preserveValues"/> is <see langword="true"/>).
+    /// Otherwise the parameter pane is hidden so the non-parametric picker doesn't see a
+    /// confusing empty grid.
+    /// </summary>
+    private void _RefreshParameterBag(ManipulatorEntry entry, bool preserveValues) {
+      var parameters = entry?.Parameters;
+      if (parameters == null || parameters.Count == 0) {
+        this._SetParameterBag(null);
+        return;
+      }
+
+      // Preserve the user's edits when only the inner UI changed (e.g. variant combo); on a
+      // fresh algorithm pick we re-seed from token (if it carries values for *this* entry)
+      // or from descriptor defaults.
+      IReadOnlyDictionary<string, object> seed = null;
+      if (preserveValues && this._currentParameterBag != null)
+        seed = this._currentParameterBag.ToValues();
+      else if (this.theEffectToken is PluginConfigToken token && token.ParameterValues != null && token.FilterName == entry.Name)
+        seed = token.ParameterValues;
+
+      this._SetParameterBag(ManipulatorParameterBag.CreateFor(parameters, seed));
+    }
+
+    private void _SetParameterBag(ManipulatorParameterBag bag) {
+      this._currentParameterBag = bag;
+      var visible = bag != null;
+      this._parameterLabel.Visible = visible;
+      this._parameterGrid.Visible = visible;
+      this._resetParametersButton.Visible = visible;
+      this._parameterGrid.SelectedObject = bag;
+      this._parameterGrid.Refresh();
+    }
+
+    private void _OnParameterValueChanged(object s, PropertyValueChangedEventArgs e) {
+      if (this._suppressEvents) return;
+      this._SchedulePreview();
+    }
+
+    private void _OnResetParametersClicked(object sender, EventArgs e) {
+      var entry = this._SelectedEntry();
+      if (entry == null || entry.Parameters == null || entry.Parameters.Count == 0) return;
+      this._SetParameterBag(ManipulatorParameterBag.CreateFor(entry.Parameters));
+      this._SchedulePreview();
     }
 
     private sealed class AlgorithmInfoDto {

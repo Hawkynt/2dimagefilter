@@ -1,8 +1,7 @@
-﻿#region (c)2008-2015 Hawkynt
+#region (c)2008-2026 Hawkynt
 /*
- *  cImage 
- *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+ *  Image filtering library
+    Copyright (C) 2008-2026 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +24,6 @@ using System.Drawing;
 using System.Drawing.Extensions.ColorProcessing.Resizing;
 
 using Classes.ImageManipulators;
-using Imager;
 
 using word = System.UInt16;
 
@@ -42,7 +40,7 @@ namespace Classes.ScriptActions {
       var width = this.Width;
       var height = this.Height;
 
-      // pverwrite dimensions from percentage if needed
+      // overwrite dimensions from percentage if needed
       var percentage = this.Percentage;
       if (percentage > 0) {
         width = (word)Math.Round(source.Width * percentage / 100d);
@@ -51,38 +49,34 @@ namespace Classes.ScriptActions {
 
       // correct aspect ratio if needed
       if (this.MaintainAspect) {
-        if (width == 0) {
+        if (width == 0)
           width = (word)Math.Round((double)height * source.Width / source.Height);
-        } else {
+        else
           height = (word)Math.Round((double)width * source.Height / source.Width);
-        }
       }
 
       // UseThresholds + HorizontalBph/VerticalBph retained in the serialization contract but no longer
       // thread any scaler behaviour after the local sPixel-based XBR/XBRz/NQ migration.
 
-      cImage result = null;
+      Bitmap result = null;
       var method = this.Manipulator;
-      var planeExtractor = method as PlaneExtractor;
-      var bitmapFixed = method as BitmapFixedAdapter;
-      var bitmapResampler = method as BitmapResamplerAdapter;
 
-      if (bitmapFixed != null) {
+      if (method is BitmapFixedAdapter bitmapFixed)
         result = bitmapFixed.Apply(source, this.UseThresholds);
-      } else if (bitmapResampler != null) {
-        result = bitmapResampler.Apply(source, width, height, this.HorizontalBph, this.VerticalBph, System.Drawing.Color.Transparent, this.UseCenteredGrid);
-      } else if (planeExtractor != null) {
+      else if (method is BitmapResamplerAdapter bitmapResampler)
+        result = bitmapResampler.Apply(source, width, height, this.HorizontalBph, this.VerticalBph, this.CanvasColor, this.UseCenteredGrid);
+      else if (method is PlaneExtractor planeExtractor)
         result = planeExtractor.Apply(source);
-      }
 
       this.TargetImage = result;
       return true;
     }
 
     public Bitmap GdiSource => null;
-    public cImage SourceImage { get; set; }
-    public cImage TargetImage { get; set; }
-    
+    public Bitmap SourceImage { get; set; }
+    public Bitmap TargetImage { get; set; }
+    public string PoolSourceKey => null;
+
     #endregion
 
     public IImageManipulator Manipulator { get; }
@@ -91,6 +85,7 @@ namespace Classes.ScriptActions {
     public bool MaintainAspect { get; }
     public OutOfBoundsMode HorizontalBph { get; }
     public OutOfBoundsMode VerticalBph { get; }
+    public Color CanvasColor { get; }
     public byte Count { get; }
     public bool UseThresholds { get; }
     public bool UseCenteredGrid { get; }
@@ -99,7 +94,7 @@ namespace Classes.ScriptActions {
 
     private readonly bool _applyToTarget;
 
-    public ResizeCommand(bool applyToTarget, IImageManipulator manipulator, word width, word height, word percentage, bool maintainAspect, OutOfBoundsMode horizontalBph, OutOfBoundsMode verticalBph, byte count, bool useThresholds, bool useCenteredGrid, float radius) {
+    public ResizeCommand(bool applyToTarget, IImageManipulator manipulator, word width, word height, word percentage, bool maintainAspect, OutOfBoundsMode horizontalBph, OutOfBoundsMode verticalBph, byte count, bool useThresholds, bool useCenteredGrid, float radius, Color canvasColor = default) {
       this._applyToTarget = applyToTarget;
       this.Manipulator = manipulator;
       this.Width = width;
@@ -107,6 +102,7 @@ namespace Classes.ScriptActions {
       this.MaintainAspect = maintainAspect;
       this.HorizontalBph = horizontalBph;
       this.VerticalBph = verticalBph;
+      this.CanvasColor = canvasColor == default ? Color.Transparent : canvasColor;
       this.Count = count;
       this.UseThresholds = useThresholds;
       this.UseCenteredGrid = useCenteredGrid;

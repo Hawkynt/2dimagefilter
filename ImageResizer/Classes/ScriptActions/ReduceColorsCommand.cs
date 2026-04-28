@@ -1,6 +1,5 @@
 #region (c)2008-2026 Hawkynt
 /*
- *  cImage
  *  Image filtering library
     Copyright (C) 2008-2026 Hawkynt
 
@@ -19,7 +18,6 @@
 using System.Drawing;
 using Hawkynt.ColorProcessing.Dithering;
 using Hawkynt.ColorProcessing.Quantization;
-using Imager;
 using Imager.Pipelines;
 
 namespace Classes.ScriptActions {
@@ -49,15 +47,13 @@ namespace Classes.ScriptActions {
       if (source == null || this.Quantizer == null)
         return false;
 
-      using (var src = source.ToBitmap())
-      using (var reduced = UpstreamPipeline.ApplyQuantization(src, this.Quantizer, this.Ditherer, this.PaletteSize))
-        this.TargetImage = cImage.FromBitmap(reduced);
-
+      this.TargetImage = UpstreamPipeline.ApplyQuantization(source, this.Quantizer, this.Ditherer, this.PaletteSize);
       return true;
     }
 
     public Bitmap GdiSource => null;
-    public cImage SourceImage { get; set; }
-    public cImage TargetImage { get; set; }
+    public Bitmap SourceImage { get; set; }
+    public Bitmap TargetImage { get; set; }
+    public string PoolSourceKey => null;
   }
 }

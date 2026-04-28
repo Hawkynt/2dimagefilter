@@ -1,8 +1,7 @@
-﻿#region (c)2008-2015 Hawkynt
+#region (c)2008-2026 Hawkynt
 /*
- *  cImage 
- *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+ *  Image filtering library
+    Copyright (C) 2008-2026 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,30 +21,29 @@
 using System;
 using System.Drawing;
 
-using Imager;
-
 namespace Classes.ScriptActions {
   internal class LoadStdInCommand : IScriptAction {
     #region Implementation of IScriptAction
     public bool ChangesSourceImage => true;
-
     public bool ChangesTargetImage => true;
     public bool ProvidesNewGdiSource => true;
 
     public bool Execute() {
       using (var stream = Console.OpenStandardInput())
-        this.SourceImage = cImage.FromBitmap(this.GdiSource = (Bitmap)Image.FromStream(stream, false));
+      using (var image = Image.FromStream(stream, false))
+        this.SourceImage = this.GdiSource = new Bitmap(image);
       return true;
     }
 
-    public cImage SourceImage { get; set; }
+    public Bitmap SourceImage { get; set; }
 
-    public cImage TargetImage {
+    public Bitmap TargetImage {
       get => null;
       set { }
     }
 
     public Bitmap GdiSource { get; private set; }
+    public string PoolSourceKey => null;
     #endregion
 
   }

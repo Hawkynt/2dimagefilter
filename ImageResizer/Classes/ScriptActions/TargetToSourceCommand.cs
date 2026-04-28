@@ -1,8 +1,7 @@
-﻿#region (c)2008-2015 Hawkynt
+#region (c)2008-2026 Hawkynt
 /*
- *  cImage 
- *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+ *  Image filtering library
+    Copyright (C) 2008-2026 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,9 +20,13 @@
 
 using System.Drawing;
 
-using Imager;
-
 namespace Classes.ScriptActions {
+  /// <summary>
+  /// Promotes the target image into the source slot and clears the target. Pre-M5 (cImage)
+  /// the same bitmap was simply aliased into both slots; with engine-owned <see cref="Bitmap"/>
+  /// instances we must <see cref="Bitmap.Clone()"/> instead — the engine's TargetImage setter
+  /// would otherwise dispose the just-promoted source bitmap when we null the target.
+  /// </summary>
   internal class TargetToSourceCommand : IScriptAction {
     #region Implementation of IScriptAction
     public bool ChangesSourceImage => true;
@@ -31,16 +34,16 @@ namespace Classes.ScriptActions {
     public bool ProvidesNewGdiSource => false;
 
     public bool Execute() {
-      this.SourceImage = this.TargetImage;
+      this.SourceImage = this.TargetImage == null ? null : (Bitmap)this.TargetImage.Clone();
       this.TargetImage = null;
       return true;
     }
 
     public Bitmap GdiSource => null;
 
-    public cImage SourceImage { get; set; }
-
-    public cImage TargetImage { get; set; }
+    public Bitmap SourceImage { get; set; }
+    public Bitmap TargetImage { get; set; }
+    public string PoolSourceKey => null;
     #endregion
   }
 }

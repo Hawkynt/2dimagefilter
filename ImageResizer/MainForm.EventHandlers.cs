@@ -45,6 +45,12 @@ namespace ImageResizer {
     }
 
     private void btSwitch_Click(object sender, EventArgs e) {
+      // Detach both PictureBoxes BEFORE running the action — TargetToSourceCommand causes the
+      // engine to dispose the old source bitmap (replaced by a clone of the target) and the old
+      // target bitmap (set to null). Either disposal would crash a still-attached PictureBox
+      // mid-paint via ImageAnimator.CanAnimate(FrameDimensionsList).
+      this.iwhSourceImage.Image = null;
+      this._TargetImage = null;
 
       this._scriptEngine.ExecuteAction(new TargetToSourceCommand());
       this._SourceImage = this._scriptEngine.GdiSource;
@@ -166,6 +172,21 @@ namespace ImageResizer {
 
       this.nudRadius.Enabled = method != null && method.SupportsRadius;
 
+      // Show / hide the PropertyGrid for the selected manipulator's parameter surface.
+      // Stash the bag on the form so the apply path can read its values back without
+      // re-parsing the grid; null when the manipulator has no tunable parameters.
+      var parameters = method?.Parameters;
+      if (parameters != null && parameters.Count > 0) {
+        var bag = ManipulatorParameterBag.CreateFor(parameters);
+        this._currentParameterBag = bag;
+        this.pgManipulatorParameters.SelectedObject = bag;
+        this.pgManipulatorParameters.Visible = true;
+      } else {
+        this._currentParameterBag = null;
+        this.pgManipulatorParameters.SelectedObject = null;
+        this.pgManipulatorParameters.Visible = false;
+      }
+
       this._SchedulePreview();
     }
 
@@ -258,6 +279,23 @@ namespace ImageResizer {
       this._SchedulePreview();
     }
 
+    private void btnScale2x_Click(object sender, EventArgs e) => this._ApplyScaleFactor(2);
+    private void btnScale3x_Click(object sender, EventArgs e) => this._ApplyScaleFactor(3);
+    private void btnScale4x_Click(object sender, EventArgs e) => this._ApplyScaleFactor(4);
+    private void btnScale5x_Click(object sender, EventArgs e) => this._ApplyScaleFactor(5);
+    private void btnScale6x_Click(object sender, EventArgs e) => this._ApplyScaleFactor(6);
+    private void btnScale10x_Click(object sender, EventArgs e) => this._ApplyScaleFactor(10);
+
+    private void _ApplyScaleFactor(int factor) {
+      var source = this._scriptEngine.SourceImage;
+      if (source == null) return;
+
+      var targetW = (long)source.Width * factor;
+      var targetH = (long)source.Height * factor;
+      this.nudWidth.Value = (decimal)Math.Min(targetW, (long)this.nudWidth.Maximum);
+      this.nudHeight.Value = (decimal)Math.Min(targetH, (long)this.nudHeight.Maximum);
+    }
+
     private void showToolStripMenuItem_Click(object sender, EventArgs e) {
       MessageBox.Show(ScriptSerializer.SerializeState(this._scriptEngine), "Script", MessageBoxButtons.OK, MessageBoxIcon.None);
     }
@@ -279,6 +317,10 @@ namespace ImageResizer {
       var srcBitmap = this._scriptEngine.GdiSource;
       var srcW = srcBitmap?.Width ?? 0;
       var srcH = srcBitmap?.Height ?? 0;
+      // Detach both PictureBoxes before re-running the script — RepeatActions will dispose
+      // intermediate engine-owned bitmaps and we mustn't leave the UI referencing them.
+      this.iwhSourceImage.Image = null;
+      this._TargetImage = null;
       try {
         this._scriptEngine.RepeatActions();
         this._SourceImage = this._scriptEngine.GdiSource;

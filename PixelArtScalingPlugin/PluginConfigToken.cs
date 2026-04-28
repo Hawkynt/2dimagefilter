@@ -19,6 +19,7 @@
  */
 #endregion
 
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Extensions.ColorProcessing.Resizing;
 
@@ -57,6 +58,14 @@ namespace PixelArtScaling {
     /// <summary>When <c>true</c>, destination pixel centres are aligned with source coordinates; when <c>false</c>, top-left corners are. Upstream resamplers honour this per-call.</summary>
     public bool UseCenteredGrid { get; set; } = true;
 
+    /// <summary>
+    /// Tunable parameter overrides for the currently selected manipulator entry, keyed by
+    /// <c>ParameterDescriptor.Name</c>. <c>null</c> or empty when the entry is non-parametric
+    /// or the user hasn't touched any field. Consumed by the effect's
+    /// <c>OnSetRenderInfo</c> via <c>ManipulatorEntry.CreateWith(values)</c>.
+    /// </summary>
+    public Dictionary<string, object> ParameterValues { get; set; }
+
     public PluginConfigToken() { }
 
     public PluginConfigToken(PluginConfigToken cloneFrom) : base(cloneFrom) {
@@ -73,6 +82,9 @@ namespace PixelArtScaling {
       this.VerticalOobMode = cloneFrom.VerticalOobMode;
       this.CanvasColor = cloneFrom.CanvasColor;
       this.UseCenteredGrid = cloneFrom.UseCenteredGrid;
+      this.ParameterValues = cloneFrom.ParameterValues == null
+        ? null
+        : new Dictionary<string, object>(cloneFrom.ParameterValues);
     }
 
     public override object Clone() => new PluginConfigToken(this);

@@ -1,8 +1,7 @@
-﻿#region (c)2008-2019 Hawkynt
+#region (c)2008-2026 Hawkynt
 /*
- *  cImage 
- *  Image filtering library 
-    Copyright (C) 2008-2019 Hawkynt
+ *  Image filtering library
+    Copyright (C) 2008-2026 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,15 +19,24 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
+using System.Drawing;
+using System.Drawing.Imaging;
 
-using Imager;
+using Hawkynt.ColorProcessing;
+using Hawkynt.Drawing;
 
 namespace Classes.ImageManipulators {
+  /// <summary>
+  /// Maps each source pixel through a projector <c>Color → byte</c> and writes a greyscale
+  /// 32bpp ARGB bitmap. The actual projector is wired by <c>SupportedManipulators</c> from
+  /// <c>UpstreamPipeline.PlaneExtractors()</c>; this adapter just walks the pixels.
+  /// </summary>
   [Description("Color component extractors")]
   internal class PlaneExtractor : IImageManipulator {
-    private readonly Func<cImage, cImage> _planeExtractionFunction;
+    private readonly Func<Color, byte> _projector;
 
     #region Implementation of IImageManipulator
     public bool SupportsWidth => false;
@@ -40,15 +48,32 @@ namespace Classes.ImageManipulators {
     public bool SupportsRadius => false;
     public string Description { get; }
 
+    // Plane extractors are pure colour-space projections with no tunable parameters.
+    public IReadOnlyList<ParameterDescriptor> Parameters => ImageManipulatorDefaults.EmptyParameters;
+    public IImageManipulator CreateWith(IReadOnlyDictionary<string, object> values) => this;
+
     #endregion
 
-    public cImage Apply(cImage source) => this._planeExtractionFunction(source);
-
-    public PlaneExtractor(Func<cImage, cImage> planeExtractionFunction, string description) {
-      Contract.Requires(planeExtractionFunction != null);
-      this._planeExtractionFunction = planeExtractionFunction;
-      this.Description = description;
+    public Bitmap Apply(Bitmap source) {
+      Contract.Requires(source != null);
+      var width = source.Width;
+      var height = source.Height;
+      var result = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+      using (var src = source.Lock(ImageLockMode.ReadOnly))
+      using (var dst = result.Lock(ImageLockMode.WriteOnly)) {
+        for (var y = 0; y < height; ++y)
+        for (var x = 0; x < width; ++x) {
+          var grey = this._projector(src[x, y]);
+          dst[x, y] = Color.FromArgb(255, grey, grey, grey);
+        }
+      }
+      return result;
     }
 
+    public PlaneExtractor(Func<Color, byte> projector, string description) {
+      Contract.Requires(projector != null);
+      this._projector = projector;
+      this.Description = description;
+    }
   }
 }

@@ -1,8 +1,7 @@
-#region (c)2008-2019 Hawkynt
+#region (c)2008-2026 Hawkynt
 /*
- *  cImage
  *  Image filtering library
-    Copyright (C) 2008-2019 Hawkynt
+    Copyright (C) 2008-2026 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,19 +17,40 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
-using Classes;
-using Imager;
-using Imager.Pipelines;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
+
+using Hawkynt.Drawing;
+
+using Imager.Pipelines;
 
 namespace PixelArtScaling {
   internal static class SupportedManipulators {
 
+    /// <summary>
+    /// Walks the <paramref name="source"/> Bitmap pixel-by-pixel through <paramref name="extract"/>
+    /// and writes a 32bpp greyscale result. The plugin's plane-extractor entries previously delegated
+    /// this through <c>cImage</c>; the M5 migration moved it to a direct <see cref="IBitmapLocker"/>
+    /// loop so the plugin no longer touches the retired <c>cImage</c> wrapper.
+    /// </summary>
+    private static Bitmap _ExtractPlane(Bitmap source, System.Func<Color, byte> extract) {
+      var width = source.Width;
+      var height = source.Height;
+      var result = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+      using (var src = source.Lock(ImageLockMode.ReadOnly))
+      using (var dst = result.Lock(ImageLockMode.WriteOnly)) {
+        for (var y = 0; y < height; ++y)
+        for (var x = 0; x < width; ++x) {
+          var grey = extract(src[x, y]);
+          dst[x, y] = Color.FromArgb(255, grey, grey, grey);
+        }
+      }
+      return result;
+    }
+
     public static readonly ManipulatorEntry[] Manipulators =
       new ManipulatorEntry[0]
-
-    // Local PixelScalerType / XbrScalerType / XbrzScalerType / NqScalerType blocks
-    // removed — their entries are provided by the upstream rescaler block below.
 
     #region upstream rescalers (Upscaler:/Downscaler: …) — single dropdown entry per algorithm; user W/H or Scale (%) snaps to a supported variant for multi-scale algorithms
 .Concat(
@@ -44,7 +64,7 @@ namespace PixelArtScaling {
       UpstreamPipeline.ClassifyRescaler(capture) + ": " + capture.Name,
       capture.Description,
       scaleX, scaleY,
-      (img, r) => cImage.FromBitmap(capture.Apply(img.ToBitmap(), r.Width * scaleX, r.Height * scaleY, false))
+      (img, r) => capture.Apply(img, r.Width * scaleX, r.Height * scaleY, false)
     ))
 .Concat(
     from s in UpstreamPipeline.Rescalers()
@@ -55,20 +75,16 @@ namespace PixelArtScaling {
       UpstreamPipeline.ClassifyRescaler(capture) + ": " + capture.Name,
       capture.Description + " — supports " + scalesText + "; Target W/H or Scale (%) snaps to the nearest variant.",
       capture.SupportedScales,
-      (img, _, w, h) => cImage.FromBitmap(capture.Apply(img.ToBitmap(), w, h, false))
+      (img, _, w, h) => capture.Apply(img, w, h, false)
     ))
     #endregion
 
-    #region upstream filters (Filter: …)
+    #region upstream filters (Filter: …) — parametric variants thread Parameters/CreateWith through
 .Concat(
     from f in UpstreamPipeline.Filters()
     let capture = f
-    select (ManipulatorEntry)new FixedScaleEntry(
-      "Filter: " + capture.Name,
-      capture.Description,
-      1, 1,
-      (img, _) => cImage.FromBitmap(capture.Apply(img.ToBitmap()))
-    ))
+    select (ManipulatorEntry)_BuildFilterEntry(capture)
+    )
     #endregion
 
     #region upstream colour-space plane extractors (Plane: …)
@@ -79,7 +95,7 @@ namespace PixelArtScaling {
       "Plane: " + capture.Name,
       capture.Description,
       1, 1,
-      (img, _) => new cImage(img, capture.Extract)
+      (img, _) => _ExtractPlane(img, capture.Extract)
     ))
     #endregion
 
@@ -90,7 +106,7 @@ namespace PixelArtScaling {
     select (ManipulatorEntry)new ResampleEntry(
       UpstreamPipeline.ClassifyResampler(capture) + ": " + capture.Name,
       capture.Description,
-      (img, _, w, h, options) => cImage.FromBitmap(capture.Resample(img.ToBitmap(), w, h, options.HorizontalMode, options.VerticalMode, options.CanvasColor, options.UseCenteredGrid))
+      (img, _, w, h, options) => capture.Resample(img, w, h, options.HorizontalMode, options.VerticalMode, options.CanvasColor, options.UseCenteredGrid)
     ))
     #endregion
 
@@ -105,5 +121,40 @@ namespace PixelArtScaling {
 
       .OrderBy(e => e.Name, System.StringComparer.OrdinalIgnoreCase)
       .ToArray();
+
+    /// <summary>
+    /// Wraps an upstream <see cref="UpstreamPipeline.FilterInfo"/> in a <see cref="FixedScaleEntry"/>.
+    /// When the filter advertises a non-empty <c>Parameters</c> list (i.e. it was registered through
+    /// <c>FilterRegistry.RegisterParametric</c>), threads the parameter surface and a CreateWith
+    /// rebuilder into the entry so the plugin's PropertyGrid can render and apply tunable values.
+    /// Mirrors PG1's <c>SupportedManipulators._BuildFilterAdapter</c> in the WinForms exe.
+    /// </summary>
+    private static FixedScaleEntry _BuildFilterEntry(UpstreamPipeline.FilterInfo filter) {
+      var displayName = "Filter: " + filter.Name;
+      if (filter.Parameters == null || filter.Parameters.Count == 0 || filter.CreateWith == null)
+        return new FixedScaleEntry(displayName, filter.Description, 1, 1, (img, _) => filter.Apply(img));
+
+      System.Func<System.Collections.Generic.IReadOnlyDictionary<string, object>, FixedScaleEntry> rebuild = null;
+      rebuild = values => {
+        var bound = filter.CreateWith(values);
+        return new FixedScaleEntry(
+          displayName,
+          bound.Description,
+          1, 1,
+          (img, _) => bound.Apply(img),
+          bound.Parameters,
+          rebuild
+        );
+      };
+
+      return new FixedScaleEntry(
+        displayName,
+        filter.Description,
+        1, 1,
+        (img, _) => filter.Apply(img),
+        filter.Parameters,
+        rebuild
+      );
+    }
   }
 }

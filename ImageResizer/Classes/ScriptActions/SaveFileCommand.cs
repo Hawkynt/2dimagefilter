@@ -1,8 +1,7 @@
-﻿#region (c)2008-2019 Hawkynt
+#region (c)2008-2026 Hawkynt
 /*
- *  cImage 
- *  Image filtering library 
-    Copyright (C) 2008-2019 Hawkynt
+ *  Image filtering library
+    Copyright (C) 2008-2026 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,18 +22,16 @@ using System;
 using System.Diagnostics.Contracts;
 using System.Drawing;
 
-using Imager;
-
 namespace Classes.ScriptActions {
   internal class SaveFileCommand : IScriptAction {
     #region Implementation of IScriptAction
     public bool ChangesSourceImage => false;
-
     public bool ChangesTargetImage => false;
     public bool ProvidesNewGdiSource => false;
 
     public bool Execute() {
-      var result = CLI.SaveHelper(this.FileName, this.TargetImage.ToBitmap());
+      // The engine still owns TargetImage; pass through, don't dispose.
+      var result = CLI.SaveHelper(this.FileName, this.TargetImage);
       if (result == CLIExitCode.NothingToSave)
         throw new NullReferenceException("Nothing to save");
       if (result == CLIExitCode.JpegNotSupportedOnThisPlatform)
@@ -45,9 +42,9 @@ namespace Classes.ScriptActions {
 
     public Bitmap GdiSource => null;
 
-    public cImage SourceImage { get; set; }
-
-    public cImage TargetImage { get; set; }
+    public Bitmap SourceImage { get; set; }
+    public Bitmap TargetImage { get; set; }
+    public string PoolSourceKey => null;
     #endregion
 
     public string FileName { get; }

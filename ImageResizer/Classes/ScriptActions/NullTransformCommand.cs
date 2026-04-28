@@ -1,8 +1,7 @@
-﻿#region (c)2008-2015 Hawkynt
+#region (c)2008-2026 Hawkynt
 /*
- *  cImage 
- *  Image filtering library 
-    Copyright (C) 2008-2015 Hawkynt
+ *  Image filtering library
+    Copyright (C) 2008-2026 Hawkynt
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,9 +20,12 @@
 
 using System.Drawing;
 
-using Imager;
-
 namespace Classes.ScriptActions {
+  /// <summary>
+  /// Copies <see cref="IScriptAction.SourceImage"/> into <see cref="IScriptAction.TargetImage"/>.
+  /// We <see cref="Bitmap.Clone()"/> the source so the engine's source / target slots stay
+  /// independently owned — disposing one must not invalidate the other.
+  /// </summary>
   internal class NullTransformCommand : IScriptAction {
     #region Implementation of IScriptAction
     public bool ChangesSourceImage => false;
@@ -31,15 +33,15 @@ namespace Classes.ScriptActions {
     public bool ProvidesNewGdiSource => false;
 
     public bool Execute() {
-      this.TargetImage = this.SourceImage;
+      this.TargetImage = this.SourceImage == null ? null : (Bitmap)this.SourceImage.Clone();
       return true;
     }
 
     public Bitmap GdiSource => null;
 
-    public cImage SourceImage { get; set; }
-
-    public cImage TargetImage { get; set; }
+    public Bitmap SourceImage { get; set; }
+    public Bitmap TargetImage { get; set; }
+    public string PoolSourceKey => null;
     #endregion
   }
 }

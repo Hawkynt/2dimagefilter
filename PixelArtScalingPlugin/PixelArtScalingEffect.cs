@@ -28,8 +28,6 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 
-using Imager;
-
 namespace PixelArtScaling {
 
   public class PluginSupportInfo : IPluginSupportInfo {
@@ -78,20 +76,31 @@ namespace PixelArtScaling {
         if (!_ENTRIES_BY_NAME.TryGetValue(token.FilterName ?? string.Empty, out var entry))
           entry = SupportedManipulators.Manipulators[0];
 
+        // PG2 — bind parametric overrides into a fresh entry instance when the token carries
+        // them. CreateWith is a no-op for non-parametric entries (default base impl returns
+        // this), so the unconditional call is safe and keeps the dispatch path uniform.
+        if (token.ParameterValues != null && entry.Parameters.Count > 0)
+          entry = entry.CreateWith(token.ParameterValues) ?? entry;
+
         var sourceSurface = srcArgs.Surface;
         var sourceRect = this.EnvironmentParameters.GetSelection(sourceSurface.Bounds).GetBoundsInt();
         var (userW, userH) = _ResolveTargetSize(token, sourceRect.Width, sourceRect.Height);
         var targetRect = entry.ComputeTargetRectangle(sourceRect, userW, userH);
 
-        var input = cImage.FromBitmap(sourceSurface.CreateAliasedBitmap());
+        // CreateAliasedBitmap aliases the surface's pixel buffer — never dispose it (the
+        // Surface owns the memory). Pass it straight into the manipulator entry; the entry
+        // returns a freshly-allocated Bitmap that we own and dispose after blitting to the
+        // result Surface.
+        var input = sourceSurface.CreateAliasedBitmap();
         var options = new ResampleOptions(
           token.HorizontalOobMode,
           token.VerticalOobMode,
           token.CanvasColor,
           token.UseCenteredGrid
         );
-        var filtered = entry.Apply(input, sourceRect, userW, userH, options);
-        var newSurface = _CreateSurfaceFromImage(filtered, targetRect);
+        Surface newSurface;
+        using (var filtered = entry.Apply(input, sourceRect, userW, userH, options))
+          newSurface = _CreateSurfaceFromBitmap(filtered, targetRect);
 
         var old = this._filteredSurface;
         this._filteredSurface = newSurface;
@@ -137,7 +146,9 @@ namespace PixelArtScaling {
     }
 
     private static bool _OobAppliesToEntry(ManipulatorEntry entry) {
-      // Upstream-prefixed entries go through the Bitmap-based adapters that don't honour cImage OOB.
+      // Upstream-prefixed entries go through the Bitmap-based adapters that bake their own OOB handling
+      // (or don't have a notion of OOB at all). Local fixed-scale entries — none remain after M5,
+      // but the predicate is kept for future plugin-side entries.
       var name = entry?.Name;
       if (string.IsNullOrEmpty(name)) return false;
       if (name.StartsWith("Scaler:") || name.StartsWith("Resampler:") || name.StartsWith("Filter:") || name.StartsWith("Plane:"))
@@ -155,8 +166,31 @@ namespace PixelArtScaling {
         (int)token.HorizontalOobMode, "/", (int)token.VerticalOobMode, "|",
         token.CanvasColor.ToArgb().ToString("X8"), "|",
         token.UseCenteredGrid ? "1" : "0", "|",
+        _ParameterSignature(token.ParameterValues), "|",
         src.Width, "x", src.Height
       );
+    }
+
+    /// <summary>
+    /// PG2 — stable, ordered, culture-invariant signature for the parameter dictionary so
+    /// the render cache invalidates when the user tweaks a parametric filter and clicks OK
+    /// again. Keys are sorted ordinally; values are stringified via InvariantCulture.
+    /// </summary>
+    private static string _ParameterSignature(System.Collections.Generic.IDictionary<string, object> values) {
+      if (values == null || values.Count == 0) return string.Empty;
+      var keys = new System.Collections.Generic.List<string>(values.Keys);
+      keys.Sort(System.StringComparer.Ordinal);
+      var sb = new System.Text.StringBuilder(values.Count * 16);
+      foreach (var k in keys) {
+        sb.Append(k).Append('=');
+        var v = values[k];
+        if (v is System.IFormattable f)
+          sb.Append(f.ToString(null, System.Globalization.CultureInfo.InvariantCulture));
+        else
+          sb.Append(v?.ToString() ?? string.Empty);
+        sb.Append(';');
+      }
+      return sb.ToString();
     }
 
     private static (int width, int height) _ResolveTargetSize(PluginConfigToken token, int sourceW, int sourceH) {
@@ -181,16 +215,15 @@ namespace PixelArtScaling {
       }
     }
 
-    private static Surface _CreateSurfaceFromImage(cImage image, Rectangle rect) {
-      var bitmap = image.ToBitmap();
+    private static Surface _CreateSurfaceFromBitmap(Bitmap bitmap, Rectangle rect) {
       var clipRect = new Rectangle(
         Math.Max(0, Math.Min(bitmap.Width - 1, rect.X)),
         Math.Max(0, Math.Min(bitmap.Height - 1, rect.Y)),
         Math.Max(1, Math.Min(bitmap.Width - rect.X, rect.Width)),
         Math.Max(1, Math.Min(bitmap.Height - rect.Y, rect.Height))
       );
-      var selection = bitmap.Clone(clipRect, bitmap.PixelFormat);
-      return Surface.CopyFromBitmap(selection);
+      using (var selection = bitmap.Clone(clipRect, bitmap.PixelFormat))
+        return Surface.CopyFromBitmap(selection);
     }
   }
 }
