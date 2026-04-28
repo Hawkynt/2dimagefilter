@@ -112,7 +112,10 @@ namespace ImageResizer.UserControls {
       this._stageHint = new Label { Text = "Pick a quantizer below:", Dock = DockStyle.Top, AutoSize = true, Font = new Font(this.Font, FontStyle.Bold) };
       root.Controls.Add(this._stageHint, 0, 4);
 
-      // 5 — quant strip (with its own scroll)
+      // 5 — quant strip. ONE FlowLayoutPanel containing both header labels and tiles as
+      // siblings. Headers force a flow break (their own row) and the rest of the row gets
+      // tiles wrapping naturally. Click on a header toggles visibility of its category's
+      // tiles. No nested AutoSize, no scrollbar-feedback loops.
       this._quantStrip = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoScroll = true, WrapContents = true, FlowDirection = FlowDirection.LeftToRight, BorderStyle = BorderStyle.FixedSingle };
       this._quantStrip.Scroll += (s, e) => this._UpdatePriorities();
       root.Controls.Add(this._quantStrip, 0, 5);
@@ -120,7 +123,7 @@ namespace ImageResizer.UserControls {
       // 6 — "after quant → ditherer" hint
       root.Controls.Add(new Label { Text = "Then pick a ditherer:", Dock = DockStyle.Top, AutoSize = true, Font = new Font(this.Font, FontStyle.Bold), Padding = new Padding(0, 6, 0, 0) }, 0, 6);
 
-      // 7 — ditherer strip
+      // 7 — ditherer strip (same pattern as _quantStrip)
       this._ditherStrip = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoScroll = true, WrapContents = true, FlowDirection = FlowDirection.LeftToRight, BorderStyle = BorderStyle.FixedSingle };
       this._ditherStrip.Scroll += (s, e) => this._UpdatePriorities();
       root.Controls.Add(this._ditherStrip, 0, 7);
@@ -166,7 +169,13 @@ namespace ImageResizer.UserControls {
           outer.Panel2MinSize = Math.Min(360, halfWidth);
           outer.SplitterDistance = Math.Min(440, outer.Width - outer.Panel2MinSize);
         } catch { /* parent too narrow even for the clamped values; let WinForms keep defaults */ }
+        this._SyncStripWrapWidths(outer.Panel1);
       };
+      // Drag-the-splitter re-flow: when Panel1 resizes, push the new wrap-width onto the
+      // strips so tiles re-flow row-by-row at the new column width without waiting for
+      // AutoScroll feedback. Cleaner than letting the FLPs derive width from their own
+      // ClientSize (which can lag scrollbar visibility changes).
+      outer.Panel1.ClientSizeChanged += (s, e) => this._SyncStripWrapWidths(outer.Panel1);
 
       this._thumbs.ThumbnailReady += this._OnThumbnailReady;
       this._thumbs.ThumbnailStarted += this._OnThumbnailStarted;
@@ -237,16 +246,36 @@ namespace ImageResizer.UserControls {
       this._quantStrip.SuspendLayout();
       _DisposeChildren(this._quantStrip);
 
-      foreach (var q in QuantizerRegistry.All) {
-        if (q.DeclaringType.ContainsGenericParameters) continue;
-        var tile = new Tile(q.Name);
-        tile.Clicked += (s, e) => this._OnQuantizerPicked(q, tile);
-        tile.Resize(this._PreviewSize);
-        this._quantStrip.Controls.Add(tile);
+      var byCategory = QuantizerRegistry.All
+        .Where(q => !q.DeclaringType.ContainsGenericParameters)
+        .GroupBy(q => q.Type)
+        .OrderBy(g => _CategoryOrder(g.Key));
 
-        var key = new ThumbnailKey(this._thumbs.SourceVersion, q.Name, null, this._PaletteSize, this._PreviewSize);
-        this._tilesByKey[key] = tile;
-        this._RequestIfNeeded(key, q, null, priorityVisibleInStrip: true);
+      foreach (var category in byCategory) {
+        var tileCount = category.Count();
+        var header = _CreateCategoryHeader(_QuantCategoryLabel(category.Key), tileCount);
+        this._quantStrip.Controls.Add(header);
+        this._quantStrip.SetFlowBreak(header, true);
+        var firstTileInCategory = (Tile)null;
+        foreach (var q in category) {
+          var tile = new Tile(q.Name);
+          var qLocal = q;
+          tile.Clicked += (s, e) => this._OnQuantizerPicked(qLocal, tile);
+          tile.Resize(this._PreviewSize);
+          this._quantStrip.Controls.Add(tile);
+          if (firstTileInCategory == null) firstTileInCategory = tile;
+          var key = new ThumbnailKey(this._thumbs.SourceVersion, q.Name, null, this._PaletteSize, this._PreviewSize);
+          this._tilesByKey[key] = tile;
+          this._RequestIfNeeded(key, q, null, priorityVisibleInStrip: true);
+        }
+        // Force the LAST tile of this category to break flow so the next header starts
+        // on a fresh row. Headers themselves get SetFlowBreak above; tiles within a
+        // category wrap naturally because they're all the same size.
+        var lastTileInCategory = this._quantStrip.Controls[this._quantStrip.Controls.Count - 1];
+        this._quantStrip.SetFlowBreak(lastTileInCategory, true);
+        // Wire header click → toggle Visible on all tiles in this category.
+        var category1 = category.ToList();
+        header.Click += (s, e) => this._ToggleCategory(this._quantStrip, header, category1.Count);
       }
       this._quantStrip.ResumeLayout();
     }
@@ -257,28 +286,141 @@ namespace ImageResizer.UserControls {
 
       if (this._pickedQuantizer == null) { this._ditherStrip.ResumeLayout(); return; }
 
-      // First tile = "no dither" (explicit NoDithering), matches the quant-only baseline.
+      // Baseline category: one (no-dither) tile.
+      var baselineHeader = _CreateCategoryHeader("Baseline", 1);
+      this._ditherStrip.Controls.Add(baselineHeader);
+      this._ditherStrip.SetFlowBreak(baselineHeader, true);
       var noDitherTile = new Tile("(no dither)");
       noDitherTile.Clicked += (s, e) => this._OnDithererPicked(null, noDitherTile);
       noDitherTile.Resize(this._PreviewSize);
       this._ditherStrip.Controls.Add(noDitherTile);
+      this._ditherStrip.SetFlowBreak(noDitherTile, true);
       var noDitherKey = new ThumbnailKey(this._thumbs.SourceVersion, this._pickedQuantizer.Name, null, this._PaletteSize, this._PreviewSize);
       this._tilesByKey[noDitherKey] = noDitherTile;
       this._RequestIfNeeded(noDitherKey, this._pickedQuantizer, null, priorityVisibleInStrip: true);
+      baselineHeader.Click += (s, e) => this._ToggleCategory(this._ditherStrip, baselineHeader, 1);
 
-      foreach (var d in DithererRegistry.All) {
-        if (d.DeclaringType.ContainsGenericParameters) continue;
-        if (string.Equals(d.DeclaringType.Name, nameof(NoDithering), StringComparison.Ordinal)) continue;
-        var tile = new Tile(d.Name);
-        tile.Clicked += (s, e) => this._OnDithererPicked(d, tile);
-        tile.Resize(this._PreviewSize);
-        this._ditherStrip.Controls.Add(tile);
-        var key = new ThumbnailKey(this._thumbs.SourceVersion, this._pickedQuantizer.Name, d.Name, this._PaletteSize, this._PreviewSize);
-        this._tilesByKey[key] = tile;
-        this._RequestIfNeeded(key, this._pickedQuantizer, d, priorityVisibleInStrip: true);
+      var byCategory = DithererRegistry.All
+        .Where(d => !d.DeclaringType.ContainsGenericParameters
+                 && !string.Equals(d.DeclaringType.Name, nameof(NoDithering), StringComparison.Ordinal))
+        .GroupBy(d => d.Type)
+        .OrderBy(g => _CategoryOrder(g.Key));
+
+      foreach (var category in byCategory) {
+        var tileCount = category.Count();
+        var header = _CreateCategoryHeader(_DitherCategoryLabel(category.Key), tileCount);
+        this._ditherStrip.Controls.Add(header);
+        this._ditherStrip.SetFlowBreak(header, true);
+        foreach (var d in category) {
+          var tile = new Tile(d.Name);
+          var dLocal = d;
+          tile.Clicked += (s, e) => this._OnDithererPicked(dLocal, tile);
+          tile.Resize(this._PreviewSize);
+          this._ditherStrip.Controls.Add(tile);
+          var key = new ThumbnailKey(this._thumbs.SourceVersion, this._pickedQuantizer.Name, d.Name, this._PaletteSize, this._PreviewSize);
+          this._tilesByKey[key] = tile;
+          this._RequestIfNeeded(key, this._pickedQuantizer, d, priorityVisibleInStrip: true);
+        }
+        var lastTileInCategory = this._ditherStrip.Controls[this._ditherStrip.Controls.Count - 1];
+        this._ditherStrip.SetFlowBreak(lastTileInCategory, true);
+        var capturedTileCount = tileCount;
+        header.Click += (s, e) => this._ToggleCategory(this._ditherStrip, header, capturedTileCount);
       }
       this._ditherStrip.ResumeLayout();
     }
+
+    /// <summary>Creates a clickable category header label. AutoSize keeps it modest-width
+    /// (just the text); flow-break before AND after (set by callers via SetFlowBreak on the
+    /// previous tile and on the header itself) is what guarantees its own row.</summary>
+    private static Label _CreateCategoryHeader(string title, int tileCount) {
+      var lbl = new Label {
+        Text = "▼  " + title + "  (" + tileCount + ")",
+        Tag = new _HeaderState(title, tileCount, expanded: true),
+        AutoSize = true,
+        Margin = new Padding(0, 6, 0, 2),
+        TextAlign = ContentAlignment.MiddleLeft,
+        Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold),
+        BackColor = SystemColors.ControlLight,
+        BorderStyle = BorderStyle.FixedSingle,
+        Padding = new Padding(8, 4, 8, 4),
+        Cursor = Cursors.Hand,
+      };
+      return lbl;
+    }
+
+    /// <summary>Toggles Visible on the next <paramref name="tileCount"/> Tile siblings after
+    /// <paramref name="header"/> within <paramref name="strip"/>. Flat-FLP design: tiles are
+    /// direct siblings of the header, no nested containers, no AutoSize cycles.</summary>
+    private void _ToggleCategory(FlowLayoutPanel strip, Label header, int tileCount) {
+      strip.SuspendLayout();
+      var state = (_HeaderState)header.Tag;
+      state = state.WithExpanded(!state.Expanded);
+      header.Tag = state;
+      header.Text = (state.Expanded ? "▼  " : "▶  ") + state.Title + "  (" + state.TileCount + ")";
+
+      var headerIndex = strip.Controls.IndexOf(header);
+      var seen = 0;
+      for (var i = headerIndex + 1; i < strip.Controls.Count && seen < tileCount; ++i) {
+        if (strip.Controls[i] is Tile t) {
+          t.Visible = state.Expanded;
+          seen++;
+        }
+      }
+      strip.ResumeLayout();
+    }
+
+    private sealed class _HeaderState {
+      public string Title { get; }
+      public int TileCount { get; }
+      public bool Expanded { get; }
+      public _HeaderState(string title, int tileCount, bool expanded) { this.Title = title; this.TileCount = tileCount; this.Expanded = expanded; }
+      public _HeaderState WithExpanded(bool e) => new(this.Title, this.TileCount, e);
+    }
+
+    private static int _CategoryOrder(QuantizationType t) => t switch {
+      QuantizationType.Tree => 0,
+      QuantizationType.Splitting => 1,
+      QuantizationType.Clustering => 2,
+      QuantizationType.Variance => 3,
+      QuantizationType.Neural => 4,
+      QuantizationType.Fixed => 5,
+      QuantizationType.Preprocessing => 6,
+      QuantizationType.Postprocessing => 7,
+      _ => 99,
+    };
+
+    private static int _CategoryOrder(DitheringType t) => t switch {
+      DitheringType.Ordered => 0,
+      DitheringType.ErrorDiffusion => 1,
+      DitheringType.Noise => 2,
+      DitheringType.Random => 3,
+      DitheringType.Custom => 4,
+      DitheringType.None => 5,
+      _ => 99,
+    };
+
+    private static string _QuantCategoryLabel(QuantizationType t) => t switch {
+      QuantizationType.Tree => "Tree-based (Octree variants)",
+      QuantizationType.Splitting => "Splitting (Median Cut, Wu)",
+      QuantizationType.Clustering => "Clustering (K-Means family)",
+      QuantizationType.Variance => "Variance-based",
+      QuantizationType.Neural => "Neural / Self-Organising",
+      QuantizationType.Fixed => "Fixed palettes (retro / web-safe)",
+      QuantizationType.Preprocessing => "Preprocessing wrappers",
+      QuantizationType.Postprocessing => "Postprocessing wrappers",
+      _ => t.ToString(),
+    };
+
+    private static string _DitherCategoryLabel(DitheringType t) => t switch {
+      DitheringType.Ordered => "Ordered (Bayer / blue-noise / threshold matrices)",
+      DitheringType.ErrorDiffusion => "Error diffusion (Floyd-Steinberg family)",
+      DitheringType.Noise => "Noise patterns",
+      DitheringType.Random => "Random",
+      DitheringType.Custom => "Special / Custom",
+      DitheringType.None => "None",
+      _ => t.ToString(),
+    };
+
 
     private void _RequestIfNeeded(ThumbnailKey key, QuantizerDescriptor q, DithererDescriptor d, bool priorityVisibleInStrip) {
       if (this._thumbs.TryGetCached(key, out var bmp)) {
@@ -335,7 +477,7 @@ namespace ImageResizer.UserControls {
     private void _OnQuantizerPicked(QuantizerDescriptor q, Tile tile) {
       this._pickedQuantizer = q;
       this._pickedDitherer = null;
-      foreach (Control c in this._quantStrip.Controls) if (c is Tile qt) qt.SetSelected(qt == tile);
+      foreach (var qt in _AllTiles(this._quantStrip)) qt.SetSelected(qt == tile);
 
       // Drop dither-strip entries from the queue (priorities stale) and rebuild.
       var sv = this._thumbs.SourceVersion;
@@ -358,8 +500,36 @@ namespace ImageResizer.UserControls {
 
     private void _OnDithererPicked(DithererDescriptor d, Tile tile) {
       this._pickedDitherer = d;
-      foreach (Control c in this._ditherStrip.Controls) if (c is Tile dt) dt.SetSelected(dt == tile);
+      foreach (var dt in _AllTiles(this._ditherStrip)) dt.SetSelected(dt == tile);
       this._ScheduleDetailRender();
+    }
+
+    /// <summary>Yields every Tile sibling of the strip's flat FlowLayoutPanel.</summary>
+    private static IEnumerable<Tile> _AllTiles(FlowLayoutPanel strip) {
+      foreach (Control c in strip.Controls)
+        if (c is Tile t)
+          yield return t;
+    }
+
+    /// <summary>Forces the strip FLPs to wrap at the SplitContainer.Panel1's effective inner
+    /// width, minus a vertical-scrollbar reserve. Setting MaximumSize.Width on a wrap-content
+    /// FLP constrains its preferred-content-width independently of any scrollbar feedback the
+    /// FLP would otherwise compute from its own ClientSize.</summary>
+    private void _SyncStripWrapWidths(SplitterPanel panel1) {
+      // The strips live inside a TableLayoutPanel inside Panel1, so their available inner
+      // width matches Panel1.ClientSize.Width minus a small reserve for the vertical scrollbar
+      // and the borders/padding inside `root`.
+      var w = panel1.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - 12;
+      if (w < 80) w = 80;
+      _ApplyWrapWidth(this._quantStrip, w);
+      _ApplyWrapWidth(this._ditherStrip, w);
+    }
+
+    private static void _ApplyWrapWidth(FlowLayoutPanel strip, int width) {
+      // MaximumSize.Width is the wrap constraint. Height stays unbounded (0 = no max).
+      var current = strip.MaximumSize;
+      if (current.Width == width) return;
+      strip.MaximumSize = new Size(width, 0);
     }
 
     /// <summary>
