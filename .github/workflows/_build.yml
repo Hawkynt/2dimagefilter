@@ -26,6 +26,16 @@ jobs:
           ref: ${{ inputs.ref || github.ref }}
           fetch-depth: 0
 
+      # See ci.yml for the rationale; ImageResizerLibrary needs the sibling upstream library
+      # checked out for ProjectReference resolution. NuGet fallback exists in the csproj but
+      # the published version lags behind master; checking out the sibling keeps CI in sync.
+      - name: Checkout sibling C--FrameworkExtensions
+        uses: actions/checkout@v4
+        with:
+          repository: Hawkynt/C--FrameworkExtensions
+          path: .sibling/C--FrameworkExtensions
+          fetch-depth: 1
+
       - uses: actions/setup-dotnet@v4
         with: { dotnet-version: '8.x' }
 

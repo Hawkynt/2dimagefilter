@@ -66,12 +66,21 @@ namespace ImageResizer.UserControls {
       this.Dock = DockStyle.Fill;
       this.AutoScroll = false;
 
-      // Outer 2-column layout: left = quant/dither controls (original stack),
-      // right = zoomable detail preview of the currently selected combination.
-      var outer = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
-      outer.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 440));
-      outer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-      outer.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+      // Outer 2-pane split: left = quant/dither controls (original stack),
+      // right = zoomable detail preview. SplitContainer gives the user a draggable splitter
+      // and a fixed-Panel1 resize policy so the right detail pane absorbs window resizes.
+      // Note: do NOT set Panel{1,2}MinSize here — the SplitContainer's default Width is 150,
+      // and setting MinSize on a freshly-constructed control triggers an internal
+      // SplitterDistance clamp that throws "SplitterDistance must be between Panel1MinSize
+      // and Width - Panel2MinSize" because the constraint is unsatisfiable at Width=150.
+      // Final MinSize + SplitterDistance are applied in the HandleCreated handler below,
+      // by which point the SplitContainer is parented and has its real Width.
+      var outer = new SplitContainer {
+        Dock = DockStyle.Fill,
+        Orientation = Orientation.Vertical,
+        FixedPanel = FixedPanel.Panel1,
+        SplitterWidth = 6,
+      };
 
       var root = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 10, Padding = new Padding(4) };
       root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
@@ -143,9 +152,21 @@ namespace ImageResizer.UserControls {
       detailRoot.Controls.Add(this._detailPreview, 0, 0);
       detailRoot.Controls.Add(this._detailStatus, 0, 1);
 
-      outer.Controls.Add(root, 0, 0);
-      outer.Controls.Add(detailRoot, 1, 0);
+      outer.Panel1.Controls.Add(root);
+      outer.Panel2.Controls.Add(detailRoot);
       this.Controls.Add(outer);
+      // Apply MinSize + SplitterDistance once the SplitContainer is parented and has a real
+      // Width. Setting MinSize before this point throws because the SplitterDistance clamp
+      // can't satisfy [Panel1MinSize, Width - Panel2MinSize] when Width is the default 150.
+      outer.HandleCreated += (s, e) => {
+        try {
+          // Cap MinSize at half of the actual width so neither side can exceed available space.
+          var halfWidth = Math.Max(50, outer.Width / 2 - 10);
+          outer.Panel1MinSize = Math.Min(360, halfWidth);
+          outer.Panel2MinSize = Math.Min(360, halfWidth);
+          outer.SplitterDistance = Math.Min(440, outer.Width - outer.Panel2MinSize);
+        } catch { /* parent too narrow even for the clamped values; let WinForms keep defaults */ }
+      };
 
       this._thumbs.ThumbnailReady += this._OnThumbnailReady;
       this._thumbs.ThumbnailStarted += this._OnThumbnailStarted;
@@ -495,7 +516,7 @@ namespace ImageResizer.UserControls {
 
     /// <summary>A single thumbnail tile: square image area + name label + selection border + rendering overlay.</summary>
     private sealed class Tile : Panel {
-      private readonly PictureBox _pb = new PictureBox { Dock = DockStyle.Top, SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.FromArgb(240, 240, 240) };
+      private readonly PictureBox _pb = new PictureBox { Dock = DockStyle.Fill, SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.FromArgb(240, 240, 240) };
       private readonly Label _label = new Label { Dock = DockStyle.Bottom, AutoSize = false, Height = 18, TextAlign = ContentAlignment.MiddleCenter };
       private readonly Label _status = new Label {
         Text = "rendering…",
@@ -513,8 +534,11 @@ namespace ImageResizer.UserControls {
         this.Margin = new Padding(4);
         this.Padding = new Padding(2);
         this.BorderStyle = BorderStyle.FixedSingle;
-        this.Controls.Add(this._pb);
+        // Add Label FIRST so the dock layout gives it Bottom 18px before _pb's Fill claims
+        // the remainder. Reverse order leaves _pb at its preferred 100px and _label fighting
+        // for layout space, which manifests as the image rendering small at the top-left.
         this.Controls.Add(this._label);
+        this.Controls.Add(this._pb);
         // Status overlay sits on top of the PictureBox (same parent/bounds). Because WinForms
         // Controls don't support alpha, we use a light-tinted opaque label as a visible badge.
         this._pb.Controls.Add(this._status);
@@ -551,7 +575,7 @@ namespace ImageResizer.UserControls {
       public void Resize(int previewSize) {
         this.Width = previewSize + 8;
         this.Height = previewSize + 28;
-        this._pb.Height = previewSize;
+        // _pb is Dock=Fill — it auto-takes (TileHeight - LabelHeight - padding). No explicit height.
       }
     }
 
@@ -625,6 +649,9 @@ namespace ImageResizer.UserControls {
       private Point _dragStart;
       private PointF _dragImageStart;
       private bool _dragging;
+      // Set when SetImage runs before the panel has a valid ClientSize. Cleared by _FitToView
+      // once the panel is sized (typically the first OnPaint after the layout settles).
+      private bool _needsFit;
 
       public _ZoomableView() {
         this.DoubleBuffered = true;
@@ -636,6 +663,7 @@ namespace ImageResizer.UserControls {
         var old = this._image;
         this._image = img;
         old?.Dispose();
+        this._needsFit = true;
         this._FitToView();
         this.Invalidate();
       }
@@ -649,6 +677,7 @@ namespace ImageResizer.UserControls {
         var displayW = this._image.Width * this._zoom;
         var displayH = this._image.Height * this._zoom;
         this._imagePos = new PointF((this.ClientSize.Width - displayW) / 2f, (this.ClientSize.Height - displayH) / 2f);
+        this._needsFit = false;
       }
 
       protected override void OnResize(EventArgs e) {
@@ -664,6 +693,11 @@ namespace ImageResizer.UserControls {
             e.Graphics.DrawString("(no detail preview yet)", this.Font, br, new PointF(10, 10));
           return;
         }
+        // Defer-fit recovery: SetImage is sometimes invoked before the panel's layout
+        // has settled (ClientSize == 0,0). _FitToView early-returns in that state, leaving
+        // _zoom = 1.0f and _imagePos = (0,0) — image renders at native size top-left.
+        // First paint with valid ClientSize is the right moment to retry the fit.
+        if (this._needsFit) this._FitToView();
         e.Graphics.InterpolationMode = this._zoom >= 2.0f
           ? System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor  // show actual pixels when zoomed in
           : System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;

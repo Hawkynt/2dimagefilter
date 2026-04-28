@@ -16,6 +16,18 @@ jobs:
         with:
           fetch-depth: 0
 
+      # ImageResizerLibrary references the sibling repo's System.Drawing.Extensions via a
+      # ProjectReference (so live upstream changes flow without a NuGet pack/publish hop).
+      # GitHub Actions' actions/checkout `path:` cannot escape the workspace, so we drop the
+      # sibling under <consumer>/.sibling/ — the consumer's csproj probes both this and the
+      # local-dev layout (../../C--FrameworkExtensions) before falling back to NuGet.
+      - name: Checkout sibling C--FrameworkExtensions
+        uses: actions/checkout@v4
+        with:
+          repository: Hawkynt/C--FrameworkExtensions
+          path: .sibling/C--FrameworkExtensions
+          fetch-depth: 1
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'            # SDK only; actual targets are net45/net47

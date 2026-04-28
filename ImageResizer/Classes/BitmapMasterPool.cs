@@ -262,7 +262,12 @@ namespace Classes {
       using (var loaded = Image.FromFile(absolutePath)) {
         var copy = new Bitmap(loaded.Width, loaded.Height, PixelFormat.Format32bppArgb);
         using (var g = Graphics.FromImage(copy))
-          g.DrawImageUnscaled(loaded, 0, 0);
+          // DrawImage with explicit pixel rect, NOT DrawImageUnscaled. The latter is DPI-aware:
+          // it paints the source at its physical (inches) size, so a 72-DPI image drawn onto a
+          // 96-DPI Graphics is scaled up by 96/72 ≈ 1.33×, gets clipped against the same-pixel-
+          // dimensioned destination, and you see only the upper-left 75% of the image. The
+          // explicit pixel-rect overload forces a 1:1 pixel copy regardless of DPI metadata.
+          g.DrawImage(loaded, 0, 0, loaded.Width, loaded.Height);
         return copy;
       }
     }

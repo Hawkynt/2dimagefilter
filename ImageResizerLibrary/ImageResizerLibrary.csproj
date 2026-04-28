@@ -28,10 +28,24 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
-  <ItemGroup>
-    <!-- Project reference during active development so changes to the upstream
-         IKernelResampler etc. are visible without an intermediate NuGet pack/publish.
-         Swap back to a PackageReference once the upstream is packed + published. -->
-    <ProjectReference Include="..\..\C--FrameworkExtensions\System.Drawing.Extensions\System.Drawing.Extensions.csproj" />
+  <!-- Resolve the upstream library via ProjectReference if we can find the sibling repo, else
+       fall back to the published NuGet. Two probe locations supported, in priority order:
+         1. local-dev layout: sibling repos checked out next to each other
+            (../../C..FrameworkExtensions/System.Drawing.Extensions/)
+         2. CI layout: sibling cloned into a subdir of the consumer workspace
+            (../.sibling/C..FrameworkExtensions/) because GitHub Actions' actions/checkout
+            `path:` parameter cannot escape the workspace.
+       NuGet fallback only fires when neither path resolves.
+       (The dot-notation in this comment avoids XML's no-double-hyphen rule; the actual
+       paths in the conditions below use the correct repo name.) -->
+  <PropertyGroup>
+    <FrameworkExtensionsRoot Condition="'$(FrameworkExtensionsRoot)' == '' And Exists('..\..\C--FrameworkExtensions\System.Drawing.Extensions\System.Drawing.Extensions.csproj')">..\..\C--FrameworkExtensions</FrameworkExtensionsRoot>
+    <FrameworkExtensionsRoot Condition="'$(FrameworkExtensionsRoot)' == '' And Exists('..\.sibling\C--FrameworkExtensions\System.Drawing.Extensions\System.Drawing.Extensions.csproj')">..\.sibling\C--FrameworkExtensions</FrameworkExtensionsRoot>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(FrameworkExtensionsRoot)' != ''">
+    <ProjectReference Include="$(FrameworkExtensionsRoot)\System.Drawing.Extensions\System.Drawing.Extensions.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(FrameworkExtensionsRoot)' == ''">
+    <PackageReference Include="FrameworkExtensions.System.Drawing" Version="1.0.1" />
   </ItemGroup>
 </Project>
