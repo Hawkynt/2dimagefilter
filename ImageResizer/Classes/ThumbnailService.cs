@@ -86,6 +86,18 @@ namespace Classes {
     private readonly Dictionary<ThumbnailKey, Bitmap> _cache = new Dictionary<ThumbnailKey, Bitmap>();
     private readonly object _cacheGate = new object();
 
+    // Palette-build short-circuit: when the user picks a quantizer, every dither tile in the
+    // strip + the detail preview render the SAME (source, quantizer, paletteSize) combo. The
+    // upstream pipeline factors that into ComputeHistogram + ComputePalette + ApplyPaletteWithDither;
+    // we cache the first two so each thumbnail/detail render only pays for the third.
+    //   _cachedHistogram is per SourceVersion (single entry; replaced on source swap).
+    //   _paletteCache is per (SourceVersion, quantName, paletteSize) — invalidated on source swap.
+    private Dictionary<int, uint> _cachedHistogram;
+    private long _cachedHistogramVersion = -1;
+    private readonly Dictionary<(long version, string quantName, ushort paletteSize), Color[]> _paletteCache
+      = new Dictionary<(long, string, ushort), Color[]>();
+    private readonly object _paletteCacheGate = new object();
+
     // Pre-downscaled "master" bitmap pool per preview size. Built lazily on first render for
     // a given size; each pool holds N clones (N = worker count for thumbnail pools, fewer for
     // detail) so every concurrent render owns its own Bitmap instance and GDI+ LockBits won't
@@ -209,6 +221,11 @@ namespace Classes {
       lock (this._statsGate) {
         this._statsComputed = false;
         this._stats = default;
+      }
+      lock (this._paletteCacheGate) {
+        this._cachedHistogram = null;
+        this._cachedHistogramVersion = -1;
+        this._paletteCache.Clear();
       }
       this.SourceBitmap = source;
       this.SourceVersion++;
@@ -362,14 +379,60 @@ namespace Classes {
       if (pool == null) return null;
 
       // Rent a pre-cloned master; GDI+ LockBits can't race because each worker owns its
-      // own Bitmap instance for the duration of the call. ApplyQuantization reads ReadOnly
-      // and returns a fresh bitmap, so the rented clone is unchanged and safe to return.
+      // own Bitmap instance for the duration of the call.
       var copy = pool.Rent();
       try {
-        return UpstreamPipeline.ApplyQuantization(copy, work.Quantizer, work.Ditherer, work.Key.PaletteSize);
+        // Reuse the cached (histogram, palette) for this (sourceVersion, quantizer, paletteSize)
+        // tuple. Every dither tile in the strip — and the detail preview — share the same
+        // upstream (Quantizer × PaletteSize), so the histogram and palette are computed at most
+        // once per source-version+quantizer combo regardless of how many ditherers are tried.
+        var palette = this._GetOrComputePalette(copy, work.Key.SourceVersion, work.Quantizer, work.Key.PaletteSize);
+        return UpstreamPipeline.ApplyPaletteWithDither(copy, palette, work.Ditherer);
       } finally {
         pool.Return(copy);
       }
+    }
+
+    /// <summary>Returns the palette for (sourceVersion, quantizer, paletteSize), reusing a
+    /// cached one if available. The histogram cache is shared across all quantizers for a
+    /// given source-version (it depends only on the source).</summary>
+    private Color[] _GetOrComputePalette(Bitmap source, long sourceVersion, QuantizerDescriptor quantizer, ushort paletteSize) {
+      var key = (sourceVersion, quantizer.Name, paletteSize);
+      lock (this._paletteCacheGate) {
+        if (this._paletteCache.TryGetValue(key, out var cached))
+          return cached;
+      }
+      // Histogram is shared across quantizers — cache by SourceVersion.
+      Dictionary<int, uint> histogram;
+      lock (this._paletteCacheGate) {
+        if (this._cachedHistogramVersion == sourceVersion && this._cachedHistogram != null) {
+          histogram = this._cachedHistogram;
+        } else {
+          // Drop histogram outside the lock; ComputeHistogram does a per-pixel walk and we
+          // don't want to block other workers building their palettes from the cached one.
+          histogram = null;
+        }
+      }
+      if (histogram == null) {
+        histogram = UpstreamPipeline.ComputeHistogram(source);
+        lock (this._paletteCacheGate) {
+          // Late-write: another worker may have populated it concurrently — reuse if so.
+          if (this._cachedHistogramVersion == sourceVersion && this._cachedHistogram != null)
+            histogram = this._cachedHistogram;
+          else {
+            this._cachedHistogram = histogram;
+            this._cachedHistogramVersion = sourceVersion;
+          }
+        }
+      }
+      var palette = UpstreamPipeline.ComputePalette(histogram, quantizer, paletteSize);
+      lock (this._paletteCacheGate) {
+        // Late-write race: keep whatever's already there; otherwise stash this one.
+        if (this._paletteCache.TryGetValue(key, out var existing))
+          return existing;
+        this._paletteCache[key] = palette;
+      }
+      return palette;
     }
 
     /// <summary>
