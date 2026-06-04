@@ -32,7 +32,8 @@ const CHANGELOG = path.join(REPO_ROOT, 'CHANGELOG.md');
 // Bucket order in the rendered section is fixed: additions first, then
 // changes, then bug-fixes, then removals, then open TODOs, then the
 // catch-all.
-export const BUCKET_ORDER = ['Added', 'Changed', 'Fixed', 'Removed', 'TODO', 'Other'];
+// Order matches the commit-prefix convention +  -  *  #  !
+export const BUCKET_ORDER = ['Added', 'Removed', 'Changed', 'Fixed', 'TODO', 'Other'];
 const PREFIX_TO_BUCKET = {
     '+': 'Added',
     '*': 'Changed',
@@ -117,37 +118,46 @@ function main() {
     let mode = null;            // 'nightly' | 'release'
     let tag  = null;
     let version = null;
+    let notesPath = null;       // --notes <file>: write the release-notes body here
 
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
         if (a === '--nightly') { mode = 'nightly'; }
         else if (a === '--release') { mode = 'release'; tag = argv[++i]; }
         else if (a === '--version') { version = argv[++i]; }
+        else if (a === '--notes') { notesPath = argv[++i]; }
     }
     if (!mode) {
-        console.error('usage: update-changelog.mjs --nightly | --release <tag> [--version X.Y.Z.B]');
+        console.error('usage: update-changelog.mjs --nightly | --release <tag> [--version X.Y.Z.B] [--notes <file>]');
         process.exit(2);
     }
 
-    const since = gitLastTag();
+    const since   = gitLastTag();
     const commits = gitCommits(since);
+
+    const header = mode === 'nightly'
+        ? `Nightly ${isoToday()}${version ? ` (${version})` : ''}`
+        : `${tag} (${isoToday()})`;
+
+    // The functional changes only: commit subjects bucketed by + - * # ! prefix.
+    const section = renderSection(header, bucketize(commits));
+
+    // Release-notes body = the buckets without the leading "## <header>" line
+    // (the GitHub release title already carries it). Written even when empty so
+    // the workflow's body_path always resolves.
+    if (notesPath) {
+        const body = section.replace(/^##[^\n]*\n\n?/, '');
+        fs.writeFileSync(notesPath, body.trimEnd() + '\n');
+        console.log(`Wrote release notes to ${notesPath}.`);
+    }
+
     if (commits.length === 0) {
         console.log('No new commits since last tag -- CHANGELOG unchanged.');
         return;
     }
 
-    let header;
-    if (mode === 'nightly') {
-        const suffix = version ? ` (${version})` : '';
-        header = `Nightly ${isoToday()}${suffix}`;
-    } else {
-        header = `${tag} (${isoToday()})`;
-    }
-
-    const section = renderSection(header, bucketize(commits));
     const existing = fs.existsSync(CHANGELOG) ? fs.readFileSync(CHANGELOG, 'utf8') : '';
-    const next = prependSection(existing, section);
-    fs.writeFileSync(CHANGELOG, next);
+    fs.writeFileSync(CHANGELOG, prependSection(existing, section));
     console.log(`CHANGELOG updated with ${commits.length} commit(s) under "${header}".`);
 }
 

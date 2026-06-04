@@ -1,12 +1,15 @@
 name: Release
 
 on:
-  push:
-    tags: ['v*']
   workflow_dispatch:
 
 permissions:
   contents: write
+
+# Force JavaScript-based actions to run on Node 24 instead of the deprecated Node 20 ahead of
+# the 2026-06-16 hard cutover, until we bump each action to a Node-24-native major version.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   test:
@@ -29,27 +32,33 @@ jobs:
     with:
       version: ${{ needs.version.outputs.version }}
       release-kind: release
-      changelog-flag: --release ${{ github.ref_name }}
+      changelog-flag: --release v${{ needs.version.outputs.version }}
 
   publish:
     needs: [version, build]
-    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with: { name: "ImageResizer-win-${{ needs.version.outputs.version }}", path: dist }
       - uses: actions/download-artifact@v4
         with: { name: "PixelArtScalingPlugin-win-${{ needs.version.outputs.version }}", path: dist }
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compose release notes
+        env:
+          V: ${{ needs.version.outputs.version }}
+        run: |
+          node .github/workflows/scripts/update-changelog.mjs --release "v$V" --notes CHANGES.md
+          echo "## 2dimagefilter v$V" > RELEASE_NOTES.md
+          echo >> RELEASE_NOTES.md
+          cat CHANGES.md >> RELEASE_NOTES.md
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.version.outputs.version }}
           name: v${{ needs.version.outputs.version }}
-          body: |
-            ## 2D Image Filter v${{ needs.version.outputs.version }}
-
-            - **ImageResizer** — WinForms GUI (net48)
-            - **PixelArtScalingPlugin** — single-DLL Paint.NET 5 effect (net48, Costura-bundled)
-
-            Requires .NET Framework 4.8+.
           files: dist/*.zip
-          generate_release_notes: true
+          body_path: RELEASE_NOTES.md

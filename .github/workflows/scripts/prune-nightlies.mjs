@@ -1,7 +1,7 @@
 // Grandfather-Father-Son pruning for nightly releases.
 //
 // Keep:
-//   * the 7 most recent daily nightly-YYYY-MM-DD releases
+//   * the 7 most recent daily nightly-yyyyMMdd releases
 //   * the newest release from each of the 4 most recent ISO-weeks
 //   * the newest release from each of the 3 most recent calendar months
 //
@@ -36,11 +36,11 @@ function listNightlies() {
 }
 
 /** Exported so tests can exercise it against synthetic input. Silently drops
- *  entries that don't match the nightly-YYYY-MM-DD tag shape or that throw
+ *  entries that don't match the nightly-yyyyMMdd tag shape or that throw
  *  while constructing their Date. */
 export function parseNightlies(raw) {
     if (!Array.isArray(raw)) return [];
-    const re = /^nightly-(\d{4})-(\d{2})-(\d{2})$/;
+    const re = /^nightly-(\d{4})(\d{2})(\d{2})$/;
     const out = [];
     for (const r of raw) {
         try {

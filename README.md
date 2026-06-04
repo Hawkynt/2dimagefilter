@@ -1,11 +1,21 @@
 # 2D Image Filter
 
+[![License](https://img.shields.io/github/license/Hawkynt/2dimagefilter)](https://github.com/Hawkynt/2dimagefilter/blob/master/LICENSE)
+[![Language](https://img.shields.io/github/languages/top/Hawkynt/2dimagefilter?color=8957D5)](https://github.com/Hawkynt/2dimagefilter)
+
 [![CI](https://github.com/Hawkynt/2dimagefilter/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Hawkynt/2dimagefilter/actions/workflows/ci.yml)
-[![Release](https://github.com/Hawkynt/2dimagefilter/actions/workflows/release.yml/badge.svg)](https://github.com/Hawkynt/2dimagefilter/actions/workflows/release.yml)
-[![Latest release](https://img.shields.io/github/v/release/Hawkynt/2dimagefilter?label=release&sort=semver)](https://github.com/Hawkynt/2dimagefilter/releases/latest)
-[![Latest nightly](https://img.shields.io/github/v/release/Hawkynt/2dimagefilter?include_prereleases&label=nightly&sort=date)](https://github.com/Hawkynt/2dimagefilter/releases?q=prerelease%3Atrue)
-[![License](https://img.shields.io/badge/License-GPL_3.0-blue)](https://licenses.nuget.org/GPL-3.0-or-later)
-![Language](https://img.shields.io/github/languages/top/Hawkynt/2dImagefilter?color=purple)
+![Last Commit](https://img.shields.io/github/last-commit/Hawkynt/2dimagefilter?branch=master)
+![Activity](https://img.shields.io/github/commit-activity/m/Hawkynt/2dimagefilter)
+
+[![Stars](https://img.shields.io/github/stars/Hawkynt/2dimagefilter?color=FFD700)](https://github.com/Hawkynt/2dimagefilter/stargazers)
+[![Forks](https://img.shields.io/github/forks/Hawkynt/2dimagefilter?color=008080)](https://github.com/Hawkynt/2dimagefilter/network/members)
+[![Issues](https://img.shields.io/github/issues/Hawkynt/2dimagefilter)](https://github.com/Hawkynt/2dimagefilter/issues)
+![Code Size](https://img.shields.io/github/languages/code-size/Hawkynt/2dimagefilter?color=4CAF50)
+![Repo Size](https://img.shields.io/github/repo-size/Hawkynt/2dimagefilter?color=FF9800)
+
+[![Release](https://img.shields.io/github/v/release/Hawkynt/2dimagefilter?sort=semver)](https://github.com/Hawkynt/2dimagefilter/releases/latest)
+[![Nightly](https://img.shields.io/github/v/release/Hawkynt/2dimagefilter?include_prereleases=true&sort=date&label=nightly&color=FF9800)](https://github.com/Hawkynt/2dimagefilter/releases)
+[![Downloads](https://img.shields.io/github/downloads/Hawkynt/2dimagefilter/total)](https://github.com/Hawkynt/2dimagefilter/releases)
 
 > A comprehensive collection of pixel art scaling algorithms for upscaling low-resolution computer and console graphics.
 

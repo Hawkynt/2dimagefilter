@@ -7,6 +7,11 @@ on:
     branches: [master, main]
   workflow_call: {}
 
+# Force JavaScript-based actions to run on Node 24 instead of the deprecated Node 20 ahead of
+# the 2026-06-16 hard cutover, until we bump each action to a Node-24-native major version.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   build:
     # net45 + net47 WPF targets require Windows + .NET Framework targeting packs.

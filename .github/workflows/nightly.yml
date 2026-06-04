@@ -14,6 +14,11 @@ concurrency:
   group: nightly
   cancel-in-progress: true
 
+# Force JavaScript-based actions to run on Node 24 instead of the deprecated Node 20 ahead of
+# the 2026-06-16 hard cutover, until we bump each action to a Node-24-native major version.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   meta:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
@@ -30,7 +35,7 @@ jobs:
           fetch-depth: 0
       - id: m
         run: |
-          DATE=$(date -u +%Y-%m-%d)
+          DATE=$(date -u +%Y%m%d)
           VERSION=$(perl .github/workflows/scripts/version.pl)
           SHA="${{ github.event.workflow_run.head_sha || github.sha }}"
           echo "date=$DATE"         >> "$GITHUB_OUTPUT"
@@ -51,10 +56,20 @@ jobs:
     needs: [meta, build]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.meta.outputs.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - uses: actions/download-artifact@v4
         with: { name: "ImageResizer-win-${{ needs.meta.outputs.version }}", path: dist }
       - uses: actions/download-artifact@v4
         with: { name: "PixelArtScalingPlugin-win-${{ needs.meta.outputs.version }}", path: dist }
+
+      - name: Generate release notes (commit-prefix changelog)
+        run: node .github/workflows/scripts/update-changelog.mjs --nightly --notes CHANGES.md
 
       - name: Delete same-date nightly
         env:
@@ -72,7 +87,7 @@ jobs:
               -R "${{ github.repository }}" \
               --title "Nightly ${{ needs.meta.outputs.date }} (${{ needs.meta.outputs.version }})" \
               --prerelease \
-              --notes "Automated build of commit \`${{ needs.meta.outputs.sha }}\`. Requires .NET Framework." \
+              --notes-file CHANGES.md \
               dist/*.zip
 
   prune:
