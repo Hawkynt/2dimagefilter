@@ -10,6 +10,7 @@
 // Dry-run locally with `node .github/workflows/scripts/prune-nightlies.mjs --dry-run`.
 
 import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 
 export const DAILY_KEEP   = 7;
 export const WEEKLY_KEEP  = 4;
@@ -23,8 +24,29 @@ function gh(args, opts = {}) {
     return r.stdout;
 }
 
+// Synchronous sleep; the script is intentionally spawnSync-based.
+function sleep(ms) {
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+// The GitHub API occasionally answers 5xx; retry a few times and otherwise
+// skip the prune - missing one night is harmless, the next run catches up.
+const LIST_ATTEMPTS = 3;
+const RETRY_PAUSE_MS = 10_000;
+
 function listNightlies() {
-    const out = gh(['release', 'list', '--limit', '200', '--json', 'tagName,createdAt,isPrerelease']);
+    let out = null;
+    for (let attempt = 1; attempt <= LIST_ATTEMPTS; attempt++) {
+        try { out = gh(['release', 'list', '--limit', '200', '--json', 'tagName,createdAt,isPrerelease']); break; }
+        catch (e) {
+            console.error(`warning: listing releases failed (attempt ${attempt}/${LIST_ATTEMPTS}): ${e.message}`);
+            if (attempt < LIST_ATTEMPTS) sleep(RETRY_PAUSE_MS);
+        }
+    }
+    if (out === null) {
+        console.error('warning: could not list releases; skipping prune.');
+        return [];
+    }
     let all;
     try { all = JSON.parse(out); }
     catch (e) {
@@ -95,7 +117,11 @@ export function planRetention(releases, opts = {}) {
     const keep     = new Set();
 
     // --- Son: N newest releases -----------------------------------------
-    const sonSlice = releases.slice(0, dailyN);
+    // INVARIANT: the newest nightly is ALWAYS kept (hence max(1, …)). The
+    // next nightly's release notes measure their delta from the nearest tag
+    // (update-changelog.mjs), so deleting the newest tag would silently widen
+    // the next delta and re-report already-published changes.
+    const sonSlice = releases.slice(0, Math.max(1, dailyN));
     for (const r of sonSlice) keep.add(r.tag);
     const sonWeeks  = new Set(sonSlice.map(r => isoWeekKey(r.date)));
     const sonMonths = new Set(sonSlice.map(r => r.iso.slice(0, 7)));
@@ -135,8 +161,10 @@ export function planRetention(releases, opts = {}) {
 }
 
 // --- Entry point -------------------------------------------------------------
-// Skipped when imported as a module (for tests).
-if (import.meta.url === `file://${process.argv[1]}` || import.meta.url.endsWith(process.argv[1]?.replace(/\\/g,'/'))) {
+// Skipped when imported as a module (for tests). pathToFileURL handles Windows
+// separators AND percent-encodes blanks, so the comparison also holds for
+// working copies living in paths with spaces.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
     main();
 }
 function main() {
