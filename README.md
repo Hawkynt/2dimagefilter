@@ -1,10 +1,10 @@
 # 2D Image Filter
 
-[![License](https://img.shields.io/github/license/Hawkynt/2dimagefilter)](https://github.com/Hawkynt/2dimagefilter/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/Hawkynt/2dimagefilter)](https://github.com/Hawkynt/2dimagefilter/blob/main/LICENSE)
 [![Language](https://img.shields.io/github/languages/top/Hawkynt/2dimagefilter?color=8957D5)](https://github.com/Hawkynt/2dimagefilter)
 
-[![CI](https://github.com/Hawkynt/2dimagefilter/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Hawkynt/2dimagefilter/actions/workflows/ci.yml)
-![Last Commit](https://img.shields.io/github/last-commit/Hawkynt/2dimagefilter?branch=master)
+[![CI](https://github.com/Hawkynt/2dimagefilter/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Hawkynt/2dimagefilter/actions/workflows/ci.yml)
+![Last Commit](https://img.shields.io/github/last-commit/Hawkynt/2dimagefilter?branch=main)
 ![Activity](https://img.shields.io/github/commit-activity/m/Hawkynt/2dimagefilter)
 
 [![Stars](https://img.shields.io/github/stars/Hawkynt/2dimagefilter?color=FFD700)](https://github.com/Hawkynt/2dimagefilter/stargazers)
@@ -18,8 +18,6 @@
 [![Downloads](https://img.shields.io/github/downloads/Hawkynt/2dimagefilter/total)](https://github.com/Hawkynt/2dimagefilter/releases)
 
 > A comprehensive collection of pixel art scaling algorithms for upscaling low-resolution computer and console graphics.
-
-## 📖 Overview
 
 2D Image Filter is a powerful library that brings together the most popular image scaling algorithms specifically designed for pixel art and low-resolution graphics. Unlike traditional image scaling methods that often blur or distort pixel art, these algorithms preserve the crisp, clean aesthetic while intelligently enlarging images.
 
@@ -42,7 +40,7 @@ Our enhanced approach uses flexible similarity functions:
 (color1.IsLike(color2)) ? Interpolate(color1, color2) : color3
 ```
 
-## 🚀 Features
+## ✨ Features
 
 ### 📦 Multiple Distribution Formats
 - **Standalone Application**: GUI application for interactive image processing
@@ -78,7 +76,7 @@ Our enhanced approach uses flexible similarity functions:
 - Bicubic, Lanczos, and exotic mathematical kernels
 - Support for custom radius and parameters
 
-## 💻 Installation & Usage
+## 📦 Installation & Usage
 
 ### Prerequisites
 - .NET Framework 4.5 or higher
@@ -169,10 +167,6 @@ This project implements algorithms from numerous sources:
 - **FNES Filters**: FNES emulator team
 - **VBA Enhancements**: VBA-rr team
 
-## 📄 License
-
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
-
 ## 🤝 Contributing
 
 Contributions are welcome! Whether you want to:
@@ -187,3 +181,14 @@ Please feel free to open an issue or submit a pull request.
 
 - **Standalone Application**: [Download v2.0.0](https://github.com/Hawkynt/2dimagefilter/releases/download/2.0.0/Standalone.zip)
 - **Paint.NET Plugin**: [Download v2.0.0](https://github.com/Hawkynt/2dimagefilter/releases/download/2.0.0/PaintDotNetPlugin.zip)
+
+## ❤️ Support
+
+If this project saves you time or money, consider supporting its development:
+
+[![GitHub Sponsors](https://img.shields.io/badge/GitHub-Sponsor-EA4AAA?logo=githubsponsors)](https://github.com/sponsors/Hawkynt)
+[![PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?logo=paypal)](https://www.paypal.me/hawkynt)
+
+## 📜 License
+
+Licensed under LGPL-3.0-or-later — see [LICENSE](LICENSE).
