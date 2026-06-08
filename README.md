@@ -13,7 +13,7 @@
 ![Code Size](https://img.shields.io/github/languages/code-size/Hawkynt/2dimagefilter?color=4CAF50)
 ![Repo Size](https://img.shields.io/github/repo-size/Hawkynt/2dimagefilter?color=FF9800)
 
-[![Release](https://img.shields.io/github/v/release/Hawkynt/2dimagefilter?sort=semver)](https://github.com/Hawkynt/2dimagefilter/releases/latest)
+[![Release](https://img.shields.io/github/v/release/Hawkynt/2dimagefilter)](https://github.com/Hawkynt/2dimagefilter/releases/latest)
 [![Nightly](https://img.shields.io/github/v/release/Hawkynt/2dimagefilter?include_prereleases&sort=date&label=nightly&color=FF9800)](https://github.com/Hawkynt/2dimagefilter/releases)
 [![Downloads](https://img.shields.io/github/downloads/Hawkynt/2dimagefilter/total)](https://github.com/Hawkynt/2dimagefilter/releases)
 
