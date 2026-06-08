@@ -14,7 +14,7 @@
 ![Repo Size](https://img.shields.io/github/repo-size/Hawkynt/2dimagefilter?color=FF9800)
 
 [![Release](https://img.shields.io/github/v/release/Hawkynt/2dimagefilter)](https://github.com/Hawkynt/2dimagefilter/releases/latest)
-[![Nightly](https://img.shields.io/github/v/release/Hawkynt/2dimagefilter?include_prereleases&sort=date&label=nightly&color=FF9800)](https://github.com/Hawkynt/2dimagefilter/releases)
+[![Nightly](https://img.shields.io/github/v/release/Hawkynt/2dimagefilter?include_prereleases&sort=date&filter=nightly-*&label=nightly&color=FF9800)](https://github.com/Hawkynt/2dimagefilter/releases)
 [![Downloads](https://img.shields.io/github/downloads/Hawkynt/2dimagefilter/total)](https://github.com/Hawkynt/2dimagefilter/releases)
 
 > A comprehensive collection of pixel art scaling algorithms for upscaling low-resolution computer and console graphics.
