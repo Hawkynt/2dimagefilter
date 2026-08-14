@@ -38,9 +38,15 @@ namespace Classes {
     /// </summary>
     public const string DEFAULT_FILE_EXTENSION = ".irs";
     /// <summary>
-    /// Used to identify the dimensions
+    /// Used to identify the dimensions.
+    /// <para>
+    /// Note the non-capturing group around the alternation: without it <c>^</c> and <c>$</c> bind
+    /// to the first and last branch only, so anything containing a valid branch anywhere would be
+    /// accepted. The percentage branch must capture its digits, too - it used to be an empty group,
+    /// which silently turned every <c>&lt;p&gt;%</c> into <c>auto</c>.
+    /// </para>
     /// </summary>
-    private static readonly Regex _DIMENSIONS_REGEX = new Regex(@"^(auto)|(w(?<width>[0-9]+))|(h(?<height>[0-9]+))|((?<width>[0-9]+)x(?<height>[0-9]+))|((?<percent>)%)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex _DIMENSIONS_REGEX = new Regex(@"^(?:auto|w(?<width>[0-9]+)|h(?<height>[0-9]+)|(?<width>[0-9]+)x(?<height>[0-9]+)|(?<percent>[0-9]+)%)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     /// <summary>
     /// Used to identify filter name and parameters
     /// </summary>
