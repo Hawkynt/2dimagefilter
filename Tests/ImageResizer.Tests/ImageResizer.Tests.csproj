@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Matches the ImageResizer executable under test -->
+    <TargetFramework>net48</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Platforms>AnyCPU</Platforms>
+    <Prefer32Bit>false</Prefer32Bit>
+    <IsPackable>false</IsPackable>
+    <LangVersion>12</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <Import Project="..\..\VersionSpecificSymbols.Common.prop" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.*" />
+    <PackageReference Include="NUnit" Version="3.*" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.3.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The CLI parser lives in the executable; ImageResizerLibrary supplies the algorithms
+         SupportedManipulators enumerates and is referenced directly so the test host finds it
+         on disk rather than through Costura's embedded-resource resolver. -->
+    <ProjectReference Include="..\..\ImageResizer\ImageResizer.csproj" />
+    <ProjectReference Include="..\..\ImageResizerLibrary\ImageResizerLibrary.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -7,6 +7,9 @@
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/ImageResizer.Tests/ImageResizer.Tests.csproj" />
+  </Folder>
   <Project Path="ImageResizer/ImageResizer.csproj" />
   <Project Path="ImageResizerLibrary/ImageResizerLibrary.csproj" />
   <Project Path="PixelArtScalingPlugin/PixelArtScaling.csproj" />

@@ -10,7 +10,8 @@ per-repo distillation.
 The flagship **pixel-art scaling collection**: dozens of upscalers (HQ, XBR,
 Eagle, Scale…), resamplers, downsamplers, filters, quantizers and ditherers.
 Solution `ImageResizer.slnx`: GUI app (`ImageResizer`), the algorithm library
-(`ImageResizerLibrary`), and `PixelArtScalingPlugin`. Filter names follow
+(`ImageResizerLibrary`), `PixelArtScalingPlugin`, and the test projects under
+`Tests/`. Filter names follow
 the category-prefix scheme documented in the README — keep code, GUI
 dropdown and README in sync.
 
@@ -26,8 +27,8 @@ dropdown and README in sync.
 
 ## The loop (always, in this order)
 
-1. **Before committing**: `dotnet build ImageResizer.slnx -c Release` and the
-   tests until green; scaling changes get an eyeball comparison against the
+1. **Before committing**: `dotnet build ImageResizer.slnx -c Release` and
+   `dotnet test ImageResizer.slnx -c Release` until green; scaling changes get an eyeball comparison against the
    reference output of the affected algorithm — visual regressions don't
    show in unit tests.
 2. **Commit** (rules above) and **push**.
