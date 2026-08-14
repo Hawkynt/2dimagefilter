@@ -81,7 +81,7 @@ namespace Classes {
           Console.WriteLine("Saving to file " + saveCommand.FileName);
           break;
         case ResizeCommand resizeCommand:
-          Console.WriteLine("Applying filter     : {0}", SupportedManipulators.MANIPULATORS.First(k => k.Value == resizeCommand.Manipulator).Key);
+          Console.WriteLine("Applying filter     : {0}", _GetManipulatorName(resizeCommand.Manipulator));
           Console.WriteLine("  Target percentage : {0}", resizeCommand.Percentage == 0 ? "auto" : resizeCommand.Percentage + "%");
           Console.WriteLine("  Target width      : {0}", resizeCommand.Width == 0 ? "auto" : resizeCommand.Width + "pixels");
           Console.WriteLine("  Target height     : {0}", resizeCommand.Height == 0 ? "auto" : resizeCommand.Height + "pixels");
@@ -98,24 +98,66 @@ namespace Classes {
     private static void _PostAction(ScriptEngine engine, IScriptAction command) {
       switch (command) {
         case LoadFileCommand loadCommand:
-          Console.WriteLine("  File   : {0} Bytes", new FileInfo(loadCommand.FileName).Length);
-          Console.WriteLine("  Width  : {0} Pixel", engine.SourceImage.Width);
-          Console.WriteLine("  Height : {0} Pixel", engine.SourceImage.Height);
-          Console.WriteLine("  Size   : {0:0.00} MegaPixel", engine.SourceImage.Width * engine.SourceImage.Height / 1000000.0);
-          Console.WriteLine("  Type   : {0}", ImageCodecInfo.GetImageDecoders().First(d => d.FormatID == engine.GdiSource.RawFormat.Guid).FormatDescription);
-          Console.WriteLine("  Format : {0}", engine.GdiSource.PixelFormat);
+          _PrintImageFileDetails(loadCommand.FileName);
           return;
-        case SaveFileCommand saveCommand: {
-          var reloadedImage = Image.FromFile(saveCommand.FileName);
-          Console.WriteLine("  File   : {0} Bytes", new FileInfo(saveCommand.FileName).Length);
-          Console.WriteLine("  Width  : {0} Pixel", reloadedImage.Width);
-          Console.WriteLine("  Height : {0} Pixel", reloadedImage.Height);
-          Console.WriteLine("  Size   : {0:0.00} MegaPixel", reloadedImage.Width * reloadedImage.Height / 1000000.0);
-          Console.WriteLine("  Type   : {0}", ImageCodecInfo.GetImageDecoders().First(d => d.FormatID == reloadedImage.RawFormat.Guid).FormatDescription);
-          Console.WriteLine("  Format : {0}", reloadedImage.PixelFormat);
+        case SaveFileCommand saveCommand:
+          _PrintImageFileDetails(saveCommand.FileName);
           break;
-        }
       }
+    }
+
+    /// <summary>
+    /// Prints size and format details of an image file.
+    /// <para>
+    /// The details are read back from the file rather than from the engine's bitmaps on purpose:
+    /// the engine holds in-memory copies whose <see cref="Image.RawFormat"/> is
+    /// <see cref="ImageFormat.MemoryBmp"/>, and GDI+ registers no decoder for that - looking one
+    /// up used to throw and take the whole run down with it.
+    /// </para>
+    /// <para>
+    /// This is diagnostic output; it must never be able to abort a pipeline, hence the blanket
+    /// catch.
+    /// </para>
+    /// </summary>
+    /// <param name="fileName">The image file to describe.</param>
+    private static void _PrintImageFileDetails(string fileName) {
+      try {
+        Console.WriteLine("  File   : {0} Bytes", new FileInfo(fileName).Length);
+
+        // no validation and no embedded colour management - we only want the header
+        using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+        using (var image = Image.FromStream(stream, false, false)) {
+          Console.WriteLine("  Width  : {0} Pixel", image.Width);
+          Console.WriteLine("  Height : {0} Pixel", image.Height);
+          Console.WriteLine("  Size   : {0:0.00} MegaPixel", image.Width * image.Height / 1000000.0);
+          Console.WriteLine("  Type   : {0}", _GetFormatDescription(image.RawFormat));
+          Console.WriteLine("  Format : {0}", image.PixelFormat);
+        }
+      } catch (Exception e) {
+        Console.WriteLine("  (details unavailable: {0})", e.Message);
+      }
+    }
+
+    /// <summary>
+    /// Gets the human-readable description of an image format, e.g. <c>"PNG"</c>.
+    /// </summary>
+    /// <param name="format">The format.</param>
+    /// <returns>The decoder's description, or the format's own name when no decoder knows it.</returns>
+    private static string _GetFormatDescription(ImageFormat format)
+      => ImageCodecInfo.GetImageDecoders().FirstOrDefault(d => d.FormatID == format.Guid)?.FormatDescription ?? format.ToString()
+    ;
+
+    /// <summary>
+    /// Gets the registered name of a manipulator.
+    /// </summary>
+    /// <param name="manipulator">The manipulator.</param>
+    /// <returns>The name it is registered under, or its description when it is not registered.</returns>
+    private static string _GetManipulatorName(IImageManipulator manipulator) {
+      foreach (var pair in SupportedManipulators.MANIPULATORS)
+        if (ReferenceEquals(pair.Value, manipulator))
+          return pair.Key;
+
+      return ReflectionUtils.GetDescriptionForClass(manipulator.GetType());
     }
 
     /// <summary>
