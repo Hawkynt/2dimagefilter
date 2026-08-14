@@ -35,7 +35,9 @@ jobs:
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.x'            # SDK only; actual targets are net45/net47
+          # SDK only; actual targets are net45/net47/net48. Must satisfy global.json and be
+          # >= 9.0.200, which is where .slnx solution files became loadable.
+          dotnet-version: '10.x'
 
       - name: Stamp versions
         shell: bash
@@ -44,10 +46,10 @@ jobs:
       # Paint.NET reference assemblies live under PixelArtScalingPlugin/External/
       # so the whole solution (exe + plugin) builds in CI without any download step.
       - name: Restore solution
-        run: dotnet restore ImageResizer.sln
+        run: dotnet restore ImageResizer.slnx
 
       - name: Build solution
-        run: dotnet build ImageResizer.sln --configuration Release --no-restore
+        run: dotnet build ImageResizer.slnx --configuration Release --no-restore
 
       # No test projects exist in this repo -- build success is the only CI signal.
       - name: No tests to run

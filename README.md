@@ -109,7 +109,7 @@ git clone https://github.com/Hawkynt/2dimagefilter.git
 cd 2dimagefilter
 
 # Build the solution
-dotnet build ImageResizer.sln -c Release
+dotnet build ImageResizer.slnx -c Release
 
 # Or build individual projects
 dotnet build ImageResizerLibrary/ImageResizerLibrary.csproj
