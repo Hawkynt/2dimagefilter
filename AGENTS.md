@@ -38,6 +38,16 @@ dropdown and README in sync.
 Stable releases are **manual** (`gh workflow run release.yml`) — never cut
 one unless explicitly asked.
 
+## Versioning
+
+- Each project declares a **three-part base** in `<Version>` and nothing else.
+  The fourth part (revision) belongs to CI: `version.pl --stamp` appends the
+  commit count of the folder that declares the version.
+- **Never** pin `<AssemblyVersion>` or `<FileVersion>` — they derive from
+  `<Version>`, and pinning them silently overrides the stamp, which is how the
+  binaries ended up reporting 1.1.3.3 while releases were named 1.1.3.21.
+- Bump the base by hand only for a deliberate major/minor/patch release.
+
 ## Code conventions
 
 - Latest C# features; pixel kernels are hot paths — measure before and

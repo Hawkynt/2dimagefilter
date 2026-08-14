@@ -26,8 +26,10 @@
     <Company>»SynthelicZ«</Company>
     <Product>ImageResizer</Product>
     <Copyright>Copyright © 2008-2019 Hawkynt</Copyright>
-    <AssemblyVersion>1.1.3.3</AssemblyVersion>
-    <FileVersion>1.1.3.3</FileVersion>
+    <!-- Base version only. The revision is appended during CI by
+         .github/workflows/scripts/version.pl; AssemblyVersion and FileVersion derive from it,
+         so never pin those here or the stamp has no effect on the produced binaries. -->
+    <Version>1.1.3</Version>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

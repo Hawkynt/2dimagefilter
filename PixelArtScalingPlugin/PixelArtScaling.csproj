@@ -8,8 +8,8 @@
     <Product>PixelArtScalingPlugin</Product>
     <Description>Manipulates images using the 2dimagefilter library.</Description>
     <Copyright>Copyright ©2008-2019 Hawkynt</Copyright>
-    <AssemblyVersion>1.1.3.3</AssemblyVersion>
-    <FileVersion>1.1.3.3</FileVersion>
+    <!-- Base version only; the revision is stamped by CI. See ImageResizer.csproj. -->
+    <Version>1.1.3</Version>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>9</LangVersion>
