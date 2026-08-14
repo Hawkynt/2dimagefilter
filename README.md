@@ -98,8 +98,8 @@ Our enhanced approach uses flexible similarity functions:
 
 #### Option 3: Command Line Interface
 ```bash
-ImageResizer.exe load input.png resize auto "Upscaler: HQ 2x" save output.png
-ImageResizer.exe load sprite.bmp resize 400% "Upscaler: XBR 3x" save scaled_sprite.png
+ImageResizer.exe /load input.png /resize auto "Upscaler: HQ 2x" /save output.png
+ImageResizer.exe /load sprite.bmp /resize 400% "Upscaler: XBR 3x" /save scaled_sprite.png
 ```
 
 ### Building from Source
@@ -111,6 +111,9 @@ cd 2dimagefilter
 # Build the solution
 dotnet build ImageResizer.slnx -c Release
 
+# Run the tests
+dotnet test ImageResizer.slnx -c Release
+
 # Or build individual projects
 dotnet build ImageResizerLibrary/ImageResizerLibrary.csproj
 dotnet build ImageResizer/ImageResizer.csproj
@@ -121,23 +124,26 @@ dotnet build ImageResizer/ImageResizer.csproj
 ### Command Line Usage
 The application supports powerful command-line scripting.
 
-> **Filter names** use the category prefix shown in the GUI dropdown. Scaling prefixes are directional: `Upscaler: ` (integer upscalers such as HQ, XBR, Eagle, Scale), `Downscaler: ` (integer downscalers, future), `Resampler: ` (bidirectional arbitrary-ratio kernels such as Bicubic, Lanczos), `Downsampler: ` (downscale-only resamplers such as DPID, SSIM Downscale). Other categories: `Filter: `, `Plane: `, `Quantize: `, `Dither: `, `Blend: `. Pass the full label (prefix included) as the filter argument.
+> **Filter names** use the category prefix shown in the GUI dropdown. Scaling prefixes are directional: `Upscaler: ` (integer upscalers such as HQ, XBR, Eagle, Scale), `Downscaler: ` (integer downscalers, future), `Resampler: ` (bidirectional arbitrary-ratio kernels such as Bicubic, Lanczos), `Downsampler: ` (downscale-only resamplers such as DPID, SSIM Downscale). Other categories: `Filter: `, `Plane: `, `Quantize: `, `Dither: `, `Blend: `. Pass the full label as the filter argument; the prefix may be omitted where the bare name is unambiguous, which keeps command lines and `.irs` scripts written before the prefixes existed working.
 
 ```bash
 # Basic usage
-ImageResizer.exe load <input> resize <dimensions> <method> save <output>
+ImageResizer.exe /load <input> /resize <dimensions> <method> /save <output>
 
 # Dimension formats
-resize auto "Upscaler: Scale 2x"          # Auto-detect from algorithm
-resize 320x240 "Resampler: Bicubic"       # Specific dimensions
-resize w128 "Upscaler: HQ 2x"             # Width only (height auto)
-resize h96 "Upscaler: Eagle"              # Height only (width auto)
-resize 200% "Upscaler: XBR 3x"            # Percentage scaling
+/resize auto "Upscaler: Scale 2x"          # Auto-detect from algorithm
+/resize 320x240 "Resampler: Bicubic"       # Specific dimensions
+/resize w128 "Upscaler: HQ 2x"             # Width only (height auto)
+/resize h96 "Upscaler: Eagle"              # Height only (width auto)
+/resize 200% "Upscaler: XBR 3x"            # Percentage scaling
+/resize auto "HQ 2x"                       # Prefix omitted - unambiguous
 
 # Parameter examples
-resize auto "Resampler: Bicubic(radius=1.5,vbounds=wrap)"
-resize 2x2 "Upscaler: HQ 2x(thresholds=1,repeat=2)"
+/resize auto "Resampler: Bicubic(radius=1.5,vbounds=wrap)"
+/resize 2x2 "Upscaler: HQ 2x(thresholds=1)"
 ```
+
+Run `ImageResizer.exe /?` to print the full help including the list of every supported filter method; with no arguments it opens the GUI.
 
 ### Supported Parameters
 - `radius`: Filter radius for resampling kernels

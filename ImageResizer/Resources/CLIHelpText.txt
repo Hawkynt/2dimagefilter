@@ -21,6 +21,7 @@ How to use :
 ============
 
 {location} [{load} <source>] [{stdin}] [{resize} <dimensions> <method>[(<repeat>|<paramlist>)]] [{save} <target>] [{script} <script>] [{stdout}]...
+{location} /?
 
 ============
 Explanation:
@@ -37,6 +38,8 @@ Explanation:
   {script}        - Processes a script file in the current chain.
     <script>     - the name of the script file - take care not to build recursive scripts !
 
+  /?             - Shows this help. Also accepted: -?, --?, /h, -h, /help, --help
+
   {resize}        - Resizes the image in the buffer and stores the result back to the buffer.
     <dimensions> - auto | w<x> | h<y> | <x>x<y> | <p>%
                    If only width or height is specified, the other dimension is auto-detected by aspect ratio
@@ -44,7 +47,9 @@ Explanation:
       <x>        - the final width in pixels for the target
       <y>        - the final height in pixels for the target
       <p>        - the percentage to resize eg 400% for 4-times resizing
-    <method>     - the method to use
+    <method>     - the method to use, as listed under "Supported filter methods" below
+                   Methods are listed as "<category>: <name>". The category may be left out as
+                   long as no other category offers a method of the same name.
     <repeat>     - the number of repetitions using this method
     <paramlist>  - a list of parameters to apply, separated using ',' and assigned using '='; eg. radius=4, centeredGrid=0
       {radius}     - a floating point value setting the radius of the filter
@@ -58,22 +63,25 @@ Explanation:
 Examples:
 =========
 
-{location} {load} input.bmp {resize} 72x92 "Bicubic(vbounds=wrap)" {save} output.png
-{location} {load} input.bmp {resize} w72 "Bicubic" {save} output.png
-{location} {load} input.bmp {resize} h92 "Bicubic(vbounds=whole,hbounds=whole)" {save} output.png
-{location} {load} input.bmp {resize} 325% "Bicubic" {save} output.png
-{location} {load} input.bmp {resize} auto "LQ 2x Smart" {save} output.png
+{location} {load} input.bmp {resize} 72x92 "Resampler: Bicubic(vbounds=wrap)" {save} output.png
+{location} {load} input.bmp {resize} w72 "Resampler: Bicubic" {save} output.png
+{location} {load} input.bmp {resize} h92 "Resampler: Bicubic(vbounds=whole,hbounds=whole)" {save} output.png
+{location} {load} input.bmp {resize} 325% "Resampler: Bicubic" {save} output.png
+{location} {load} input.bmp {resize} auto "Upscaler: LQ 2x" {save} output.png
 {location} {load} input.bmp {script} "MyFilterChain.scr" {save} output.png
 {location} {script} "MyScript.scr"
 
+The category may be left out where it is unambiguous, so this is the same filter as above.
+{location} {load} input.bmp {resize} auto "LQ 2x" {save} output.png
+
 You can load and process multiple files at once by loading after saving again.
-{location} {load}  1.bmp {resize} 10x10 Pixel {save} 1.jpg {load} 2.bmp {resize} 10x10 Pixel {save} 2.jpg
+{location} {load} 1.bmp {resize} 10x10 "Nearest Neighbor" {save} 1.jpg {load} 2.bmp {resize} 10x10 "Nearest Neighbor" {save} 2.jpg
 
 You can also save to multiple files by adding another save parameter.
-{location} {load} 1.bmp {resize} 10x10 Pixel {save} 1.jpg {save} 2.png
+{location} {load} 1.bmp {resize} 10x10 "Nearest Neighbor" {save} 1.jpg {save} 2.png
 
 Even preprocessing using multiple filters is possible by adding another resize parameter.
-{location} {load} 1.bmp {resize} 10x10 Pixel {resize} auto Scale2x {save} 1.png
+{location} {load} 1.bmp {resize} 10x10 "Nearest Neighbor" {resize} auto "Scale 2x" {save} 1.png
 {location} {load} 1.bmp {resize} auto "XBR 3x" {resize} w128 Bicubic {save} 1.png
 
 =========================
@@ -87,4 +95,4 @@ Miscellaneous:
 ==============
 
 For further information, please visit the project's website at:
-  http://code.google.com/p/2dimagefilter/
+  https://github.com/Hawkynt/2dimagefilter
