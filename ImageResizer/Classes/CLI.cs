@@ -40,12 +40,23 @@ namespace Classes {
   internal static class CLI {
 
     /// <summary>
+    /// The arguments that ask for the help text rather than for work.
+    /// </summary>
+    private static readonly string[] _HELP_ARGUMENTS = { "/?", "-?", "--?", "/h", "-h", "/help", "--help" };
+
+    /// <summary>
     /// Parses the command line arguments.
     /// </summary>
     /// <param name="arguments">The arguments.</param>
     public static CLIExitCode ParseCommandLineArguments(string[] arguments) {
       if (arguments == null || arguments.Length < 1)
         return CLIExitCode.OK;
+
+      // only the leading argument, so a file that happens to be named like a switch stays a file
+      if (_HELP_ARGUMENTS.Contains(arguments[0], StringComparer.OrdinalIgnoreCase)) {
+        _ShowHelp();
+        return CLIExitCode.OK;
+      }
 
       var engine = new ScriptEngine();
       var line = string.Join(" ", arguments.Select(a => string.Format(@"""{0}""", a)));
@@ -57,6 +68,7 @@ namespace Classes {
       try {
         ScriptSerializer.LoadFromString(engine, line);
       } catch (ScriptSerializerException e) {
+        _ShowError(e);
         _ShowHelp();
         return e.ErrorType;
       }
@@ -158,6 +170,56 @@ namespace Classes {
           return pair.Key;
 
       return ReflectionUtils.GetDescriptionForClass(manipulator.GetType());
+    }
+
+    /// <summary>
+    /// Explains why a script could not be parsed. Without this the CLI answered every malformed
+    /// command line with nothing but the help text, leaving the user to guess which token it
+    /// choked on.
+    /// </summary>
+    /// <param name="exception">The parse failure.</param>
+    private static void _ShowError(ScriptSerializerException exception) {
+      var origin = exception.Filename == null
+        ? string.Empty
+        : string.Format(" in {0}, line {1}", exception.Filename, exception.LineNumber)
+        ;
+
+      Console.WriteLine("ERROR{0}: {1}", origin, _GetErrorText(exception.ErrorType));
+      Console.WriteLine();
+    }
+
+    /// <summary>
+    /// Gets a human-readable explanation for an exit code.
+    /// </summary>
+    /// <param name="exitCode">The exit code.</param>
+    /// <returns>The explanation.</returns>
+    private static string _GetErrorText(CLIExitCode exitCode) {
+      switch (exitCode) {
+        case CLIExitCode.UnknownParameter:
+          return "Unknown command or filter parameter - see the list of supported filter methods below.";
+        case CLIExitCode.TooLessArguments:
+          return "A command is missing arguments.";
+        case CLIExitCode.FilenameMustNotBeNull:
+          return "A file name is missing.";
+        case CLIExitCode.InvalidTargetDimensions:
+          return "Invalid target dimensions - expected auto, w<x>, h<y>, <x>x<y> or <p>%.";
+        case CLIExitCode.CouldNotParseDimensionsAsWord:
+          return "Target dimensions out of range - width, height and percentage must be 0-65535.";
+        case CLIExitCode.UnknownFilter:
+          return "Unknown filter method - see the list of supported filter methods below.";
+        case CLIExitCode.AmbiguousFilter:
+          return "Ambiguous filter method - more than one category provides it, so prefix it with the category shown in the list below.";
+        case CLIExitCode.InvalidFilterDescription:
+          return "Invalid filter description - expected <method>[(<repeat>|<paramlist>)].";
+        case CLIExitCode.CouldNotParseParameterAsFloat:
+          return "A filter parameter that must be a floating point value is not one.";
+        case CLIExitCode.CouldNotParseParameterAsByte:
+          return "A filter parameter that must be a value 0-255 is not one.";
+        case CLIExitCode.InvalidOutOfBoundsMode:
+          return "Invalid out of bounds mode - expected const, half, whole, wrap or transparent.";
+        default:
+          return exitCode.ToString();
+      }
     }
 
     /// <summary>
