@@ -38,6 +38,7 @@ namespace Classes {
     CouldNotParseParameterAsFloat=13,
     CouldNotParseParameterAsByte=14,
     InvalidOutOfBoundsMode=15,
+    AmbiguousFilter=18,
 
     RuntimeError=16,
   }

@@ -65,6 +65,12 @@ namespace Classes {
     internal const string HBOUNDS_PARAMETER_NAME = "hbounds";
     internal const string VBOUNDS_PARAMETER_NAME = "vbounds";
 
+    /// <summary>
+    /// Separates the category from the filter name in a manipulator key, as in
+    /// <c>"Upscaler: HQ 2x"</c>.
+    /// </summary>
+    internal const string CATEGORY_SEPARATOR = ": ";
+
     internal const string LOAD_COMMAND_NAME = "/load";
     internal const string SCRIPT_COMMAND_NAME = "/script";
     internal const string SAVE_COMMAND_NAME = "/save";
@@ -346,17 +352,58 @@ namespace Classes {
       }
 
       // find the given manipulator
-      var manipulator = SupportedManipulators.MANIPULATORS
-        .Where(resizer => string.Compare(resizer.Key, filterName, true) == 0)
-        .Select(kvp => kvp.Value)
-        .FirstOrDefault()
-      ;
+      var manipulator = FindManipulator(SupportedManipulators.MANIPULATORS, filterName, out var isAmbiguous);
+      if (isAmbiguous)
+        return CLIExitCode.AmbiguousFilter;
 
       if (manipulator == null)
         return CLIExitCode.UnknownFilter;
 
       engine.AddWithoutExecution(new ResizeCommand(true, manipulator, targetWidth, targetHeight, targetPercent, useAspect, hbounds, vbounds, repeat, useThresholds, useCenteredGrid, radius));
       return CLIExitCode.OK;
+    }
+
+    /// <summary>
+    /// Resolves a filter name to the manipulator it names.
+    /// <para>
+    /// Manipulator keys carry the category they were registered under, e.g.
+    /// <c>"Upscaler: HQ 2x"</c>. Command lines and script files written before that scheme
+    /// existed name the filter alone, e.g. <c>"HQ 2x"</c>, so the full key is tried first and the
+    /// bare name second - the latter matched against everything each key holds after its first
+    /// <see cref="CATEGORY_SEPARATOR"/>. Categories are derived when the manipulator list is
+    /// built, so they are deliberately not enumerated here.
+    /// </para>
+    /// </summary>
+    /// <param name="manipulators">The registered manipulators to search.</param>
+    /// <param name="filterName">The name to resolve; matched case-insensitively.</param>
+    /// <param name="isAmbiguous">Set when a bare name is provided by more than one category.</param>
+    /// <returns>The manipulator, or <c>null</c> when no filter matches or the name is ambiguous.</returns>
+    internal static IImageManipulator FindManipulator(KeyValuePair<string, IImageManipulator>[] manipulators, string filterName, out bool isAmbiguous) {
+      isAmbiguous = false;
+
+      foreach (var pair in manipulators)
+        if (string.Equals(pair.Key, filterName, StringComparison.OrdinalIgnoreCase))
+          return pair.Value;
+
+      IImageManipulator result = null;
+      foreach (var pair in manipulators) {
+        var index = pair.Key.IndexOf(CATEGORY_SEPARATOR, StringComparison.Ordinal);
+        if (index < 0)
+          continue;
+
+        if (!string.Equals(pair.Key.Substring(index + CATEGORY_SEPARATOR.Length), filterName, StringComparison.OrdinalIgnoreCase))
+          continue;
+
+        // two categories offering the same bare name - the user has to say which
+        if (result != null) {
+          isAmbiguous = true;
+          return null;
+        }
+
+        result = pair.Value;
+      }
+
+      return result;
     }
 
     /// <summary>
