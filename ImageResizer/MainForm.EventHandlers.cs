@@ -271,6 +271,7 @@ namespace ImageResizer {
 
     private void nudWidth_ValueChanged(object sender, EventArgs e) {
       this._CorrectAspectRatioIfNeeded(false);
+      this._SyncPercentageFromWidth();
       this._SchedulePreview();
     }
 
@@ -290,10 +291,9 @@ namespace ImageResizer {
       var source = this._scriptEngine.SourceImage;
       if (source == null) return;
 
-      var targetW = (long)source.Width * factor;
-      var targetH = (long)source.Height * factor;
-      this.nudWidth.Value = (decimal)Math.Min(targetW, (long)this.nudWidth.Maximum);
-      this.nudHeight.Value = (decimal)Math.Min(targetH, (long)this.nudHeight.Maximum);
+      var maximum = (int)this.nudWidth.Maximum;
+      this.nudWidth.Value = TargetDimensions.Scale(source.Width, factor, maximum);
+      this.nudHeight.Value = TargetDimensions.Scale(source.Height, factor, maximum);
     }
 
     private void showToolStripMenuItem_Click(object sender, EventArgs e) {

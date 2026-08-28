@@ -77,6 +77,18 @@ namespace ImageResizer {
     /// <see cref="_CreateCategoryFilter"/>.
     /// </summary>
     private ComboBox _cmbCategory;
+
+    /// <summary>
+    /// Sets the target size as a percentage of the source. Created in code by
+    /// <see cref="_CreatePercentageControl"/>.
+    /// </summary>
+    private NumericUpDown _nudPercentage;
+
+    /// <summary>
+    /// Guards the percentage control and the width/height boxes against driving each other in a
+    /// loop while one is being updated from the other.
+    /// </summary>
+    private bool _isApplyingPercentage;
     private CancellationTokenSource _previewCts;
 
     // The preview-owned bitmap currently shown in iwhTargetImage, if any. We OWN it and must
@@ -207,6 +219,7 @@ namespace ImageResizer {
       this.cmbResizeMethod.SelectedIndex = 0;
 
       this._CreateCategoryFilter();
+      this._CreatePercentageControl();
 
       this.cmbHorizontalBPH.DataSource = Enum.GetValues(typeof(OutOfBoundsMode));
       this.cmbVerticalBPH.DataSource = Enum.GetValues(typeof(OutOfBoundsMode));
@@ -319,6 +332,112 @@ namespace ImageResizer {
 
       var index = ManipulatorCategories.IndexOf(methods, previous);
       this.cmbResizeMethod.SelectedIndex = index < 0 ? 0 : index;
+    }
+
+    /// <summary>
+    /// Adds the percentage control to the target resolution group.
+    /// <para>
+    /// The fixed 2x..10x buttons only cover whole factors; a percentage covers everything between
+    /// and is what the command line has always accepted as <c>/resize &lt;p&gt;%</c>.
+    /// </para>
+    /// </summary>
+    private void _CreatePercentageControl() {
+      var group = this.nudWidth.Parent;
+      if (group == null)
+        return;
+
+      // The height row is the template for the new one. Its label sits a few pixels lower than
+      // its box, so both offsets are copied rather than guessed.
+      var heightLabel = group.Controls.OfType<Label>().FirstOrDefault(l => l.Text.StartsWith("Height", StringComparison.OrdinalIgnoreCase));
+      var rowHeight = this.nudHeight.Height + 6;
+      var newRowTop = this.nudHeight.Top + rowHeight;
+
+      this._nudPercentage = new NumericUpDown {
+        Name = "nudPercentage",
+        Location = new Point(this.nudHeight.Left, newRowTop),
+        Size = this.nudHeight.Size,
+        Anchor = this.nudHeight.Anchor,
+        Minimum = 1,
+        Maximum = 6400,
+        Value = 100,
+        Increment = 25,
+      };
+
+      // everything strictly below the height row moves down to make space - the height label
+      // itself sits below the box's top, so the boundary is the box's bottom edge
+      var heightRowBottom = this.nudHeight.Top + this.nudHeight.Height;
+      foreach (Control control in group.Controls)
+        if (control.Top >= heightRowBottom)
+          control.Top += rowHeight;
+
+      group.Height += rowHeight;
+      group.Controls.Add(this._nudPercentage);
+
+      if (heightLabel != null)
+        group.Controls.Add(new Label {
+          Name = "lblPercentage",
+          Text = "Percent",
+          Location = new Point(heightLabel.Left, heightLabel.Top + rowHeight),
+          Anchor = heightLabel.Anchor,
+          TextAlign = heightLabel.TextAlign,
+          // "Percent" is wider than the label this row was copied from
+          AutoSize = true,
+        });
+
+      this._nudPercentage.ValueChanged += this._OnPercentageChanged;
+    }
+
+    /// <summary>
+    /// Applies the percentage to the width and height boxes.
+    /// </summary>
+    private void _OnPercentageChanged(object sender, EventArgs e) {
+      if (this._isApplyingPercentage)
+        return;
+
+      var source = this._scriptEngine.SourceImage;
+      if (source == null)
+        return;
+
+      TargetDimensions.FromPercentage(
+        source.Width,
+        source.Height,
+        (double)this._nudPercentage.Value,
+        out var width,
+        out var height,
+        (int)this.nudWidth.Maximum
+      );
+
+      this._isApplyingPercentage = true;
+      try {
+        this.nudWidth.Value = width;
+        this.nudHeight.Value = height;
+      } finally {
+        this._isApplyingPercentage = false;
+      }
+    }
+
+    /// <summary>
+    /// Follows the width box with the percentage control, so the two never disagree about what
+    /// the target size is.
+    /// </summary>
+    private void _SyncPercentageFromWidth() {
+      if (this._isApplyingPercentage || this._nudPercentage == null)
+        return;
+
+      var source = this._scriptEngine.SourceImage;
+      if (source == null)
+        return;
+
+      var percentage = (decimal)TargetDimensions.ToPercentage(source.Width, (int)this.nudWidth.Value);
+      if (percentage < this._nudPercentage.Minimum || percentage > this._nudPercentage.Maximum)
+        return;
+
+      this._isApplyingPercentage = true;
+      try {
+        this._nudPercentage.Value = decimal.Round(percentage, 0);
+      } finally {
+        this._isApplyingPercentage = false;
+      }
     }
 
     /// <summary>
