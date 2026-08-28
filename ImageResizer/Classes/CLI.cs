@@ -45,6 +45,16 @@ namespace Classes {
     private static readonly string[] _HELP_ARGUMENTS = { "/?", "-?", "--?", "/h", "-h", "/help", "--help" };
 
     /// <summary>
+    /// Where progress reports and errors go.
+    /// <para>
+    /// Never standard output: <see cref="ScriptActions.SaveStdOutCommand"/> writes a PNG there, and
+    /// anything else on that stream corrupts the image for whatever is on the other end of the
+    /// pipe. Standard output carries image data and nothing else.
+    /// </para>
+    /// </summary>
+    private static TextWriter _Diagnostics => Console.Error;
+
+    /// <summary>
     /// Parses the command line arguments.
     /// </summary>
     /// <param name="arguments">The arguments.</param>
@@ -54,22 +64,23 @@ namespace Classes {
 
       // only the leading argument, so a file that happens to be named like a switch stays a file
       if (_HELP_ARGUMENTS.Contains(arguments[0], StringComparer.OrdinalIgnoreCase)) {
-        _ShowHelp();
+        // help that was asked for is the output of the run, so it goes to standard output
+        _ShowHelp(Console.Out);
         return CLIExitCode.OK;
       }
 
       var engine = new ScriptEngine();
       var line = string.Join(" ", arguments.Select(a => string.Format(@"""{0}""", a)));
-      Console.WriteLine("Executing the following script:");
-      Console.WriteLine(line);
-      Console.WriteLine();
+      _Diagnostics.WriteLine("Executing the following script:");
+      _Diagnostics.WriteLine(line);
+      _Diagnostics.WriteLine();
 
       // load script from command line parameters
       try {
         ScriptSerializer.LoadFromString(engine, line);
       } catch (ScriptSerializerException e) {
         _ShowError(e);
-        _ShowHelp();
+        _ShowHelp(_Diagnostics);
         return e.ErrorType;
       }
 
@@ -77,7 +88,7 @@ namespace Classes {
       try {
         engine.RepeatActions(_PreAction, _PostAction);
       } catch (Exception e) {
-        Console.WriteLine(e.Message);
+        _Diagnostics.WriteLine(e.Message);
         return CLIExitCode.RuntimeError;
       }
 
@@ -87,22 +98,22 @@ namespace Classes {
     private static void _PreAction(ScriptEngine engine, IScriptAction command) {
       switch (command) {
         case LoadFileCommand loadCommand:
-          Console.WriteLine("Loading from file " + loadCommand.FileName);
+          _Diagnostics.WriteLine("Loading from file " + loadCommand.FileName);
           return;
         case SaveFileCommand saveCommand:
-          Console.WriteLine("Saving to file " + saveCommand.FileName);
+          _Diagnostics.WriteLine("Saving to file " + saveCommand.FileName);
           break;
         case ResizeCommand resizeCommand:
-          Console.WriteLine("Applying filter     : {0}", _GetManipulatorName(resizeCommand.Manipulator));
-          Console.WriteLine("  Target percentage : {0}", resizeCommand.Percentage == 0 ? "auto" : resizeCommand.Percentage + "%");
-          Console.WriteLine("  Target width      : {0}", resizeCommand.Width == 0 ? "auto" : resizeCommand.Width + "pixels");
-          Console.WriteLine("  Target height     : {0}", resizeCommand.Height == 0 ? "auto" : resizeCommand.Height + "pixels");
-          Console.WriteLine("  Hori. BPH         : {0}", resizeCommand.HorizontalBph);
-          Console.WriteLine("  Vert. BPH         : {0}", resizeCommand.VerticalBph);
-          Console.WriteLine("  Use Thresholds    : {0}", resizeCommand.UseThresholds);
-          Console.WriteLine("  Centered Grid     : {0}", resizeCommand.UseCenteredGrid);
-          Console.WriteLine("  Radius            : {0}", resizeCommand.Radius);
-          Console.WriteLine("  Repeat            : {0} times", resizeCommand.Count);
+          _Diagnostics.WriteLine("Applying filter     : {0}", _GetManipulatorName(resizeCommand.Manipulator));
+          _Diagnostics.WriteLine("  Target percentage : {0}", resizeCommand.Percentage == 0 ? "auto" : resizeCommand.Percentage + "%");
+          _Diagnostics.WriteLine("  Target width      : {0}", resizeCommand.Width == 0 ? "auto" : resizeCommand.Width + "pixels");
+          _Diagnostics.WriteLine("  Target height     : {0}", resizeCommand.Height == 0 ? "auto" : resizeCommand.Height + "pixels");
+          _Diagnostics.WriteLine("  Hori. BPH         : {0}", resizeCommand.HorizontalBph);
+          _Diagnostics.WriteLine("  Vert. BPH         : {0}", resizeCommand.VerticalBph);
+          _Diagnostics.WriteLine("  Use Thresholds    : {0}", resizeCommand.UseThresholds);
+          _Diagnostics.WriteLine("  Centered Grid     : {0}", resizeCommand.UseCenteredGrid);
+          _Diagnostics.WriteLine("  Radius            : {0}", resizeCommand.Radius);
+          _Diagnostics.WriteLine("  Repeat            : {0} times", resizeCommand.Count);
           break;
       }
     }
@@ -134,19 +145,19 @@ namespace Classes {
     /// <param name="fileName">The image file to describe.</param>
     private static void _PrintImageFileDetails(string fileName) {
       try {
-        Console.WriteLine("  File   : {0} Bytes", new FileInfo(fileName).Length);
+        _Diagnostics.WriteLine("  File   : {0} Bytes", new FileInfo(fileName).Length);
 
         // no validation and no embedded colour management - we only want the header
         using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
         using (var image = Image.FromStream(stream, false, false)) {
-          Console.WriteLine("  Width  : {0} Pixel", image.Width);
-          Console.WriteLine("  Height : {0} Pixel", image.Height);
-          Console.WriteLine("  Size   : {0:0.00} MegaPixel", image.Width * image.Height / 1000000.0);
-          Console.WriteLine("  Type   : {0}", _GetFormatDescription(image.RawFormat));
-          Console.WriteLine("  Format : {0}", image.PixelFormat);
+          _Diagnostics.WriteLine("  Width  : {0} Pixel", image.Width);
+          _Diagnostics.WriteLine("  Height : {0} Pixel", image.Height);
+          _Diagnostics.WriteLine("  Size   : {0:0.00} MegaPixel", image.Width * image.Height / 1000000.0);
+          _Diagnostics.WriteLine("  Type   : {0}", _GetFormatDescription(image.RawFormat));
+          _Diagnostics.WriteLine("  Format : {0}", image.PixelFormat);
         }
       } catch (Exception e) {
-        Console.WriteLine("  (details unavailable: {0})", e.Message);
+        _Diagnostics.WriteLine("  (details unavailable: {0})", e.Message);
       }
     }
 
@@ -184,8 +195,8 @@ namespace Classes {
         : string.Format(" in {0}, line {1}", exception.Filename, exception.LineNumber)
         ;
 
-      Console.WriteLine("ERROR{0}: {1}", origin, _GetErrorText(exception.ErrorType));
-      Console.WriteLine();
+      _Diagnostics.WriteLine("ERROR{0}: {1}", origin, _GetErrorText(exception.ErrorType));
+      _Diagnostics.WriteLine();
     }
 
     /// <summary>
@@ -225,7 +236,9 @@ namespace Classes {
     /// <summary>
     /// Shows the CLI help.
     /// </summary>
-    private static void _ShowHelp() {
+    /// <param name="writer">Where to write it: standard output when the user asked for help,
+    /// <see cref="_Diagnostics"/> when it accompanies an error.</param>
+    private static void _ShowHelp(TextWriter writer) {
 
       var longestFilterNameLength = SupportedManipulators.MANIPULATORS.Select(k => k.Key.Length).Max();
 
@@ -257,7 +270,7 @@ namespace Classes {
         .Replace("{stdin}", ScriptSerializer.STDIN_COMMAND_NAME)
         .Replace("{stdout}", ScriptSerializer.STDOUT_COMMAND_NAME)
         ;
-      Console.WriteLine(lines);
+      writer.WriteLine(lines);
     }
 
     /// <summary>

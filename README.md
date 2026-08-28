@@ -145,6 +145,18 @@ ImageResizer.exe /load <input> /resize <dimensions> <method> /save <output>
 
 Run `ImageResizer.exe /?` to print the full help including the list of every supported filter method; with no arguments it opens the GUI.
 
+#### Piping
+
+`/stdin` reads an image from standard input and `/stdout` writes a PNG to standard output. Standard output carries image data and nothing else — progress reports and errors go to standard error — so a run can be piped straight into another program:
+
+```bash
+# chain two runs
+ImageResizer.exe /load in.png /resize auto "HQ 2x" /stdout | ImageResizer.exe /stdin /resize auto "XBR 3x" /save out.png
+
+# hand the result to another tool
+ImageResizer.exe /load in.png /resize auto "XBR 3x" /stdout | magick - out.webp
+```
+
 ### Supported Parameters
 - `radius`: Filter radius for resampling kernels
 - `thresholds`: Enable/disable similarity thresholds

@@ -69,10 +69,34 @@ namespace ImageResizer.Tests {
     /// <summary>The outcome of one process run.</summary>
     private sealed class RunResult {
       public int ExitCode { get; set; }
-      public string StandardOutput { get; set; }
+
+      /// <summary>
+      /// Standard output verbatim. Kept as bytes because it carries image data whenever /stdout
+      /// is in play, and decoding that as text would mangle it.
+      /// </summary>
+      public byte[] StandardOutputBytes { get; set; }
+
       public string StandardError { get; set; }
 
+      public string StandardOutput => Encoding.UTF8.GetString(this.StandardOutputBytes);
+
       public CLIExitCode Code => (CLIExitCode)this.ExitCode;
+
+      /// <summary>Whether standard output is exactly one PNG and nothing else.</summary>
+      public bool StandardOutputIsPng
+        => this.StandardOutputBytes.Length > 8 && this.StandardOutputBytes.Take(8).SequenceEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A })
+      ;
+
+      /// <summary>The dimensions in the IHDR chunk of the PNG on standard output.</summary>
+      public Size StandardOutputPngSize {
+        get {
+          var header = this.StandardOutputBytes;
+          return new Size(
+            (header[16] << 24) | (header[17] << 16) | (header[18] << 8) | header[19],
+            (header[20] << 24) | (header[21] << 16) | (header[22] << 8) | header[23]
+          );
+        }
+      }
     }
 
     /// <summary>
@@ -80,7 +104,15 @@ namespace ImageResizer.Tests {
     /// </summary>
     /// <param name="arguments">The arguments, each quoted as needed.</param>
     /// <returns>The outcome.</returns>
-    private RunResult _Run(params string[] arguments) {
+    private RunResult _Run(params string[] arguments) => this._RunWithInput(null, arguments);
+
+    /// <summary>
+    /// Runs the executable, optionally feeding it standard input.
+    /// </summary>
+    /// <param name="standardInput">Bytes to pipe in, or <c>null</c> for no input.</param>
+    /// <param name="arguments">The arguments.</param>
+    /// <returns>The outcome.</returns>
+    private RunResult _RunWithInput(byte[] standardInput, params string[] arguments) {
       var startInfo = new ProcessStartInfo(_EXECUTABLE) {
         Arguments = string.Join(" ", arguments.Select(_Quote)),
         WorkingDirectory = this._directory.Path,
@@ -88,21 +120,29 @@ namespace ImageResizer.Tests {
         CreateNoWindow = true,
         RedirectStandardOutput = true,
         RedirectStandardError = true,
+        RedirectStandardInput = standardInput != null,
       };
 
       using (var process = Process.Start(startInfo)) {
-        // read both pipes before waiting, or a full buffer deadlocks the child
-        var standardOutput = process.StandardOutput.ReadToEndAsync();
+        // drain both pipes before waiting, or a full buffer deadlocks the child
+        var standardOutput = new MemoryStream();
+        var outputPump = process.StandardOutput.BaseStream.CopyToAsync(standardOutput);
         var standardError = process.StandardError.ReadToEndAsync();
+
+        if (standardInput != null)
+          using (var input = process.StandardInput.BaseStream)
+            input.Write(standardInput, 0, standardInput.Length);
 
         if (!process.WaitForExit(_TIMEOUT_MILLISECONDS)) {
           process.Kill();
           Assert.Fail("the executable did not terminate within {0} ms", _TIMEOUT_MILLISECONDS);
         }
 
+        outputPump.Wait(_TIMEOUT_MILLISECONDS);
+
         return new RunResult {
           ExitCode = process.ExitCode,
-          StandardOutput = standardOutput.Result,
+          StandardOutputBytes = standardOutput.ToArray(),
           StandardError = standardError.Result,
         };
       }
@@ -130,7 +170,7 @@ namespace ImageResizer.Tests {
     public void LoadAndSave_CopiesTheImageThrough() {
       var result = this._Run("/load", this._Source(), "/save", "out.png");
 
-      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardOutput);
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
       Assert.That(this._SizeOf("out.png"), Is.EqualTo(new Size(16, 16)));
     }
 
@@ -139,7 +179,7 @@ namespace ImageResizer.Tests {
     public void TheCommandLineFromIssue33_Works() {
       var result = this._Run("/load", this._Source(), "/resize", "auto", "HQ 2x", "/save", "out.png");
 
-      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardOutput);
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
       Assert.That(this._SizeOf("out.png"), Is.EqualTo(new Size(32, 32)));
     }
 
@@ -152,7 +192,7 @@ namespace ImageResizer.Tests {
     public void FixedFactorUpscalers_ProduceTheirFactor(string filter, int expectedWidth, int expectedHeight) {
       var result = this._Run("/load", this._Source(), "/resize", "auto", filter, "/save", "out.png");
 
-      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardOutput);
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
       Assert.That(this._SizeOf("out.png"), Is.EqualTo(new Size(expectedWidth, expectedHeight)));
     }
 
@@ -164,7 +204,7 @@ namespace ImageResizer.Tests {
     public void EveryDimensionForm_ReachesItsTarget(string dimensions, int expectedWidth, int expectedHeight) {
       var result = this._Run("/load", this._Source(), "/resize", dimensions, "Resampler: Bicubic", "/save", "out.png");
 
-      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardOutput);
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
       Assert.That(this._SizeOf("out.png"), Is.EqualTo(new Size(expectedWidth, expectedHeight)));
     }
 
@@ -172,7 +212,7 @@ namespace ImageResizer.Tests {
     public void FiltersChain_LeftToRight() {
       var result = this._Run("/load", this._Source(), "/resize", "auto", "XBR 3x", "/resize", "w128", "Bicubic", "/save", "out.png");
 
-      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardOutput);
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
       Assert.That(this._SizeOf("out.png").Width, Is.EqualTo(128));
     }
 
@@ -180,7 +220,7 @@ namespace ImageResizer.Tests {
     public void SeveralSavesInOneRun_AllProduceFiles() {
       var result = this._Run("/load", this._Source(), "/resize", "auto", "HQ 2x", "/save", "a.png", "/save", "b.bmp");
 
-      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardOutput);
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
       Assert.That(this._Exists("a.png"), Is.True);
       Assert.That(this._Exists("b.bmp"), Is.True);
     }
@@ -195,7 +235,7 @@ namespace ImageResizer.Tests {
         "/load", "two.png", "/resize", "auto", "HQ 2x", "/save", "two-out.png"
       );
 
-      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardOutput);
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
       Assert.That(this._SizeOf("one-out.png"), Is.EqualTo(new Size(16, 16)));
       Assert.That(this._SizeOf("two-out.png"), Is.EqualTo(new Size(24, 24)));
     }
@@ -208,7 +248,7 @@ namespace ImageResizer.Tests {
     public void TheOutputExtension_PicksTheContainerFormat(string target) {
       var result = this._Run("/load", this._Source(), "/save", target);
 
-      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardOutput);
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
       Assert.That(TestBitmaps.RawFormatOf(this._directory.File(target)), Is.EqualTo(TestBitmaps.FormatFor(target)));
     }
 
@@ -218,7 +258,7 @@ namespace ImageResizer.Tests {
 
       var result = this._Run("/load", "my source.png", "/save", "my target.png");
 
-      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardOutput);
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
       Assert.That(this._Exists("my target.png"), Is.True);
     }
 
@@ -226,7 +266,7 @@ namespace ImageResizer.Tests {
     public void FilterParameters_AreAccepted() {
       var result = this._Run("/load", this._Source(), "/resize", "32x32", "Resampler: Bicubic(vbounds=wrap,hbounds=wrap,centered=0)", "/save", "out.png");
 
-      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardOutput);
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
       Assert.That(this._SizeOf("out.png"), Is.EqualTo(new Size(32, 32)));
     }
 
@@ -241,7 +281,7 @@ namespace ImageResizer.Tests {
 
       var result = this._Run("/script", "chain.irs");
 
-      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardOutput);
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
       Assert.That(this._SizeOf("out.png"), Is.EqualTo(new Size(64, 64)));
     }
 
@@ -252,7 +292,7 @@ namespace ImageResizer.Tests {
 
       var result = this._Run("/load", "in.png", "/script", "filter.irs", "/save", "out.png");
 
-      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardOutput);
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
       Assert.That(this._SizeOf("out.png"), Is.EqualTo(new Size(32, 32)));
     }
 
@@ -263,7 +303,7 @@ namespace ImageResizer.Tests {
       var result = this._Run("/script", "bad.irs");
 
       Assert.That(result.Code, Is.EqualTo(CLIExitCode.UnknownFilter));
-      Assert.That(result.StandardOutput, Does.Contain("bad.irs"));
+      Assert.That(result.StandardError, Does.Contain("bad.irs"));
     }
 
     #endregion
@@ -279,7 +319,7 @@ namespace ImageResizer.Tests {
       var result = this._Run(switchText);
 
       Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK));
-      Assert.That(result.StandardOutput, Does.Contain("How to use"));
+      Assert.That(result.StandardOutput, Does.Contain("How to use"), "help that was asked for is the run's output");
     }
 
     [Test]
@@ -306,7 +346,7 @@ namespace ImageResizer.Tests {
       var result = this._Run("/frobnicate", "in.png");
 
       Assert.That(result.Code, Is.EqualTo(CLIExitCode.UnknownParameter));
-      Assert.That(result.StandardOutput, Does.Contain("ERROR"));
+      Assert.That(result.StandardError, Does.Contain("ERROR"));
     }
 
     [Test]
@@ -314,7 +354,7 @@ namespace ImageResizer.Tests {
       var result = this._Run("/load", this._Source(), "/resize", "auto", "NoSuchFilter", "/save", "out.png");
 
       Assert.That(result.Code, Is.EqualTo(CLIExitCode.UnknownFilter));
-      Assert.That(result.StandardOutput, Does.Contain("ERROR"));
+      Assert.That(result.StandardError, Does.Contain("ERROR"));
       Assert.That(this._Exists("out.png"), Is.False, "nothing may be written when the script never parsed");
     }
 
@@ -378,7 +418,75 @@ namespace ImageResizer.Tests {
     public void AFailingRun_StillPrintsTheHelpSoTheUserCanRecover() {
       var result = this._Run("/load", this._Source(), "/resize", "auto", "NoSuchFilter");
 
-      Assert.That(result.StandardOutput, Does.Contain("How to use"));
+      Assert.That(result.StandardError, Does.Contain("How to use"));
+    }
+
+    #endregion
+
+    #region piping
+
+    /// <summary>
+    /// Regression for issue #15: the progress reports used to go to standard output, so whatever
+    /// consumed the pipe received several hundred bytes of text where it expected a PNG header.
+    /// </summary>
+    [Test]
+    public void StdOut_CarriesNothingButTheImage() {
+      var result = this._Run("/load", this._Source(), "/resize", "auto", "HQ 2x", "/stdout");
+
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
+      Assert.That(result.StandardOutputIsPng, Is.True, "standard output must start with the PNG signature, not with a progress report");
+      Assert.That(result.StandardOutputPngSize, Is.EqualTo(new Size(32, 32)));
+    }
+
+    [Test]
+    public void StdOut_KeepsTheDiagnosticsOnStandardError() {
+      var result = this._Run("/load", this._Source(), "/stdout");
+
+      Assert.That(result.StandardError, Does.Contain("Executing the following script"));
+      Assert.That(result.StandardOutputIsPng, Is.True);
+    }
+
+    [Test]
+    public void StdIn_ReadsAnImageFromThePipe() {
+      var source = File.ReadAllBytes(this._directory.File(this._Source()));
+
+      var result = this._RunWithInput(source, "/stdin", "/resize", "auto", "HQ 2x", "/save", "out.png");
+
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
+      Assert.That(this._SizeOf("out.png"), Is.EqualTo(new Size(32, 32)));
+    }
+
+    /// <summary>
+    /// The end-to-end shape issue #15 was really about: one instance's output feeding the next.
+    /// </summary>
+    [Test]
+    public void StdOutOfOneRun_FeedsStdInOfTheNext() {
+      var first = this._Run("/load", this._Source(), "/resize", "auto", "HQ 2x", "/stdout");
+
+      var second = this._RunWithInput(first.StandardOutputBytes, "/stdin", "/resize", "auto", "XBR 3x", "/stdout");
+
+      Assert.That(second.Code, Is.EqualTo(CLIExitCode.OK), second.StandardError);
+      Assert.That(second.StandardOutputIsPng, Is.True);
+      Assert.That(second.StandardOutputPngSize, Is.EqualTo(new Size(96, 96)), "16 through HQ 2x is 32, through XBR 3x is 96");
+    }
+
+    [Test]
+    public void SeveralStdOutCommands_EachEmitAnImage() {
+      var single = this._Run("/load", this._Source(), "/stdout");
+
+      var twice = this._Run("/load", this._Source(), "/stdout", "/stdout");
+
+      Assert.That(twice.Code, Is.EqualTo(CLIExitCode.OK), twice.StandardError);
+      Assert.That(twice.StandardOutputBytes.Length, Is.EqualTo(single.StandardOutputBytes.Length * 2));
+    }
+
+    [Test]
+    public void AFailingRun_LeavesStandardOutputEmpty() {
+      var result = this._Run("/load", this._Source(), "/resize", "auto", "NoSuchFilter", "/stdout");
+
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.UnknownFilter));
+      Assert.That(result.StandardOutputBytes, Is.Empty, "a consumer of the pipe must not receive the help text");
+      Assert.That(result.StandardError, Is.Not.Empty);
     }
 
     #endregion
@@ -389,22 +497,22 @@ namespace ImageResizer.Tests {
     public void TheRunEchoesTheScriptItIsAboutToExecute() {
       var result = this._Run("/load", this._Source(), "/save", "out.png");
 
-      Assert.That(result.StandardOutput, Does.Contain("Executing the following script"));
+      Assert.That(result.StandardError, Does.Contain("Executing the following script"));
     }
 
     [Test]
     public void LoadDiagnostics_ReportTheRealContainerFormat() {
       var result = this._Run("/load", this._Source(), "/save", "out.png");
 
-      Assert.That(result.StandardOutput, Does.Contain("Type   : PNG"), "MemoryBmp here would mean the in-memory copy is being described");
-      Assert.That(result.StandardOutput, Does.Not.Contain("details unavailable"));
+      Assert.That(result.StandardError, Does.Contain("Type   : PNG"), "MemoryBmp here would mean the in-memory copy is being described");
+      Assert.That(result.StandardError, Does.Not.Contain("details unavailable"));
     }
 
     [Test]
     public void ResizeDiagnostics_NameTheFilterThatRan() {
       var result = this._Run("/load", this._Source(), "/resize", "auto", "HQ 2x", "/save", "out.png");
 
-      Assert.That(result.StandardOutput, Does.Contain("Upscaler: HQ 2x"), "the canonical name, not the abbreviation that was typed");
+      Assert.That(result.StandardError, Does.Contain("Upscaler: HQ 2x"), "the canonical name, not the abbreviation that was typed");
     }
 
     #endregion
