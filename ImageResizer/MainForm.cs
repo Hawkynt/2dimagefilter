@@ -71,6 +71,12 @@ namespace ImageResizer {
     // _SchedulePreview, which restarts the timer; 300 ms after the last change the timer
     // tick kicks off an async preview render into iwhTargetImage.
     private System.Windows.Forms.Timer _previewDebounce;
+
+    /// <summary>
+    /// Narrows <see cref="cmbResizeMethod"/> to one manipulator category. Created in code by
+    /// <see cref="_CreateCategoryFilter"/>.
+    /// </summary>
+    private ComboBox _cmbCategory;
     private CancellationTokenSource _previewCts;
 
     // The preview-owned bitmap currently shown in iwhTargetImage, if any. We OWN it and must
@@ -200,6 +206,8 @@ namespace ImageResizer {
 
       this.cmbResizeMethod.SelectedIndex = 0;
 
+      this._CreateCategoryFilter();
+
       this.cmbHorizontalBPH.DataSource = Enum.GetValues(typeof(OutOfBoundsMode));
       this.cmbVerticalBPH.DataSource = Enum.GetValues(typeof(OutOfBoundsMode));
 
@@ -259,6 +267,59 @@ namespace ImageResizer {
     }
 
     #endregion
+
+    /// <summary>
+    /// Adds the category selector above the method dropdown.
+    /// <para>
+    /// The registry holds several hundred methods, which is more than a single dropdown can
+    /// present usefully; picking a category narrows it to one kind of algorithm. Built in code
+    /// rather than in the Designer, the same way the Tools menu is, so the generated file stays
+    /// untouched.
+    /// </para>
+    /// </summary>
+    private void _CreateCategoryFilter() {
+      var group = this.cmbResizeMethod.Parent;
+      if (group == null)
+        return;
+
+      this._cmbCategory = new ComboBox {
+        Name = "cmbCategory",
+        DropDownStyle = ComboBoxStyle.DropDownList,
+        Location = this.cmbResizeMethod.Location,
+        Size = this.cmbResizeMethod.Size,
+        Anchor = this.cmbResizeMethod.Anchor,
+        TabIndex = this.cmbResizeMethod.TabIndex,
+      };
+
+      // make room: everything from the method dropdown down moves out of the way
+      var offset = this._cmbCategory.Height + 6;
+      foreach (Control control in group.Controls)
+        if (control.Top >= this.cmbResizeMethod.Top)
+          control.Top += offset;
+
+      group.Height += offset;
+      group.Controls.Add(this._cmbCategory);
+
+      this._cmbCategory.Items.AddRange(ManipulatorCategories.List(SupportedManipulators.MANIPULATORS));
+      this._cmbCategory.SelectedIndex = 0;
+      this._cmbCategory.SelectedIndexChanged += this._OnCategoryChanged;
+    }
+
+    /// <summary>
+    /// Narrows the method dropdown to the chosen category, keeping the current method selected
+    /// when it is still on offer.
+    /// </summary>
+    private void _OnCategoryChanged(object sender, EventArgs e) {
+      var previous = this.cmbResizeMethod.SelectedValue as IImageManipulator;
+      var methods = ManipulatorCategories.Filter(SupportedManipulators.MANIPULATORS, this._cmbCategory.SelectedItem as string);
+      if (methods.Length < 1)
+        return;
+
+      this.cmbResizeMethod.DataSource = methods;
+
+      var index = ManipulatorCategories.IndexOf(methods, previous);
+      this.cmbResizeMethod.SelectedIndex = index < 0 ? 0 : index;
+    }
 
     /// <summary>
     /// Loads and applies the configuration settings.
