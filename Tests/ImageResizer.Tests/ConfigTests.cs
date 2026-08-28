@@ -18,6 +18,8 @@
  */
 #endregion
 
+using System.Drawing;
+using System.Drawing.Extensions.ColorProcessing.Resizing;
 using System.IO;
 using System.Windows.Forms;
 using System.Xml;
@@ -47,12 +49,7 @@ namespace ImageResizer.Tests {
       this._directory.Dispose();
     }
 
-    private static void _Reset() {
-      Config.LastLoadDirectory = null;
-      Config.LastSaveDirectory = null;
-      Config.SourceSizeMode = null;
-      Config.TargetSizeMode = null;
-    }
+    private static void _Reset() => Config.Reset();
 
     #region round trip
 
@@ -63,6 +60,17 @@ namespace ImageResizer.Tests {
       Config.LastSaveDirectory = @"C:\saves";
       Config.SourceSizeMode = PictureBoxSizeMode.Zoom;
       Config.TargetSizeMode = PictureBoxSizeMode.CenterImage;
+      Config.WindowBounds = new Rectangle(12, 34, 800, 600);
+      Config.WindowState = FormWindowState.Maximized;
+      Config.ResizeMethod = "Upscaler: HQ 2x";
+      Config.MethodCategory = "Upscaler";
+      Config.HorizontalBph = OutOfBoundsMode.WrapAround;
+      Config.VerticalBph = OutOfBoundsMode.HalfSampleSymmetric;
+      Config.UseThresholds = true;
+      Config.UseCenteredGrid = false;
+      Config.KeepAspect = true;
+      Config.RepetitionCount = 4;
+      Config.Radius = 2.5f;
       Config.Save(file);
       _Reset();
 
@@ -72,6 +80,80 @@ namespace ImageResizer.Tests {
       Assert.That(Config.LastSaveDirectory, Is.EqualTo(@"C:\saves"));
       Assert.That(Config.SourceSizeMode, Is.EqualTo(PictureBoxSizeMode.Zoom));
       Assert.That(Config.TargetSizeMode, Is.EqualTo(PictureBoxSizeMode.CenterImage));
+      Assert.That(Config.WindowBounds, Is.EqualTo(new Rectangle(12, 34, 800, 600)));
+      Assert.That(Config.WindowState, Is.EqualTo(FormWindowState.Maximized));
+      Assert.That(Config.ResizeMethod, Is.EqualTo("Upscaler: HQ 2x"));
+      Assert.That(Config.MethodCategory, Is.EqualTo("Upscaler"));
+      Assert.That(Config.HorizontalBph, Is.EqualTo(OutOfBoundsMode.WrapAround));
+      Assert.That(Config.VerticalBph, Is.EqualTo(OutOfBoundsMode.HalfSampleSymmetric));
+      Assert.That(Config.UseThresholds, Is.True);
+      Assert.That(Config.UseCenteredGrid, Is.False);
+      Assert.That(Config.KeepAspect, Is.True);
+      Assert.That(Config.RepetitionCount, Is.EqualTo(4));
+      Assert.That(Config.Radius, Is.EqualTo(2.5f));
+    }
+
+    #endregion
+
+    #region window placement
+
+    [TestCase("12,34,800,600", true)]
+    [TestCase("0,0,1,1", true)]
+    [TestCase("12,34,0,600", false)]
+    [TestCase("12,34,800,0", false)]
+    [TestCase("12,34,800", false)]
+    [TestCase("a,b,c,d", false)]
+    [TestCase("", false)]
+    public void OnlyAWindowWithExtentIsRestored(string value, bool expected) {
+      var file = this._directory.File("config.xml");
+      File.WriteAllText(file, $@"<Configuration><WindowBounds value=""{value}"" /></Configuration>");
+
+      Config.Load(file);
+
+      Assert.That(Config.WindowBounds != null, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void AMinimizedWindowIsRememberedAsNormal() {
+      var file = this._directory.File("config.xml");
+      File.WriteAllText(file, @"<Configuration><WindowState value=""Minimized"" /></Configuration>");
+
+      Config.Load(file);
+
+      Assert.That(Config.WindowState, Is.EqualTo(FormWindowState.Normal), "nobody wants to reopen a minimized window");
+    }
+
+    [TestCase("RepetitionCount", "0")]
+    [TestCase("RepetitionCount", "-1")]
+    [TestCase("RepetitionCount", "many")]
+    [TestCase("Radius", "0")]
+    [TestCase("Radius", "-2")]
+    [TestCase("Radius", "wide")]
+    public void ANonsensicalNumberIsIgnored(string element, string value) {
+      var file = this._directory.File("config.xml");
+      File.WriteAllText(file, $@"<Configuration><{element} value=""{value}"" /></Configuration>");
+
+      Config.Load(file);
+
+      Assert.That(Config.RepetitionCount, Is.Null);
+      Assert.That(Config.Radius, Is.Null);
+    }
+
+    [Test]
+    public void RadiusIsWrittenAndReadInvariantOfTheCurrentCulture() {
+      var file = this._directory.File("config.xml");
+      var previous = System.Threading.Thread.CurrentThread.CurrentCulture;
+      System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("de-DE");
+      try {
+        Config.Radius = 1.5f;
+        Config.Save(file);
+        _Reset();
+        Config.Load(file);
+
+        Assert.That(Config.Radius, Is.EqualTo(1.5f));
+      } finally {
+        System.Threading.Thread.CurrentThread.CurrentCulture = previous;
+      }
     }
 
     [Test]

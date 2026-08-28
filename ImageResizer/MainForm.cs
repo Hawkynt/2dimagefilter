@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Drawing;
@@ -233,6 +234,7 @@ namespace ImageResizer {
       this.chkUseThresholds.Checked = false;
 
       this._LoadConfigurationSettings();
+      this.FormClosing += (s, e) => this._SaveConfigurationSettings();
 
       if (fileToOpenOnStart != null)
         this._LoadImageFromFileName(fileToOpenOnStart);
@@ -449,7 +451,104 @@ namespace ImageResizer {
 
       if (Config.TargetSizeMode != null)
         this._TargetImageSizeMode = Config.TargetSizeMode.Value;
+
+      this._RestoreWindowPlacement();
+
+      // category before method: narrowing the list would otherwise drop the restored selection
+      if (Config.MethodCategory != null && this._cmbCategory != null && this._cmbCategory.Items.Contains(Config.MethodCategory))
+        this._cmbCategory.SelectedItem = Config.MethodCategory;
+
+      if (Config.ResizeMethod != null)
+        this._SelectMethodByName(Config.ResizeMethod);
+
+      if (Config.HorizontalBph != null)
+        this.cmbHorizontalBPH.SelectedItem = Config.HorizontalBph.Value;
+
+      if (Config.VerticalBph != null)
+        this.cmbVerticalBPH.SelectedItem = Config.VerticalBph.Value;
+
+      if (Config.UseThresholds != null)
+        this.chkUseThresholds.Checked = Config.UseThresholds.Value;
+
+      if (Config.UseCenteredGrid != null)
+        this.chkUseCenteredGrid.Checked = Config.UseCenteredGrid.Value;
+
+      if (Config.KeepAspect != null)
+        this.chkKeepAspect.Checked = Config.KeepAspect.Value;
+
+      if (Config.RepetitionCount != null)
+        this.nudRepetitionCount.Value = _Clamp(Config.RepetitionCount.Value, this.nudRepetitionCount);
+
+      if (Config.Radius != null)
+        this.nudRadius.Value = _Clamp((decimal)Config.Radius.Value, this.nudRadius);
     }
+
+    /// <summary>
+    /// Captures everything worth remembering into <see cref="Config"/>. Runs while the window is
+    /// closing, before <c>Program</c> writes the file.
+    /// </summary>
+    private void _SaveConfigurationSettings() {
+      // Maximized and minimized bounds describe the current state, not the size to come back to
+      Config.WindowBounds = this.WindowState == FormWindowState.Normal ? this.Bounds : this.RestoreBounds;
+      Config.WindowState = this.WindowState == FormWindowState.Minimized ? FormWindowState.Normal : this.WindowState;
+
+      Config.MethodCategory = this._cmbCategory?.SelectedItem as string;
+      Config.ResizeMethod = this._SelectedMethodName();
+      Config.HorizontalBph = this.cmbHorizontalBPH.SelectedItem as OutOfBoundsMode?;
+      Config.VerticalBph = this.cmbVerticalBPH.SelectedItem as OutOfBoundsMode?;
+      Config.UseThresholds = this.chkUseThresholds.Checked;
+      Config.UseCenteredGrid = this.chkUseCenteredGrid.Checked;
+      Config.KeepAspect = this.chkKeepAspect.Checked;
+      Config.RepetitionCount = (int)this.nudRepetitionCount.Value;
+      Config.Radius = (float)this.nudRadius.Value;
+    }
+
+    /// <summary>
+    /// Puts the window back where it was, unless that is off every screen - a monitor that is no
+    /// longer attached would otherwise strand the window out of reach.
+    /// </summary>
+    private void _RestoreWindowPlacement() {
+      var bounds = Config.WindowBounds;
+      if (bounds != null && Screen.AllScreens.Any(screen => screen.WorkingArea.IntersectsWith(bounds.Value))) {
+        this.StartPosition = FormStartPosition.Manual;
+        this.Bounds = bounds.Value;
+      }
+
+      if (Config.WindowState != null && Config.WindowState.Value != FormWindowState.Minimized)
+        this.WindowState = Config.WindowState.Value;
+    }
+
+    /// <summary>
+    /// Gets the registered name of the selected method.
+    /// </summary>
+    private string _SelectedMethodName() {
+      var selected = this.cmbResizeMethod.SelectedValue as IImageManipulator;
+      var index = ManipulatorCategories.IndexOf(SupportedManipulators.MANIPULATORS, selected);
+      return index < 0 ? null : SupportedManipulators.MANIPULATORS[index].Key;
+    }
+
+    /// <summary>
+    /// Selects a method by its registered name, if the current list still offers it.
+    /// </summary>
+    /// <param name="name">The registered name.</param>
+    private void _SelectMethodByName(string name) {
+      if (!(this.cmbResizeMethod.DataSource is KeyValuePair<string, IImageManipulator>[] methods))
+        return;
+
+      for (var i = 0; i < methods.Length; ++i)
+        if (string.Equals(methods[i].Key, name, StringComparison.OrdinalIgnoreCase)) {
+          this.cmbResizeMethod.SelectedIndex = i;
+          return;
+        }
+    }
+
+    /// <summary>
+    /// Keeps a remembered value inside what its control accepts - the limits can change between
+    /// builds, and an out-of-range assignment throws.
+    /// </summary>
+    private static decimal _Clamp(decimal value, NumericUpDown control)
+      => value < control.Minimum ? control.Minimum : value > control.Maximum ? control.Maximum : value
+    ;
 
     /// <summary>
     /// If the current selection has a parameter surface and the user has changed at least one
