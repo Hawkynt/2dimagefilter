@@ -216,7 +216,16 @@ namespace Classes {
               return CLIExitCode.FilenameMustNotBeNull;
             }
 
-            LoadFromFile(engine, filename);
+            // a script that cannot be read is a usage error, not a crash - it used to escape as an
+            // unhandled IOException and print a stack trace at the user
+            try {
+              LoadFromFile(engine, filename);
+            } catch (IOException) {
+              return CLIExitCode.ScriptFileCouldNotBeRead;
+            } catch (UnauthorizedAccessException) {
+              return CLIExitCode.ScriptFileCouldNotBeRead;
+            }
+
             break;
           }
           #endregion

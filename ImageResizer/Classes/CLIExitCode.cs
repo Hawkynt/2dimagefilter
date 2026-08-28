@@ -39,6 +39,7 @@ namespace Classes {
     CouldNotParseParameterAsByte=14,
     InvalidOutOfBoundsMode=15,
     AmbiguousFilter=18,
+    ScriptFileCouldNotBeRead=19,
 
     RuntimeError=16,
   }

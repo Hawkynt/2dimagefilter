@@ -19,8 +19,10 @@
  */
 #endregion
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -71,6 +73,15 @@ namespace ImageResizer {
       var firstParam = args != null && args.Length > 0 ? args[0] : null;
       var fileToOpenOnStart = firstParam != _FORCE_GUI_CLP_NAME && File.Exists(firstParam) ? firstParam : null;
 
+      // Scripts dropped on the executable, or opened through a file association, arrive as plain
+      // file names - the same shape as an image to open. They are something to run, so they take
+      // the CLI path with each one turned into a /script command.
+      if (_AreAllScriptFiles(args)) {
+        var scriptArguments = _ToScriptArguments(args);
+        _EnterScriptDirectory(args[0]);
+        Environment.Exit((int)CLI.ParseCommandLineArguments(scriptArguments));
+      }
+
       if (firstParam != null && firstParam != _FORCE_GUI_CLP_NAME && fileToOpenOnStart == null) {
 
         // execute CLI if arguments are given which are not forcing into gui or a valid filename
@@ -101,6 +112,65 @@ namespace ImageResizer {
         }
       }
 
+    }
+
+    /// <summary>
+    /// Determines whether every argument names an existing script file.
+    /// </summary>
+    /// <param name="args">The arguments.</param>
+    /// <returns><c>true</c> when there is at least one and all of them are scripts.</returns>
+    private static bool _AreAllScriptFiles(string[] args)
+      => args != null && args.Length > 0 && args.All(_IsScriptFile)
+    ;
+
+    /// <summary>
+    /// Determines whether a path names an existing script file.
+    /// </summary>
+    /// <param name="path">The path.</param>
+    /// <returns><c>true</c> when it exists and carries the script extension.</returns>
+    private static bool _IsScriptFile(string path)
+      => !string.IsNullOrWhiteSpace(path)
+      && string.Equals(Path.GetExtension(path), ScriptSerializer.DEFAULT_FILE_EXTENSION, StringComparison.OrdinalIgnoreCase)
+      && File.Exists(path)
+    ;
+
+    /// <summary>
+    /// Turns a list of script files into the command line that runs them in order.
+    /// <para>
+    /// The paths are made absolute here because <see cref="_EnterScriptDirectory"/> moves the
+    /// working directory afterwards, and a relative path would then point somewhere else.
+    /// </para>
+    /// </summary>
+    /// <param name="paths">The script files.</param>
+    /// <returns>The arguments.</returns>
+    private static string[] _ToScriptArguments(string[] paths) {
+      var result = new List<string>(paths.Length * 2);
+      foreach (var path in paths) {
+        result.Add(ScriptSerializer.SCRIPT_COMMAND_NAME);
+        result.Add(Path.GetFullPath(path));
+      }
+
+      return result.ToArray();
+    }
+
+    /// <summary>
+    /// Makes a script's own folder the working directory.
+    /// <para>
+    /// A script names its images relatively, and the working directory it inherits when Explorer
+    /// launches it is not its own - dropping a script on the executable gives the executable's
+    /// folder. Resolving against the script instead is what makes a script and its images travel
+    /// together, and is how Explorer runs a batch file.
+    /// </para>
+    /// </summary>
+    /// <param name="scriptPath">The script being run.</param>
+    private static void _EnterScriptDirectory(string scriptPath) {
+      try {
+        var directory = Path.GetDirectoryName(Path.GetFullPath(scriptPath));
+        if (!string.IsNullOrEmpty(directory))
+          Directory.SetCurrentDirectory(directory);
+      } catch (Exception) {
+        // an unusable path is the script runner's problem to report, not ours
+      }
     }
   }
 }

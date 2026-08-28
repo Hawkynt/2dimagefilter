@@ -104,18 +104,34 @@ namespace ImageResizer.Tests {
     /// </summary>
     /// <param name="arguments">The arguments, each quoted as needed.</param>
     /// <returns>The outcome.</returns>
-    private RunResult _Run(params string[] arguments) => this._RunWithInput(null, arguments);
+    private RunResult _Run(params string[] arguments) => this._Execute(null, null, arguments);
+
+    /// <summary>
+    /// Runs the executable from a working directory other than the scratch directory, the way
+    /// Explorer launches something that lives elsewhere.
+    /// </summary>
+    /// <param name="workingDirectory">The directory to start in.</param>
+    /// <param name="arguments">The arguments.</param>
+    /// <returns>The outcome.</returns>
+    private RunResult _RunIn(string workingDirectory, params string[] arguments)
+      => this._Execute(null, workingDirectory, arguments)
+    ;
+
+    private RunResult _RunWithInput(byte[] standardInput, params string[] arguments)
+      => this._Execute(standardInput, null, arguments)
+    ;
 
     /// <summary>
     /// Runs the executable, optionally feeding it standard input.
     /// </summary>
     /// <param name="standardInput">Bytes to pipe in, or <c>null</c> for no input.</param>
+    /// <param name="workingDirectory">The directory to start in, or <c>null</c> for the scratch directory.</param>
     /// <param name="arguments">The arguments.</param>
     /// <returns>The outcome.</returns>
-    private RunResult _RunWithInput(byte[] standardInput, params string[] arguments) {
+    private RunResult _Execute(byte[] standardInput, string workingDirectory, string[] arguments) {
       var startInfo = new ProcessStartInfo(_EXECUTABLE) {
         Arguments = string.Join(" ", arguments.Select(_Quote)),
-        WorkingDirectory = this._directory.Path,
+        WorkingDirectory = workingDirectory ?? this._directory.Path,
         UseShellExecute = false,
         CreateNoWindow = true,
         RedirectStandardOutput = true,
@@ -304,6 +320,70 @@ namespace ImageResizer.Tests {
 
       Assert.That(result.Code, Is.EqualTo(CLIExitCode.UnknownFilter));
       Assert.That(result.StandardError, Does.Contain("bad.irs"));
+    }
+
+    #endregion
+
+    #region dropped scripts
+
+    /// <summary>
+    /// Issue #12: a script dropped on the executable, or double clicked through a file
+    /// association, arrives as a bare file name. It used to be taken for an image to open.
+    /// </summary>
+    [Test]
+    public void AScriptPassedAsABareFileName_IsRun() {
+      this._Source();
+      File.WriteAllText(this._directory.File("drop.irs"), "/load \"in.png\"\r\n/resize auto \"Upscaler: XBR 4x\"\r\n/save \"out.png\"\r\n");
+
+      var result = this._Run("drop.irs");
+
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
+      Assert.That(this._SizeOf("out.png"), Is.EqualTo(new Size(64, 64)));
+    }
+
+    [Test]
+    public void ADroppedScript_ResolvesItsPathsAgainstItsOwnFolder() {
+      this._Source();
+      File.WriteAllText(this._directory.File("drop.irs"), "/load \"in.png\"\r\n/resize auto \"Upscaler: HQ 2x\"\r\n/save \"out.png\"\r\n");
+      var elsewhere = Path.Combine(this._directory.Path, "elsewhere");
+      Directory.CreateDirectory(elsewhere);
+
+      // launched from a directory that is not the script's, the way Explorer does it
+      var result = this._RunIn(elsewhere, Path.Combine(this._directory.Path, "drop.irs"));
+
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
+      Assert.That(this._Exists("out.png"), Is.True, "the script's own folder is what its relative paths mean");
+    }
+
+    [Test]
+    public void SeveralDroppedScripts_RunInOrder() {
+      this._Source();
+      File.WriteAllText(this._directory.File("one.irs"), "/load \"in.png\"\r\n/resize auto \"Upscaler: HQ 2x\"\r\n/save \"one.png\"\r\n");
+      File.WriteAllText(this._directory.File("two.irs"), "/load \"one.png\"\r\n/resize auto \"Upscaler: HQ 2x\"\r\n/save \"two.png\"\r\n");
+
+      var result = this._Run("one.irs", "two.irs");
+
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
+      Assert.That(this._SizeOf("two.png"), Is.EqualTo(new Size(64, 64)));
+    }
+
+    [Test]
+    public void TheScriptExtension_IsMatchedCaseInsensitively() {
+      this._Source();
+      File.WriteAllText(this._directory.File("drop.IRS"), "/load \"in.png\"\r\n/save \"out.png\"\r\n");
+
+      var result = this._Run("drop.IRS");
+
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
+      Assert.That(this._Exists("out.png"), Is.True);
+    }
+
+    [Test]
+    public void AnUnreadableScript_IsAnExitCodeRatherThanACrash() {
+      var result = this._Run("/script", "absent.irs");
+
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.ScriptFileCouldNotBeRead));
+      Assert.That(result.StandardError, Does.Not.Contain("Unhandled Exception"));
     }
 
     #endregion

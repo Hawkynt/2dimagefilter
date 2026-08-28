@@ -228,6 +228,8 @@ namespace Classes {
           return "A filter parameter that must be a value 0-255 is not one.";
         case CLIExitCode.InvalidOutOfBoundsMode:
           return "Invalid out of bounds mode - expected const, half, whole, wrap or transparent.";
+        case CLIExitCode.ScriptFileCouldNotBeRead:
+          return "The script file could not be read.";
         default:
           return exitCode.ToString();
       }
