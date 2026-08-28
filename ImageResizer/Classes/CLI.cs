@@ -69,6 +69,13 @@ namespace Classes {
         return CLIExitCode.OK;
       }
 
+      // a /load naming a set of files becomes one run per file before anything else sees it
+      arguments = WildcardExpansion.Expand(arguments);
+      if (arguments.Length < 1) {
+        _Diagnostics.WriteLine("No files matched.");
+        return CLIExitCode.OK;
+      }
+
       var engine = new ScriptEngine();
       var line = string.Join(" ", arguments.Select(a => string.Format(@"""{0}""", a)));
       _Diagnostics.WriteLine("Executing the following script:");

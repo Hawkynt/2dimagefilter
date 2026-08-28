@@ -1,4 +1,4 @@
-========================================================================
+﻿========================================================================
    ** {appname} v{version}, {copyright}
    Version for Windows NT/9x/2000/XP/Vista/7  (All rights reserved)
 ------------------------------------------------------------------------
@@ -79,6 +79,10 @@ The category may be left out where it is unambiguous, so this is the same filter
 Since STDOUT carries nothing but the image, runs can be piped into each other or into any
 other tool that reads an image from STDIN.
 {location} {load} 1.png {resize} auto "HQ 2x" {stdout} | {location} {stdin} {resize} auto "XBR 3x" {save} 2.png
+
+A {load} whose name contains * or ? processes every matching file in turn. A * in a later
+file name stands for the matched file's own name, so each target is named after its source.
+{location} {load} *.png {resize} auto "HQ 2x" {save} big\*.png
 
 You can load and process multiple files at once by loading after saving again.
 {location} {load} 1.bmp {resize} 10x10 "Nearest Neighbor" {save} 1.jpg {load} 2.bmp {resize} 10x10 "Nearest Neighbor" {save} 2.jpg
