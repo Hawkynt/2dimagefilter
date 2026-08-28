@@ -1,4 +1,4 @@
-#region (c)2008-2026 Hawkynt
+﻿#region (c)2008-2026 Hawkynt
 /*
  *  Image filtering library
     Copyright (C) 2008-2026 Hawkynt
@@ -47,7 +47,7 @@ namespace Classes.ScriptActions {
       // Legacy engine-owned path: copy the loader output into a standalone Bitmap so the file
       // handle is released before we hand ownership to the engine.
       using (var image = Image.FromFile(this.FileName))
-        this.SourceImage = this.GdiSource = new Bitmap(image);
+        this.SourceImage = this.GdiSource = BitmapLoader.CopyPreservingTransparency(image);
 
       this.PoolSourceKey = null;
       return true;
