@@ -21,6 +21,7 @@
 
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 
 using Imager.Pipelines;
 
@@ -32,10 +33,7 @@ namespace Classes.ImageManipulators {
   /// Exposed as a system-API baseline for visual comparison against the upstream resamplers.
   ///
   /// OOB modes, canvas colour and centred-grid flag on <see cref="UpstreamPipeline.ResampleFunc"/>
-  /// are ignored: GDI+ has no equivalent knobs. The <c>-1,-1,W+1,H+1</c> draw rectangle works
-  /// around a long-standing GDI+ bug that otherwise paints a white pixel on the top/left edge
-  /// (see http://forums.asp.net/t/1031961.aspx/1). This matches the behaviour of the retired
-  /// local <c>Interpolator</c> / <c>cImage.ApplyScaler(InterpolationMode, …)</c> path exactly.
+  /// are ignored: GDI+ has no equivalent knobs.
   /// </summary>
   internal static class GdiPlusResampler {
 
@@ -47,15 +45,50 @@ namespace Classes.ImageManipulators {
       );
     }
 
+    /// <summary>
+    /// Resamples through GDI+.
+    /// <para>
+    /// Interpolating near an edge needs samples from beyond it, and GDI+ takes those from the
+    /// transparent surround unless told otherwise - which is what stamped a one pixel halo around
+    /// every output. <see cref="WrapMode.TileFlipXY"/> mirrors the source at its borders instead,
+    /// so the edge is interpolated against real colour.
+    /// </para>
+    /// <para>
+    /// The previous workaround for that halo drew into <c>-1,-1,W+1,H+1</c>. It hid the border by
+    /// pushing it outside the bitmap, but in doing so it offset the image by a pixel and stretched
+    /// it by one in each direction, so the result was never the requested resampling.
+    /// </para>
+    /// </summary>
+    /// <param name="source">The source bitmap.</param>
+    /// <param name="targetWidth">The target width.</param>
+    /// <param name="targetHeight">The target height.</param>
+    /// <param name="mode">The interpolation mode.</param>
+    /// <returns>The resampled bitmap.</returns>
     private static Bitmap Resample(Bitmap source, int targetWidth, int targetHeight, InterpolationMode mode) {
-      var result = new Bitmap(targetWidth, targetHeight);
+      var result = new Bitmap(targetWidth, targetHeight, PixelFormat.Format32bppArgb);
+      result.SetResolution(source.HorizontalResolution, source.VerticalResolution);
+
       using (var graphics = Graphics.FromImage(result)) {
+        // SourceCopy: write the resampled pixels as they are instead of blending them over the
+        // transparent bitmap we just allocated
+        graphics.CompositingMode = CompositingMode.SourceCopy;
         graphics.CompositingQuality = CompositingQuality.HighQuality;
         graphics.InterpolationMode = mode;
         graphics.SmoothingMode = SmoothingMode.HighQuality;
-        // -1/-1 + size+1 draw rectangle avoids the GDI+ white-edge pixel bug.
-        graphics.DrawImage(source, -1, -1, targetWidth + 1, targetHeight + 1);
+        graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+        using (var attributes = new ImageAttributes()) {
+          attributes.SetWrapMode(WrapMode.TileFlipXY);
+          graphics.DrawImage(
+            source,
+            new Rectangle(0, 0, targetWidth, targetHeight),
+            0, 0, source.Width, source.Height,
+            GraphicsUnit.Pixel,
+            attributes
+          );
+        }
       }
+
       return result;
     }
 
