@@ -21,6 +21,10 @@
 
 2D Image Filter is a powerful library that brings together the most popular image scaling algorithms specifically designed for pixel art and low-resolution graphics. Unlike traditional image scaling methods that often blur or distort pixel art, these algorithms preserve the crisp, clean aesthetic while intelligently enlarging images.
 
+![ImageResizer showing generated pixel-art demo data and its live scaler preview](docs/screenshots/image-resizer.png)
+
+_The screenshot is regenerated automatically from deterministic demo data on repository pushes, so it tracks the current GUI rather than fossilizing into documentation archaeology._
+
 ### 🎯 Project Goals
 
 - **Algorithm Collection**: Gather all available pixel art scaling filters in one comprehensive library
