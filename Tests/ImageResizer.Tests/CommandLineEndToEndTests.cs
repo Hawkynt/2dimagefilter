@@ -217,6 +217,9 @@ namespace ImageResizer.Tests {
     [TestCase("h48", 48, 48)]
     [TestCase("325%", 52, 52)]
     [TestCase("100%", 16, 16)]
+    // a percentage that rounds below a pixel used to end the run with a runtime error
+    [TestCase("1%", 1, 1)]
+    [TestCase("50%", 8, 8)]
     public void EveryDimensionForm_ReachesItsTarget(string dimensions, int expectedWidth, int expectedHeight) {
       var result = this._Run("/load", this._Source(), "/resize", dimensions, "Resampler: Bicubic", "/save", "out.png");
 

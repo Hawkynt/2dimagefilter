@@ -43,8 +43,9 @@ namespace Classes.ScriptActions {
       // overwrite dimensions from percentage if needed
       var percentage = this.Percentage;
       if (percentage > 0) {
-        width = (word)Math.Round(source.Width * percentage / 100d);
-        height = (word)Math.Round(source.Height * percentage / 100d);
+        TargetDimensions.FromPercentage(source.Width, source.Height, percentage, out var scaledWidth, out var scaledHeight);
+        width = (word)scaledWidth;
+        height = (word)scaledHeight;
       }
 
       // correct aspect ratio if needed
