@@ -90,6 +90,11 @@ namespace ImageResizer {
     /// loop while one is being updated from the other.
     /// </summary>
     private bool _isApplyingPercentage;
+
+    /// <summary>
+    /// Toggles the <c>.irs</c> file association. Checked while scripts open with this build.
+    /// </summary>
+    private ToolStripMenuItem _associateScriptsItem;
     private CancellationTokenSource _previewCts;
 
     // The preview-owned bitmap currently shown in iwhTargetImage, if any. We OWN it and must
@@ -245,6 +250,10 @@ namespace ImageResizer {
       var toolsMenu = new ToolStripMenuItem("&Tools");
       var reduceColorsItem = new ToolStripMenuItem("&Reduce Colours…", null, this._OnReduceColoursClicked);
       toolsMenu.DropDownItems.Add(reduceColorsItem);
+      toolsMenu.DropDownItems.Add(new ToolStripSeparator());
+      this._associateScriptsItem = new ToolStripMenuItem("&Associate " + ScriptSerializer.DEFAULT_FILE_EXTENSION + " scripts", null, this._OnAssociateScriptsClicked);
+      toolsMenu.DropDownItems.Add(this._associateScriptsItem);
+      toolsMenu.DropDownOpening += (s, e) => this._RefreshScriptAssociationState();
       var helpIndex = this.msMain.Items.IndexOf(this.helpToolStripMenuItem);
       if (helpIndex >= 0)
         this.msMain.Items.Insert(helpIndex, toolsMenu);
@@ -439,6 +448,44 @@ namespace ImageResizer {
         this._nudPercentage.Value = decimal.Round(percentage, 0);
       } finally {
         this._isApplyingPercentage = false;
+      }
+    }
+
+    /// <summary>
+    /// Ticks the menu item when scripts currently open with this build.
+    /// </summary>
+    private void _RefreshScriptAssociationState() {
+      try {
+        using (var classes = ScriptFileAssociation.OpenUserClasses())
+          this._associateScriptsItem.Checked = ScriptFileAssociation.IsRegistered(classes, Application.ExecutablePath);
+      } catch (Exception) {
+        // a registry we cannot read just means we cannot show the state
+        this._associateScriptsItem.Checked = false;
+      }
+    }
+
+    /// <summary>
+    /// Associates or disassociates <c>.irs</c> scripts with this build.
+    /// </summary>
+    private void _OnAssociateScriptsClicked(object sender, EventArgs e) {
+      try {
+        using (var classes = ScriptFileAssociation.OpenUserClasses()) {
+          var executable = Application.ExecutablePath;
+          if (ScriptFileAssociation.IsRegistered(classes, executable))
+            ScriptFileAssociation.Unregister(classes);
+          else
+            ScriptFileAssociation.Register(classes, executable);
+        }
+
+        ScriptFileAssociation.NotifyShell();
+        this._RefreshScriptAssociationState();
+      } catch (Exception exception) {
+        MessageBox.Show(
+          "The file association could not be changed." + Environment.NewLine + exception.Message,
+          "Associate scripts",
+          MessageBoxButtons.OK,
+          MessageBoxIcon.Warning
+        );
       }
     }
 
