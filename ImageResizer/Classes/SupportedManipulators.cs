@@ -90,6 +90,21 @@ namespace Classes {
     )
     #endregion
 
+    #region add the Kopf-Lischinski depixelizer
+    // Registered by hand: the upstream discovery that builds ScalerRegistry does not pick this one
+    // up, so it never reached the pipeline the other resamplers arrive through. It is exposed
+    // through its own bitmap entry point instead.
+.Concat(new[] {
+    new KeyValuePair<string, IImageManipulator>(
+      "Resampler: Kopf-Lischinski",
+      new BitmapResamplerAdapter(
+        "Kopf-Lischinski 2011 depixelization. Builds a similarity graph over the pixels, resolves diagonal ambiguities with the curve, sparse-pixel and island heuristics, and renders the resulting cell boundaries as smooth curves — so pixel art enlarges into shapes rather than into bigger pixels.",
+        (source, width, height, _, _, _, _) => Hawkynt.Drawing.BitmapDepixelExtensions.Depixelize(source, width, height)
+      )
+    ),
+    })
+    #endregion
+
     #region add upstream-colorspace plane extractors (from UpstreamPipeline)
 .Concat(
     from p in UpstreamPipeline.PlaneExtractors()

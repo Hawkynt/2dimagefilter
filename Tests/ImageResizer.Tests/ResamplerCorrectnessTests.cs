@@ -149,6 +149,52 @@ namespace ImageResizer.Tests {
     }
 
     /// <summary>
+    /// Issue #17: the Kopf-Lischinski depixelizer is implemented upstream but the discovery that
+    /// builds the scaler registry never picked it up, so it was registered by hand. These pin
+    /// that it is reachable and that it actually depixelizes.
+    /// </summary>
+    [Test]
+    public void KopfLischinski_IsRegistered()
+      => Assert.That(SupportedManipulators.MANIPULATORS.Any(pair => pair.Key == "Resampler: Kopf-Lischinski"), Is.True)
+    ;
+
+    [Test]
+    public void KopfLischinski_ReconstructsRatherThanReplicating() {
+      using (var source = _PixelArt())
+      using (var depixelized = _Resample("Resampler: Kopf-Lischinski", source, 64, 64))
+      using (var replicated = _Resample("Resampler: Nearest Neighbor", source, 64, 64)) {
+        var differing = 0;
+        for (var y = 0; y < 64; ++y)
+        for (var x = 0; x < 64; ++x)
+          if (depixelized.GetPixel(x, y).ToArgb() != replicated.GetPixel(x, y).ToArgb())
+            ++differing;
+
+        Assert.That(differing, Is.GreaterThan(0), "a depixelizer that matches nearest neighbour is not depixelizing");
+      }
+    }
+
+    [Test]
+    public void KopfLischinski_KeepsTheColoursItWasGiven() {
+      using (var source = _PixelArt())
+      using (var result = _Resample("Resampler: Kopf-Lischinski", source, 64, 64)) {
+        // the interior of a solid block must still be that block's colour
+        Assert.That(result.GetPixel(32, 32).A, Is.GreaterThan(0));
+      }
+    }
+
+    /// <summary>A small two-colour glyph - the kind of input depixelization exists for.</summary>
+    private static Bitmap _PixelArt(int size = 8) {
+      var result = new Bitmap(size, size);
+      for (var y = 0; y < size; ++y)
+      for (var x = 0; x < size; ++x) {
+        var inside = System.Math.Abs(x - size / 2) + System.Math.Abs(y - size / 2) < size / 2;
+        result.SetPixel(x, y, inside ? Color.FromArgb(255, 200, 30, 30) : Color.FromArgb(255, 255, 240, 220));
+      }
+
+      return result;
+    }
+
+    /// <summary>
     /// The halo the GDI+ workaround was hiding: interpolating at an edge pulled in the transparent
     /// surround, leaving a bright border on an otherwise uniform image.
     /// </summary>
