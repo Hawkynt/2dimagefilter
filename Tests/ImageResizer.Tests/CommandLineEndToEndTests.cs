@@ -324,6 +324,57 @@ namespace ImageResizer.Tests {
 
     #endregion
 
+    #region batches
+
+    /// <summary>
+    /// Issue #31: naming a set of files instead of writing the same lines out per sprite.
+    /// </summary>
+    [Test]
+    public void AWildcardLoad_ProcessesEveryMatch() {
+      this._Source("alpha.png");
+      this._Source("beta.png");
+      this._Source("gamma.png");
+      Directory.CreateDirectory(Path.Combine(this._directory.Path, "big"));
+
+      var result = this._Run("/load", "*.png", "/resize", "auto", "HQ 2x", "/save", @"big\*.png");
+
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
+      foreach (var name in new[] { "alpha", "beta", "gamma" })
+        Assert.That(TestBitmaps.SizeOf(Path.Combine(this._directory.Path, "big", name + ".png")), Is.EqualTo(new Size(32, 32)), name);
+    }
+
+    [Test]
+    public void AWildcardLoad_NamesEachTargetAfterItsSource() {
+      this._Source("one.png");
+      this._Source("two.png");
+
+      var result = this._Run("/load", "*.png", "/resize", "auto", "HQ 2x", "/save", "*.bmp");
+
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
+      Assert.That(this._Exists("one.bmp"), Is.True);
+      Assert.That(this._Exists("two.bmp"), Is.True);
+    }
+
+    [Test]
+    public void AWildcardThatMatchesNothing_IsNotAnError() {
+      var result = this._Run("/load", "*.tga", "/save", "*.png");
+
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
+      Assert.That(result.StandardError, Does.Contain("No files matched"));
+    }
+
+    [Test]
+    public void APlainFileName_StillProcessesExactlyOneFile() {
+      this._Source("only.png");
+
+      var result = this._Run("/load", "only.png", "/resize", "auto", "HQ 2x", "/save", "out.png");
+
+      Assert.That(result.Code, Is.EqualTo(CLIExitCode.OK), result.StandardError);
+      Assert.That(this._SizeOf("out.png"), Is.EqualTo(new Size(32, 32)));
+    }
+
+    #endregion
+
     #region dropped scripts
 
     /// <summary>

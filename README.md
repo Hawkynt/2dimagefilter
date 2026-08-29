@@ -145,6 +145,17 @@ ImageResizer.exe /load <input> /resize <dimensions> <method> /save <output>
 
 Run `ImageResizer.exe /?` to print the full help including the list of every supported filter method; with no arguments it opens the GUI.
 
+#### Batch processing
+
+A `/load` whose name contains `*` or `?` runs the rest of the chain once per matching file. A `*` in a later file name stands for the matched file's own name, so every target is named after its source — no need to write the same lines out per sprite:
+
+```bash
+# every png in the folder, upscaled into bigImageResizer.exe /load *.png /resize auto "Upscaler: HQ 2x" /save big\*.png
+
+# convert a whole folder while scaling
+ImageResizer.exe /load sprites\*.bmp /resize 400% "Upscaler: XBR 4x" /save out\*.png
+```
+
 #### Piping
 
 `/stdin` reads an image from standard input and `/stdout` writes a PNG to standard output. Standard output carries image data and nothing else — progress reports and errors go to standard error — so a run can be piped straight into another program:
