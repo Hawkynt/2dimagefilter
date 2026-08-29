@@ -1,0 +1,82 @@
+name: Screenshots
+
+on:
+  push:
+    branches:
+      - '**'
+    paths-ignore:
+      - 'docs/screenshots/**'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+# Force JavaScript-based actions to run on Node 24 instead of the deprecated Node 20 ahead of
+# the 2026-06-16 hard cutover, until we bump each action to a Node-24-native major version.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+concurrency:
+  group: screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Same sibling layout as CI: ImageResizerLibrary prefers this ProjectReference over NuGet.
+      - name: Checkout sibling C--FrameworkExtensions
+        uses: actions/checkout@v4
+        with:
+          repository: Hawkynt/C--FrameworkExtensions
+          path: .sibling/C--FrameworkExtensions
+          fetch-depth: 1
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Restore application
+        run: dotnet restore ImageResizer/ImageResizer.csproj
+
+      - name: Build application
+        run: dotnet build ImageResizer/ImageResizer.csproj --configuration Release --no-restore
+
+      - name: Generate demo screenshot
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem ImageResizer/bin/Release -Recurse -Filter ImageResizer.exe |
+            Select-Object -First 1
+          if (-not $exe) {
+            throw 'ImageResizer.exe was not produced by the build.'
+          }
+
+          ./.github/workflows/scripts/generate-screenshot.ps1 `
+            -Executable $exe.FullName `
+            -Output docs/screenshots/image-resizer.png
+
+      - name: Upload screenshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-resizer-screenshot
+          path: docs/screenshots/image-resizer.png
+          if-no-files-found: error
+
+      - name: Commit changed screenshot
+        shell: pwsh
+        run: |
+          git add -- docs/screenshots/image-resizer.png
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) {
+            'Screenshot is unchanged.' | Add-Content $env:GITHUB_STEP_SUMMARY
+            exit 0
+          }
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m '* refresh generated screenshot'
+          git push origin "HEAD:${{ github.ref_name }}"
