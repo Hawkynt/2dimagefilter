@@ -1,4 +1,4 @@
-#region (c)2008-2026 Hawkynt
+﻿#region (c)2008-2026 Hawkynt
 /*
  *  Image filtering library
     Copyright (C) 2008-2026 Hawkynt
@@ -31,7 +31,7 @@ namespace Classes.ScriptActions {
     public bool Execute() {
       using (var stream = Console.OpenStandardInput())
       using (var image = Image.FromStream(stream, false))
-        this.SourceImage = this.GdiSource = new Bitmap(image);
+        this.SourceImage = this.GdiSource = BitmapLoader.CopyPreservingTransparency(image);
       return true;
     }
 

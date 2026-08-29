@@ -1,4 +1,4 @@
-#region (c)2008-2026 Hawkynt
+﻿#region (c)2008-2026 Hawkynt
 /*
  *  Image filtering library
     Copyright (C) 2008-2026 Hawkynt
@@ -259,17 +259,8 @@ namespace Classes {
     /// the image is disposed, so we draw it into a fresh 32bpp ARGB bitmap and discard the loader.
     /// </summary>
     private static Bitmap _LoadFromDisk(string absolutePath) {
-      using (var loaded = Image.FromFile(absolutePath)) {
-        var copy = new Bitmap(loaded.Width, loaded.Height, PixelFormat.Format32bppArgb);
-        using (var g = Graphics.FromImage(copy))
-          // DrawImage with explicit pixel rect, NOT DrawImageUnscaled. The latter is DPI-aware:
-          // it paints the source at its physical (inches) size, so a 72-DPI image drawn onto a
-          // 96-DPI Graphics is scaled up by 96/72 ≈ 1.33×, gets clipped against the same-pixel-
-          // dimensioned destination, and you see only the upper-left 75% of the image. The
-          // explicit pixel-rect overload forces a 1:1 pixel copy regardless of DPI metadata.
-          g.DrawImage(loaded, 0, 0, loaded.Width, loaded.Height);
-        return copy;
-      }
+      using (var loaded = Image.FromFile(absolutePath))
+        return BitmapLoader.CopyPreservingTransparency(loaded);
     }
   }
 }
