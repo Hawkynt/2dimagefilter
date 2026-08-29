@@ -148,10 +148,11 @@ function New-DemoImage {
     # A few high-contrast tiles provide circles, diagonals and checker patterns in one tiny source.
     for ($y = 0; $y -lt 12; ++$y) {
       for ($x = 0; $x -lt 12; ++$x) {
-        if ((($x + $y) % 2) -eq 0)
+        if ((($x + $y) % 2) -eq 0) {
           $bitmap.SetPixel(7 + $x, 39 + $y, $white)
-        else
+        } else {
           $bitmap.SetPixel(7 + $x, 39 + $y, $dark)
+        }
       }
     }
 
