@@ -1,0 +1,68 @@
+name: Generate
+
+# Cheap derived-file stage: working-branch pushes refresh the screenshot and commit it back to the
+# same branch before a pull request is opened. The generated-file action deliberately refuses main.
+on:
+  push:
+    branches-ignore: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: generate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  screenshot:
+    name: refresh the application screenshot
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ImageResizerLibrary prefers the live sibling ProjectReference over the NuGet fallback.
+      - name: Checkout sibling C--FrameworkExtensions
+        uses: actions/checkout@v4
+        with:
+          repository: Hawkynt/C--FrameworkExtensions
+          path: .sibling/C--FrameworkExtensions
+          fetch-depth: 1
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Restore application
+        run: dotnet restore ImageResizer/ImageResizer.csproj
+
+      - name: Build application
+        run: dotnet build ImageResizer/ImageResizer.csproj --configuration Release --no-restore
+
+      - name: Capture screenshot
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path docs/screenshots | Out-Null
+          $exe = Resolve-Path 'ImageResizer/bin/Release/net48/ImageResizer.exe'
+          $shot = Join-Path (Get-Location) 'docs/screenshots/image-resizer.png'
+
+          & $exe '--screenshot' $shot
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path $shot)) {
+            Write-Error "ImageResizer exited successfully but wrote no screenshot to $shot."
+            exit 1
+          }
+
+          $result = Get-Item $shot
+          if ($result.Length -lt 10000) {
+            Write-Error "Generated screenshot is suspiciously small ($($result.Length) bytes)."
+            exit 1
+          }
+
+      - uses: Hawkynt/RepositoryTemplate/commit-generated-file@v1
+        with:
+          file: docs/screenshots/image-resizer.png
+          message: '* refresh the application screenshot'

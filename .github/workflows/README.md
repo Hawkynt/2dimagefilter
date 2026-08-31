@@ -6,22 +6,22 @@
 
 | File                            | Trigger                             | Purpose                                      |
 |---------------------------------|-------------------------------------|----------------------------------------------|
+| `generate.yml`                  | working-branch push + manual        | Regenerate and commit the GUI demo screenshot|
 | `ci.yml`                        | push + PR + `workflow_call`         | Build and test the solution                  |
-| `screenshots.yml`               | push + `workflow_dispatch`          | Regenerate and commit the GUI demo screenshot|
 | `release.yml`                   | tag push `v*`                       | GitHub Release (GUI + plugin zips)           |
-| `nightly.yml`                   | CI success on `master`              | `nightly-YYYY-MM-DD` + GFS prune             |
+| `nightly.yml`                   | successful CI on `main`             | `nightly-YYYY-MM-DD` + GFS prune             |
 | `_build.yml`                    | `workflow_call` (internal)          | .NET Framework publish + zip                 |
-| `scripts/*`                     | invoked by workflows                | version/changelog/prune/screenshot tools     |
+| `scripts/*`                     | invoked by workflows                | version/changelog/prune tools                |
 
 ## Why Windows-only
 
-- **.NET Framework targets**: require Windows and the .NET Framework targeting packs.
-- **GUI screenshot**: launches the WinForms application with deterministic generated pixel-art demo data, waits for its auto-preview, captures the real application window, and commits only when the rendered pixels changed.
-- **Version source**: `<Version>1.1.3</Version>` in `ImageResizerLibrary/ImageResizerLibrary.csproj` (the other csprojs use only `<AssemblyVersion>`).
+- **.NET Framework targets** require Windows and the .NET Framework targeting packs.
+- **GUI screenshot generation** builds the real WinForms application, launches its internal `--screenshot` mode with deterministic pixel-art demo data, waits for the normal auto-preview, and renders the form through WinForms itself.
+- **Generated files stay on working branches**: `Hawkynt/RepositoryTemplate/commit-generated-file@v1` writes the PNG back through GitHub's contents API, producing a signed commit and refusing to modify `main`.
 
 ## Release artifacts
 
 | Artifact                                             | Produced by          | Runtime requirement          |
 |------------------------------------------------------|----------------------|------------------------------|
-| `ImageResizer-win-<version>.zip`                     | release + nightly    | .NET Framework 4.5 + WPF     |
-| `PixelArtScalingPlugin-win-<version>.zip`            | release + nightly    | .NET Framework 4.7           |
+| `ImageResizer-win-<version>.zip`                     | release + nightly    | .NET Framework 4.8           |
+| `PixelArtScalingPlugin-win-<version>.zip`            | release + nightly    | .NET Framework 4.8           |
