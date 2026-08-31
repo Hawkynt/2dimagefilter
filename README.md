@@ -21,6 +21,16 @@
 
 2D Image Filter is a powerful library that brings together the most popular image scaling algorithms specifically designed for pixel art and low-resolution graphics. Unlike traditional image scaling methods that often blur or distort pixel art, these algorithms preserve the crisp, clean aesthetic while intelligently enlarging images.
 
+### Standalone application
+
+![ImageResizer showing deterministic pixel-art demo data and its live HQ 2x preview](docs/screenshots/image-resizer.png)
+
+### Quantization and dithering
+
+![Reduce Colours dialog showing a generated high-colour test card, quantizer thumbnails, ditherer thumbnails, histogram, and detail preview](docs/screenshots/reduce-colours.png)
+
+_The CI generator creates deterministic pixel-art and high-colour demo inputs, drives the real application windows until their previews finish, uploads the source demos as workflow artifacts, and commits changed window captures back to the working branch._
+
 ### 🎯 Project Goals
 
 - **Algorithm Collection**: Gather all available pixel art scaling filters in one comprehensive library
@@ -215,7 +225,7 @@ Please feel free to open an issue or submit a pull request.
 
 If this project saves you time or money, consider supporting its development:
 
-[![GitHub Sponsors](https://img.shields.io/badge/GitHub-Sponsor-EA4AAA?logo=githubsponsors)](https://github.com/sponsors/Hawkynt)
+[![GitHub Sponsors](https://img.shields.io/badge/GitHub-Sponsors-EA4AAA?logo=githubsponsors)](https://github.com/sponsors/Hawkynt)
 [![PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?logo=paypal)](https://www.paypal.me/hawkynt)
 
 ## 📜 License

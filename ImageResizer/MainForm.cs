@@ -241,6 +241,12 @@ namespace ImageResizer {
       this._LoadConfigurationSettings();
       this.FormClosing += (s, e) => this._SaveConfigurationSettings();
 
+      // Must exist before the initial load: _SchedulePreview() no-ops while the timer is
+      // null, so constructing it later left a command-line file sitting without a preview.
+      // Preview-debounce timer — 300 ms after the last parameter change fires a preview render.
+      this._previewDebounce = new System.Windows.Forms.Timer { Interval = 300 };
+      this._previewDebounce.Tick += this._OnPreviewDebounceTick;
+
       if (fileToOpenOnStart != null)
         this._LoadImageFromFileName(fileToOpenOnStart);
 
@@ -259,10 +265,6 @@ namespace ImageResizer {
         this.msMain.Items.Insert(helpIndex, toolsMenu);
       else
         this.msMain.Items.Add(toolsMenu);
-
-      // Preview-debounce timer — 300 ms after the last parameter change fires a preview render.
-      this._previewDebounce = new System.Windows.Forms.Timer { Interval = 300 };
-      this._previewDebounce.Tick += this._OnPreviewDebounceTick;
 
       // Checkboxes that affect the preview output but have no Designer-generated handler.
       this.chkUseThresholds.CheckedChanged += (s, e) => this._SchedulePreview();

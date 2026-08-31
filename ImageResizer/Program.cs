@@ -40,6 +40,16 @@ namespace ImageResizer {
     private const string _FORCE_GUI_CLP_NAME = "/FORCEGUI";
 
     /// <summary>
+    /// Generates the deterministic main-window documentation screenshot and exits.
+    /// </summary>
+    private const string _SCREENSHOT_CLP_NAME = "--screenshot";
+
+    /// <summary>
+    /// Generates every deterministic documentation demo image and application-window screenshot.
+    /// </summary>
+    private const string _SCREENSHOTS_CLP_NAME = "--screenshots";
+
+    /// <summary>
     /// The name and full path to the currently running executable.
     /// </summary>
     private static readonly string _THIS_EXECUTABLES_FILE_NAME = Assembly.GetEntryAssembly().Location;
@@ -69,6 +79,26 @@ namespace ImageResizer {
        * If there is no console at all, we show the GUI.
        * This way we're both a CLI and a GUI.
        */
+
+      var screenshotsIndex = args == null ? -1 : Array.IndexOf(args, _SCREENSHOTS_CLP_NAME);
+      if (screenshotsIndex >= 0) {
+        var outputDirectory = screenshotsIndex + 1 < args.Length ? args[screenshotsIndex + 1] : "screenshots";
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        ScreenshotCapture.SaveAll(outputDirectory);
+        Environment.Exit((int)CLIExitCode.OK);
+        return;
+      }
+
+      var screenshotIndex = args == null ? -1 : Array.IndexOf(args, _SCREENSHOT_CLP_NAME);
+      if (screenshotIndex >= 0) {
+        var outputPath = screenshotIndex + 1 < args.Length ? args[screenshotIndex + 1] : "screenshot.png";
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        ScreenshotCapture.Save(outputPath);
+        Environment.Exit((int)CLIExitCode.OK);
+        return;
+      }
 
       var firstParam = args != null && args.Length > 0 ? args[0] : null;
       var fileToOpenOnStart = firstParam != _FORCE_GUI_CLP_NAME && File.Exists(firstParam) ? firstParam : null;
