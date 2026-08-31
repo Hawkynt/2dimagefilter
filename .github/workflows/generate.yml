@@ -1,7 +1,7 @@
 name: Generate
 
-# Cheap derived-file stage: working-branch pushes refresh the screenshot and commit it back to the
-# same branch before a pull request is opened. The generated-file action deliberately refuses main.
+# Cheap derived-file stage: working-branch pushes refresh documentation screenshots and commit them
+# back to the same branch before a pull request is opened. The generated-file action refuses main.
 on:
   push:
     branches-ignore: [main]
@@ -18,8 +18,8 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
-  screenshot:
-    name: refresh the application screenshot
+  screenshots:
+    name: refresh application screenshots
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,27 +42,52 @@ jobs:
       - name: Build application
         run: dotnet build ImageResizer/ImageResizer.csproj --configuration Release --no-restore
 
-      - name: Capture screenshot
+      - name: Generate demo images and screenshots
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path docs/screenshots | Out-Null
+          $out = Join-Path (Get-Location) 'docs/screenshots'
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
           $exe = Resolve-Path 'ImageResizer/bin/Release/net48/ImageResizer.exe'
-          $shot = Join-Path (Get-Location) 'docs/screenshots/image-resizer.png'
 
-          & $exe '--screenshot' $shot
+          & $exe '--screenshots' $out
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          if (-not (Test-Path $shot)) {
-            Write-Error "ImageResizer exited successfully but wrote no screenshot to $shot."
-            exit 1
+
+          $expected = @{
+            'image-resizer.png' = 10000
+            'reduce-colours.png' = 10000
+            'demo-pixel-art.png' = 500
+            'demo-quantization.png' = 5000
+          }
+          foreach ($entry in $expected.GetEnumerator()) {
+            $path = Join-Path $out $entry.Key
+            if (-not (Test-Path $path)) {
+              Write-Error "Screenshot generator wrote no $($entry.Key)."
+              exit 1
+            }
+            $file = Get-Item $path
+            if ($file.Length -lt $entry.Value) {
+              Write-Error "$($entry.Key) is suspiciously small ($($file.Length) bytes; expected at least $($entry.Value))."
+              exit 1
+            }
           }
 
-          $result = Get-Item $shot
-          if ($result.Length -lt 10000) {
-            Write-Error "Generated screenshot is suspiciously small ($($result.Length) bytes)."
-            exit 1
-          }
+      - name: Upload generated screenshot inputs and captures
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-screenshots
+          path: |
+            docs/screenshots/image-resizer.png
+            docs/screenshots/reduce-colours.png
+            docs/screenshots/demo-pixel-art.png
+            docs/screenshots/demo-quantization.png
+          if-no-files-found: error
 
       - uses: Hawkynt/RepositoryTemplate/commit-generated-file@v1
         with:
           file: docs/screenshots/image-resizer.png
-          message: '* refresh the application screenshot'
+          message: '* refresh the main application screenshot'
+
+      - uses: Hawkynt/RepositoryTemplate/commit-generated-file@v1
+        with:
+          file: docs/screenshots/reduce-colours.png
+          message: '* refresh the quantization screenshot'
