@@ -209,7 +209,7 @@ namespace ImageResizer {
 
         var target = _GetField<ImageWithDetails>(view, "iwhTargetImage");
         _PumpMessagesUntil(
-          () => target.Image != null && string.IsNullOrEmpty(target.StatusText),
+          () => target.Image != null && target.StatusText.StartsWith("Preview (", StringComparison.Ordinal),
           TimeSpan.FromSeconds(10),
           "The main-window demo preview did not finish rendering."
         );
