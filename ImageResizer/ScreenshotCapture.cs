@@ -213,13 +213,13 @@ namespace ImageResizer {
         // turns any failure into a timeout that says nothing, so wait for either and then report
         // whatever the form actually said.
         _PumpMessagesUntil(
-          () => target.StatusText.StartsWith("Preview", StringComparison.Ordinal),
+          () => target.StatusText?.StartsWith("Preview", StringComparison.Ordinal) == true,
           TimeSpan.FromSeconds(120),
           "The main-window demo preview never reported a result."
         );
-        if (target.Image == null || !target.StatusText.StartsWith("Preview (", StringComparison.Ordinal))
+        if (target.Image == null || target.StatusText?.StartsWith("Preview (", StringComparison.Ordinal) != true)
           throw new InvalidOperationException(
-            "The main-window demo preview failed: " + target.StatusText);
+            "The main-window demo preview failed: " + (target.StatusText ?? "<no status reported>"));
 
         _SaveForm(view, outputPath);
       }
