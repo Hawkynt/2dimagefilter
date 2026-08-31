@@ -210,7 +210,10 @@ namespace ImageResizer {
         var target = _GetField<ImageWithDetails>(view, "iwhTargetImage");
         _PumpMessagesUntil(
           () => target.Image != null && target.StatusText.StartsWith("Preview (", StringComparison.Ordinal),
-          TimeSpan.FromSeconds(10),
+          // Generous on purpose: this is a liveness guard, not a speed assertion. The pump keeps
+          // dispatching messages the whole time, so a real hang still fails - but a shared CI
+          // runner resizing and filtering the demo image is simply slower than a desktop.
+          TimeSpan.FromSeconds(120),
           "The main-window demo preview did not finish rendering."
         );
 
@@ -233,7 +236,7 @@ namespace ImageResizer {
         var status = _GetField<Label>(panel, "_detailStatus");
         _PumpMessagesUntil(
           () => status.Text.StartsWith("Detail:", StringComparison.Ordinal),
-          TimeSpan.FromSeconds(15),
+          TimeSpan.FromSeconds(120),
           "The quantization/dithering detail preview did not finish rendering."
         );
 
