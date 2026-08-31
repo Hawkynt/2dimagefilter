@@ -208,14 +208,18 @@ namespace ImageResizer {
         view.Show();
 
         var target = _GetField<ImageWithDetails>(view, "iwhTargetImage");
+        // The preview runs on a background task and reports through StatusText: "Preview (<n> ms)"
+        // when it worked, "Preview - <reason>" when it threw. Waiting only for the first spelling
+        // turns any failure into a timeout that says nothing, so wait for either and then report
+        // whatever the form actually said.
         _PumpMessagesUntil(
-          () => target.Image != null && target.StatusText.StartsWith("Preview (", StringComparison.Ordinal),
-          // Generous on purpose: this is a liveness guard, not a speed assertion. The pump keeps
-          // dispatching messages the whole time, so a real hang still fails - but a shared CI
-          // runner resizing and filtering the demo image is simply slower than a desktop.
+          () => target.StatusText.StartsWith("Preview", StringComparison.Ordinal),
           TimeSpan.FromSeconds(120),
-          "The main-window demo preview did not finish rendering."
+          "The main-window demo preview never reported a result."
         );
+        if (target.Image == null || !target.StatusText.StartsWith("Preview (", StringComparison.Ordinal))
+          throw new InvalidOperationException(
+            "The main-window demo preview failed: " + target.StatusText);
 
         _SaveForm(view, outputPath);
       }
