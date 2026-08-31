@@ -211,9 +211,10 @@ namespace ImageResizer {
         // The preview runs on a background task and reports through StatusText: "Preview (<n> ms)"
         // when it worked, "Preview - <reason>" when it threw. Waiting only for the first spelling
         // turns any failure into a timeout that says nothing, so wait for either and then report
-        // whatever the form actually said.
+        // whatever the form actually said. "Preview - rendering..." is the in-flight state and
+        // must not end the wait.
         _PumpMessagesUntil(
-          () => target.StatusText?.StartsWith("Preview", StringComparison.Ordinal) == true,
+          () => _IsSettledPreview(target.StatusText),
           TimeSpan.FromSeconds(120),
           "The main-window demo preview never reported a result."
         );
@@ -224,6 +225,15 @@ namespace ImageResizer {
         _SaveForm(view, outputPath);
       }
     }
+
+    /// <summary>
+    /// True once the target pane reports a finished preview - either a timing or a failure
+    /// reason. The transient "rendering" note is deliberately not settled.
+    /// </summary>
+    private static bool _IsSettledPreview(string status)
+      => status != null
+         && status.StartsWith("Preview", StringComparison.Ordinal)
+         && !status.Contains("rendering");
 
     private static void _SaveReduceColoursWindow(string outputPath, string demoPath) {
       _EnsureOutputDirectory(outputPath);
