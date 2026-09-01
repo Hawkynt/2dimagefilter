@@ -29,8 +29,6 @@
 
 ![Reduce Colours dialog showing a generated high-colour test card, quantizer thumbnails, ditherer thumbnails, histogram, and detail preview](docs/screenshots/reduce-colours.png)
 
-_The CI generator creates deterministic pixel-art and high-colour demo inputs, drives the real application windows until their previews finish, uploads the source demos as workflow artifacts, and commits changed window captures back to the working branch._
-
 ### 🎯 Project Goals
 
 - **Algorithm Collection**: Gather all available pixel art scaling filters in one comprehensive library
