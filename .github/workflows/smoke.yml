@@ -1,0 +1,19 @@
+name: Smoke
+
+# The fast tier, on every push to a working branch: one OS, fast tests only, no coverage, no
+# package-README check. It answers "is what I just pushed broken?" in minutes; ci.yml on the pull
+# request is the gate that runs the full matrix and every category.
+#
+# Never on main: that branch takes changes through pull requests, which already ran the full gate.
+on:
+  push:
+    branches-ignore: [main, master]
+  workflow_dispatch: {}
+
+jobs:
+  smoke:
+    uses: Hawkynt/RepositoryTemplate/.github/workflows/dotnet-smoke.yml@v1
+    with:
+      solution: ImageResizer.slnx
+      dotnet-version: '10.x'
+      siblings: '[{"repository":"Hawkynt/C--FrameworkExtensions","path":".sibling/C--FrameworkExtensions"}]'
