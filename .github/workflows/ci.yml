@@ -11,6 +11,13 @@ on:
   # parked in action_required, so without a dispatch the generated head gets no checks at all.
   workflow_dispatch: {}
 
+# Pushing three times to a branch used to queue three full matrices and run all of them. A newer
+# pull-request run supersedes the older one; a push to main is not cancelled, because main wants a
+# recorded result for every commit rather than only for the newest.
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 # Force JavaScript-based actions to run on Node 24 instead of the deprecated Node 20 ahead of
 # the 2026-06-16 hard cutover, until we bump each action to a Node-24-native major version.
 env:
