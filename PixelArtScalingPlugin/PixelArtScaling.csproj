@@ -27,9 +27,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
-  <PropertyGroup>
-    <PostBuildEvent>rem copy "$(TargetPath)" "D:\_copyapps\paint.net\effects\"</PostBuildEvent>
-  </PropertyGroup>
   <Import Project="..\VersionSpecificSymbols.Common.prop" />
   <ItemGroup>
     <Reference Include="PaintDotNet.Base">
