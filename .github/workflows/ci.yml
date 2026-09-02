@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
   workflow_call: {}
+  # generate.yml/screenshots.yml dispatches this for the head its GITHUB_TOKEN commit created:
+  # that commit cannot trigger a workflow itself, and the synchronize run GitHub emits for it is
+  # parked in action_required, so without a dispatch the generated head gets no checks at all.
+  workflow_dispatch: {}
 
 # Force JavaScript-based actions to run on Node 24 instead of the deprecated Node 20 ahead of
 # the 2026-06-16 hard cutover, until we bump each action to a Node-24-native major version.

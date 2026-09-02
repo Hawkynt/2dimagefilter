@@ -8,6 +8,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
+  actions: write
   contents: write
 
 concurrency:
@@ -92,3 +93,32 @@ jobs:
         with:
           file: docs/screenshots/reduce-colours.png
           message: '* refresh the quantization screenshot'
+
+      # A GITHUB_TOKEN commit does not trigger another workflow, which is what stops generation
+      # looping. The cost is that for a branch that already has an open pull request, GitHub parks
+      # the pull_request/synchronize run for the bot commit in `action_required` and the required
+      # checks never attach to the generated head -- the pull request then shows no checks at all
+      # and cannot merge. workflow_dispatch is the documented exception that MAY start a workflow
+      # with GITHUB_TOKEN, so dispatch CI explicitly when generation actually advanced the branch.
+      - name: Run CI on the generated head
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="$GITHUB_REF_NAME"
+          generated_head=$(gh api "repos/$GITHUB_REPOSITORY/branches/$branch" --jq '.commit.sha')
+          if [ "$generated_head" = "$GITHUB_SHA" ]; then
+            echo "::notice::The generated images were already current; the normal synchronize run covers this head."
+            exit 0
+          fi
+
+          owner="${GITHUB_REPOSITORY%%/*}"
+          open_prs=$(gh api --method GET "repos/$GITHUB_REPOSITORY/pulls" \
+            -f state=open -f head="$owner:$branch" --jq 'length')
+          if [ "$open_prs" -eq 0 ]; then
+            echo "::notice::No open pull request for $branch; keeping generation as the cheap pre-PR stage."
+            exit 0
+          fi
+
+          echo "Dispatching CI for generated head $generated_head."
+          gh workflow run ci.yml --ref "$branch"
