@@ -16,6 +16,7 @@ jobs:
   build:
     # net45 + net47 WPF targets require Windows + .NET Framework targeting packs.
     runs-on: windows-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:

@@ -18,6 +18,7 @@ jobs:
   version:
     needs: test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     outputs:
       version: ${{ steps.v.outputs.version }}
     steps:
@@ -37,6 +38,7 @@ jobs:
   publish:
     needs: [version, build]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/download-artifact@v4
         with: { name: "ImageResizer-win-${{ needs.version.outputs.version }}", path: dist }
