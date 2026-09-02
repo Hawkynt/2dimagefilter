@@ -15,5 +15,8 @@ jobs:
     uses: Hawkynt/RepositoryTemplate/.github/workflows/dotnet-smoke.yml@v1
     with:
       solution: ImageResizer.slnx
+      # The same runner ci.yml builds on. This is a WinForms solution with a Paint.NET plugin;
+      # the fast tier has to build what the gate builds, not a subset that happens to compile.
+      runs-on: windows-latest
       dotnet-version: '10.x'
       siblings: '[{"repository":"Hawkynt/C--FrameworkExtensions","path":".sibling/C--FrameworkExtensions"}]'
