@@ -21,15 +21,11 @@
 
 2D Image Filter is a powerful library that brings together the most popular image scaling algorithms specifically designed for pixel art and low-resolution graphics. Unlike traditional image scaling methods that often blur or distort pixel art, these algorithms preserve the crisp, clean aesthetic while intelligently enlarging images.
 
-### Standalone application
-
 ![ImageResizer showing deterministic pixel-art demo data and its live HQ 2x preview](docs/screenshots/image-resizer.png)
 
-### Quantization and dithering
+## 🧭 Vision
 
-![Reduce Colours dialog showing a generated high-colour test card, quantizer thumbnails, ditherer thumbnails, histogram, and detail preview](docs/screenshots/reduce-colours.png)
-
-### 🎯 Project Goals
+### 🎯 Project goals
 
 - **Algorithm Collection**: Gather all available pixel art scaling filters in one comprehensive library
 - **Enhanced Flexibility**: Convert rigid color comparisons into parameterized "IsLike" functions
@@ -84,48 +80,38 @@ Our enhanced approach uses flexible similarity functions:
 - Bicubic, Lanczos, and exotic mathematical kernels
 - Support for custom radius and parameters
 
-## 📦 Installation & Usage
+## 📦 Installation
 
 ### Prerequisites
 - .NET Framework 4.5 or higher
 - Windows Vista/7/8/10/11
 
-### Quick Start
+## 🚀 Quick start
 
-#### Option 1: Standalone Application
+### Option 1: Standalone Application
 1. Download from [Releases](https://github.com/Hawkynt/2dimagefilter/releases)
 2. Extract and run `ImageResizer.exe`
 3. Load your image and select a scaling algorithm
 4. Configure parameters and export the result
 
-#### Option 2: Paint.NET Plugin
+### Option 2: Paint.NET Plugin
 1. Download the Paint.NET plugin
 2. Extract to your Paint.NET Effects folder
 3. Restart Paint.NET
 4. Find "Pixel Art Scaling" in the Effects menu
 
-#### Option 3: Command Line Interface
+### Option 3: Command Line Interface
 ```bash
 ImageResizer.exe /load input.png /resize auto "Upscaler: HQ 2x" /save output.png
 ImageResizer.exe /load sprite.bmp /resize 400% "Upscaler: XBR 3x" /save scaled_sprite.png
 ```
 
-### Building from Source
-```bash
-# Clone the repository
-git clone https://github.com/Hawkynt/2dimagefilter.git
-cd 2dimagefilter
+## 🖼️ Screenshots
 
-# Build the solution
-dotnet build ImageResizer.slnx -c Release
+![Reduce Colours dialog showing a generated high-colour test card, quantizer thumbnails, ditherer thumbnails, histogram, and detail preview](docs/screenshots/reduce-colours.png)
 
-# Run the tests
-dotnet test ImageResizer.slnx -c Release
-
-# Or build individual projects
-dotnet build ImageResizerLibrary/ImageResizerLibrary.csproj
-dotnet build ImageResizer/ImageResizer.csproj
-```
+*The Reduce Colours dialog: quantizer and ditherer thumbnails, histogram and detail preview, all
+generated from deterministic demo data.*
 
 ## 📚 Documentation
 
@@ -204,6 +190,29 @@ This project implements algorithms from numerous sources:
 - **FNES Filters**: FNES emulator team
 - **VBA Enhancements**: VBA-rr team
 
+## 📊 Downloads
+
+- **Standalone Application**: [Download v2.0.0](https://github.com/Hawkynt/2dimagefilter/releases/download/2.0.0/Standalone.zip)
+- **Paint.NET Plugin**: [Download v2.0.0](https://github.com/Hawkynt/2dimagefilter/releases/download/2.0.0/PaintDotNetPlugin.zip)
+
+## 🛠️ Building
+
+```bash
+# Clone the repository
+git clone https://github.com/Hawkynt/2dimagefilter.git
+cd 2dimagefilter
+
+# Build the solution
+dotnet build ImageResizer.slnx -c Release
+
+# Run the tests
+dotnet test ImageResizer.slnx -c Release
+
+# Or build individual projects
+dotnet build ImageResizerLibrary/ImageResizerLibrary.csproj
+dotnet build ImageResizer/ImageResizer.csproj
+```
+
 ## 🤝 Contributing
 
 Contributions are welcome! Whether you want to:
@@ -214,16 +223,11 @@ Contributions are welcome! Whether you want to:
 
 Please feel free to open an issue or submit a pull request.
 
-## 📊 Downloads
-
-- **Standalone Application**: [Download v2.0.0](https://github.com/Hawkynt/2dimagefilter/releases/download/2.0.0/Standalone.zip)
-- **Paint.NET Plugin**: [Download v2.0.0](https://github.com/Hawkynt/2dimagefilter/releases/download/2.0.0/PaintDotNetPlugin.zip)
-
 ## ❤️ Support
 
 If this project saves you time or money, consider supporting its development:
 
-[![GitHub Sponsors](https://img.shields.io/badge/GitHub-Sponsors-EA4AAA?logo=githubsponsors)](https://github.com/sponsors/Hawkynt)
+[![GitHub Sponsors](https://img.shields.io/badge/GitHub-Sponsor-EA4AAA?logo=githubsponsors)](https://github.com/sponsors/Hawkynt)
 [![PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?logo=paypal)](https://www.paypal.me/hawkynt)
 
 ## 📜 License
