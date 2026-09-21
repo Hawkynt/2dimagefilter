@@ -66,7 +66,8 @@ Our enhanced approach uses flexible similarity functions:
 
 #### Modern Advanced Scalers
 - **XBR Family**: XBR2x/3x/4x Normal and NonBlend (Hyllian)
-- **XBRz**: High quality scaling (Zenju)
+- **XBRz**: High quality scaling (Zenju), 2x-6x, as released up to 1.8
+- **XBRz 1.9**: XBRz with the 1.9 refinements — a higher steep direction threshold and blends rounded rather than truncated. Offered as its own entry, so the plain **XBRz** entries keep producing exactly the pixels they always did
 - **Reverse AA**: Anti-aliasing filter (Hyllian)
 
 #### Specialized Effects
