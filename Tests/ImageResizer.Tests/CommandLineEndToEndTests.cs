@@ -203,6 +203,7 @@ namespace ImageResizer.Tests {
     [TestCase("HQ 2x", 32, 32)]
     [TestCase("Upscaler: XBR 3x", 48, 48)]
     [TestCase("Upscaler: xBRZ 4x", 64, 64)]
+    [TestCase("Upscaler: xBRZ 1.9 4x", 64, 64)]
     [TestCase("Upscaler: Scale 2x", 32, 32)]
     [TestCase("Upscaler: Eagle", 32, 32)]
     public void FixedFactorUpscalers_ProduceTheirFactor(string filter, int expectedWidth, int expectedHeight) {

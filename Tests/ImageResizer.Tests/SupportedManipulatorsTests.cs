@@ -177,5 +177,19 @@ namespace ImageResizer.Tests {
       Assert.That(keys, Does.Contain("Upscaler: Eagle"));
       Assert.That(keys, Does.Contain("Resampler: Bicubic"));
     }
+
+    /// <summary>
+    /// xBRZ 1.9 is a separate entry rather than a change to the existing one, so saved settings and
+    /// scripts naming the plain xBRZ entries keep resolving to the pixels they always produced.
+    /// </summary>
+    [Test]
+    public void BothXbrzReleasesAreOfferedSeparately() {
+      var keys = SupportedManipulators.MANIPULATORS.Select(pair => pair.Key).ToArray();
+
+      foreach (var scale in new[] { 2, 3, 4, 5, 6 }) {
+        Assert.That(keys, Does.Contain($"Upscaler: xBRZ {scale}x"));
+        Assert.That(keys, Does.Contain($"Upscaler: xBRZ 1.9 {scale}x"));
+      }
+    }
   }
 }
